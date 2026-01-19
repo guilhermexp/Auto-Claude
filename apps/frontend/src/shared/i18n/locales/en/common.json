@@ -407,5 +407,71 @@
     "loadingMore": "Loading more...",
     "scrollForMore": "Scroll for more",
     "allLoaded": "All issues loaded"
+  },
+  "agentTools": {
+    "specGatherer": {
+      "label": "Spec Gatherer",
+      "description": "Collects initial requirements from user"
+    },
+    "specResearcher": {
+      "label": "Spec Researcher",
+      "description": "Validates external integrations and APIs"
+    },
+    "specWriter": {
+      "label": "Spec Writer",
+      "description": "Creates the spec.md document"
+    },
+    "specCritic": {
+      "label": "Spec Critic",
+      "description": "Self-critique using deep analysis"
+    },
+    "discoveryAgent": {
+      "label": "Discovery Agent",
+      "description": "Initial project discovery and analysis"
+    },
+    "contextBuilder": {
+      "label": "Context Builder",
+      "description": "Builds context from existing codebase"
+    },
+    "specValidator": {
+      "label": "Spec Validator",
+      "description": "Validates spec completeness and quality"
+    },
+    "planner": {
+      "label": "Planner",
+      "description": "Creates implementation plan with subtasks"
+    },
+    "coder": {
+      "label": "Coder",
+      "description": "Implements individual subtasks"
+    },
+    "qaReviewer": {
+      "label": "QA Reviewer",
+      "description": "Validates acceptance criteria. Uses Electron or Puppeteer based on project type."
+    },
+    "qaFixer": {
+      "label": "QA Fixer",
+      "description": "Fixes QA-reported issues. Uses Electron or Puppeteer based on project type."
+    }
+  },
+  "errorMessages": {
+    "failedToLoadBranches": "Failed to load branches",
+    "failedToLoadRepositories": "Failed to load repositories",
+    "failedToLoadProjects": "Failed to load projects",
+    "failedToLoadDebugInfo": "Failed to load debug info",
+    "failedToLoadClaudeProfiles": "Failed to load Claude profiles",
+    "failedToLoadProjectIndex": "Failed to load project index",
+    "failedToLoadImage": "Failed to load image",
+    "failedToLoadTaskWorktrees": "Failed to load task worktrees",
+    "failedToLoadWorktrees": "Failed to load worktrees",
+    "failedToLoadNotes": "Failed to load notes",
+    "failedToOpenIde": "Failed to open IDE",
+    "cannotResumeTask": "Cannot Resume Task",
+    "cannotResumeTaskDescription": "Failed to load implementation plan. Please try again or check the task files.",
+    "tryAgain": "Please try again."
+  },
+  "notifications": {
+    "detecting": "Detecting...",
+    "please": "Please"
   }
 }

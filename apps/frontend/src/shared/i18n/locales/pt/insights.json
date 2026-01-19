@@ -1,0 +1,46 @@
+{
+  "title": "Insights e Memória",
+  "graphMemoryStatus": "Status da Memória Gráfica",
+  "connected": "Conectado",
+  "notAvailable": "Não Disponível",
+  "labels": {
+    "database": "Banco de Dados",
+    "path": "Caminho",
+    "total": "Total",
+    "prReviews": "Análises de PR",
+    "sessions": "Sessões",
+    "codebase": "Base de Código",
+    "patterns": "Padrões",
+    "gotchas": "Armadilhas"
+  },
+  "notConfigured": {
+    "title": "Memória Graphiti não está configurada",
+    "description": "Para ativar memória gráfica, defina GRAPHITI_ENABLED=true nas configurações do projeto."
+  },
+  "searchMemories": {
+    "title": "Pesquisar Memórias",
+    "placeholder": "Procure por padrões, insights, armadilhas...",
+    "resultsFound": "{{count}} resultado(s) encontrado(s)",
+    "score": "Pontuação:"
+  },
+  "memoryBrowser": {
+    "title": "Navegador de Memória",
+    "itemsCount": "{{current}} de {{total}} memórias",
+    "noMemoriesEmpty": "Nenhuma memória registrada. Memórias são criadas durante sessões de agentes IA e análises de PR.",
+    "noMemoriesFiltered": "Nenhuma memória corresponde ao filtro selecionado.",
+    "showAll": "Mostrar todas as memórias"
+  },
+  "memoryCard": {
+    "whatWorked": "O Que Funcionou",
+    "whatFailed": "O Que Falhou",
+    "approach": "Abordagem",
+    "recommendations": "Recomendações",
+    "patterns": "Padrões",
+    "gotchas": "Armadilhas",
+    "changedFiles": "Arquivos Alterados",
+    "fileInsights": "Insights dos Arquivos",
+    "subtasksCompleted": "Subtarefas Concluídas",
+    "expand": "Expandir",
+    "collapse": "Recolher"
+  }
+}

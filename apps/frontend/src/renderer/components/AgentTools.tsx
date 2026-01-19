@@ -88,6 +88,45 @@ function getThinkingLabel(level: ThinkingLevel): string {
   return thinking?.label || level;
 }
 
+// Helper function to get translated agent label and description
+function getAgentLabel(t: any, agentId: string): string {
+  const agentKeys: Record<string, string> = {
+    spec_gatherer: 'specGatherer',
+    spec_researcher: 'specResearcher',
+    spec_writer: 'specWriter',
+    spec_critic: 'specCritic',
+    spec_discovery: 'discoveryAgent',
+    spec_context: 'contextBuilder',
+    spec_validation: 'specValidator',
+    planner: 'planner',
+    coder: 'coder',
+    qa_reviewer: 'qaReviewer',
+    qa_fixer: 'qaFixer',
+  };
+
+  const key = agentKeys[agentId];
+  return key ? t(`common:agentTools.${key}.label`) : agentId;
+}
+
+function getAgentDescription(t: any, agentId: string): string {
+  const agentKeys: Record<string, string> = {
+    spec_gatherer: 'specGatherer',
+    spec_researcher: 'specResearcher',
+    spec_writer: 'specWriter',
+    spec_critic: 'specCritic',
+    spec_discovery: 'discoveryAgent',
+    spec_context: 'contextBuilder',
+    spec_validation: 'specValidator',
+    planner: 'planner',
+    coder: 'coder',
+    qa_reviewer: 'qaReviewer',
+    qa_fixer: 'qaFixer',
+  };
+
+  const key = agentKeys[agentId];
+  return key ? t(`common:agentTools.${key}.description`) : '';
+}
+
 const AGENT_CONFIGS: Record<string, AgentConfig> = {
   // Spec Creation Phases - all use 'spec' phase settings
   spec_gatherer: {
@@ -366,9 +405,14 @@ interface AgentCardProps {
 function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServerStates, customServers, onAddMcp, onRemoveMcp }: AgentCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const { t } = useTranslation(['settings']);
+  const { t: tSettings } = useTranslation(['settings']);
+  const { t } = useTranslation(['common']);
   const category = CATEGORIES[config.category as keyof typeof CATEGORIES];
   const CategoryIcon = category.icon;
+
+  // Get translated label and description for this agent
+  const agentLabel = getAgentLabel(t, id);
+  const agentDescription = getAgentDescription(t, id);
 
   // Build combined MCP server info including custom servers
   const allMcpServers = useMemo(() => {
@@ -438,7 +482,7 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <h3 className="font-medium text-sm text-foreground">{config.label}</h3>
+            <h3 className="font-medium text-sm text-foreground">{agentLabel}</h3>
             <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-secondary text-secondary-foreground">
               {modelLabel}
             </span>
@@ -446,7 +490,7 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
               {thinkingLabel}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground truncate">{config.description}</p>
+          <p className="text-xs text-muted-foreground truncate">{agentDescription}</p>
         </div>
         <div className="flex items-center gap-2 text-muted-foreground">
           <span className="text-xs">
@@ -476,7 +520,7 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                   className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
                 >
                   <Plus className="h-3 w-3" />
-                  {t('mcp.addServer')}
+                  {tSettings('mcp.addServer')}
                 </button>
               )}
             </div>
@@ -497,7 +541,7 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                         <span className="font-medium">{serverInfo?.name || server}</span>
                         {isAdded && (
                           <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded">
-                            {t('mcp.added')}
+                            {tSettings('mcp.added')}
                           </span>
                         )}
                       </div>
@@ -506,7 +550,7 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                           type="button"
                           onClick={(e) => { e.stopPropagation(); onRemoveMcp(id, server); }}
                           className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all"
-                          title={t('mcp.remove')}
+                          title={tSettings('mcp.remove')}
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
@@ -527,14 +571,14 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                         <ServerIcon className="h-3.5 w-3.5 text-muted-foreground" />
                         <span className="font-medium">{serverInfo?.name || server}</span>
                         <span className="text-[10px] text-muted-foreground no-underline">
-                          ({t('mcp.removed')})
+                          ({tSettings('mcp.removed')})
                         </span>
                       </div>
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); onAddMcp(id, server); }}
                         className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-primary transition-all"
-                        title={t('mcp.restore')}
+                        title={tSettings('mcp.restore')}
                       >
                         <RotateCcw className="h-3.5 w-3.5" />
                       </button>
@@ -543,7 +587,7 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                 })}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">{t('mcp.noMcpServers')}</p>
+              <p className="text-sm text-muted-foreground">{tSettings('mcp.noMcpServers')}</p>
             )}
           </div>
 
@@ -574,8 +618,8 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('mcp.addMcpTo', { agent: config.label })}</DialogTitle>
-            <DialogDescription>{t('mcp.addMcpDescription')}</DialogDescription>
+            <DialogTitle>{tSettings('mcp.addMcpTo', { agent: agentLabel })}</DialogTitle>
+            <DialogDescription>{tSettings('mcp.addMcpDescription')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-2 py-4">
             {availableMcps.length > 0 ? (
@@ -599,14 +643,14 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
               })
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">
-                {t('mcp.allMcpsAdded')}
+                {tSettings('mcp.allMcpsAdded')}
               </p>
             )}
             {/* Also show removed MCPs that can be restored */}
             {removedMcps.length > 0 && (
               <>
                 <div className="border-t border-border my-2 pt-2">
-                  <p className="text-xs text-muted-foreground mb-2">{t('mcp.restore')}:</p>
+                  <p className="text-xs text-muted-foreground mb-2">{tSettings('mcp.restore')}:</p>
                 </div>
                 {removedMcps.map((mcpId) => {
                   const server = allMcpServers[mcpId];

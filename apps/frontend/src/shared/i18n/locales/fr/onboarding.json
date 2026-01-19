@@ -234,5 +234,60 @@
       "retry": "Réessayer",
       "fallbackNote": "La mémoire fonctionnera toujours avec la recherche par mots-clés même sans embeddings."
     }
-  }
+  },
+  "firstSpec": {
+    "title": "Créer Votre Première Tâche",
+    "subtitle": "Décrivez ce que vous voulez créer et laissez Auto Claude faire le reste",
+    "tips": [
+      {
+        "title": "Soyez Descriptif",
+        "description": "Décrivez clairement ce que vous souhaitez créer. Incluez les exigences, contraintes et comportement attendu."
+      },
+      {
+        "title": "Commencez Petit",
+        "description": "Commencez par une tâche ciblée comme ajouter une fonctionnalité ou corriger un bug. Les petites tâches sont plus faciles à vérifier."
+      },
+      {
+        "title": "Incluez le Contexte",
+        "description": "Mentionnez les chemins de fichiers pertinents, les bibliothèques ou les modèles existants que votre code doit suivre."
+      },
+      {
+        "title": "Ajouter des Images",
+        "description": "Les captures d'écran et les maquettes aident Auto Claude à comprendre le résultat visuel souhaité."
+      }
+    ]
+  },
+  "ollamaModels": {
+    "qwen3_4b": "Qwen3 4B - Équilibre qualité et vitesse",
+    "qwen3_8b": "Qwen3 8B - Meilleure qualité d'embedding",
+    "googleEmbedding": "Modèle léger d'embedding de Google",
+    "mxbaiEmbedding": "Embeddings polyvalents populaires"
+  },
+  "graphitiProviders": [
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "description": "Modèles GPT (recommandé)"
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "description": "Modèles Claude"
+    },
+    {
+      "id": "google",
+      "name": "Google AI",
+      "description": "Modèles Gemini"
+    },
+    {
+      "id": "azure",
+      "name": "Azure OpenAI",
+      "description": "Modèles OpenAI via Azure"
+    },
+    {
+      "id": "ollama",
+      "name": "Ollama",
+      "description": "Modèles locaux (gratuit)"
+    }
+  ]
 }

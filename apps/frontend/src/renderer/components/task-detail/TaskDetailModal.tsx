@@ -77,7 +77,7 @@ const isFilesTabEnabled = () => {
 
 // Separate component to use hooks only when task exists
 function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals, onOpenInbuiltTerminal }: { open: boolean; task: Task; onOpenChange: (open: boolean) => void; onSwitchToTerminals?: () => void; onOpenInbuiltTerminal?: (id: string, cwd: string) => void }) {
-  const { t } = useTranslation(['tasks']);
+  const { t } = useTranslation(['tasks', 'common']);
   const { toast } = useToast();
   const state = useTaskDetail({ task });
   const showFilesTab = isFilesTabEnabled();
@@ -95,8 +95,8 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
         const isValid = await state.reloadPlanForIncompleteTask();
         if (!isValid) {
           toast({
-            title: 'Cannot Resume Task',
-            description: 'Failed to load implementation plan. Please try again or check the task files.',
+            title: t('common:errorMessages.cannotResumeTask'),
+            description: t('common:errorMessages.cannotResumeTaskDescription'),
             variant: 'destructive',
             duration: 5000,
           });

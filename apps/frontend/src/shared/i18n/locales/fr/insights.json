@@ -1,0 +1,46 @@
+{
+  "title": "Insights et Mémoire",
+  "graphMemoryStatus": "Statut de la Mémoire Graphique",
+  "connected": "Connecté",
+  "notAvailable": "Non Disponible",
+  "labels": {
+    "database": "Base de Données",
+    "path": "Chemin",
+    "total": "Total",
+    "prReviews": "Analyses de PR",
+    "sessions": "Sessions",
+    "codebase": "Base de Code",
+    "patterns": "Modèles",
+    "gotchas": "Pièges"
+  },
+  "notConfigured": {
+    "title": "La mémoire Graphiti n'est pas configurée",
+    "description": "Pour activer la mémoire graphique, définissez GRAPHITI_ENABLED=true dans les paramètres du projet."
+  },
+  "searchMemories": {
+    "title": "Rechercher les Souvenirs",
+    "placeholder": "Rechercher des modèles, des insights, des pièges...",
+    "resultsFound": "{{count}} résultat(s) trouvé(s)",
+    "score": "Score :"
+  },
+  "memoryBrowser": {
+    "title": "Navigateur de Mémoire",
+    "itemsCount": "{{current}} sur {{total}} souvenirs",
+    "noMemoriesEmpty": "Aucun souvenir enregistré. Les souvenirs sont créés lors des sessions d'agents IA et des analyses de PR.",
+    "noMemoriesFiltered": "Aucun souvenir ne correspond au filtre sélectionné.",
+    "showAll": "Afficher tous les souvenirs"
+  },
+  "memoryCard": {
+    "whatWorked": "Ce qui a Fonctionné",
+    "whatFailed": "Ce qui a Échoué",
+    "approach": "Approche",
+    "recommendations": "Recommandations",
+    "patterns": "Modèles",
+    "gotchas": "Pièges",
+    "changedFiles": "Fichiers Modifiés",
+    "fileInsights": "Insights sur les Fichiers",
+    "subtasksCompleted": "Sous-tâches Complétées",
+    "expand": "Agrandir",
+    "collapse": "Réduire"
+  }
+}

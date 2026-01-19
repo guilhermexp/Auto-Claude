@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
+import { useTranslation } from 'react-i18next';
 
 interface FirstSpecStepProps {
   onNext: () => void;
@@ -50,27 +51,28 @@ function TipCard({ icon, title, description }: TipCardProps) {
  */
 export function FirstSpecStep({ onNext, onBack, onSkip, onOpenTaskCreator }: FirstSpecStepProps) {
   const [hasCreatedSpec, setHasCreatedSpec] = useState(false);
+  const { t } = useTranslation(['onboarding']);
 
   const tips = [
     {
       icon: <PenLine className="h-4 w-4" />,
-      title: 'Be Descriptive',
-      description: 'Clearly describe what you want to build. Include requirements, constraints, and expected behavior.'
+      title: t('firstSpec.tips.0.title'),
+      description: t('firstSpec.tips.0.description')
     },
     {
       icon: <Target className="h-4 w-4" />,
-      title: 'Start Small',
-      description: 'Begin with a focused task like adding a feature or fixing a bug. Smaller tasks are easier to verify.'
+      title: t('firstSpec.tips.1.title'),
+      description: t('firstSpec.tips.1.description')
     },
     {
       icon: <ListChecks className="h-4 w-4" />,
-      title: 'Include Context',
-      description: 'Mention relevant files, APIs, or patterns. The more context you provide, the better the results.'
+      title: t('firstSpec.tips.2.title'),
+      description: t('firstSpec.tips.2.description')
     },
     {
       icon: <Sparkles className="h-4 w-4" />,
-      title: 'Let AI Help',
-      description: 'The AI can generate titles and classify tasks. Focus on describing what you want, not the details.'
+      title: t('firstSpec.tips.3.title'),
+      description: t('firstSpec.tips.3.description')
     }
   ];
 
@@ -94,10 +96,10 @@ export function FirstSpecStep({ onNext, onBack, onSkip, onOpenTaskCreator }: Fir
             </div>
           </div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">
-            Create Your First Task
+            {t('firstSpec.title')}
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Describe what you want to build and let Auto Claude handle the rest
+            {t('firstSpec.subtitle')}
           </p>
         </div>
 

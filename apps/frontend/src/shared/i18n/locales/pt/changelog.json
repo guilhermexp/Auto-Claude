@@ -1,0 +1,81 @@
+{
+  "header": {
+    "title": "Gerador de Changelog",
+    "step1": "Etapa 1: Selecione tarefas concluídas para incluir",
+    "step2": "Etapa 2: Configure e gere changelog",
+    "step3": "Etapa 3: Publique e arquive tarefas",
+    "stepLabels": {
+      "select": "Selecionar",
+      "generate": "Gerar",
+      "release": "Publicar"
+    },
+    "refreshButton": "Atualizar"
+  },
+  "filters": {
+    "changelogSource": "Fonte do Changelog",
+    "gitHistoryOptions": "Opções de Histórico Git",
+    "historyType": "Tipo de Histórico",
+    "historyTypeOptions": {
+      "sinceVersion": "Desde Versão",
+      "recentCommits": "Commits Recentes",
+      "sinceDate": "Desde Data",
+      "tagRange": "Intervalo de Tags"
+    },
+    "numberOfCommits": "Número de Commits",
+    "sinceDate": "Desde Data",
+    "fromTag": "Do Tag",
+    "toTag": "Para Tag (opcional)",
+    "lastVersion": "Última Versão",
+    "versionHelpText": "Todos os commits desde esta versão serão incluídos",
+    "includeMergeCommits": "Incluir commits de mesclagem",
+    "loadingButton": "Carregando...",
+    "loadCommitsButton": "Carregar Commits",
+    "branchComparison": "Comparação de Branches",
+    "baseBranch": "Branch Base",
+    "baseBranchHelp": "O branch em que você está mesclando",
+    "compareBranch": "Branch de Comparação",
+    "compareBranchHelp": "O branch com suas alterações",
+    "differentBranchesError": "Os branches devem ser diferentes"
+  },
+  "list": {
+    "selectAll": "Selecionar Tudo",
+    "clearButton": "Limpar",
+    "noCompletedTasks": "Nenhuma Tarefa Concluída",
+    "noCompletedTasksDescription": "Complete tarefas no quadro Kanban e marque-as como \"Feito\" para incluir no seu changelog.",
+    "commitsFound": "{{count}} commit(s) encontrado(s)",
+    "loadingCommits": "Carregando commits...",
+    "noCommitsFound": "Nenhum Commit Encontrado",
+    "continueButton": "Continuar"
+  },
+  "configuration": {
+    "backButton": "Voltar à Seleção",
+    "releaseInfo": "Informações de Lançamento",
+    "version": "Versão",
+    "date": "Data",
+    "previous": "Anterior:",
+    "outputStyle": "Estilo de Saída",
+    "format": "Formato",
+    "audience": "Público",
+    "emojis": "Emojis",
+    "advancedOptions": "Opções Avançadas",
+    "customInstructions": "Instruções Personalizadas",
+    "customInstructionsPlaceholder": "Adicione instruções especiais para a IA...",
+    "customInstructionsHelp": "Opcional. Guie a IA sobre tom, detalhes específicos a incluir, etc.",
+    "generatingButton": "Gerando...",
+    "generateChangelogButton": "Gerar Changelog"
+  },
+  "noProject": {
+    "title": "Nenhum Projeto Selecionado",
+    "description": "Selecione um projeto na barra lateral para gerar changelogs."
+  },
+  "formats": {
+    "markdown": "Markdown",
+    "html": "HTML",
+    "plain": "Texto Simples"
+  },
+  "audiences": {
+    "users": "Usuários",
+    "developers": "Desenvolvedores",
+    "technical": "Técnico"
+  }
+}

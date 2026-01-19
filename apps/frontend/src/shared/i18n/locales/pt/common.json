@@ -407,5 +407,71 @@
     "loadingMore": "Carregando mais...",
     "scrollForMore": "Rolar para mais",
     "allLoaded": "Todos os problemas carregados"
+  },
+  "agentTools": {
+    "specGatherer": {
+      "label": "Coletor de Spec",
+      "description": "Coleta requisitos iniciais do usuário"
+    },
+    "specResearcher": {
+      "label": "Pesquisador de Spec",
+      "description": "Valida integrações externas e APIs"
+    },
+    "specWriter": {
+      "label": "Escritor de Spec",
+      "description": "Cria o documento spec.md"
+    },
+    "specCritic": {
+      "label": "Crítico de Spec",
+      "description": "Auto-crítica usando análise profunda"
+    },
+    "discoveryAgent": {
+      "label": "Agente de Descoberta",
+      "description": "Descoberta e análise inicial do projeto"
+    },
+    "contextBuilder": {
+      "label": "Construtor de Contexto",
+      "description": "Constrói contexto a partir de código existente"
+    },
+    "specValidator": {
+      "label": "Validador de Spec",
+      "description": "Valida completude e qualidade da spec"
+    },
+    "planner": {
+      "label": "Planejador",
+      "description": "Cria plano de implementação com subtarefas"
+    },
+    "coder": {
+      "label": "Codificador",
+      "description": "Implementa subtarefas individuais"
+    },
+    "qaReviewer": {
+      "label": "Revisor de QA",
+      "description": "Valida critérios de aceitação. Usa Electron ou Puppeteer baseado no tipo de projeto."
+    },
+    "qaFixer": {
+      "label": "Corretor de QA",
+      "description": "Corrige problemas relatados pelo QA. Usa Electron ou Puppeteer baseado no tipo de projeto."
+    }
+  },
+  "errorMessages": {
+    "failedToLoadBranches": "Falha ao carregar branches",
+    "failedToLoadRepositories": "Falha ao carregar repositórios",
+    "failedToLoadProjects": "Falha ao carregar projetos",
+    "failedToLoadDebugInfo": "Falha ao carregar informações de debug",
+    "failedToLoadClaudeProfiles": "Falha ao carregar perfis Claude",
+    "failedToLoadProjectIndex": "Falha ao carregar índice do projeto",
+    "failedToLoadImage": "Falha ao carregar imagem",
+    "failedToLoadTaskWorktrees": "Falha ao carregar worktrees de tarefa",
+    "failedToLoadWorktrees": "Falha ao carregar worktrees",
+    "failedToLoadNotes": "Falha ao carregar notas",
+    "failedToOpenIde": "Falha ao abrir IDE",
+    "cannotResumeTask": "Não é Possível Retomar Tarefa",
+    "cannotResumeTaskDescription": "Falha ao carregar plano de implementação. Por favor, tente novamente ou verifique os arquivos de tarefa.",
+    "tryAgain": "Por favor, tente novamente."
+  },
+  "notifications": {
+    "detecting": "Detectando...",
+    "please": "Por favor"
   }
 }

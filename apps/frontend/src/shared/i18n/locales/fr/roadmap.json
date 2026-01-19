@@ -1,0 +1,56 @@
+{
+  "header": {
+    "title": "Roadmap",
+    "competitorAnalysis": "Analyse Concurrentielle",
+    "clickToViewAnalysis": "Cliquez pour voir l'analyse détaillée",
+    "addFeature": "Ajouter une Fonctionnalité",
+    "addFeatureTooltip": "Ajouter une nouvelle fonctionnalité à la feuille de route",
+    "regenerate": "Régénérer la Roadmap",
+    "regenerateTooltip": "Régénérer la Roadmap",
+    "target": "Cible :",
+    "morePersonas": "+{{count}} personas supplémentaires",
+    "secondaryPersonas": "Personas Secondaires :",
+    "featuresCount": "{{count}} fonctionnalités",
+    "phasesCount": "{{count}} phases"
+  },
+  "emptyState": {
+    "title": "Aucune Roadmap Encore",
+    "description": "Générez une feuille de route alimentée par l'IA qui comprend l'audience cible de votre projet et crée un plan de fonctionnalités stratégiques.",
+    "generateButton": "Générer la Roadmap"
+  },
+  "tabs": {
+    "kanban": "Kanban",
+    "phases": "Phases",
+    "allFeatures": "Toutes les Fonctionnalités",
+    "byPriority": "Par Priorité",
+    "featuresLabel": "{{count}} fonctionnalités"
+  },
+  "featureCard": {
+    "competitorInsight": "Insight Concurrentiel",
+    "competitorInsightTooltip": "Cette fonctionnalité résout les points faibles des concurrents",
+    "goToTask": "Aller à la Tâche",
+    "build": "Créer"
+  },
+  "phaseCard": {
+    "progress": "Progression",
+    "featuresCount": "{{completed}}/{{total}} fonctionnalités",
+    "milestones": "Jalons",
+    "featuresSection": "Fonctionnalités ({{count}})",
+    "viewTask": "Voir la Tâche",
+    "buildButton": "Créer",
+    "moreFeatures": "+{{count}} autres fonctionnalités"
+  },
+  "statuses": {
+    "backlog": "Backlog",
+    "inProgress": "En Cours",
+    "launched": "Lancé",
+    "planned": "Prévu",
+    "proposed": "Proposé"
+  },
+  "priorities": {
+    "low": "Basse",
+    "medium": "Moyenne",
+    "high": "Haute",
+    "critical": "Critique"
+  }
+}

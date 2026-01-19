@@ -407,5 +407,71 @@
     "loadingMore": "Chargement...",
     "scrollForMore": "Défiler pour plus",
     "allLoaded": "Toutes les issues chargées"
+  },
+  "agentTools": {
+    "specGatherer": {
+      "label": "Collecteur de Spec",
+      "description": "Collecte les exigences initiales de l'utilisateur"
+    },
+    "specResearcher": {
+      "label": "Chercheur de Spec",
+      "description": "Valide les intégrations externes et les API"
+    },
+    "specWriter": {
+      "label": "Rédacteur de Spec",
+      "description": "Crée le document spec.md"
+    },
+    "specCritic": {
+      "label": "Critique de Spec",
+      "description": "Auto-critique utilisant une analyse approfondie"
+    },
+    "discoveryAgent": {
+      "label": "Agent de Découverte",
+      "description": "Découverte et analyse initiale du projet"
+    },
+    "contextBuilder": {
+      "label": "Constructeur de Contexte",
+      "description": "Construit le contexte à partir du code existant"
+    },
+    "specValidator": {
+      "label": "Validateur de Spec",
+      "description": "Valide l'exhaustivité et la qualité de la spec"
+    },
+    "planner": {
+      "label": "Planificateur",
+      "description": "Crée un plan d'implémentation avec des sous-tâches"
+    },
+    "coder": {
+      "label": "Codeur",
+      "description": "Implémente les sous-tâches individuelles"
+    },
+    "qaReviewer": {
+      "label": "Vérificateur QA",
+      "description": "Valide les critères d'acceptation. Utilise Electron ou Puppeteer selon le type de projet."
+    },
+    "qaFixer": {
+      "label": "Correcteur QA",
+      "description": "Corrige les problèmes signalés par QA. Utilise Electron ou Puppeteer selon le type de projet."
+    }
+  },
+  "errorMessages": {
+    "failedToLoadBranches": "Impossible de charger les branches",
+    "failedToLoadRepositories": "Impossible de charger les dépôts",
+    "failedToLoadProjects": "Impossible de charger les projets",
+    "failedToLoadDebugInfo": "Impossible de charger les informations de débogage",
+    "failedToLoadClaudeProfiles": "Impossible de charger les profils Claude",
+    "failedToLoadProjectIndex": "Impossible de charger l'index du projet",
+    "failedToLoadImage": "Impossible de charger l'image",
+    "failedToLoadTaskWorktrees": "Impossible de charger les worktrees de tâche",
+    "failedToLoadWorktrees": "Impossible de charger les worktrees",
+    "failedToLoadNotes": "Impossible de charger les notes",
+    "failedToOpenIde": "Impossible d'ouvrir l'IDE",
+    "cannotResumeTask": "Impossible de Reprendre la Tâche",
+    "cannotResumeTaskDescription": "Impossible de charger le plan d'implémentation. Veuillez réessayer ou vérifier les fichiers de tâche.",
+    "tryAgain": "Veuillez réessayer."
+  },
+  "notifications": {
+    "detecting": "Détection...",
+    "please": "S'il vous plaît"
   }
 }

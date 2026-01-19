@@ -13,6 +13,10 @@ import enGitlab from './locales/en/gitlab.json';
 import enTaskReview from './locales/en/taskReview.json';
 import enTerminal from './locales/en/terminal.json';
 import enErrors from './locales/en/errors.json';
+import enRoadmap from './locales/en/roadmap.json';
+import enIdeation from './locales/en/ideation.json';
+import enChangelog from './locales/en/changelog.json';
+import enInsights from './locales/en/insights.json';
 
 // Import French translation resources
 import frCommon from './locales/fr/common.json';
@@ -26,6 +30,10 @@ import frGitlab from './locales/fr/gitlab.json';
 import frTaskReview from './locales/fr/taskReview.json';
 import frTerminal from './locales/fr/terminal.json';
 import frErrors from './locales/fr/errors.json';
+import frRoadmap from './locales/fr/roadmap.json';
+import frIdeation from './locales/fr/ideation.json';
+import frChangelog from './locales/fr/changelog.json';
+import frInsights from './locales/fr/insights.json';
 
 // Import Portuguese translation resources
 import ptCommon from './locales/pt/common.json';
@@ -39,6 +47,10 @@ import ptGitlab from './locales/pt/gitlab.json';
 import ptTaskReview from './locales/pt/taskReview.json';
 import ptTerminal from './locales/pt/terminal.json';
 import ptErrors from './locales/pt/errors.json';
+import ptRoadmap from './locales/pt/roadmap.json';
+import ptIdeation from './locales/pt/ideation.json';
+import ptChangelog from './locales/pt/changelog.json';
+import ptInsights from './locales/pt/insights.json';
 
 export const defaultNS = 'common';
 
@@ -54,7 +66,11 @@ export const resources = {
     gitlab: enGitlab,
     taskReview: enTaskReview,
     terminal: enTerminal,
-    errors: enErrors
+    errors: enErrors,
+    roadmap: enRoadmap,
+    ideation: enIdeation,
+    changelog: enChangelog,
+    insights: enInsights
   },
   fr: {
     common: frCommon,
@@ -67,7 +83,11 @@ export const resources = {
     gitlab: frGitlab,
     taskReview: frTaskReview,
     terminal: frTerminal,
-    errors: frErrors
+    errors: frErrors,
+    roadmap: frRoadmap,
+    ideation: frIdeation,
+    changelog: frChangelog,
+    insights: frInsights
   },
   pt: {
     common: ptCommon,
@@ -80,7 +100,11 @@ export const resources = {
     gitlab: ptGitlab,
     taskReview: ptTaskReview,
     terminal: ptTerminal,
-    errors: ptErrors
+    errors: ptErrors,
+    roadmap: ptRoadmap,
+    ideation: ptIdeation,
+    changelog: ptChangelog,
+    insights: ptInsights
   }
 } as const;
 
@@ -91,7 +115,7 @@ i18n
     lng: 'en', // Default language (will be overridden by settings)
     fallbackLng: 'en',
     defaultNS,
-    ns: ['common', 'navigation', 'settings', 'tasks', 'welcome', 'onboarding', 'dialogs', 'gitlab', 'taskReview', 'terminal', 'errors'],
+    ns: ['common', 'navigation', 'settings', 'tasks', 'welcome', 'onboarding', 'dialogs', 'gitlab', 'taskReview', 'terminal', 'errors', 'roadmap', 'ideation', 'changelog', 'insights'],
     interpolation: {
       escapeValue: false // React already escapes values
     },

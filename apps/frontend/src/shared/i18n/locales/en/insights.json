@@ -1,0 +1,46 @@
+{
+  "title": "Insights & Memory",
+  "graphMemoryStatus": "Graph Memory Status",
+  "connected": "Connected",
+    "notAvailable": "Not Available",
+  "labels": {
+    "database": "Database",
+    "path": "Path",
+    "total": "Total",
+    "prReviews": "PR Reviews",
+    "sessions": "Sessions",
+    "codebase": "Codebase",
+    "patterns": "Patterns",
+    "gotchas": "Gotchas"
+  },
+  "notConfigured": {
+    "title": "Graphiti memory is not configured",
+    "description": "To enable graph memory, set GRAPHITI_ENABLED=true in project settings."
+  },
+  "searchMemories": {
+    "title": "Search Memories",
+    "placeholder": "Search for patterns, insights, gotchas...",
+    "resultsFound": "{{count}} result(s) found",
+    "score": "Score:"
+  },
+  "memoryBrowser": {
+    "title": "Memory Browser",
+    "itemsCount": "{{current}} of {{total}} memories",
+    "noMemoriesEmpty": "No memories recorded yet. Memories are created during AI agent sessions and PR reviews.",
+    "noMemoriesFiltered": "No memories match the selected filter.",
+    "showAll": "Show all memories"
+  },
+  "memoryCard": {
+    "whatWorked": "What Worked",
+    "whatFailed": "What Failed",
+    "approach": "Approach",
+    "recommendations": "Recommendations",
+    "patterns": "Patterns",
+    "gotchas": "Gotchas",
+    "changedFiles": "Changed Files",
+    "fileInsights": "File Insights",
+    "subtasksCompleted": "Subtasks Completed",
+    "expand": "Expand",
+    "collapse": "Collapse"
+  }
+}

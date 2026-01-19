@@ -1,0 +1,56 @@
+{
+  "header": {
+    "title": "Roadmap",
+    "competitorAnalysis": "Análise Competitiva",
+    "clickToViewAnalysis": "Clique para visualizar análise detalhada",
+    "addFeature": "Adicionar Funcionalidade",
+    "addFeatureTooltip": "Adicionar nova funcionalidade ao roadmap",
+    "regenerate": "Regenerar Roadmap",
+    "regenerateTooltip": "Regenerar Roadmap",
+    "target": "Alvo:",
+    "morePersonas": "+{{count}} mais personas",
+    "secondaryPersonas": "Personas Secundários:",
+    "featuresCount": "{{count}} funcionalidades",
+    "phasesCount": "{{count}} fases"
+  },
+  "emptyState": {
+    "title": "Nenhum Roadmap Ainda",
+    "description": "Gere um roadmap alimentado por IA que compreenda seu público-alvo e crie um plano de funcionalidades estratégico.",
+    "generateButton": "Gerar Roadmap"
+  },
+  "tabs": {
+    "kanban": "Kanban",
+    "phases": "Fases",
+    "allFeatures": "Todas as Funcionalidades",
+    "byPriority": "Por Prioridade",
+    "featuresLabel": "{{count}} funcionalidades"
+  },
+  "featureCard": {
+    "competitorInsight": "Insight Competitivo",
+    "competitorInsightTooltip": "Esta funcionalidade aborda pontos fracos dos concorrentes",
+    "goToTask": "Ir para Tarefa",
+    "build": "Criar"
+  },
+  "phaseCard": {
+    "progress": "Progresso",
+    "featuresCount": "{{completed}}/{{total}} funcionalidades",
+    "milestones": "Marcos",
+    "featuresSection": "Funcionalidades ({{count}})",
+    "viewTask": "Ver Tarefa",
+    "buildButton": "Criar",
+    "moreFeatures": "+{{count}} mais funcionalidades"
+  },
+  "statuses": {
+    "backlog": "Backlog",
+    "inProgress": "Em Andamento",
+    "launched": "Lançado",
+    "planned": "Planejado",
+    "proposed": "Proposto"
+  },
+  "priorities": {
+    "low": "Baixa",
+    "medium": "Média",
+    "high": "Alta",
+    "critical": "Crítica"
+  }
+}

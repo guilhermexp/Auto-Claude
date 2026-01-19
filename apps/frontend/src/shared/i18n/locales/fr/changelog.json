@@ -1,0 +1,81 @@
+{
+  "header": {
+    "title": "Générateur de Changelog",
+    "step1": "Étape 1 : Sélectionnez les tâches complétées à inclure",
+    "step2": "Étape 2 : Configurez et générez le changelog",
+    "step3": "Étape 3 : Publiez et archivez les tâches",
+    "stepLabels": {
+      "select": "Sélectionner",
+      "generate": "Générer",
+      "release": "Publier"
+    },
+    "refreshButton": "Actualiser"
+  },
+  "filters": {
+    "changelogSource": "Source du Changelog",
+    "gitHistoryOptions": "Options d'Historique Git",
+    "historyType": "Type d'Historique",
+    "historyTypeOptions": {
+      "sinceVersion": "Depuis la Version",
+      "recentCommits": "Commits Récents",
+      "sinceDate": "Depuis la Date",
+      "tagRange": "Plage de Tags"
+    },
+    "numberOfCommits": "Nombre de Commits",
+    "sinceDate": "Depuis la Date",
+    "fromTag": "Depuis le Tag",
+    "toTag": "Jusqu'au Tag (optionnel)",
+    "lastVersion": "Dernière Version",
+    "versionHelpText": "Tous les commits depuis cette version seront inclus",
+    "includeMergeCommits": "Inclure les commits de fusion",
+    "loadingButton": "Chargement...",
+    "loadCommitsButton": "Charger les Commits",
+    "branchComparison": "Comparaison de Branches",
+    "baseBranch": "Branch de Base",
+    "baseBranchHelp": "La branche sur laquelle vous fusionnez",
+    "compareBranch": "Branche de Comparaison",
+    "compareBranchHelp": "La branche avec vos modifications",
+    "differentBranchesError": "Les branches doivent être différentes"
+  },
+  "list": {
+    "selectAll": "Sélectionner Tout",
+    "clearButton": "Effacer",
+    "noCompletedTasks": "Aucune Tâche Complétée",
+    "noCompletedTasksDescription": "Complétez les tâches dans le tableau Kanban et marquez-les comme \"Fait\" pour les inclure dans votre changelog.",
+    "commitsFound": "{{count}} commit(s) trouvé(s)",
+    "loadingCommits": "Chargement des commits...",
+    "noCommitsFound": "Aucun Commit Trouvé",
+    "continueButton": "Continuer"
+  },
+  "configuration": {
+    "backButton": "Retour à la Sélection",
+    "releaseInfo": "Infos de Sortie",
+    "version": "Version",
+    "date": "Date",
+    "previous": "Précédente :",
+    "outputStyle": "Style de Sortie",
+    "format": "Format",
+    "audience": "Audience",
+    "emojis": "Émoticônes",
+    "advancedOptions": "Options Avancées",
+    "customInstructions": "Instructions Personnalisées",
+    "customInstructionsPlaceholder": "Ajoutez des instructions spéciales pour l'IA...",
+    "customInstructionsHelp": "Optionnel. Guidez l'IA sur le ton, les détails spécifiques à inclure, etc.",
+    "generatingButton": "Génération...",
+    "generateChangelogButton": "Générer le Changelog"
+  },
+  "noProject": {
+    "title": "Aucun Projet Sélectionné",
+    "description": "Sélectionnez un projet dans la barre latérale pour générer des changelogs."
+  },
+  "formats": {
+    "markdown": "Markdown",
+    "html": "HTML",
+    "plain": "Texte Brut"
+  },
+  "audiences": {
+    "users": "Utilisateurs",
+    "developers": "Développeurs",
+    "technical": "Technique"
+  }
+}

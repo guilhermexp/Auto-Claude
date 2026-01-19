@@ -1,0 +1,43 @@
+{
+  "header": {
+    "title": "Ideation",
+    "ideasCount": "{{count}} ideas",
+    "description": "AI-generated feature ideas for your project",
+    "selectedCount": "{{count}} selected",
+    "deleteButton": "Delete",
+    "addMoreButton": "Add More"
+  },
+  "emptyState": {
+    "title": "No Ideas Yet",
+    "description": "Generate AI-powered feature ideas based on your project's context, existing patterns, and target audience.",
+    "enabledIdeationTypes": "Enabled Ideation Types",
+    "generateButton": "Generate Ideas",
+    "claudeTokenWarning": "Claude token not configured. You'll be prompted to enter it when generating."
+  },
+  "filters": {
+    "all": "All",
+    "code": "Code",
+    "uiux": "UI/UX",
+    "docs": "Docs",
+    "security": "Security",
+    "performance": "Performance"
+  },
+  "generationProgress": {
+    "title": "Generating Ideas",
+    "complete": "{{completed}}/{{total}} complete",
+    "logsButton": "Logs",
+    "hideButton": "Hide",
+    "showButton": "Show",
+    "stopGenerationTooltip": "Stop generation"
+  },
+  "statusMessages": {
+    "waitingToStart": "Waiting to start...",
+    "failed": "Failed to generate ideas for this category",
+    "noIdeas": "No ideas generated for this category"
+  },
+  "ideaCard": {
+    "rationale": "Rationale",
+    "convertToTask": "Convert to Task",
+    "dismiss": "Dismiss"
+  }
+}

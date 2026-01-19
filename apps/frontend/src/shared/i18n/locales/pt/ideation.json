@@ -1,0 +1,43 @@
+{
+  "header": {
+    "title": "Ideação",
+    "ideasCount": "{{count}} ideias",
+    "description": "Ideias de funcionalidades geradas por IA para seu projeto",
+    "selectedCount": "{{count}} selecionadas",
+    "deleteButton": "Excluir",
+    "addMoreButton": "Adicionar Mais"
+  },
+  "emptyState": {
+    "title": "Nenhuma Ideia Ainda",
+    "description": "Gere ideias de funcionalidades alimentadas por IA baseadas no contexto, padrões existentes e público-alvo do seu projeto.",
+    "enabledIdeationTypes": "Tipos de Ideação Habilitados",
+    "generateButton": "Gerar Ideias",
+    "claudeTokenWarning": "Token Claude não configurado. Você será solicitado a inserir quando gerar."
+  },
+  "filters": {
+    "all": "Todas",
+    "code": "Código",
+    "uiux": "UI/UX",
+    "docs": "Docs",
+    "security": "Segurança",
+    "performance": "Performance"
+  },
+  "generationProgress": {
+    "title": "Gerando Ideias",
+    "complete": "{{completed}}/{{total}} completas",
+    "logsButton": "Logs",
+    "hideButton": "Ocultar",
+    "showButton": "Mostrar",
+    "stopGenerationTooltip": "Parar geração"
+  },
+  "statusMessages": {
+    "waitingToStart": "Aguardando início...",
+    "failed": "Falha ao gerar ideias para esta categoria",
+    "noIdeas": "Nenhuma ideia gerada para esta categoria"
+  },
+  "ideaCard": {
+    "rationale": "Justificativa",
+    "convertToTask": "Converter para Tarefa",
+    "dismiss": "Descartar"
+  }
+}

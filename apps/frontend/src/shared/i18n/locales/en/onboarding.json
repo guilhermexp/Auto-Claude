@@ -234,5 +234,60 @@
       "retry": "Retry",
       "fallbackNote": "Memory will still work with keyword search even without embeddings."
     }
-  }
+  },
+  "firstSpec": {
+    "title": "Create Your First Task",
+    "subtitle": "Describe what you want to build and let Auto Claude handle the rest",
+    "tips": [
+      {
+        "title": "Be Descriptive",
+        "description": "Clearly describe what you want to build. Include requirements, constraints, and expected behavior."
+      },
+      {
+        "title": "Start Small",
+        "description": "Begin with a focused task like adding a feature or fixing a bug. Smaller tasks are easier to verify."
+      },
+      {
+        "title": "Include Context",
+        "description": "Mention relevant file paths, libraries, or existing patterns your code should follow."
+      },
+      {
+        "title": "Add Images",
+        "description": "Screenshots and mockups help Auto Claude understand the desired visual outcome."
+      }
+    ]
+  },
+  "ollamaModels": {
+    "qwen3_4b": "Qwen3 4B - Balanced quality and speed",
+    "qwen3_8b": "Qwen3 8B - Best embedding quality",
+    "googleEmbedding": "Google's lightweight embedding model",
+    "mxbaiEmbedding": "Popular general-purpose embeddings"
+  },
+  "graphitiProviders": [
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "description": "GPT models (recommended)"
+    },
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "description": "Claude models"
+    },
+    {
+      "id": "google",
+      "name": "Google AI",
+      "description": "Gemini models"
+    },
+    {
+      "id": "azure",
+      "name": "Azure OpenAI",
+      "description": "OpenAI models via Azure"
+    },
+    {
+      "id": "ollama",
+      "name": "Ollama",
+      "description": "Local models (free)"
+    }
+  ]
 }

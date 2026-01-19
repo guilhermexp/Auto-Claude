@@ -1,0 +1,81 @@
+{
+  "header": {
+    "title": "Changelog Generator",
+    "step1": "Step 1: Select completed tasks to include",
+    "step2": "Step 2: Configure and generate changelog",
+    "step3": "Step 3: Release and archive tasks",
+    "stepLabels": {
+      "select": "Select",
+      "generate": "Generate",
+      "release": "Release"
+    },
+    "refreshButton": "Refresh"
+  },
+  "filters": {
+    "changelogSource": "Changelog Source",
+    "gitHistoryOptions": "Git History Options",
+    "historyType": "History Type",
+    "historyTypeOptions": {
+      "sinceVersion": "Since Version",
+      "recentCommits": "Recent Commits",
+      "sinceDate": "Since Date",
+      "tagRange": "Tag Range"
+    },
+    "numberOfCommits": "Number of Commits",
+    "sinceDate": "Since Date",
+    "fromTag": "From Tag",
+    "toTag": "To Tag (optional)",
+    "lastVersion": "Last Version",
+    "versionHelpText": "All commits since this version will be included",
+    "includeMergeCommits": "Include merge commits",
+    "loadingButton": "Loading...",
+    "loadCommitsButton": "Load Commits",
+    "branchComparison": "Branch Comparison",
+    "baseBranch": "Base Branch",
+    "baseBranchHelp": "The branch you're merging into",
+    "compareBranch": "Compare Branch",
+    "compareBranchHelp": "The branch with your changes",
+    "differentBranchesError": "Branches must be different"
+  },
+  "list": {
+    "selectAll": "Select All",
+    "clearButton": "Clear",
+    "noCompletedTasks": "No Completed Tasks",
+    "noCompletedTasksDescription": "Complete tasks in the Kanban board and mark them as \"Done\" to include them in your changelog.",
+    "commitsFound": "{{count}} commit(s) found",
+    "loadingCommits": "Loading commits...",
+    "noCommitsFound": "No Commits Found",
+    "continueButton": "Continue"
+  },
+  "configuration": {
+    "backButton": "Back to Selection",
+    "releaseInfo": "Release Info",
+    "version": "Version",
+    "date": "Date",
+    "previous": "Previous:",
+    "outputStyle": "Output Style",
+    "format": "Format",
+    "audience": "Audience",
+    "emojis": "Emojis",
+    "advancedOptions": "Advanced Options",
+    "customInstructions": "Custom Instructions",
+    "customInstructionsPlaceholder": "Add any special instructions for the AI...",
+    "customInstructionsHelp": "Optional. Guide the AI on tone, specific details to include, etc.",
+    "generatingButton": "Generating...",
+    "generateChangelogButton": "Generate Changelog"
+  },
+  "noProject": {
+    "title": "No Project Selected",
+    "description": "Select a project from the sidebar to generate changelogs."
+  },
+  "formats": {
+    "markdown": "Markdown",
+    "html": "HTML",
+    "plain": "Plain Text"
+  },
+  "audiences": {
+    "users": "Users",
+    "developers": "Developers",
+    "technical": "Technical"
+  }
+}

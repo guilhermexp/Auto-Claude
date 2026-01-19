@@ -1,0 +1,56 @@
+{
+  "header": {
+    "title": "Roadmap",
+    "competitorAnalysis": "Competitor Analysis",
+    "clickToViewAnalysis": "Click to view detailed analysis",
+    "addFeature": "Add Feature",
+    "addFeatureTooltip": "Add a new feature to the roadmap",
+    "regenerate": "Regenerate Roadmap",
+    "regenerateTooltip": "Regenerate Roadmap",
+    "target": "Target:",
+    "morePersonas": "+{{count}} more personas",
+    "secondaryPersonas": "Secondary Personas:",
+    "featuresCount": "{{count}} features",
+    "phasesCount": "{{count}} phases"
+  },
+  "emptyState": {
+    "title": "No Roadmap Yet",
+    "description": "Generate an AI-powered roadmap that understands your project's target audience and creates a strategic feature plan.",
+    "generateButton": "Generate Roadmap"
+  },
+  "tabs": {
+    "kanban": "Kanban",
+    "phases": "Phases",
+    "allFeatures": "All Features",
+    "byPriority": "By Priority",
+    "featuresLabel": "{{count}} features"
+  },
+  "featureCard": {
+    "competitorInsight": "Competitor Insight",
+    "competitorInsightTooltip": "This feature addresses competitor pain points",
+    "goToTask": "Go to Task",
+    "build": "Build"
+  },
+  "phaseCard": {
+    "progress": "Progress",
+    "featuresCount": "{{completed}}/{{total}} features",
+    "milestones": "Milestones",
+    "featuresSection": "Features ({{count}})",
+    "viewTask": "View Task",
+    "buildButton": "Build",
+    "moreFeatures": "+{{count}} more features"
+  },
+  "statuses": {
+    "backlog": "Backlog",
+    "inProgress": "In Progress",
+    "launched": "Launched",
+    "planned": "Planned",
+    "proposed": "Proposed"
+  },
+  "priorities": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
+  }
+}

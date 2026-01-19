@@ -1,0 +1,43 @@
+{
+  "header": {
+    "title": "Idéation",
+    "ideasCount": "{{count}} idées",
+    "description": "Idées de fonctionnalités générées par l'IA pour votre projet",
+    "selectedCount": "{{count}} sélectionnées",
+    "deleteButton": "Supprimer",
+    "addMoreButton": "Ajouter Plus"
+  },
+  "emptyState": {
+    "title": "Aucune Idée Encore",
+    "description": "Générez des idées de fonctionnalités alimentées par l'IA basées sur le contexte, les modèles existants et l'audience cible de votre projet.",
+    "enabledIdeationTypes": "Types d'Idéation Activés",
+    "generateButton": "Générer des Idées",
+    "claudeTokenWarning": "Token Claude non configuré. Vous serez invité à l'entrer lors de la génération."
+  },
+  "filters": {
+    "all": "Tous",
+    "code": "Code",
+    "uiux": "UI/UX",
+    "docs": "Docs",
+    "security": "Sécurité",
+    "performance": "Performance"
+  },
+  "generationProgress": {
+    "title": "Génération d'Idées",
+    "complete": "{{completed}}/{{total}} terminées",
+    "logsButton": "Logs",
+    "hideButton": "Masquer",
+    "showButton": "Afficher",
+    "stopGenerationTooltip": "Arrêter la génération"
+  },
+  "statusMessages": {
+    "waitingToStart": "En attente de démarrage...",
+    "failed": "Impossible de générer des idées pour cette catégorie",
+    "noIdeas": "Aucune idée générée pour cette catégorie"
+  },
+  "ideaCard": {
+    "rationale": "Justification",
+    "convertToTask": "Convertir en Tâche",
+    "dismiss": "Rejeter"
+  }
+}
