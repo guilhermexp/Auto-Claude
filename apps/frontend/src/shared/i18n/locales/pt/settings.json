@@ -1,0 +1,595 @@
+{
+  "title": "Configurações",
+  "tabs": {
+    "app": "Configurações do App",
+    "project": "Configurações do Projeto"
+  },
+  "sections": {
+    "appearance": {
+      "title": "Aparência",
+      "description": "Customize como o Auto Claude se parece"
+    },
+    "display": {
+      "title": "Exibição",
+      "description": "Ajuste o tamanho dos elementos da UI"
+    },
+    "language": {
+      "title": "Idioma",
+      "description": "Escolha seu idioma preferido"
+    },
+    "devtools": {
+      "title": "Ferramentas de Desenvolvimento",
+      "description": "Preferências de IDE e terminal"
+    },
+    "agent": {
+      "title": "Configurações do Agente",
+      "description": "Modelo padrão e framework"
+    },
+    "paths": {
+      "title": "Caminhos",
+      "description": "Ferramentas CLI e caminhos do framework"
+    },
+    "integrations": {
+      "title": "Integrações",
+      "description": "Chaves de API e contas Claude"
+    },
+    "api-profiles": {
+      "title": "Perfis de API",
+      "description": "Perfis de endpoint de API personalizado"
+    },
+    "updates": {
+      "title": "Atualizações",
+      "description": "Atualizações do Auto Claude"
+    },
+    "notifications": {
+      "title": "Notificações",
+      "description": "Preferências de alerta"
+    },
+    "debug": {
+      "title": "Debug e Logs",
+      "description": "Ferramentas de solução de problemas"
+    }
+  },
+  "apiProfiles": {
+    "title": "Perfis de API",
+    "description": "Configure endpoints de API personalizados compatíveis com Anthropic",
+    "addButton": "Adicionar Perfil",
+    "presets": {
+      "anthropic": "Anthropic",
+      "openrouter": "OpenRouter",
+      "groq": "Groq",
+      "glmGlobal": "GLM (Global)",
+      "glmChina": "GLM (China)"
+    },
+    "fields": {
+      "name": "Nome",
+      "preset": "Preset",
+      "baseUrl": "URL Base",
+      "apiKey": "Chave de API"
+    },
+    "placeholders": {
+      "name": "Minha API Personalizada",
+      "preset": "Escolha um preset do provedor",
+      "baseUrl": "https://api.anthropic.com",
+      "apiKey": "sk-ant-..."
+    },
+    "hints": {
+      "preset": "Os presets preenchem a URL base; você ainda precisa colar sua chave de API.",
+      "baseUrl": "Exemplo: https://api.anthropic.com ou http://localhost:8080"
+    },
+    "validation": {
+      "nameRequired": "Nome é obrigatório",
+      "baseUrlRequired": "URL Base é obrigatória",
+      "baseUrlInvalid": "Formato de URL inválido (deve ser http:// ou https://)",
+      "apiKeyRequired": "Chave de API é obrigatória",
+      "apiKeyInvalid": "Formato de Chave de API inválido"
+    },
+    "actions": {
+      "save": "Salvar Perfil",
+      "saving": "Salvando...",
+      "cancel": "Cancelar",
+      "changeKey": "Alterar",
+      "cancelKeyChange": "Cancelar"
+    },
+    "testConnection": {
+      "label": "Testar Conexão",
+      "testing": "Testando...",
+      "success": "Conexão Bem-sucedida",
+      "failure": "Conexão Falhou"
+    },
+    "models": {
+      "title": "Opcional: Mapeamentos de Nome de Modelo",
+      "description": "Selecione modelos do seu provedor de API. Deixe em branco para usar os padrões.",
+      "defaultLabel": "Modelo Padrão (Opcional)",
+      "haikuLabel": "Modelo Haiku (Opcional)",
+      "sonnetLabel": "Modelo Sonnet (Opcional)",
+      "opusLabel": "Modelo Opus (Opcional)",
+      "defaultPlaceholder": "ex: claude-sonnet-4-5-20250929",
+      "haikuPlaceholder": "ex: claude-haiku-4-5-20251001",
+      "sonnetPlaceholder": "ex: claude-sonnet-4-5-20250929",
+      "opusPlaceholder": "ex: claude-opus-4-5-20251101"
+    },
+    "empty": {
+      "title": "Nenhum perfil de API configurado",
+      "description": "Crie um perfil para configurar endpoints de API personalizados para seus builds.",
+      "action": "Criar Primeiro Perfil"
+    },
+    "switchToOauth": {
+      "label": "Trocar para OAuth",
+      "loading": "Trocando..."
+    },
+    "activeBadge": "Ativo",
+    "customModels": "Modelos personalizados: {{models}}",
+    "setActive": {
+      "label": "Definir Ativo",
+      "loading": "Definindo..."
+    },
+    "tooltips": {
+      "edit": "Editar perfil",
+      "deleteActive": "Troque para OAuth antes de excluir",
+      "deleteInactive": "Excluir perfil"
+    },
+    "deleteAriaLabel": "Excluir perfil {{name}}",
+    "toast": {
+      "create": {
+        "title": "Perfil criado",
+        "description": "\"{{name}}\" foi adicionado com sucesso."
+      },
+      "update": {
+        "title": "Perfil atualizado",
+        "description": "\"{{name}}\" foi atualizado com sucesso."
+      },
+      "delete": {
+        "title": "Perfil excluído",
+        "description": "\"{{name}}\" foi removido.",
+        "errorTitle": "Falha ao excluir perfil",
+        "errorFallback": "Ocorreu um erro ao excluir o perfil."
+      },
+      "switch": {
+        "oauthTitle": "Trocado para OAuth",
+        "oauthDescription": "Agora usando autenticação OAuth",
+        "profileTitle": "Perfil ativado",
+        "profileDescription": "Agora usando {{name}}",
+        "errorTitle": "Falha ao trocar autenticação",
+        "errorFallback": "Ocorreu um erro ao trocar o método de autenticação."
+      }
+    },
+    "dialog": {
+      "createTitle": "Adicionar Perfil de API",
+      "editTitle": "Editar Perfil",
+      "description": "Configure um endpoint de API personalizado compatível com Anthropic para seus builds.",
+      "deleteTitle": "Excluir Perfil?",
+      "deleteDescription": "Tem certeza de que deseja excluir \"{{name}}\"? Esta ação não pode ser desfeita.",
+      "cancel": "Cancelar",
+      "delete": "Excluir",
+      "deleting": "Excluindo..."
+    }
+  },
+  "modelSelect": {
+    "placeholder": "Selecione um modelo ou digite manualmente",
+    "placeholderManual": "Insira o nome do modelo (ex: claude-sonnet-4-5-20250929)",
+    "searchPlaceholder": "Pesquisar modelos...",
+    "noResults": "Nenhum modelo corresponde sua pesquisa",
+    "discoveryNotAvailable": "Descoberta de modelo não disponível. Insira o nome do modelo manualmente."
+  },
+  "language": {
+    "label": "Idioma da Interface",
+    "description": "Selecione o idioma para a interface da aplicação"
+  },
+  "scale": {
+    "presets": "Presets de Escala",
+    "presetsDescription": "Opções de escala rápida para preferências comuns",
+    "fineTune": "Ajustar Escala",
+    "fineTuneDescription": "Ajuste de 75% a 200% em incrementos de 5%",
+    "default": "Padrão",
+    "comfortable": "Confortável",
+    "large": "Grande"
+  },
+  "general": {
+    "otherAgentSettings": "Outras Configurações de Agente",
+    "otherAgentSettingsDescription": "Opções de configuração de agente adicionais",
+    "agentFramework": "Framework de Agente",
+    "agentFrameworkDescription": "O framework de código usado para tarefas autônomas",
+    "agentFrameworkAutoClaude": "Auto Claude",
+    "aiTerminalNaming": "Nomeação de Terminal de IA",
+    "aiTerminalNamingDescription": "Nomear terminais automaticamente com base em comandos (usa Haiku)",
+    "featureModelSettings": "Configurações de Modelo de Funcionalidade",
+    "featureModelSettingsDescription": "Modelo e nível de pensamento para Insights, Ideação e Roadmap",
+    "model": "Modelo",
+    "thinkingLevel": "Nível de Pensamento",
+    "paths": "Caminhos",
+    "pathsDescription": "Configure caminhos de executáveis e frameworks",
+    "pythonPath": "Caminho Python",
+    "pythonPathDescription": "Caminho para executável Python (deixe vazio para auto-detecção)",
+    "pythonPathPlaceholder": "python3 (padrão)",
+    "gitPath": "Caminho Git",
+    "gitPathDescription": "Caminho para executável Git (deixe vazio para auto-detecção)",
+    "gitPathPlaceholder": "git (padrão)",
+    "githubCLIPath": "Caminho GitHub CLI",
+    "githubCLIPathDescription": "Caminho para executável GitHub CLI (gh) (deixe vazio para auto-detecção)",
+    "githubCLIPathPlaceholder": "gh (padrão)",
+    "claudePath": "Caminho Claude CLI",
+    "claudePathDescription": "Caminho para executável Claude CLI (deixe vazio para auto-detecção)",
+    "claudePathPlaceholder": "claude (padrão)",
+    "detectedPath": "Auto-detectado",
+    "detectedVersion": "Versão",
+    "detectedSource": "Origem",
+    "sourceUserConfig": "Configuração do Usuário",
+    "sourceVenv": "Ambiente Virtual",
+    "sourceHomebrew": "Homebrew",
+    "sourceNvm": "NVM",
+    "sourceSystemPath": "System PATH",
+    "sourceBundled": "Incluído",
+    "sourceFallback": "Fallback",
+    "notDetected": "Não detectado",
+    "autoClaudePath": "Caminho Auto Claude",
+    "autoClaudePathDescription": "Caminho relativo ao diretório auto-claude em projetos",
+    "autoClaudePathPlaceholder": "auto-claude (padrão)",
+    "autoNameTerminals": "Nomear terminais automaticamente",
+    "autoNameTerminalsDescription": "Use IA para gerar nomes descritivos para abas de terminal com base em sua atividade"
+  },
+  "theme": {
+    "title": "Aparência",
+    "description": "Customize como o Auto Claude se parece",
+    "mode": "Modo",
+    "modeDescription": "Escolha entre temas claro e escuro",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema",
+    "colorTheme": "Tema de Cor",
+    "colorThemeDescription": "Escolha sua paleta de cores preferida"
+  },
+  "devtools": {
+    "title": "Ferramentas de Desenvolvimento",
+    "description": "Configure seu IDE preferido e terminal para trabalhar com worktrees",
+    "detecting": "Detectando ferramentas instaladas...",
+    "detectAgain": "Detectar Novamente",
+    "ide": {
+      "label": "IDE Preferida",
+      "description": "Auto Claude abrirá worktrees neste editor",
+      "placeholder": "Selecione IDE...",
+      "customPath": "Caminho IDE Personalizado",
+      "customPathPlaceholder": "/caminho/para/seu/ide"
+    },
+    "terminal": {
+      "label": "Terminal Preferido",
+      "description": "Auto Claude abrirá sessões de terminal aqui",
+      "placeholder": "Selecione terminal...",
+      "customPath": "Caminho Terminal Personalizado",
+      "customPathPlaceholder": "/caminho/para/seu/terminal"
+    },
+    "detected": "Detectado",
+    "notInstalled": "Não instalado",
+    "detectedSummary": "Detectado no seu sistema:",
+    "noToolsDetected": "Nenhuma ferramenta adicional detectada (VS Code e terminal do sistema serão usados)",
+    "yoloMode": {
+      "label": "Modo YOLO",
+      "description": "Inicie Claude com a flag --dangerously-skip-permissions, ignorando todos os prompts de segurança. Use com extremo cuidado.",
+      "warning": "Este modo ignora o sistema de permissões do Claude. Ative apenas se você confiar totalmente no código sendo executado."
+    }
+  },
+  "updates": {
+    "title": "Atualizações",
+    "description": "Gerenciar atualizações do Auto Claude",
+    "appUpdateReady": "Atualização do App Pronta",
+    "newVersion": "Nova Versão",
+    "released": "Lançado",
+    "downloading": "Baixando...",
+    "updateDownloaded": "Atualização baixada! Clique Instalar para reiniciar e aplicar a atualização.",
+    "installAndRestart": "Instalar e Reiniciar",
+    "downloadUpdate": "Baixar Atualização",
+    "version": "Versão",
+    "loading": "Carregando...",
+    "checkingForUpdates": "Verificando atualizações...",
+    "newVersionAvailable": "Nova versão disponível:",
+    "latestVersion": "Você está executando a versão mais recente.",
+    "viewRelease": "Visualizar release completo no GitHub",
+    "unableToCheck": "Não foi possível verificar atualizações",
+    "checkForUpdates": "Verificar Atualizações",
+    "autoUpdateProjects": "Auto-Atualizar Projetos",
+    "autoUpdateProjectsDescription": "Atualizar automaticamente Auto Claude em projetos quando uma nova versão estiver disponível",
+    "betaUpdates": "Atualizações Beta",
+    "betaUpdatesDescription": "Receba versões beta de pré-lançamento com novos recursos (podem ser menos estáveis)",
+    "stableDowngradeAvailable": "Versão Estável Disponível",
+    "stableDowngradeDescription": "Você está atualmente em uma versão beta. Como você desabilitou atualizações beta, você pode trocar para a release estável mais recente.",
+    "stableVersion": "Versão Estável",
+    "downloadStableVersion": "Baixar Versão Estável"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "description": "Configure preferências de notificação padrão",
+    "onTaskComplete": "Ao Completar Tarefa",
+    "onTaskCompleteDescription": "Notificar quando uma tarefa é concluída com sucesso",
+    "onTaskFailed": "Ao Falhar Tarefa",
+    "onTaskFailedDescription": "Notificar quando uma tarefa encontra um erro",
+    "onReviewNeeded": "Ao Precisar Revisão",
+    "onReviewNeededDescription": "Notificar quando QA requer sua revisão",
+    "sound": "Som",
+    "soundDescription": "Reproduzir som com notificações"
+  },
+  "actions": {
+    "save": "Salvar Configurações",
+    "rerunWizard": "Re-executar Assistente",
+    "rerunWizardDescription": "Iniciar o assistente de setup novamente"
+  },
+  "projectSections": {
+    "general": {
+      "title": "Geral",
+      "description": "Configuração de Auto-Build e agente",
+      "useClaudeMd": "Usar CLAUDE.md",
+      "useClaudeMdDescription": "Incluir instruções do CLAUDE.md no contexto do agente"
+    },
+    "claude": {
+      "title": "Auth Claude",
+      "description": "Autenticação Claude"
+    },
+    "linear": {
+      "title": "Linear",
+      "description": "Integração Linear",
+      "integrationTitle": "Integração Linear",
+      "integrationDescription": "Conectar ao Linear para rastreamento de problemas e importação de tarefas",
+      "syncDescription": "Sincronizar com Linear para rastreamento de problemas"
+    },
+    "github": {
+      "title": "GitHub",
+      "description": "Sincronização de problemas do GitHub",
+      "integrationTitle": "Integração GitHub",
+      "integrationDescription": "Conectar ao GitHub para rastreamento de problemas",
+      "syncDescription": "Sincronizar com Problemas do GitHub"
+    },
+    "gitlab": {
+      "title": "GitLab",
+      "description": "Sincronização de problemas do GitLab",
+      "integrationTitle": "Integração GitLab",
+      "integrationDescription": "Conectar ao GitLab para rastreamento de problemas",
+      "syncDescription": "Sincronizar com Problemas do GitLab"
+    },
+    "memory": {
+      "title": "Memória",
+      "description": "Backend de memória Graphiti",
+      "integrationTitle": "Memória",
+      "integrationDescription": "Configure memória persistente entre sessões para agentes",
+      "syncDescription": "Configurar memória persistente"
+    }
+  },
+  "agentProfile": {
+    "label": "Perfil de Agente",
+    "title": "Perfil de Agente Padrão",
+    "sectionDescription": "Selecione uma configuração predefinida para modelo e nível de pensamento",
+    "profilesInfo": "Perfis de agente fornecem configurações predefinidas para modelo Claude e nível de pensamento. Quando você cria uma nova tarefa, essas configurações serão usadas como padrões. Você pode sempre sobrescrevê-las no assistente de criação de tarefa.",
+    "custom": "Personalizado",
+    "customConfiguration": "Configuração Personalizada",
+    "customDescription": "Escolha modelo e nível de pensamento",
+    "phaseConfiguration": "Configuração de Fase",
+    "phaseConfigurationDescription": "Customize modelo e nível de pensamento para cada fase",
+    "clickToCustomize": "Clique para personalizar",
+    "model": "Modelo",
+    "thinking": "Pensamento",
+    "thinkingLevel": "Nível de Pensamento",
+    "selectModel": "Selecionar modelo",
+    "selectThinkingLevel": "Selecionar nível de pensamento",
+    "perPhaseOptimization": "(otimização por fase)",
+    "resetToDefaults": "Redefinir para padrões",
+    "resetToProfileDefaults": "Redefinir para padrões {{profile}}",
+    "customized": "Personalizado",
+    "phaseConfigNote": "Essas configurações serão usadas como padrões ao criar novas tarefas com este perfil. Você pode sobrescrevê-las por tarefa no assistente de criação de tarefa.",
+    "phases": {
+      "spec": {
+        "label": "Criação de Spec",
+        "description": "Descoberta, requisitos, coleta de contexto"
+      },
+      "planning": {
+        "label": "Planejamento",
+        "description": "Planejamento de implementação e arquitetura"
+      },
+      "coding": {
+        "label": "Codificação",
+        "description": "Implementação de código real"
+      },
+      "qa": {
+        "label": "Análise de QA",
+        "description": "Garantia de qualidade e validação"
+      }
+    }
+  },
+  "workspace": {
+    "roles": {
+      "backend": "Backend",
+      "frontend": "Frontend",
+      "mobile": "Mobile",
+      "shared": "Compartilhado",
+      "apiGateway": "API Gateway",
+      "worker": "Worker",
+      "other": "Outro"
+    }
+  },
+  "integrations": {
+    "title": "Integrações",
+    "description": "Gerenciar contas Claude e chaves de API",
+    "claudeAccounts": "Contas Claude",
+    "claudeAccountsDescription": "Adicione múltiplas assinaturas Claude para alternar automaticamente entre elas quando atingir limites de taxa.",
+    "noAccountsYet": "Nenhuma conta configurada ainda",
+    "default": "Padrão",
+    "active": "Ativo",
+    "authenticated": "Autenticado",
+    "needsAuth": "Requer Auth",
+    "authenticate": "Autenticar",
+    "setActive": "Definir Ativo",
+    "manualTokenEntry": "Entrada Manual de Token",
+    "runSetupToken": "Execute claude setup-token para obter seu token",
+    "tokenPlaceholder": "sk-ant-oat01-...",
+    "emailPlaceholder": "Email (opcional, para exibição)",
+    "saveToken": "Salvar Token",
+    "accountNamePlaceholder": "Nome da conta (ex: Trabalho, Pessoal)",
+    "autoSwitching": "Alternância Automática de Conta",
+    "autoSwitchingDescription": "Alternar automaticamente entre contas Claude para evitar interrupções. Configure monitoramento proativo para trocar antes de atingir limites.",
+    "enableAutoSwitching": "Ativar alternância automática",
+    "masterSwitch": "Interruptor mestre para todos os recursos de troca automática",
+    "proactiveMonitoring": "Monitoramento Proativo",
+    "proactiveDescription": "Verificar uso regularmente e trocar antes de atingir limites",
+    "checkUsageEvery": "Verificar uso a cada",
+    "seconds15": "15 segundos",
+    "seconds30": "30 segundos (recomendado)",
+    "minute1": "1 minuto",
+    "disabled": "Desabilitado",
+    "sessionThreshold": "Limiar de uso de sessão",
+    "sessionThresholdDescription": "Trocar quando o uso de sessão atingir este nível (recomendado: 95%)",
+    "weeklyThreshold": "Limiar de uso semanal",
+    "weeklyThresholdDescription": "Trocar quando o uso semanal atingir este nível (recomendado: 99%)",
+    "reactiveRecovery": "Recuperação Reativa",
+    "reactiveDescription": "Troca automática quando limite de taxa inesperado é atingido",
+    "apiKeys": "Chaves de API",
+    "apiKeysInfo": "As chaves definidas aqui são usadas como padrões. Projetos individuais podem sobrescrever essas configurações.",
+    "openaiKey": "Chave de API OpenAI",
+    "openaiKeyDescription": "Necessária para backend de memória Graphiti (embeddings)",
+    "toast": {
+      "authSuccess": "Perfil Autenticado",
+      "authSuccessWithEmail": "Conectado como {{email}}",
+      "authSuccessGeneric": "Autenticação concluída. Você pode usar este perfil.",
+      "authStartFailed": "Falha na Autenticação",
+      "addProfileFailed": "Falha ao Adicionar Perfil",
+      "loadProfilesFailed": "Falha ao Carregar Perfis",
+      "deleteProfileFailed": "Falha ao Excluir Perfil",
+      "renameProfileFailed": "Falha ao Renomear Perfil",
+      "setActiveProfileFailed": "Falha ao Definir Perfil Ativo",
+      "profileCreatedAuthFailed": "Perfil Criado - Autenticação Necessária",
+      "profileCreatedAuthFailedDescription": "O perfil foi adicionado, mas não foi possível iniciar a autenticação. Clique no botão de login para autenticar.",
+      "tokenSaved": "Token Salvo",
+      "tokenSavedDescription": "Seu token foi salvo com sucesso.",
+      "tokenSaveFailed": "Falha ao Salvar Token",
+      "settingsUpdateFailed": "Falha ao Atualizar Configurações",
+      "tryAgain": "Por favor, tente novamente.",
+      "terminalCreationFailed": "Falha ao criar terminal de autenticação",
+      "terminalCreationFailedDescription": "Não foi possível iniciar o processo de autenticação. {{error}}",
+      "maxTerminalsReached": "Máximo de terminais atingido",
+      "maxTerminalsReachedDescription": "Feche alguns terminais e tente novamente. Você pode ter até 12 terminais abertos.",
+      "terminalError": "Erro de Terminal",
+      "terminalErrorDescription": "Falha ao criar terminal: {{error}}",
+      "authProcessFailed": "Falha ao iniciar processo de autenticação",
+      "authProcessFailedDescription": "Não foi possível criar o terminal de autenticação. Por favor, tente novamente ou verifique os logs para mais detalhes."
+    }
+  },
+  "debug": {
+    "title": "Debug e Logs",
+    "description": "Acesse logs e informações de debug para solução de problemas",
+    "errorReporting": {
+      "label": "Relatório de Erro Anônimo",
+      "description": "Enviar relatórios de crash para ajudar a melhorar Auto Claude. Nenhum dado pessoal ou código é coletado."
+    },
+    "openLogsFolder": "Abrir Pasta de Logs",
+    "copyDebugInfo": "Copiar Informações de Debug",
+    "copied": "Copiado!",
+    "loadInfo": "Carregar Informações de Debug",
+    "systemInfo": "Informações do Sistema",
+    "logsLocation": "Local dos Logs",
+    "recentErrors": "Erros Recentes",
+    "noRecentErrors": "Nenhum erro recente",
+    "helpTitle": "Reportando Problemas",
+    "helpText": "Ao reportar bugs, clique em \"Copiar Informações de Debug\" para obter informações do sistema e erros recentes que nos ajudam a diagnosticar o problema."
+  },
+  "projectSettings": {
+    "noProjectSelected": {
+      "title": "Nenhum Projeto Selecionado",
+      "description": "Selecione um projeto na barra lateral para configurar suas configurações."
+    }
+  },
+  "mcp": {
+    "title": "Visão Geral do Servidor MCP",
+    "titleWithProject": "Visão Geral do Servidor MCP para {{projectName}}",
+    "description": "Configure quais servidores MCP estão disponíveis para agentes neste projeto",
+    "descriptionNoProject": "Selecione um projeto para configurar servidores MCP",
+    "serversEnabled": "{{count}} servidores habilitados",
+    "configuration": "Configuração do Servidor MCP",
+    "configurationHint": "Servidores desabilitados reduzem uso de contexto e tempo de inicialização",
+    "noProjectSelected": "Nenhum Projeto Selecionado",
+    "noProjectSelectedDescription": "Selecione um projeto na lista suspensa para visualizar e configurar servidores MCP.",
+    "projectNotInitialized": "Projeto Não Inicializado",
+    "projectNotInitializedDescription": "Inicialize Auto Claude para este projeto para configurar servidores MCP.",
+    "browserAutomation": "Automação de Navegador (apenas agentes de QA)",
+    "alwaysEnabled": "sempre habilitado",
+    "addServer": "Adicionar Servidor",
+    "addMcpTo": "Adicionar Servidor MCP para {{agent}}",
+    "addMcpDescription": "Selecione um servidor MCP para adicionar a este agente",
+    "allMcpsAdded": "Todos os servidores MCP disponíveis já foram adicionados",
+    "added": "adicionado",
+    "removed": "removido",
+    "remove": "Remover",
+    "restore": "Restaurar",
+    "noMcpServers": "Nenhum servidor MCP",
+    "cannotRemove": "Não pode remover (obrigatório)",
+    "servers": {
+      "context7": {
+        "name": "Context7",
+        "description": "Pesquisa de documentação para bibliotecas"
+      },
+      "graphiti": {
+        "name": "Memória Graphiti",
+        "description": "Grafo de conhecimento para contexto entre sessões",
+        "notConfigured": "Requer configuração de memória (veja configurações de Memória)"
+      },
+      "linear": {
+        "name": "Linear",
+        "description": "Integração de gerenciamento de projetos",
+        "notConfigured": "Requer integração Linear (veja configurações de Linear)"
+      },
+      "electron": {
+        "name": "Electron",
+        "description": "Automação de app de desktop via Chrome DevTools"
+      },
+      "puppeteer": {
+        "name": "Puppeteer",
+        "description": "Automação de navegador para testes"
+      },
+      "autoClaude": {
+        "name": "Ferramentas Auto-Claude",
+        "description": "Rastreamento de progresso de build"
+      }
+    },
+    "customServers": "Servidores Personalizados",
+    "addCustomServer": "Adicionar Servidor Personalizado",
+    "editCustomServer": "Editar Servidor Personalizado",
+    "customServerDescription": "Adicione um servidor MCP baseado em comando ou HTTP",
+    "serverType": "Tipo de Servidor",
+    "typeCommand": "Comando (npx/npm)",
+    "typeHttp": "HTTP",
+    "serverName": "Nome",
+    "serverNamePlaceholder": "Meu Servidor MCP",
+    "serverDescription": "Descrição",
+    "serverDescriptionPlaceholder": "O que este servidor faz",
+    "command": "Comando",
+    "args": "Argumentos",
+    "argsHint": "Argumentos separados por espaço",
+    "url": "URL",
+    "headers": "Headers",
+    "headerName": "Nome do Header",
+    "headerValue": "Valor do Header",
+    "noCustomServers": "Nenhum servidor personalizado configurado. Adicione um para usar com seus agentes.",
+    "errorNameRequired": "Nome do servidor é obrigatório",
+    "errorIdExists": "Um servidor com este ID já existe",
+    "errorCommandRequired": "Comando é obrigatório para servidores baseados em comando",
+    "errorUrlRequired": "URL é obrigatória para servidores baseados em HTTP",
+    "testConnection": "Testar",
+    "testing": "Testando...",
+    "authToken": "Token de Autenticação",
+    "authTokenPlaceholder": "Cole seu token de API ou PAT aqui",
+    "authTokenHint": "Usado como token Bearer no header Authorization",
+    "advancedHeaders": "Headers Adicionais",
+    "status": {
+      "healthy": "Servidor está respondendo",
+      "unhealthy": "Servidor não está respondendo",
+      "needsAuth": "Autenticação necessária",
+      "checking": "Verificando...",
+      "unknown": "Status desconhecido"
+    },
+    "hints": {
+      "github": "Isso parece ser um servidor MCP do GitHub. Você precisará de um Token de Acesso Pessoal com escopos apropriados.",
+      "createGithubPat": "Criar GitHub PAT",
+      "google": "Isso parece ser uma API do Google. Você precisará de um token OAuth ou chave de API.",
+      "createGoogleToken": "Criar Credenciais do Google",
+      "anthropic": "Isso parece ser uma API Anthropic. Você precisará de uma chave de API.",
+      "createAnthropicKey": "Criar Chave de API Anthropic",
+      "openai": "Isso parece ser uma API OpenAI. Você precisará de uma chave de API.",
+      "createOpenaiKey": "Criar Chave de API OpenAI"
+    }
+  }
+}

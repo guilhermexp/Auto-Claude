@@ -27,6 +27,19 @@ import frTaskReview from './locales/fr/taskReview.json';
 import frTerminal from './locales/fr/terminal.json';
 import frErrors from './locales/fr/errors.json';
 
+// Import Portuguese translation resources
+import ptCommon from './locales/pt/common.json';
+import ptNavigation from './locales/pt/navigation.json';
+import ptSettings from './locales/pt/settings.json';
+import ptTasks from './locales/pt/tasks.json';
+import ptWelcome from './locales/pt/welcome.json';
+import ptOnboarding from './locales/pt/onboarding.json';
+import ptDialogs from './locales/pt/dialogs.json';
+import ptGitlab from './locales/pt/gitlab.json';
+import ptTaskReview from './locales/pt/taskReview.json';
+import ptTerminal from './locales/pt/terminal.json';
+import ptErrors from './locales/pt/errors.json';
+
 export const defaultNS = 'common';
 
 export const resources = {
@@ -55,6 +68,19 @@ export const resources = {
     taskReview: frTaskReview,
     terminal: frTerminal,
     errors: frErrors
+  },
+  pt: {
+    common: ptCommon,
+    navigation: ptNavigation,
+    settings: ptSettings,
+    tasks: ptTasks,
+    welcome: ptWelcome,
+    onboarding: ptOnboarding,
+    dialogs: ptDialogs,
+    gitlab: ptGitlab,
+    taskReview: ptTaskReview,
+    terminal: ptTerminal,
+    errors: ptErrors
   }
 } as const;
 

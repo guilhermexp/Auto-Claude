@@ -1,0 +1,9 @@
+{
+  "task": {
+    "parseImplementationPlan": "Falha ao analisar implementation_plan.json para {{specId}}: {{error}}",
+    "jsonError": {
+      "titleSuffix": "(Erro JSON)",
+      "description": "⚠️ Erro de Análise JSON: {{error}}\n\nO arquivo implementation_plan.json está malformado. Execute o auto-fix do backend ou repare o arquivo manualmente."
+    }
+  }
+}

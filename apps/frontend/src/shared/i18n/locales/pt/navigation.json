@@ -1,0 +1,81 @@
+{
+  "sections": {
+    "project": "Projeto",
+    "tools": "Ferramentas"
+  },
+  "items": {
+    "kanban": "Quadro Kanban",
+    "terminals": "Terminais do Agente",
+    "insights": "Insights",
+    "roadmap": "Roadmap",
+    "ideation": "Ideação",
+    "changelog": "Changelog",
+    "context": "Contexto",
+    "githubIssues": "Problemas do GitHub",
+    "githubPRs": "PRs do GitHub",
+    "gitlabIssues": "Problemas do GitLab",
+    "gitlabMRs": "MRs do GitLab",
+    "worktrees": "Worktrees",
+    "agentTools": "Visão Geral de MCP"
+  },
+  "actions": {
+    "settings": "Configurações",
+    "help": "Ajuda e Feedback",
+    "newTask": "Nova Tarefa"
+  },
+  "tooltips": {
+    "settings": "Configurações da Aplicação",
+    "help": "Ajuda e Feedback"
+  },
+  "messages": {
+    "initializeToCreateTasks": "Inicialize o Auto Claude para criar tarefas"
+  },
+  "updateBanner": {
+    "title": "Atualização Disponível",
+    "version": "Versão {{version}} está pronta",
+    "updateAndRestart": "Atualizar e Reiniciar",
+    "installAndRestart": "Instalar e Reiniciar",
+    "downloading": "Baixando...",
+    "dismiss": "Descartar",
+    "downloadError": "Falha ao baixar atualização"
+  },
+  "claudeCode": {
+    "checking": "Verificando Claude Code...",
+    "upToDate": "Claude Code está atualizado",
+    "updateAvailable": "Atualização de Claude Code disponível",
+    "notInstalled": "Claude Code não instalado",
+    "error": "Erro ao verificar Claude Code",
+    "installed": "Instalado",
+    "outdated": "Atualização disponível",
+    "missing": "Não instalado",
+    "current": "Atual",
+    "latest": "Mais recente",
+    "path": "Caminho",
+    "lastChecked": "Última verificação",
+    "learnMore": "Saiba mais sobre Claude Code",
+    "learnMoreAriaLabel": "Saiba mais sobre Claude Code (abre em nova janela)",
+    "viewChangelog": "Visualizar Changelog do Claude Code",
+    "viewChangelogAriaLabel": "Visualizar Changelog do Claude Code (abre em nova janela)",
+    "updateWarningTitle": "Atualizar Claude Code?",
+    "updateWarningDescription": "Atualizar fechará todas as sessões Claude Code em execução. Qualquer trabalho não salvo nessas sessões pode ser perdido. Certifique-se de salvar seu trabalho antes de prosseguir.",
+    "updateAnyway": "Atualizar Mesmo Assim",
+    "switchVersion": "Trocar Versão",
+    "selectVersion": "Selecionar versão",
+    "loadingVersions": "Carregando versões...",
+    "failedToLoadVersions": "Falha ao carregar versões",
+    "installingVersion": "Instalando versão {{version}}...",
+    "rollbackWarningTitle": "Trocar para versão {{version}}?",
+    "rollbackWarningDescription": "Trocar versões fechará todas as sessões Claude Code em execução. Qualquer trabalho não salvo nessas sessões pode ser perdido. Certifique-se de salvar seu trabalho antes de prosseguir.",
+    "switchAnyway": "Trocar Mesmo Assim",
+    "currentVersion": "Atual",
+    "switchInstallation": "Trocar Instalação",
+    "selectInstallation": "Selecionar instalação",
+    "loadingInstallations": "Carregando instalações...",
+    "failedToLoadInstallations": "Falha ao carregar instalações",
+    "activeInstallation": "Ativa",
+    "pathChangeWarningTitle": "Trocar instalação de CLI?",
+    "pathChangeWarningDescription": "Trocar instalações de CLI usará um binário Claude Code diferente. Qualquer sessão em execução continuará usando a instalação anterior até ser reiniciada.",
+    "switchInstallationConfirm": "Trocar",
+    "versionUnknown": "versão desconhecida"
+  }
+}

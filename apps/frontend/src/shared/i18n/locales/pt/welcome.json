@@ -1,0 +1,17 @@
+{
+  "hero": {
+    "title": "Bem-vindo ao Auto Claude",
+    "subtitle": "Crie software autonomamente com agentes IA"
+  },
+  "actions": {
+    "newProject": "Novo Projeto",
+    "openProject": "Abrir Projeto"
+  },
+  "recentProjects": {
+    "title": "Projetos Recentes",
+    "empty": "Nenhum projeto ainda",
+    "emptyDescription": "Crie um novo projeto ou abra um existente para começar",
+    "openFolder": "Abrir Pasta",
+    "openProjectAriaLabel": "Abrir projeto {{name}}"
+  }
+}
