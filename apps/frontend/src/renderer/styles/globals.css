@@ -297,8 +297,21 @@
 }
 
 /* Base styles */
+
+/* Global theme transitions for smooth dark mode switching */
 * {
   border-color: var(--border);
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: var(--ease-out);
+  transition-duration: var(--duration-normal);
+}
+
+/* Disable transitions for elements with explicit animations */
+*:where([class*="animate-"]),
+*:where([class*="transition-transform"]),
+*:where([class*="transition-opacity"]),
+*:where([class*="transition-all"]) {
+  transition-property: revert;
 }
 
 body {
