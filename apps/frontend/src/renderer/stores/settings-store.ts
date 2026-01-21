@@ -324,6 +324,21 @@ function migrateOnboardingCompleted(settings: AppSettings): AppSettings {
 }
 
 /**
+ * Migrate theme to dark mode as default.
+ * Users with 'system' theme will be migrated to 'dark'.
+ * Users who explicitly chose 'light' will keep their preference.
+ */
+function migrateToDarkMode(settings: AppSettings): AppSettings {
+  // Only migrate 'system' theme to 'dark'
+  // Users who explicitly chose 'light' should keep their preference
+  if (settings.theme === 'system') {
+    return { ...settings, theme: 'dark' };
+  }
+
+  return settings;
+}
+
+/**
  * Load settings from main process
  */
 export async function loadSettings(): Promise<void> {
@@ -333,15 +348,25 @@ export async function loadSettings(): Promise<void> {
   try {
     const result = await window.electronAPI.getSettings();
     if (result.success && result.data) {
-      // Apply migration for onboardingCompleted flag
-      const migratedSettings = migrateOnboardingCompleted(result.data);
+      // Apply migrations
+      let migratedSettings = migrateOnboardingCompleted(result.data);
+      migratedSettings = migrateToDarkMode(migratedSettings);
       store.setSettings(migratedSettings);
 
-      // If migration changed the settings, persist them
+      // Track which settings changed for persistence
+      const settingsToSave: Partial<AppSettings> = {};
+
       if (migratedSettings.onboardingCompleted !== result.data.onboardingCompleted) {
-        await window.electronAPI.saveSettings({
-          onboardingCompleted: migratedSettings.onboardingCompleted
-        });
+        settingsToSave.onboardingCompleted = migratedSettings.onboardingCompleted;
+      }
+
+      if (migratedSettings.theme !== result.data.theme) {
+        settingsToSave.theme = migratedSettings.theme;
+      }
+
+      // Persist changed settings
+      if (Object.keys(settingsToSave).length > 0) {
+        await window.electronAPI.saveSettings(settingsToSave);
       }
 
       // Only mark settings as loaded on SUCCESS
