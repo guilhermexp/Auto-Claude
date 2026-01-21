@@ -390,17 +390,23 @@ export function App() {
     const root = document.documentElement;
 
     const applyTheme = () => {
+      console.log('[App] Applying theme:', settings.theme, 'current classList:', root.classList.toString());
+
       // Apply light/dark mode
       if (settings.theme === 'dark') {
         root.classList.add('dark');
+        console.log('[App] Added dark class, new classList:', root.classList.toString());
       } else if (settings.theme === 'light') {
         root.classList.remove('dark');
+        console.log('[App] Removed dark class, new classList:', root.classList.toString());
       } else {
         // System preference
         if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
           root.classList.add('dark');
+          console.log('[App] System dark mode, added dark class');
         } else {
           root.classList.remove('dark');
+          console.log('[App] System light mode, removed dark class');
         }
       }
     };
