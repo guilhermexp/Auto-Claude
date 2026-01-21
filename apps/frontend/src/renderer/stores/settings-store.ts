@@ -325,13 +325,13 @@ function migrateOnboardingCompleted(settings: AppSettings): AppSettings {
 
 /**
  * Migrate theme to dark mode as default.
- * Users with 'system' theme will be migrated to 'dark'.
+ * Users with 'system' theme (or undefined) will be migrated to 'dark'.
  * Users who explicitly chose 'light' will keep their preference.
  */
 function migrateToDarkMode(settings: AppSettings): AppSettings {
-  // Only migrate 'system' theme to 'dark'
+  // Migrate 'system' or undefined theme to 'dark'
   // Users who explicitly chose 'light' should keep their preference
-  if (settings.theme === 'system') {
+  if (!settings.theme || settings.theme === 'system') {
     return { ...settings, theme: 'dark' };
   }
 
