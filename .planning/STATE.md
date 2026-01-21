@@ -9,22 +9,22 @@
 
 ## Current Position
 
-**Active Phase:** 04-core-ui-components-forms
-**Active Plan:** 04-01-PLAN.md (✅ Complete)
-**Active Task:** None (plan complete)
+**Active Phase:** 05-core-ui-components-overlays
+**Active Plan:** 05-01-PLAN.md (📋 Planned, not executed)
+**Active Task:** None (ready for execution)
 
-**Phase Progress:** 4/10 phases completed (Phase 01-04 complete)
-**Plan Progress:** 4 plans completed
+**Phase Progress:** 4/10 phases completed (Phase 01-04 complete, Phase 05 planned)
+**Plan Progress:** 4 plans completed, 1 planned
 **Task Progress:** 15 tasks completed (3 from 01-01, 3 from 02-01, 3 from 03-01, 6 from 04-01)
 
 ---
 
 ## Performance Metrics
 
-**Session count:** 6
+**Session count:** 7
 **Total phases completed:** 4 (Phase 01-04)
 **Total plans completed:** 4
-**Total plans created:** 4
+**Total plans created:** 5 (4 completed + 1 planned)
 **Total tasks completed:** 15
 **Average plans per phase:** 1.0 (4 completed phases)
 **Average tasks per plan:** 3.75
@@ -105,8 +105,8 @@
 ## Session Continuity
 
 **Last session:** 2026-01-21
-**Last action:** Completed plan 04-01 (Form Components Modernization)
-**Next action:** Plan Phase 05 (`/gsd:plan-phase 5`)
+**Last action:** Created plan 05-01 (Overlay Components Modernization)
+**Next action:** Execute plan 05-01 (`/gsd:execute-phase 5`)
 
 **Open questions:** None
 
@@ -242,6 +242,48 @@
 - `eddb55a0`: feat(04-01): add orientation and spacing variants to RadioGroup
 - `644faafd`: feat(04-01): create FormField wrapper component
 - `6f8ff8a4`: docs(04-01): add comprehensive form components documentation
+
+---
+
+### Phase 05: Core UI Components - Overlays (Planned)
+
+#### Plan 05-01: Overlay Components Modernization 📋 Planned (2026-01-21)
+- **Plan status:** Created, not yet executed
+- **Scope:** Modernize 4 overlay components with cva variants
+- **Tasks planned:** 6 tasks
+  1. Modernize Dialog with size variants (sm/default/lg/xl/full)
+  2. Modernize Select with size variants (sm/default/lg)
+  3. Modernize Popover with width variants (sm/default/lg/auto)
+  4. Modernize AlertDialog with intent variants (default/info/warning/destructive)
+  5. Integrate overlays with spacing tokens (documentation)
+  6. Create OVERLAYS.md documentation
+
+**Components to modernize:**
+- Dialog: Add size variants (sm/default/lg/xl/full) using cva
+- Select: Add size variants (sm/default/lg) aligned with Input
+- Popover: Add width variants (sm/default/lg/auto)
+- AlertDialog: Add intent variants (default/info/warning/destructive) with Context API
+
+**Components already modern (no changes needed):**
+- Tooltip: ✓ Simples e funcional, já usa tokens corretamente
+- DropdownMenu: ✓ Já muito completo com submenus, checkbox, radio
+
+**All components already use Radix UI:**
+- Dialog, Tooltip, DropdownMenu, Select, Popover, AlertDialog
+- All have animations (fade, zoom, slide) with 200ms duration
+- All use Portal for proper z-index layering
+
+**Plan file:**
+- `.planning/phases/05-core-ui-components-overlays/05-01-PLAN.md` (created)
+
+**Key approach:**
+- Use cva for type-safe variants
+- Integrate with design tokens (colors, spacing, typography)
+- Add Context API to AlertDialog for intent propagation
+- Maintain zero breaking changes
+- Create comprehensive OVERLAYS.md documentation
+
+**Next step:** Execute plan with `/gsd:execute-phase 5`
 
 ---
 
