@@ -1,0 +1,48 @@
+import * as React from 'react';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { cn } from '../../lib/utils';
+
+const containerVariants = cva(
+  'mx-auto px-4', // base: centered with horizontal padding
+  {
+    variants: {
+      size: {
+        sm: 'max-w-[640px]',
+        md: 'max-w-[768px]',
+        lg: 'max-w-[1024px]',
+        xl: 'max-w-[1280px]',
+        '2xl': 'max-w-[1536px]',
+        full: 'max-w-full',
+      },
+      padding: {
+        none: 'px-0',
+        sm: 'px-4',
+        md: 'px-6',
+        lg: 'px-8',
+      },
+    },
+    defaultVariants: {
+      size: 'xl',
+      padding: 'sm',
+    },
+  }
+);
+
+export interface ContainerProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof containerVariants> {}
+
+const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
+  ({ className, size, padding, ...props }, ref) => {
+    return (
+      <div
+        className={cn(containerVariants({ size, padding }), className)}
+        ref={ref}
+        {...props}
+      />
+    );
+  }
+);
+Container.displayName = 'Container';
+
+export { Container, containerVariants };
