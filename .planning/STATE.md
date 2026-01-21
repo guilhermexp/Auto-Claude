@@ -9,22 +9,22 @@
 
 ## Current Position
 
-**Active Phase:** 07-motion-animation-system
-**Active Plan:** 07-01-PLAN.md (✅ Complete)
-**Active Task:** None (phase complete)
+**Active Phase:** 08-dark-mode-system
+**Active Plan:** 08-01-PLAN.md (📋 Planned)
+**Active Task:** None (plan created, not executed)
 
-**Phase Progress:** 7/10 phases completed (Phase 01-07 complete)
-**Plan Progress:** 7 plans completed
+**Phase Progress:** 7/10 phases completed (Phase 01-07 complete, Phase 08 planned)
+**Plan Progress:** 7 plans completed, 1 planned
 **Task Progress:** 28 tasks completed (3 from 01-01, 3 from 02-01, 3 from 03-01, 6 from 04-01, 6 from 05-01, 4 from 06-01, 3 from 07-01)
 
 ---
 
 ## Performance Metrics
 
-**Session count:** 12
+**Session count:** 13
 **Total phases completed:** 7 (Phase 01-07)
 **Total plans completed:** 7
-**Total plans created:** 7
+**Total plans created:** 8
 **Total tasks completed:** 28
 **Average plans per phase:** 1.0 (7 completed phases)
 **Average tasks per plan:** 4.0
@@ -106,8 +106,8 @@
 ## Session Continuity
 
 **Last session:** 2026-01-21
-**Last action:** Completed plan 07-01 (Motion & Animation System)
-**Next action:** Plan Phase 08 (Dark Mode System) (`/gsd:plan-phase 8`)
+**Last action:** Created plan 08-01 (Dark Mode System Polish & Documentation)
+**Next action:** Execute Phase 08 (`/gsd:execute-phase 8`)
 
 **Open questions:** None
 
@@ -407,6 +407,69 @@ ROADMAP original mencionava "criar animações para transições de páginas, mo
 - `77306a41`: feat(motion): add animation duration and easing tokens
 - `32cd4371`: feat(motion): add optional Motion variants to Dialog and Tabs
 - `071336a6`: docs(motion): add comprehensive animation system documentation
+
+---
+
+### Phase 08: Dark Mode System (Planned)
+
+#### Plan 08-01: Dark Mode System Polish & Documentation 📋 Planned (2026-01-21)
+- **Plan status:** Created, not yet executed
+- **Scope:** Polish existing dark mode system and create comprehensive documentation
+- **Tasks planned:** 3 tasks
+  1. Add smooth theme transitions using animation tokens (200ms color transitions)
+  2. Create comprehensive DARK_MODE.md documentation (~500-700 lines)
+  3. Verify dark mode compatibility of 20+ modernized components
+
+**Current Dark Mode State:**
+- ✅ Tokens CSS para dark mode (`.dark` class with 40+ color overrides)
+- ✅ Toggle de tema (Light/Dark/System) no ThemeSelector component
+- ✅ Persistência via settings store (Zustand)
+- ✅ Suporte a prefers-color-scheme (system mode)
+- ✅ Theme application em App.tsx via useEffect
+- ✅ Multiple color themes (8 themes: default, purple, emerald, rose, amber, blue, slate, ocean)
+- ❌ Smooth transitions entre temas (será adicionado)
+- ❌ Documentação abrangente (DARK_MODE.md será criado)
+
+**Scope Adjustment:**
+ROADMAP original mencionava "criar tokens CSS, toggle, persistência, prefers-color-scheme, transições", mas TODOS esses features JÁ existem exceto smooth transitions.
+
+**Decisão:** Focar em:
+- Adicionar smooth color transitions usando animation tokens do Phase 7
+- Documentar sistema dark mode existente completamente
+- Criar guia de dark-mode-friendly component development
+- Verificar que componentes modernos (Phase 02-07) são dark-mode-compatible
+
+**Smooth Transitions to Add:**
+- Global theme transition usando animation tokens (--duration-normal, --ease-out)
+- Animar background-color, color, border-color com transitions
+- Respeitar prefers-reduced-motion
+- Performance mantida (apenas color/background, GPU-friendly)
+
+**Documentation to Create:**
+- DARK_MODE.md comprehensive guide (~500-700 lines)
+- Architecture overview (token-based system, `.dark` class overrides)
+- Theme toggle API reference
+- Color themes reference (8 themes)
+- Token reference table (40+ tokens with light vs dark comparison)
+- Component development best practices
+- Testing guide
+- Migration guide
+
+**Components to Verify:**
+- All 20+ modernized components from Phases 02-07
+- Check for dark mode compatibility (correct tokens, no hardcoded colors)
+- Document findings and recommendations
+
+**Plan file:**
+- `.planning/phases/08-dark-mode-system/08-01-PLAN.md` (created)
+
+**Key approach:**
+- Polish existing implementation (smooth transitions)
+- Comprehensive documentation
+- Component compatibility verification
+- Zero breaking changes
+
+**Next step:** Execute plan with `/gsd:execute-phase 8`
 
 ---
 
