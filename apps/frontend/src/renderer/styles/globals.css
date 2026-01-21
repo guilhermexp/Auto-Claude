@@ -102,12 +102,28 @@
   --radius-3xl: 24px;
   --radius-full: 9999px;
 
-  /* Animations */
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
-  --animate-fade-in: fade-in 0.25s cubic-bezier(0, 0, 0.2, 1);
-  --animate-slide-up: slide-up 0.25s cubic-bezier(0, 0, 0.2, 1);
-  --animate-scale-in: scale-in 0.2s cubic-bezier(0, 0, 0.2, 1);
+  /* Animation Durations */
+  --duration-instant: 0ms;
+  --duration-fast: 100ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 500ms;
+
+  /* Animation Easings */
+  --ease-linear: linear;
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Animation Shorthands */
+  --animate-fade-in: fade-in var(--duration-normal) var(--ease-out);
+  --animate-slide-up: slide-up var(--duration-normal) var(--ease-out);
+  --animate-scale-in: scale-in var(--duration-normal) var(--ease-out);
+  --animate-accordion-down: accordion-down var(--duration-normal) var(--ease-out);
+  --animate-accordion-up: accordion-up var(--duration-normal) var(--ease-out);
+  --animate-pulse-subtle: pulse-subtle var(--duration-slower) var(--ease-in-out);
+  --animate-indeterminate: indeterminate 1.5s var(--ease-in-out);
 
   @keyframes accordion-down {
     from { height: 0 }
