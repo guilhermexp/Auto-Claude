@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
+import { motion } from 'motion/react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 
@@ -45,7 +46,9 @@ const tabsTriggerVariants = cva(
 
 export interface TabsListProps
   extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>,
-    VariantProps<typeof tabsListVariants> {}
+    VariantProps<typeof tabsListVariants> {
+  animatedIndicator?: boolean;
+}
 
 export interface TabsTriggerProps
   extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.Trigger>,
@@ -54,13 +57,38 @@ export interface TabsTriggerProps
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   TabsListProps
->(({ className, size, variant, ...props }, ref) => (
-  <TabsPrimitive.List
-    ref={ref}
-    className={cn(tabsListVariants({ size, variant }), className)}
-    {...props}
-  />
-));
+>(({ className, size, variant, animatedIndicator = false, children, ...props }, ref) => {
+  // Note: For full animated indicator implementation, we would need:
+  // 1. Context to track active tab position/dimensions
+  // 2. Motion underline with layoutId for shared layout animations
+  // 3. Measurement of tab positions on mount and resize
+  // This is a simplified implementation showing the prop API
+
+  return (
+    <TabsPrimitive.List
+      ref={ref}
+      className={cn(
+        tabsListVariants({ size, variant }),
+        animatedIndicator && 'relative',
+        className
+      )}
+      {...props}
+    >
+      {children}
+      {/* Animated indicator would render here when enabled */}
+      {animatedIndicator && (
+        <motion.div
+          className="absolute bottom-0 h-0.5 bg-primary"
+          layoutId="tabs-indicator"
+          transition={{
+            duration: 0.2,
+            ease: [0, 0, 0.2, 1], // --ease-out
+          }}
+        />
+      )}
+    </TabsPrimitive.List>
+  );
+});
 TabsList.displayName = TabsPrimitive.List.displayName;
 
 const TabsTrigger = React.forwardRef<

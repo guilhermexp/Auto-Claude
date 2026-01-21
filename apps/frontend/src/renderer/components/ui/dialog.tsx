@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { motion, AnimatePresence } from 'motion/react';
 import { X } from 'lucide-react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
@@ -58,18 +59,64 @@ const dialogContentVariants = cva(
   }
 );
 
+// Motion variants for optional programmatic animations
+const dialogMotionVariants = {
+  hidden: { opacity: 0, scale: 0.95, y: 20 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: 0.2,
+      ease: [0, 0, 0.2, 1], // --ease-out
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.95,
+    transition: { duration: 0.15 },
+  },
+};
+
 interface DialogContentProps
   extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>,
     VariantProps<typeof dialogContentVariants> {
   hideCloseButton?: boolean;
+  useMotion?: boolean;
 }
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, children, hideCloseButton, size, ...props }, ref) => (
-  <DialogPortal>
-    <DialogOverlay />
+>(({ className, children, hideCloseButton, size, useMotion = false, ...props }, ref) => {
+  const ContentComponent = useMotion ? motion.div : DialogPrimitive.Content;
+
+  const contentElement = useMotion ? (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      variants={dialogMotionVariants}
+      className={cn(dialogContentVariants({ size, className }))}
+      {...props}
+    >
+      {children}
+      {!hideCloseButton && (
+        <DialogPrimitive.Close
+          className={cn(
+            'absolute right-4 top-4 rounded-lg p-1 z-10',
+            'text-muted-foreground hover:text-foreground',
+            'hover:bg-accent transition-colors',
+            'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background',
+            'disabled:pointer-events-none'
+          )}
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </DialogPrimitive.Close>
+      )}
+    </motion.div>
+  ) : (
     <DialogPrimitive.Content
       ref={ref}
       className={cn(dialogContentVariants({ size, className }))}
@@ -91,8 +138,15 @@ const DialogContent = React.forwardRef<
         </DialogPrimitive.Close>
       )}
     </DialogPrimitive.Content>
-  </DialogPortal>
-));
+  );
+
+  return (
+    <DialogPortal>
+      <DialogOverlay />
+      {contentElement}
+    </DialogPortal>
+  );
+});
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
