@@ -9,25 +9,25 @@
 
 ## Current Position
 
-**Active Phase:** 06-core-ui-components-navigation ✅ Complete
-**Active Plan:** None (Phase 06 complete)
-**Active Task:** None (ready for Phase 07)
+**Active Phase:** 07-motion-animation-system
+**Active Plan:** 07-01-PLAN.md (📋 Planned, not executed)
+**Active Task:** None (ready for execution)
 
-**Phase Progress:** 6/10 phases completed (Phase 01-06 complete)
-**Plan Progress:** 6 plans completed
+**Phase Progress:** 6/10 phases completed (Phase 01-06 complete, Phase 07 planned)
+**Plan Progress:** 6 plans completed, 1 planned
 **Task Progress:** 25 tasks completed (3 from 01-01, 3 from 02-01, 3 from 03-01, 6 from 04-01, 6 from 05-01, 4 from 06-01)
 
 ---
 
 ## Performance Metrics
 
-**Session count:** 10
+**Session count:** 11
 **Total phases completed:** 6 (Phase 01-06)
 **Total plans completed:** 6
-**Total plans created:** 6
+**Total plans created:** 7 (6 completed + 1 planned)
 **Total tasks completed:** 25
 **Average plans per phase:** 1.0 (6 completed phases)
-**Average tasks per plan:** 4.2
+**Average tasks per plan:** 4.17
 
 **Blockers encountered:** 1 (missing @radix-ui/react-label dependency)
 **Blockers resolved:** 1 (installed via npm)
@@ -106,8 +106,8 @@
 ## Session Continuity
 
 **Last session:** 2026-01-21
-**Last action:** Completed Phase 06 - Plan 01 (Navigation & Utility Components Modernization)
-**Next action:** Create and execute Phase 07 plan (Motion & Animation System)
+**Last action:** Created plan 07-01 (Motion & Animation System)
+**Next action:** Execute plan 07-01 (`/gsd:execute-phase 7`)
 
 **Open questions:** None
 
@@ -326,6 +326,54 @@ ROADMAP original mencionava criar Navigation Menu, Breadcrumbs, Pagination, mas 
 - `e139ce2c`: feat(navigation): add size and variant options to Progress component
 - `cb2de630`: refactor(navigation): document spacing token integration
 - `6352ab8a`: docs(navigation): add comprehensive navigation and utility components documentation
+
+---
+
+### Phase 07: Motion & Animation System (Planned)
+
+#### Plan 07-01: Motion & Animation System 📋 Planned (2026-01-21)
+- **Plan status:** Created, not yet executed
+- **Scope:** Criar sistema de animação centralizado com tokens formalizados
+- **Tasks planned:** 3 tasks
+  1. Criar animation tokens (5 durations, 5 easings, 5+ shorthands)
+  2. Adicionar Motion variants opcionais (Dialog useMotion, Tabs animatedIndicator)
+  3. Create ANIMATIONS.md documentation
+
+**Current Animation State:**
+- Motion (Framer Motion v12.23.26) JÁ instalado ✅
+- 10+ @keyframes CSS já definidas (accordion, fade-in, slide-up, scale-in, pulse, indeterminate, progress animations, etc.) ✅
+- Animation CSS variables parcialmente definidas ✅
+- Tailwind animate classes usadas (data-[state=open]:animate-in, fade-in-0, zoom-in-95, etc.) ✅
+- Motion NÃO usado em componentes ainda
+
+**Scope Adjustment:**
+ROADMAP original mencionava "criar animações para transições de páginas, modais, toasts, hover states, loading skeletons", mas overlays JÁ têm animações CSS funcionando e loading states JÁ têm pulse/indeterminate animations.
+
+**Decisão:** Focar em:
+- Formalizar animation tokens (durations, easings) no @theme
+- Documentar animações CSS existentes
+- Adicionar Motion variants OPCIONAIS para casos complexos (Dialog, Tabs)
+- Manter animações CSS existentes (backward compatibility)
+
+**Animation Tokens to Add:**
+- Durations: instant (0ms), fast (100ms), normal (200ms), slow (300ms), slower (500ms)
+- Easings: linear, in, out, in-out, bounce
+- Shorthands: --animate-fade-in, --animate-slide-up, --animate-scale-in, etc.
+
+**Motion Integration:**
+- Dialog: optional useMotion prop (default=false, usa CSS)
+- Tabs: optional animatedIndicator prop (default=false, usa CSS transitions)
+
+**Plan file:**
+- `.planning/phases/07-motion-animation-system/07-01-PLAN.md` (created)
+
+**Key approach:**
+- Hybrid animation system (CSS + Motion)
+- Motion only when explicitly enabled (opt-in)
+- Maintain backward compatibility with CSS animations
+- Document performance and accessibility best practices
+
+**Next step:** Execute plan with `/gsd:execute-phase 7`
 
 ---
 
