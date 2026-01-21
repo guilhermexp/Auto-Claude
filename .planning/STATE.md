@@ -9,22 +9,22 @@
 
 ## Current Position
 
-**Active Phase:** 05-core-ui-components-overlays
-**Active Plan:** 05-01-PLAN.md (✅ Complete)
-**Active Task:** None (phase complete)
+**Active Phase:** 06-core-ui-components-navigation
+**Active Plan:** 06-01-PLAN.md (📋 Planned, not executed)
+**Active Task:** None (ready for execution)
 
-**Phase Progress:** 5/10 phases completed (Phase 01-05 complete)
-**Plan Progress:** 5 plans completed
+**Phase Progress:** 5/10 phases completed (Phase 01-05 complete, Phase 06 planned)
+**Plan Progress:** 5 plans completed, 1 planned
 **Task Progress:** 21 tasks completed (3 from 01-01, 3 from 02-01, 3 from 03-01, 6 from 04-01, 6 from 05-01)
 
 ---
 
 ## Performance Metrics
 
-**Session count:** 8
+**Session count:** 9
 **Total phases completed:** 5 (Phase 01-05)
 **Total plans completed:** 5
-**Total plans created:** 5
+**Total plans created:** 6 (5 completed + 1 planned)
 **Total tasks completed:** 21
 **Average plans per phase:** 1.0 (5 completed phases)
 **Average tasks per plan:** 4.2
@@ -106,8 +106,8 @@
 ## Session Continuity
 
 **Last session:** 2026-01-21
-**Last action:** Completed Phase 05, Plan 01 (Overlay Components Modernization)
-**Next action:** Plan Phase 06 (Core UI Components - Navigation)
+**Last action:** Created plan 06-01 (Navigation & Utility Components Modernization)
+**Next action:** Execute plan 06-01 (`/gsd:execute-phase 6`)
 
 **Open questions:** None
 
@@ -282,6 +282,47 @@
 - `d07b5527`: feat(overlays): add intent variants to AlertDialog component
 - `c2ad8e99`: refactor(overlays): document spacing token integration
 - `6cade15d`: docs(overlays): add comprehensive overlay components documentation
+
+---
+
+### Phase 06: Core UI Components - Navigation & Utility (Planned)
+
+#### Plan 06-01: Navigation & Utility Components Modernization 📋 Planned (2026-01-21)
+- **Plan status:** Created, not yet executed
+- **Scope:** Modernize 2 utility components (Tabs, Progress) with cva variants
+- **Tasks planned:** 4 tasks
+  1. Modernize Tabs with size and variant options (TabsList + TabsTrigger)
+  2. Modernize Progress with size and variant options
+  3. Document spacing token integration (verification)
+  4. Create NAVIGATION.md documentation
+
+**Scope Adjustment:**
+ROADMAP original mencionava criar Navigation Menu, Breadcrumbs, Pagination, mas esses componentes:
+- Não existem no projeto base (1Code Desktop)
+- Não existem no Auto-Claude atual
+- Não são usados no codebase
+
+**Decisão:** Focar em modernizar componentes utility existentes ativamente usados.
+
+**Components to modernize:**
+- Tabs: Add size variants (sm/default/lg) + variant styles (default/outline/pills)
+- Progress: Add size variants (sm/default/lg/xl) + variant colors (default/success/warning/destructive/info)
+
+**Components already modern (no changes needed):**
+- Badge: ✓ Already has cva with 9 variants (default/secondary/destructive/outline/success/warning/info/purple/muted)
+- Separator: ✓ Simple and functional, already uses Radix UI correctly
+
+**Plan file:**
+- `.planning/phases/06-core-ui-components-navigation/06-01-PLAN.md` (created)
+
+**Key approach:**
+- Use cva for type-safe variants
+- Integrate with design tokens (colors, spacing, typography)
+- Maintain zero breaking changes
+- Create comprehensive NAVIGATION.md documentation
+- Focus on actively-used components vs creating unused ones
+
+**Next step:** Execute plan with `/gsd:execute-phase 6`
 
 ---
 
