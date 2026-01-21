@@ -329,12 +329,16 @@ function migrateOnboardingCompleted(settings: AppSettings): AppSettings {
  * Users who explicitly chose 'light' will keep their preference.
  */
 function migrateToDarkMode(settings: AppSettings): AppSettings {
+  console.log('[Migration] Current theme:', settings.theme);
+
   // Migrate 'system' or undefined theme to 'dark'
   // Users who explicitly chose 'light' should keep their preference
   if (!settings.theme || settings.theme === 'system') {
+    console.log('[Migration] Migrating theme from', settings.theme, 'to dark');
     return { ...settings, theme: 'dark' };
   }
 
+  console.log('[Migration] Keeping theme as', settings.theme);
   return settings;
 }
 
@@ -347,6 +351,8 @@ export async function loadSettings(): Promise<void> {
 
   try {
     const result = await window.electronAPI.getSettings();
+    console.log('[Settings] Loaded settings from backend:', result.data?.theme);
+
     if (result.success && result.data) {
       // Apply migrations
       let migratedSettings = migrateOnboardingCompleted(result.data);
@@ -362,11 +368,16 @@ export async function loadSettings(): Promise<void> {
 
       if (migratedSettings.theme !== result.data.theme) {
         settingsToSave.theme = migratedSettings.theme;
+        console.log('[Migration] Theme changed, will save:', result.data.theme, '->', migratedSettings.theme);
       }
 
       // Persist changed settings
       if (Object.keys(settingsToSave).length > 0) {
-        await window.electronAPI.saveSettings(settingsToSave);
+        console.log('[Migration] Saving settings:', settingsToSave);
+        const saveResult = await window.electronAPI.saveSettings(settingsToSave);
+        console.log('[Migration] Save result:', saveResult);
+      } else {
+        console.log('[Migration] No settings to save');
       }
 
       // Only mark settings as loaded on SUCCESS
