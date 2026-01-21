@@ -1,26 +1,62 @@
 import * as React from 'react';
 import * as ProgressPrimitive from '@radix-ui/react-progress';
+import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 
-interface ProgressProps extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
+const progressVariants = cva(
+  'relative w-full overflow-hidden rounded-full bg-border',
+  {
+    variants: {
+      size: {
+        sm: 'h-1',
+        default: 'h-2',
+        lg: 'h-3',
+        xl: 'h-4',
+      },
+    },
+    defaultVariants: {
+      size: 'default',
+    },
+  }
+);
+
+const progressIndicatorVariants = cva(
+  'h-full w-full flex-1 transition-all duration-300 ease-out',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary',
+        success: 'bg-success',
+        warning: 'bg-warning',
+        destructive: 'bg-destructive',
+        info: 'bg-info',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  }
+);
+
+export interface ProgressProps
+  extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>,
+    VariantProps<typeof progressVariants>,
+    VariantProps<typeof progressIndicatorVariants> {
   animated?: boolean;
 }
 
 const Progress = React.forwardRef<
   React.ElementRef<typeof ProgressPrimitive.Root>,
   ProgressProps
->(({ className, value, animated, ...props }, ref) => (
+>(({ className, value, animated, size, variant, ...props }, ref) => (
   <ProgressPrimitive.Root
     ref={ref}
-    className={cn(
-      'relative h-2 w-full overflow-hidden rounded-full bg-border',
-      className
-    )}
+    className={cn(progressVariants({ size }), className)}
     {...props}
   >
     <ProgressPrimitive.Indicator
       className={cn(
-        'h-full w-full flex-1 bg-primary transition-all duration-300 ease-out',
+        progressIndicatorVariants({ variant }),
         animated && 'progress-working'
       )}
       style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
