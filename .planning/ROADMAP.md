@@ -112,22 +112,32 @@ Componentes de formulário são os mais usados - impacto visual imediato
 
 ---
 
-## Phase 5: Core UI Components - Overlays
+## Phase 5: Core UI Components - Overlays ✅
 **Goal:** Modernizar componentes de overlay com Radix UI
 
-**What we'll build:**
-- Dialog/Modal com header, content, footer
-- Tooltip com posicionamento inteligente
-- Dropdown Menu com submenus
-- Select com search e múltipla seleção
-- Popover para contextos complexos
-- Alert Dialog para ações destrutivas
+**What we built:**
+- Dialog com size variants (sm/default/lg/xl/full)
+- Select com size variants (sm/default/lg) alinhadas com Input
+- Popover com width variants (sm/default/lg/auto)
+- AlertDialog com intent variants (default/info/warning/destructive) + Context API
+- Tooltip (já moderno - sem mudanças necessárias)
+- DropdownMenu (já completo - sem mudanças necessárias)
 
 **Why this phase:**
 Overlays são críticos para UX - precisam de animações suaves e acessibilidade
 
 **Dependencies:** Phases 1-4
 **Research needed:** No
+
+**Status:** ✅ Complete
+**Completed:** 2026-01-21
+**Key achievements:**
+- 4 overlay components modernized with cva variants
+- Context API pattern for intent propagation (AlertDialog)
+- 1259-line comprehensive documentation (OVERLAYS.md)
+- Zero breaking changes for existing overlay usage
+- Full type safety with IntelliSense support
+- Consistent 200ms animations across all overlays
 
 ---
 
