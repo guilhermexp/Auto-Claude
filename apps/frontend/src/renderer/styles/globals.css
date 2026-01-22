@@ -352,9 +352,9 @@
   --popover: 0 0% 9%;
   --popover-foreground: 0 0% 98%;
 
-  /* Primary Brand Color */
-  --primary: 228 100% 50%;
-  --primary-foreground: 0 0% 100%;
+  /* Primary Brand Color - muted gray-blue for subtle dark mode */
+  --primary: 240 12% 65%;
+  --primary-foreground: 240 10% 3.9%;
 
   /* Secondary */
   --secondary: 240 3.7% 15.9%;
