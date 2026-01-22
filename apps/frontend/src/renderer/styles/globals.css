@@ -166,6 +166,76 @@
   animation: indeterminate 1.5s ease-in-out infinite;
 }
 
+/* Tailwind v4 custom color utilities - using CSS variables */
+/* These allow bg-background, text-foreground, etc. to work */
+@utility bg-background {
+  background-color: hsl(var(--background));
+}
+
+@utility bg-foreground {
+  background-color: hsl(var(--foreground));
+}
+
+@utility bg-card {
+  background-color: hsl(var(--card));
+}
+
+@utility bg-popover {
+  background-color: hsl(var(--popover));
+}
+
+@utility bg-primary {
+  background-color: hsl(var(--primary));
+}
+
+@utility bg-secondary {
+  background-color: hsl(var(--secondary));
+}
+
+@utility bg-muted {
+  background-color: hsl(var(--muted));
+}
+
+@utility bg-accent {
+  background-color: hsl(var(--accent));
+}
+
+@utility bg-destructive {
+  background-color: hsl(var(--destructive));
+}
+
+@utility text-foreground {
+  color: hsl(var(--foreground));
+}
+
+@utility text-primary {
+  color: hsl(var(--primary));
+}
+
+@utility text-secondary {
+  color: hsl(var(--secondary));
+}
+
+@utility text-muted-foreground {
+  color: hsl(var(--muted-foreground));
+}
+
+@utility text-accent-foreground {
+  color: hsl(var(--accent-foreground));
+}
+
+@utility text-destructive {
+  color: hsl(var(--destructive));
+}
+
+@utility border-border {
+  border-color: hsl(var(--border));
+}
+
+@utility border-input {
+  border-color: hsl(var(--input));
+}
+
 /* CSS variables for light mode */
 :root {
   /* Layout Base */
