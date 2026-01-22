@@ -282,7 +282,7 @@ export function Sidebar({
         <Icon className="h-4 w-4 shrink-0" />
         <span className="flex-1 text-left">{t(item.labelKey)}</span>
         {item.shortcut && (
-          <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded-md border border-border bg-secondary px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:flex">
+          <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded-md border border-border bg-secondary px-1.5 font-mono text-[10px] font-medium text-secondary-foreground sm:flex">
             {item.shortcut}
           </kbd>
         )}
