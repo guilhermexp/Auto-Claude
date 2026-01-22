@@ -1,236 +1,224 @@
 # Codebase Concerns
 
-**Analysis Date:** 2026-01-20
+**Analysis Date:** 2026-01-19
 
 ## Tech Debt
 
-**Missing Type Hints - `apps/backend/core/workspace.py` (2096 lines)**
-- Issue: Multiple functions missing return type annotations
-- Files: `apps/backend/core/workspace.py` (lines 51-69, 148, 345, 388, 745, 1079, 1717, 1753, 1814, 1920, 2042)
-- Why: Helper functions defined dynamically within exception handlers
-- Impact: Reduces IDE support, increases runtime errors, makes refactoring risky
-- Fix approach: Add explicit type hints for all public functions, extract helpers from exception blocks
-
-**Platform-Specific Code Scattered**
-- Issue: Direct `process.platform` checks instead of using platform abstraction
+**Large File Complexity:**
+- Issue: Several core files exceed 1000+ lines, indicating potential need for further modularization
 - Files:
-  - `apps/frontend/src/main/claude-cli-utils.ts:15` - `process.platform === 'win32'`
-  - `apps/frontend/src/main/cli-tool-manager.ts:958-959, 1097-1098` - Hardcoded Windows paths
-  - `apps/frontend/src/main/config-paths.ts:79` - Platform checks with env vars
-  - `apps/frontend/src/main/index.ts:124, 127, 248, 254, 266, 277, 461` - Multiple `process.platform === 'darwin'` checks
-  - `apps/frontend/src/main/python-detector.ts:20, 55` - Platform detection without abstraction
-- Why: Incrementally added features without refactoring to platform module
-- Impact: Risk of platform-specific bugs on Windows/macOS/Linux; violates CLAUDE.md guidance
-- Fix approach: Migrate all platform checks to `apps/frontend/src/main/platform/` module; use `isWindows()`, `isMacOS()`, `findExecutable()` utilities
+  - `apps/backend/core/workspace.py` (2096 lines) - Already refactored but remains large
+  - `apps/backend/runners/github/orchestrator.py` (1607 lines)
+  - `apps/backend/core/worktree.py` (1404 lines)
+  - `apps/backend/runners/github/context_gatherer.py` (1292 lines)
+  - `apps/frontend/src/main/ipc-handlers/task/worktree-handlers.ts` (3149 lines)
+  - `apps/frontend/src/main/ipc-handlers/github/pr-handlers.ts` (2874 lines)
+- Impact: Difficult to navigate, test, and maintain; increases risk of merge conflicts
+- Fix approach: Continue modular extraction pattern (workspace.py partially done); extract sub-modules for GitHub orchestrator
 
-**Large Files Needing Refactoring**
-- Issue: 8 files exceed 1000 lines, indicating too many responsibilities
+**Deprecated Modules Still in Codebase:**
+- Issue: Deprecated code remains active and produces warnings
 - Files:
-  - `apps/backend/core/workspace.py` (2096 lines) - Merge logic, AI resolution, branching
-  - `apps/backend/runners/github/orchestrator.py` (1607 lines) - PR review orchestration
-  - `apps/backend/core/worktree.py` (1404 lines) - Worktree management
-  - `apps/backend/runners/github/context_gatherer.py` (1292 lines) - PR context gathering
-  - `apps/backend/runners/github/services/parallel_followup_reviewer.py` (1285 lines) - Parallel review
-  - `apps/backend/cli/workspace_commands.py` (1220 lines) - CLI workspace commands
-  - `apps/backend/runners/github/gh_client.py` (1216 lines) - GitHub API wrapper
-  - `apps/backend/runners/github/batch_issues.py` (1159 lines) - Batch issue handling
-- Why: Incremental feature additions without refactoring
-- Impact: Difficult to maintain, test, and understand; high risk of bugs
-- Fix approach: Split by domain - e.g., `workspace.py` → `workspace/merge.py`, `workspace/conflict_resolution.py`, `workspace/ai_merge.py`
+  - `apps/backend/runners/github/confidence.py` - Marked deprecated, uses DeprecationWarning
+  - `apps/frontend/src/main/terminal/terminal-manager.ts` - Contains deprecated sync methods
+  - `apps/frontend/src/main/terminal/session-handler.ts` - persistAllSessions deprecated
+- Impact: Technical confusion, potential runtime warnings, maintenance burden
+- Fix approach: Remove deprecated modules or complete migration to evidence-based validation
+
+**Global State / Module-Level Caches:**
+- Issue: Multiple modules use global variables and module-level caches that are not thread-safe
+- Files:
+  - `apps/backend/security/profile.py` (5 global variables for caching)
+  - `apps/backend/core/client.py` (_PROJECT_INDEX_CACHE, _CLAUDE_CLI_CACHE)
+  - `apps/backend/core/io_utils.py` (_pipe_broken global)
+  - `apps/backend/core/sentry.py` (_sentry_initialized, _sentry_enabled)
+  - `apps/backend/task_logger/utils.py` (_current_logger global)
+- Impact: Potential race conditions in multi-threaded scenarios; difficult to test in isolation
+- Fix approach: Convert to class-based singletons with proper locking; use thread-local storage where appropriate
+
+**Incomplete TODO Implementation:**
+- Issue: Critical features have TODO placeholders
+- Files:
+  - `apps/backend/core/workspace.py:1578` - `_record_merge_completion` not implemented
+  - `apps/backend/merge/conflict_analysis.py:272-283` - Advanced implicit conflict detection not implemented
+  - `apps/frontend/src/renderer/stores/settings-store.ts:214` - i18n keys not implemented
+  - `apps/frontend/src/renderer/components/ideation/EnvConfigModal.tsx:1` - Props interface not defined
+- Impact: Missing functionality, potential runtime issues
+- Fix approach: Implement or remove features; document if intentionally deferred
+
+**Empty Exception Handlers:**
+- Issue: Many `pass` statements in exception handlers swallow errors silently
+- Files: 237+ instances of `pass` after exception handling across backend
+- Locations include:
+  - `apps/backend/core/worktree.py:448`
+  - `apps/backend/services/orchestrator.py:384, 396, 411, 423`
+  - `apps/backend/cli/workspace_commands.py:339-359` (multiple)
+  - `apps/backend/runners/github/memory_integration.py` (multiple)
+- Impact: Silent failures make debugging difficult; errors may propagate unexpectedly
+- Fix approach: Add logging to catch blocks; re-raise critical exceptions; document intentional suppressions
 
 ## Known Bugs
 
-**Race Condition in Merge Completion Tracking**
-- Symptoms: Context tracking incomplete after merge operations
-- Trigger: Merging completed builds
-- Files: `apps/backend/core/workspace.py:1578`
-- Root cause: `_record_merge_completion` function not yet implemented (TODO comment)
-- Impact: Loss of evolution tracking context across merge operations
-- Fix: Implement `_record_merge_completion` to track merge completion in Evolution Tracker
+**Status Flip-Flop Bug (Task Store):**
+- Symptoms: Task status may incorrectly change between terminal states
+- Files: `apps/frontend/src/renderer/stores/task-store.ts:278, 282, 324, 346`
+- Trigger: Phase transitions in updateTaskFromPlan
+- Workaround: Multiple FIX comments added inline; logic guards terminal phases
 
-**Brittle Error Detection - i18n Breaking Change**
-- Symptoms: UI shows incorrect status (error vs. skipped) when error messages are translated
-- Trigger: String-based error detection using lowercase message parsing
-- Files: `apps/frontend/src/renderer/components/BulkPRDialog.tsx:32` (`isWorktreeRelatedError()` function, lines 35-40)
-- Root cause: `lowerMsg.includes('worktree')` will break with i18n translations
-- Impact: Incorrect UI state, user confusion
-- Fix: Use error codes/types instead of string matching; or maintain English-only error detection with i18n-safe fallback
-
-**Missing i18n Translation Keys**
-- Symptoms: Hardcoded English messages in settings connection logic
-- Files: `apps/frontend/src/renderer/stores/settings-store.ts:214`
-- Root cause: TODO comment - "Use i18n translation keys (settings:connection.successTitle, settings:connection.successDescription)"
-- Impact: English-only UI for critical settings feedback; violates i18n requirements
-- Fix: Replace hardcoded strings with `t('settings:connection.successTitle')` and `t('settings:connection.successDescription')`
-
-**Missing Props Interface**
-- Files: `apps/frontend/src/renderer/components/ideation/EnvConfigModal.tsx:1`
-- Root cause: TODO for defining proper props interface
-- Impact: Type safety issues; component contract unclear
-- Fix: Define `EnvConfigModalProps` interface with required/optional properties
+**BulkPRDialog Error Detection:**
+- Symptoms: String-based error detection is fragile
+- Files: `apps/frontend/src/renderer/components/BulkPRDialog.tsx:32`
+- Trigger: API error messages changing format
+- Workaround: None - TODO comment acknowledges the issue
 
 ## Security Considerations
 
-**Unsafe String Operations Without Null Checks**
-- Risk: Functions call `.split()`, `.replace()`, `.strip()`, `.lower()` on potentially null/undefined values
+**Shell=True Usage:**
+- Risk: Command injection if inputs not properly sanitized
 - Files:
-  - `apps/backend/security/scan_secrets.py` - Secret pattern matching without length validation
-  - `apps/backend/runners/github/gh_client.py` - Parsing git output with string operations
-- Current mitigation: None - relies on callers providing valid input
-- Recommendations: Add null/undefined checks before string operations; validate input at function boundaries
+  - `apps/backend/core/git_executable.py:134` - Windows 'where' command
+  - `apps/backend/core/gh_executable.py:61` - Windows 'where' command
+- Current mitigation: Limited to Windows platform detection, not user-controlled input
+- Recommendations: Document why shell=True is required; ensure no user input reaches these calls
 
-**Missing Environment Variable Validation**
-- Risk: 130+ uses of `os.environ.get()` and `os.getenv()` without validation of critical variables
-- Files:
-  - `apps/backend/core/client.py` - LINEAR_API_KEY obtained but not validated
-  - `apps/backend/integrations/graphiti/config.py` - Multiple API keys/endpoints read without sanity checks
-- Current mitigation: None - assumes env vars are correctly set
-- Recommendations: Create environment variable validator; fail fast on startup if critical vars missing or invalid
+**Subprocess Execution Spread Across Codebase:**
+- Risk: Inconsistent security validation; command injection if not properly controlled
+- Files: 50+ files with subprocess.run/Popen calls
+- Current mitigation: Security hooks in `apps/backend/security/hooks.py`; allowlist in project_analyzer
+- Recommendations: Consolidate subprocess calls through centralized wrappers; audit all subprocess calls
 
-**Subprocess Security**
-- Risk: subprocess.run() calls without consistent input validation
-- Files:
-  - `apps/backend/services/orchestrator.py:305-415` - Multiple subprocess calls
-  - `apps/backend/analysis/security_scanner.py` - Mixed safety levels
-- Current mitigation: Security validation layer exists but not consistently applied
-- Recommendations: Enforce validation through security hooks for all subprocess calls; sanitize inputs
+**Environment Variable Handling:**
+- Risk: Sensitive data exposure through env vars
+- Files: 100+ os.environ references across backend
+- Current mitigation: Token validation in `apps/backend/core/auth.py`; encrypted token detection
+- Recommendations: Audit all env var usage; ensure secrets are not logged; use secure storage APIs
+
+**Token Decryption Not Implemented:**
+- Risk: Encrypted tokens fail silently, requiring manual workarounds
+- Files: `apps/backend/core/auth.py:103-228`
+- Current mitigation: Clear error messages directing users to alternatives
+- Recommendations: Implement cross-platform token decryption or improve error UX
 
 ## Performance Bottlenecks
 
-**Project Index Cache - Potential Staleness**
-- Problem: 5-minute TTL cache may become stale during long-running operations
-- Files: `apps/backend/core/client.py:42-44`
-- Measurement: Not measured (potential issue)
-- Cause: No cache invalidation mechanism; threading lock adds overhead
-- Improvement path: Implement cache invalidation on file system changes; use async locks
-
-**String-Based Lookups in Loops**
-- Problem: Regex patterns recompiled in loops
+**Blocking Sleep Calls:**
+- Problem: time.sleep() calls block threads
 - Files:
-  - `apps/backend/runners/github/sanitize.py` - Multiple regex pattern compilations
-  - `apps/backend/security/scan_secrets.py` - Secret patterns recompiled for every file
-- Measurement: Not measured (potential issue)
-- Cause: Pattern compilation inside loop instead of module-level
-- Improvement path: Compile patterns at module level; use pre-compiled regex patterns
+  - `apps/backend/core/workspace/models.py:129, 218`
+  - `apps/backend/core/worktree.py:95, 106`
+  - `apps/backend/services/orchestrator.py:451`
+  - `apps/backend/runners/github/file_lock.py:172`
+  - `apps/backend/runners/gitlab/glab_client.py:168`
+- Cause: Synchronous retry logic with exponential backoff
+- Improvement path: Convert to async operations where possible; use asyncio.sleep for async code
+
+**Project Index Cache TTL:**
+- Problem: 5-minute TTL may cause stale data or unnecessary reloads
+- Files: `apps/backend/core/client.py:43` (_CACHE_TTL_SECONDS = 300)
+- Cause: Fixed TTL doesn't adapt to project activity
+- Improvement path: Implement file-watcher invalidation; make TTL configurable
+
+**Security Profile Cache:**
+- Problem: Module-level cache with no size limits
+- Files: `apps/backend/security/profile.py:23-27`
+- Cause: Global state without eviction policy
+- Improvement path: Add LRU eviction; consider bounded cache
 
 ## Fragile Areas
 
-**Merge Orchestration - High Complexity**
-- Files: `apps/backend/core/workspace.py` (2096 lines)
-- Why fragile: Complex merge strategies, AI conflict resolution, multi-step branching logic
-- Common failures: Merge conflicts not handled gracefully, partial merges leave inconsistent state
-- Safe modification: Add comprehensive tests before changes; extract components to separate modules
-- Test coverage: Limited tests for 2096-line orchestration file
-
-**AI Merge Resolution - Undocumented Algorithms**
-- Files: `apps/backend/merge/ai_resolver/resolver.py` (417 lines)
-- Why fragile: AI-driven merge with minimal documentation of decision logic
-- Common failures: Incorrect merge decisions hard to debug without understanding AI prompt context
-- Safe modification: Document AI prompt construction; add test cases for common conflict scenarios
-- Test coverage: No direct tests for AI merge resolution
-
-**Deprecated Code Still Callable**
+**Merge System:**
 - Files:
-  - `apps/backend/runners/github/confidence.py` - Entire module marked DEPRECATED
-  - `apps/backend/runners/github/models.py:837` - Field marked deprecated
-  - `apps/backend/runners/github/batch_issues.py:698` - Function `_analyze_issues_with_agents` marked DEPRECATED
-- Why fragile: Old code paths still accessible; removal breaks unknown dependencies
-- Safe modification: Create deprecation timeline; add runtime warnings; remove in major version
-- Test coverage: Deprecated code may have tests that mask removal
+  - `apps/backend/core/workspace.py` (complex merge orchestration)
+  - `apps/backend/merge/` directory (conflict detection, resolution)
+- Why fragile: Complex state machine for parallel merges; many edge cases in git operations
+- Safe modification: Always test with multiple concurrent specs; use DEBUG=true for verbose logging
+- Test coverage: Tests exist but may not cover all race conditions
+
+**GitHub Integration:**
+- Files:
+  - `apps/backend/runners/github/orchestrator.py`
+  - `apps/backend/runners/github/rate_limiter.py`
+  - `apps/backend/runners/github/gh_client.py`
+- Why fragile: External API dependencies; rate limiting complexity; async/await patterns
+- Safe modification: Mock external calls in tests; test rate limit scenarios explicitly
+- Test coverage: Good coverage in `tests/test_github_*.py`
+
+**Terminal Integration (Frontend):**
+- Files:
+  - `apps/frontend/src/renderer/stores/terminal-store.ts`
+  - `apps/frontend/src/main/terminal/claude-integration-handler.ts`
+- Why fragile: Complex state management; IPC communication; PTY lifecycle
+- Safe modification: Test terminal creation/destruction cycles; watch for memory leaks
+- Test coverage: Tests exist in `__tests__/` directories
+
+**Auth/Token Handling:**
+- Files: `apps/backend/core/auth.py` (898 lines)
+- Why fragile: Platform-specific code paths; external dependency on Claude CLI; keyring integration
+- Safe modification: Test on all platforms; verify OAuth flow end-to-end
+- Test coverage: `tests/test_auth.py` exists
 
 ## Scaling Limits
 
-**Python 3.12+ Requirement**
-- Current capacity: Only supports Python 3.12+
-- Limit: Users with Python 3.10/3.11 cannot run Auto Claude
-- Symptoms at limit: Startup failure with version check error
-- Scaling path: Backport to Python 3.10 if needed; or clearly document requirement
+**Concurrent Agent Sessions:**
+- Current capacity: Limited by Claude SDK rate limits and system resources
+- Limit: No explicit session pooling or queuing
+- Scaling path: Implement session pool; add retry queues for rate limits
 
-**Embedded LadybugDB Memory Usage**
-- Current capacity: In-process graph database scales with available RAM
-- Limit: Large projects (>10k nodes) may cause memory pressure
-- Symptoms at limit: Slow Graphiti queries, memory warnings
-- Scaling path: Optimize graph queries; implement pagination; consider external database option
+**Graphiti Memory Database:**
+- Current capacity: LadybugDB (embedded Kuzu) - single-process access
+- Limit: No concurrent write support across multiple processes
+- Scaling path: Consider distributed graph database for multi-user scenarios
 
 ## Dependencies at Risk
 
-**real_ladybug (>=0.13.0) - Early Version**
-- Risk: Early version dependency; requires Python 3.12+
-- Impact: Potential compatibility issues; breaking changes likely
-- Migration plan: Monitor releases; pin version constraints; test upgrades
+**Deprecated Python Packages:**
+- Risk: `secretstorage` on Linux has complex DBus dependencies
+- Impact: Installation failures on minimal Linux systems
+- Migration plan: Document fallback to .env storage; improve error messages
 
-**react-hot-toast (Frontend)**
-- Risk: Unmaintained (last update 18 months ago); React 19 compatibility unknown
-- Impact: Toast notifications may break with React updates
-- Migration plan: Switch to `sonner` (actively maintained, similar API)
+**Platform-Specific Code:**
+- Risk: Windows/macOS/Linux code paths diverge
+- Impact: Platform-specific bugs (documented in CLAUDE.md)
+- Migration plan: Centralized platform abstraction in `apps/backend/core/platform/`
 
 ## Missing Critical Features
 
-**Payment Failure Handling**
-- Problem: No robust error handling for failed payments in spec execution
-- Current workaround: Manual retry by users
-- Blocks: Cannot gracefully handle interrupted agent sessions due to API limits
-- Implementation complexity: Medium (add retry logic, payment check hooks)
+**Implicit Conflict Detection:**
+- Problem: Function rename + usage conflicts not detected
+- Blocks: Accurate parallel merge conflict resolution
+- Files: `apps/backend/merge/conflict_analysis.py:272-283`
 
-**Comprehensive Merge Testing**
-- Problem: No end-to-end tests for merge workflows
-- Files affected: `apps/backend/core/workspace.py` (2096 lines untested)
-- Current workaround: Manual testing only
-- Blocks: High risk of regressions in merge logic
-- Implementation complexity: High (need test fixtures, mock git operations, AI responses)
+**_record_merge_completion:**
+- Problem: Merge completion not recorded for timeline tracking
+- Blocks: Full merge history audit trail
+- Files: `apps/backend/core/workspace.py:1578`
 
 ## Test Coverage Gaps
 
-**Core Workspace Merge Logic - No Unit Tests**
-- What's not tested: 2096-line merge orchestration in `apps/backend/core/workspace.py`
-- Risk: Merge logic could break silently; high regression risk
-- Priority: High
-- Difficulty to test: High (complex git operations, AI calls, multi-step flows)
+**Async Code Testing:**
+- What's not tested: Many async functions have limited coverage
+- Files: 70+ files with async functions, 92+ with await statements
+- Risk: Race conditions in async code may go unnoticed
+- Priority: High - async bugs are hard to reproduce
 
-**AI Merge Resolution - Not Directly Tested**
-- What's not tested: AI-driven conflict resolution in `apps/backend/merge/ai_resolver/resolver.py`
-- Files: `apps/backend/merge/ai_resolver/resolver.py` (417 lines)
-- Risk: Incorrect merge decisions not caught until production use
-- Priority: High
-- Difficulty to test: High (need to mock Claude SDK responses, create realistic conflict scenarios)
+**Platform-Specific Paths:**
+- What's not tested: Windows-specific code paths on Linux CI
+- Files: Platform detection in `apps/backend/core/platform/__init__.py`
+- Risk: Windows-only bugs not caught until user reports
+- Priority: Medium - CI now runs on all platforms per CLAUDE.md
 
-**Frontend State Stores - Largely Untested**
-- What's not tested: `roadmap-store.ts`, `ideation-store.ts`, many Zustand stores
-- Risk: State management bugs could cause UI inconsistencies
-- Priority: Medium
-- Difficulty to test: Medium (need to mock IPC, Zustand testing patterns)
+**Global State Reset:**
+- What's not tested: Cache invalidation edge cases
+- Files: All files with module-level caches
+- Risk: State leakage between tests
+- Priority: Medium - add cache reset fixtures
 
-## Documentation Gaps
-
-**Complex Code Lacking Comments**
-- Files:
-  - `apps/backend/merge/ai_resolver/resolver.py` (417 lines) - AI merge resolution minimal documentation
-  - `apps/backend/merge/conflict_analysis.py:272` - TODO: "These advanced checks are currently TODO"
-  - `apps/backend/analysis/insight_extractor.py` (643 lines) - Pattern extraction undocumented
-  - `apps/backend/integrations/graphiti/queries_pkg/graphiti.py` (420 lines) - Graph operations minimally documented
-- Impact: Difficult to understand complex algorithms; onboarding new developers harder
-- Fix: Add docstrings for public functions; document complex algorithms with examples
-
-**Missing CONTRIBUTING.md Guidelines**
-- Problem: No centralized contributor guidelines beyond CLAUDE.md
-- Impact: Contributors may not follow project conventions
-- Fix: Create CONTRIBUTING.md with setup instructions, code style, PR process
-
-## Configuration Issues
-
-**Environment Variable Schema Validation Missing**
-- Problem: No schema validation for required environment variables
-- Files: `.env.example` exists but no runtime validation
-- Impact: Silent failures when env vars incorrectly set
-- Fix: Create startup validator; check critical env vars on app launch
-
-**Graphiti LLM Provider Selection Undocumented**
-- Problem: 5+ LLM/embedding providers but no documentation of priority/fallback
-- Files: `apps/backend/integrations/graphiti/providers_pkg/`
-- Impact: Users may not know which provider is used or how to configure
-- Fix: Document provider selection logic; add examples to .env.example
+**Exception Handler Behavior:**
+- What's not tested: Error paths through empty except blocks
+- Files: 237+ `pass` statements in exception handlers
+- Risk: Silent failures in production
+- Priority: High - add tests that trigger exception paths
 
 ---
 
-*Concerns audit: 2026-01-20*
-*Update as issues are fixed or new ones discovered*
+*Concerns audit: 2026-01-19*

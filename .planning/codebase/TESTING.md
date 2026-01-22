@@ -1,118 +1,105 @@
 # Testing Patterns
 
-**Analysis Date:** 2026-01-20
+**Analysis Date:** 2026-01-19
 
 ## Test Framework
 
-**Runner:**
-
-Backend:
-- pytest - Unit and integration tests
+**Backend (Python):**
+- Runner: pytest (>=7.0.0)
 - Config: `tests/pytest.ini`
+- Async support: pytest-asyncio (>=0.21.0)
+- Coverage: pytest-cov (>=4.0.0)
+- Mocking: pytest-mock (>=3.0.0)
 
-Frontend:
-- Vitest 4.0.16 - Unit tests
+**Frontend (TypeScript):**
+- Runner: Vitest (v4.0.16)
 - Config: `apps/frontend/vitest.config.ts`
-
-**Assertion Library:**
-- Backend: pytest built-in assertions
-- Frontend: Vitest built-in `expect`
-- Frontend: @testing-library/jest-dom (v6.9.1) - DOM matchers
+- DOM testing: @testing-library/react, @testing-library/dom
+- Mocking: Vitest built-in `vi`
 
 **Run Commands:**
-
-Backend:
 ```bash
-# From apps/backend/ directory
-apps/backend/.venv/bin/pytest tests/ -v                # Run all tests
-apps/backend/.venv/bin/pytest tests/ -m "not slow"    # Skip slow tests
-apps/backend/.venv/bin/pytest tests/test_security.py::TestCommandExtraction::test_simple_command -v  # Specific test
+# Backend - all tests
+apps/backend/.venv/bin/pytest tests/ -v
 
-# Or from root
+# Backend - skip slow tests (recommended for development)
+apps/backend/.venv/bin/pytest tests/ -m "not slow" -v
+
+# Backend - single test file
+apps/backend/.venv/bin/pytest tests/test_security.py -v
+
+# Backend - specific test
+apps/backend/.venv/bin/pytest tests/test_security.py::test_bash_command_validation -v
+
+# Frontend - all tests
+cd apps/frontend && npm test
+
+# Frontend - watch mode
+cd apps/frontend && npm run test:watch
+
+# Frontend - coverage
+cd apps/frontend && npm run test:coverage
+
+# From root (convenience)
 npm run test:backend
-```
-
-Frontend:
-```bash
-# From apps/frontend/ directory
-npm test                              # Run all tests
-npm test -- --watch                   # Watch mode
-npm test -- path/to/file.test.ts     # Single file
-npm run test:coverage                 # Coverage report
-npm run test:e2e                      # E2E tests (Playwright)
+npm run test (frontend)
 ```
 
 ## Test File Organization
 
-**Location:**
-
-Backend:
-- All tests in `tests/` directory at project root
-- Not co-located with source
-- Pattern: `test_*.py`
-
-Frontend:
-- Mixed strategy:
-  - Some co-located: `{Component}.test.tsx` alongside source
-  - Some in `__tests__/` directories
-  - Integration tests: `src/__tests__/integration/`
-- Pattern: `*.test.ts` or `*.test.tsx`
-
-**Naming:**
-
-Backend:
-- `test_*.py` (e.g., `test_security.py`, `test_merge_parallel.py`)
-
-Frontend:
-- Unit tests: `{name}.test.ts` or `{name}.test.tsx`
-- Integration tests: `{feature}.integration.test.ts`
-
-**Structure:**
-
-Backend:
+**Backend Location:** Co-located at root `tests/` directory
 ```
 tests/
-  ├── pytest.ini
-  ├── requirements-test.txt
-  ├── test_security.py
-  ├── test_merge_parallel.py
-  └── test_*.py
+├── pytest.ini                    # Pytest configuration
+├── conftest.py                   # Shared fixtures
+├── test_fixtures.py              # Sample data constants
+├── review_fixtures.py            # Review system fixtures
+├── qa_report_helpers.py          # QA test helpers
+├── requirements-test.txt         # Test dependencies
+├── test_security.py              # Security module tests
+├── test_client.py                # SDK client tests
+├── test_qa_loop.py               # QA system tests
+└── ...
 ```
 
-Frontend:
+**Frontend Location:** Co-located with source, in `__tests__/` directories
 ```
 apps/frontend/src/
-  ├── __tests__/
-  │   ├── setup.ts                 # Test environment setup
-  │   └── integration/             # Integration tests
-  │       ├── claude-profile-ipc.test.ts
-  │       ├── file-watcher.test.ts
-  │       └── task-lifecycle.test.ts
-  ├── main/__tests__/
-  │   ├── agent-events.test.ts
-  │   ├── app-logger.test.ts
-  │   └── ...
-  ├── renderer/
-  │   ├── components/
-  │   │   ├── TaskCard.tsx
-  │   │   ├── AuthStatusIndicator.test.tsx  # Co-located
-  │   │   └── __tests__/
-  │   │       ├── ProjectTabBar.test.tsx
-  │   │       └── SortableProjectTab.test.tsx
-  │   └── __tests__/
-  │       ├── task-store.test.ts
-  │       └── roadmap-store.test.ts
-  └── __mocks__/
-      ├── electron.ts
-      └── sentry-electron-main.ts
+├── __tests__/
+│   ├── setup.ts                  # Test setup (mocks, globals)
+│   └── integration/              # Integration tests
+├── main/__tests__/               # Main process tests
+│   ├── parsers.test.ts
+│   ├── rate-limit-detector.test.ts
+│   └── ...
+├── renderer/__tests__/           # Renderer tests
+│   ├── task-store.test.ts
+│   └── ...
+└── renderer/components/__tests__/ # Component tests
 ```
+
+**Naming:**
+- Python: `test_*.py` (e.g., `test_security.py`)
+- TypeScript: `*.test.ts` or `*.test.tsx` (e.g., `parsers.test.ts`)
 
 ## Test Structure
 
-**Suite Organization:**
-
-Backend (pytest):
+**Python - pytest Pattern:**
 ```python
+#!/usr/bin/env python3
+"""
+Tests for Security System
+=========================
+
+Tests the security.py module functionality including:
+- Command extraction and parsing
+- Command allowlist validation
+"""
+
+import pytest
+from security import validate_command, extract_commands
+
+
 class TestCommandExtraction:
     """Tests for command extraction from shell strings."""
 
@@ -120,326 +107,379 @@ class TestCommandExtraction:
         """Extracts single command correctly."""
         commands = extract_commands("ls -la")
         assert commands == ["ls"]
+
+    def test_piped_commands(self):
+        """Extracts all commands from pipeline."""
+        commands = extract_commands("cat file.txt | grep pattern | wc -l")
+        assert commands == ["cat", "grep", "wc"]
+
+
+class TestValidateCommand:
+    """Tests for full command validation."""
+
+    def test_base_commands_allowed(self, temp_dir):
+        """Base commands are always allowed."""
+        for cmd in ["ls", "cat", "grep"]:
+            allowed, reason = validate_command(cmd, temp_dir)
+            assert allowed is True, f"{cmd} should be allowed"
 ```
 
-Frontend (Vitest):
+**TypeScript - Vitest Pattern:**
 ```typescript
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+/**
+ * Phase Parsers Tests
+ * ====================
+ * Unit tests for the specialized phase parsers.
+ */
 
-describe('ModuleName', () => {
-  beforeEach(() => {
-    // Reset state
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { ExecutionPhaseParser } from '../agent/parsers';
+
+describe('ExecutionPhaseParser', () => {
+  const parser = new ExecutionPhaseParser();
+
+  const makeContext = (currentPhase: string): ExecutionParserContext => ({
+    currentPhase,
+    isTerminal: currentPhase === 'complete'
   });
 
-  describe('functionName', () => {
-    it('should handle valid input', () => {
-      // arrange
-      const input = createTestInput();
+  describe('structured event parsing', () => {
+    it('should parse structured phase events', () => {
+      const log = '__EXEC_PHASE__:{"phase":"coding","message":"Starting"}';
+      const result = parser.parse(log, makeContext('planning'));
 
-      // act
-      const result = functionName(input);
-
-      // assert
-      expect(result).toEqual(expectedOutput);
+      expect(result).toEqual({
+        phase: 'coding',
+        message: 'Starting',
+        currentSubtask: undefined
+      });
     });
+  });
 
-    it('should throw on invalid input', () => {
-      expect(() => functionName(null)).toThrow('Invalid input');
+  describe('terminal state handling', () => {
+    it('should not change phase when current phase is complete', () => {
+      const log = 'Starting coder agent...';
+      const result = parser.parse(log, makeContext('complete'));
+
+      expect(result).toBeNull();
     });
+  });
+});
+```
+
+## Mocking
+
+**Python - pytest fixtures and unittest.mock:**
+```python
+from unittest.mock import MagicMock, patch
+
+@pytest.fixture
+def mock_task_logger():
+    """Mock TaskLogger for testing PhaseExecutor."""
+    logger = MagicMock()
+    logger.log = MagicMock()
+    logger.start_phase = MagicMock()
+    logger.end_phase = MagicMock()
+    return logger
+
+# Using patch decorator
+@patch('core.client.find_claude_cli')
+def test_client_creation(mock_find_cli):
+    mock_find_cli.return_value = '/usr/local/bin/claude'
+    # Test code...
+
+# Using monkeypatch fixture
+def test_with_env_var(monkeypatch):
+    monkeypatch.setenv("CLAUDE_CLI_PATH", "/custom/path")
+    # Test code...
+```
+
+**TypeScript - Vitest vi.mock:**
+```typescript
+// Mock at module level (hoisted)
+vi.mock('../claude-profile-manager', () => ({
+  getClaudeProfileManager: vi.fn(() => ({
+    getActiveProfile: vi.fn(() => ({
+      id: 'test-profile-id',
+      name: 'Test Profile'
+    })),
+    recordRateLimitEvent: vi.fn()
+  }))
+}));
+
+describe('Rate Limit Detector', () => {
+  beforeEach(() => {
+    vi.resetModules();
   });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
-});
-```
 
-**Patterns:**
-- Backend: Class-based tests for related test cases, module-level for simple tests
-- Frontend: `beforeEach` for per-test setup, `afterEach` to restore mocks
-- Explicit arrange/act/assert structure in complex tests
-- One assertion focus per test (but multiple expects OK)
-
-## Mocking
-
-**Framework:**
-
-Backend:
-- pytest built-in mocking (monkeypatch, fixtures)
-
-Frontend:
-- Vitest built-in mocking (`vi`)
-- Module mocking via `vi.mock()` at top of file
-
-**Patterns:**
-
-Backend:
-```python
-def test_with_mock(monkeypatch):
-    mock_fn = lambda: "mocked"
-    monkeypatch.setattr(module, "function", mock_fn)
-    # test code
-```
-
-Frontend:
-```typescript
-import { vi } from 'vitest';
-import { externalFunction } from './external';
-
-// Mock module
-vi.mock('./external', () => ({
-  externalFunction: vi.fn()
-}));
-
-describe('test suite', () => {
-  it('mocks function', () => {
-    const mockFn = vi.mocked(externalFunction);
-    mockFn.mockReturnValue('mocked result');
-
-    // test code
-
-    expect(mockFn).toHaveBeenCalledWith('expected arg');
+  it('should detect rate limit', async () => {
+    const { detectRateLimit } = await import('../rate-limit-detector');
+    const result = detectRateLimit('Limit reached · resets Dec 17');
+    expect(result.isRateLimited).toBe(true);
   });
 });
 ```
 
 **What to Mock:**
-- Backend: External subprocess calls, file system operations, network requests
-- Frontend: Electron APIs, file system, IPC handlers, timers
-- Both: External API calls, environment variables
+- External APIs (Claude SDK, GitHub API)
+- File system operations in unit tests
+- Network requests
+- System time (for time-sensitive tests)
+- Heavy dependencies (databases, MCP servers)
 
 **What NOT to Mock:**
-- Pure functions and utilities
-- Internal business logic
-- TypeScript types
+- Pure functions under test
+- Simple data transformations
+- Validation logic
 
 ## Fixtures and Factories
 
-**Test Data:**
-
-Backend:
+**Python Fixtures (conftest.py):**
 ```python
-# Fixtures defined in test files or conftest.py
 @pytest.fixture
-def sample_config():
-    return {"key": "value"}
+def temp_dir() -> Generator[Path, None, None]:
+    """Create a temporary directory that's cleaned up after the test."""
+    temp_path = Path(tempfile.mkdtemp())
+    yield temp_path
+    shutil.rmtree(temp_path, ignore_errors=True)
+
+@pytest.fixture
+def temp_git_repo(temp_dir: Path) -> Generator[Path, None, None]:
+    """Create a temporary git repository with initial commit."""
+    # Clear git environment variables to isolate from parent repo
+    orig_env = {}
+    git_vars_to_clear = ["GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE"]
+    for key in git_vars_to_clear:
+        orig_env[key] = os.environ.get(key)
+        if key in os.environ:
+            del os.environ[key]
+
+    try:
+        subprocess.run(["git", "init"], cwd=temp_dir, capture_output=True)
+        subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=temp_dir)
+        # ...
+        yield temp_dir
+    finally:
+        # Restore environment
+        for key, value in orig_env.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+@pytest.fixture
+def python_project(temp_git_repo: Path) -> Path:
+    """Create a sample Python project structure."""
+    (temp_git_repo / "pyproject.toml").write_text(toml_content)
+    (temp_git_repo / "app" / "__init__.py").write_text("# App module\n")
+    return temp_git_repo
 ```
 
-Frontend:
+**TypeScript Setup (setup.ts):**
 ```typescript
-// Factory functions in test files
-function createTestTask(overrides: Partial<Task> = {}): Task {
+import { vi, beforeEach, afterEach } from 'vitest';
+
+// Mock localStorage for tests
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
   return {
-    id: `task-${Date.now()}-${Math.random().toString(36).substring(7)}`,
-    specId: 'test-spec-001',
-    projectId: 'project-1',
-    title: 'Test Task',
-    description: 'Test description',
-    status: 'backlog' as TaskStatus,
-    subtasks: [],
-    logs: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    ...overrides
+    getItem: vi.fn((key: string) => store[key] || null),
+    setItem: vi.fn((key: string, value: string) => { store[key] = value; }),
+    clear: vi.fn(() => { store = {}; })
+  };
+})();
+
+Object.defineProperty(global, 'localStorage', { value: localStorageMock });
+
+// Mock window.electronAPI for renderer tests
+if (typeof window !== 'undefined') {
+  (window as any).electronAPI = {
+    getTasks: vi.fn(),
+    createTask: vi.fn(),
+    getSettings: vi.fn(),
+    // ...
   };
 }
 
-// Example from task-store.test.ts (lines 10-24)
-function createTestPlan(overrides: Partial<ImplementationPlan> = {}): ImplementationPlan {
-  return {
-    feature: 'Test Feature',
-    workflow_type: 'feature',
-    services_involved: [],
-    phases: [
-      {
-        phase: 1,
-        name: 'Test Phase',
-        type: 'implementation',
-        subtasks: [
-          { id: 'subtask-1', description: 'First subtask', status: 'pending' },
-          { id: 'subtask-2', description: 'Second subtask', status: 'pending' }
-        ]
-      }
-    ],
-    final_acceptance: ['Tests pass'],
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    spec_file: 'spec.md',
-    ...overrides
-  };
-}
+beforeEach(() => {
+  localStorageMock.clear();
+});
+
+afterEach(() => {
+  vi.clearAllMocks();
+  vi.resetModules();
+});
 ```
 
-**Location:**
-- Backend: Fixtures in test files or `conftest.py`
-- Frontend: Factory functions in test files, shared mocks in `src/__mocks__/`
+**Sample Data (test_fixtures.py):**
+```python
+SAMPLE_REACT_COMPONENT = '''import React from 'react';
+import { useState } from 'react';
+
+function App() {
+  const [count, setCount] = useState(0);
+  return <div><h1>Hello World</h1></div>;
+}
+export default App;
+'''
+
+SAMPLE_PYTHON_MODULE = '''"""Sample Python module."""
+import os
+from pathlib import Path
+
+def hello():
+    """Say hello."""
+    print("Hello")
+'''
+```
 
 ## Coverage
 
-**Requirements:**
-- No enforced coverage target
-- Coverage tracked for awareness
-- Focus on critical paths
-
-**Configuration:**
-
-Backend:
-- Not explicitly configured in pytest.ini
-- Can be run with: `pytest --cov=apps/backend --cov-report=html`
-
-Frontend:
-- Provider: v8
-- Reporters: text, json, html
-- Config: `apps/frontend/vitest.config.ts`
-- Include: `src/**/*.ts`, `src/**/*.tsx`
-- Exclude: test files, type definitions, `node_modules`
+**Requirements:** No enforced minimum threshold, but aim for meaningful coverage
 
 **View Coverage:**
-
-Backend:
 ```bash
-pytest tests/ --cov=apps/backend --cov-report=html
-open htmlcov/index.html
+# Backend
+apps/backend/.venv/bin/pytest tests/ --cov=apps/backend --cov-report=html
+
+# Frontend
+cd apps/frontend && npm run test:coverage
 ```
 
-Frontend:
-```bash
-npm run test:coverage
-open coverage/index.html
-```
+**Coverage Output:**
+- Backend: `.coverage` file, HTML report in `htmlcov/`
+- Frontend: `coverage/` directory with JSON, text, and HTML reports
 
 ## Test Types
 
 **Unit Tests:**
-- Backend: Test single function/class in isolation
-- Frontend: Test single component/function in isolation
-- Mocking: Mock all external dependencies
-- Speed: Fast (<100ms per test)
+- Test individual functions/classes in isolation
+- Mock external dependencies
+- Fast execution (sub-second)
+- Location: `tests/test_*.py`, `src/**/*.test.ts`
 
 **Integration Tests:**
-- Backend: Test multiple modules together (e.g., agent + client + security)
-- Frontend: Test IPC bridge, file watchers, task lifecycle
-- Location: `apps/frontend/src/__tests__/integration/`
-- Mocking: Mock only external boundaries
+- Test interactions between components
+- May use real file system, git repos
+- Slower execution
+- Markers: `@pytest.mark.integration` (Python)
+- Location: `tests/` (Python), `src/__tests__/integration/` (TypeScript)
 
-**E2E Tests:**
-- Frontend: Playwright for end-to-end user flows
-- Location: `apps/frontend/e2e/`
-- Command: `npm run test:e2e`
-- Examples: `e2e/task-workflow.spec.ts`
+**E2E Tests (Frontend):**
+- Framework: Playwright (configured but limited use)
+- Config: `apps/frontend/e2e/playwright.config.ts`
+- Run: `npm run test:e2e`
 
 ## Common Patterns
 
-**Async Testing:**
-
-Backend:
+**Async Testing (Python):**
 ```python
+import pytest
+
 @pytest.mark.asyncio
-async def test_async_operation():
-    result = await async_function()
-    assert result == "expected"
+async def test_async_function():
+    result = await some_async_operation()
+    assert result is not None
+
+# pytest.ini enables asyncio_mode = auto
+# No need to manually mark simple async tests
 ```
 
-Frontend:
+**Async Testing (TypeScript):**
 ```typescript
 it('should handle async operation', async () => {
-  const result = await asyncFunction();
-  expect(result).toBe('expected');
+  const { detectRateLimit } = await import('../rate-limit-detector');
+  const result = detectRateLimit('some output');
+  expect(result.isRateLimited).toBe(false);
 });
 ```
 
-**Error Testing:**
-
-Backend:
+**Error Testing (Python):**
 ```python
-def test_error():
-    with pytest.raises(ValueError, match="Invalid input"):
-        function_call()
+def test_blocked_dangerous_command(self, temp_dir):
+    """Dangerous commands not in allowlist are blocked."""
+    allowed, reason = validate_command("rm -rf /", temp_dir)
+    assert allowed is False
+    assert "not allowed for safety" in reason
+
+def test_raises_on_invalid_input():
+    """Should raise ValueError on invalid input."""
+    with pytest.raises(ValueError, match="Invalid configuration"):
+        process_config(None)
 ```
 
-Frontend:
+**Error Testing (TypeScript):**
 ```typescript
-it('should throw on invalid input', () => {
-  expect(() => parse(null)).toThrow('Cannot parse null');
+it('should return false for empty output', async () => {
+  const { detectRateLimit } = await import('../rate-limit-detector');
+  const result = detectRateLimit('');
+  expect(result.isRateLimited).toBe(false);
 });
 
-// Async error
-it('should reject on file not found', async () => {
-  await expect(readConfig('invalid.txt')).rejects.toThrow('ENOENT');
-});
-```
-
-**React Component Testing:**
-
-Frontend (with React Testing Library):
-```typescript
-import { render, screen } from '@testing-library/react';
-
-it('renders component', () => {
-  render(<TaskCard task={createTestTask()} />);
-  expect(screen.getByText('Test Task')).toBeInTheDocument();
+it('should handle malformed input gracefully', () => {
+  expect(() => parser.parse(null as any)).not.toThrow();
 });
 ```
 
-**Performance Testing (Frontend):**
-
-Example from `TaskCard.tsx` (lines 80-109):
-```typescript
-// React.memo with custom comparator for performance testing
-const arePropsEqual = (prevProps: TaskCardProps, nextProps: TaskCardProps) => {
-  const prevTask = prevProps.task;
-  const nextTask = nextProps.task;
-
-  // Check reference equality first (fast path)
-  if (prevTask === nextTask &&
-      prevProps.onToggleSelect === nextProps.onToggleSelect) {
-    return true;
-  }
-
-  // Compare specific fields that affect rendering
-  const isEqual = (
-    prevTask.id === nextTask.id &&
-    prevTask.status === nextTask.status &&
-    prevTask.title === nextTask.title &&
-    prevTask.description === nextTask.description &&
-    prevTask.updatedAt === nextTask.updatedAt &&
-    prevTask.subtasks.every((s, i) => s.status === nextTask.subtasks[i]?.status)
-  );
-
-  return isEqual;
-};
+**Parameterized Tests (Python):**
+```python
+@pytest.mark.parametrize("cmd,expected", [
+    ("ls -la", ["ls"]),
+    ("cat file | grep pattern", ["cat", "grep"]),
+    ("", []),
+])
+def test_extract_commands(cmd, expected):
+    assert extract_commands(cmd) == expected
 ```
 
-**Snapshot Testing:**
-- Not used in this codebase
-- Prefer explicit assertions
+**Parameterized Tests (TypeScript):**
+```typescript
+const testCases = [
+  'rate limit exceeded',
+  'usage limit reached',
+  'too many requests'
+];
 
-## Pre-Commit Hooks
+for (const output of testCases) {
+  const result = detectRateLimit(output);
+  expect(result.isRateLimited).toBe(true);
+}
+```
 
-**Pre-commit Configuration:** `.pre-commit-config.yaml`
+## Pre-commit Testing
 
-**Test Hooks:**
+**Configuration:** `.pre-commit-config.yaml`
 
-Backend:
-- pytest runs on commit for `apps/backend/` and `tests/`
-- Excludes slow/integration tests: `-m "not slow and not integration"`
-- Skipped in worktrees (if `node_modules` not found)
+Tests run automatically on commit:
+- Python: `pytest -m "not slow and not integration"` (fast tests only)
+- TypeScript: Biome lint + TypeScript type check
 
-Frontend:
-- Biome lint + format check
-- TypeScript type checking
-- Skipped in worktrees (if `node_modules` not found)
+Skipped tests in pre-commit:
+- `test_graphiti.py` (external dependencies)
+- `test_worktree.py` (git-sensitive)
+- `test_workspace.py` (Windows path issues)
 
-**Running Manually:**
+## Test Markers (Python)
+
+```python
+@pytest.mark.slow       # Long-running tests
+@pytest.mark.integration  # Integration tests
+@pytest.mark.asyncio    # Async tests (auto-applied via config)
+```
+
+**Run specific markers:**
 ```bash
-# All hooks
-pre-commit run --all-files
+# Skip slow tests
+pytest tests/ -m "not slow"
 
-# Specific hook
-pre-commit run pytest --all-files
+# Run only integration tests
+pytest tests/ -m "integration"
 ```
 
 ---
 
-*Testing analysis: 2026-01-20*
-*Update when test patterns change*
+*Testing analysis: 2026-01-19*

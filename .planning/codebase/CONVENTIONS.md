@@ -1,259 +1,283 @@
 # Coding Conventions
 
-**Analysis Date:** 2026-01-20
+**Analysis Date:** 2026-01-19
 
 ## Naming Patterns
 
 **Files:**
-- Backend: `snake_case.py` (e.g., `project_analyzer.py`, `linear_updater.py`, `app_logger.py`)
-- Frontend Components: `PascalCase.tsx` (e.g., `TaskCard.tsx`, `ProjectTabBar.tsx`, `AddFeatureDialog.tsx`)
-- Frontend Services/Utilities: `kebab-case.ts` (e.g., `app-logger.ts`, `api-validation-service.ts`, `claude-cli-utils.ts`)
-- Frontend Stores: `kebab-case-store.ts` (e.g., `task-store.ts`, `project-store.ts`, `terminal-store.ts`)
-- Test files: `*.test.ts` or `*.test.tsx` (co-located with source) or `test_*.py` (backend)
+- Python: `snake_case.py` (e.g., `project_analyzer.py`, `qa_report.py`)
+- TypeScript: `kebab-case.ts` or `PascalCase.tsx` for React components
+- Test files: `test_*.py` (Python), `*.test.ts` (TypeScript)
+- Config files: lowercase with extension (e.g., `ruff.toml`, `tsconfig.json`)
 
 **Functions:**
-- Python: `snake_case()` (e.g., `get_or_create_profile()`, `validate_bash_command()`, `extract_commands()`)
-- TypeScript: `camelCase()` for regular functions (e.g., `createTestTask()`, `formatRelativeTime()`)
-- React Components: `PascalCase()` (e.g., `TaskCard()`, `ProjectTabBar()`)
-- React Hooks: `camelCase()` with `use` prefix (e.g., `useTaskStore()`, `useGlobalTerminalListeners()`)
+- Python: `snake_case` (e.g., `validate_command()`, `get_security_profile()`)
+- TypeScript: `camelCase` (e.g., `detectRateLimit()`, `parsePhaseEvent()`)
 
 **Variables:**
-- camelCase for all variables (both Python and TypeScript)
-- Constants: `UPPER_SNAKE_CASE` (Python) or camelCase when exported (TypeScript)
-  - Examples: `STUCK_CHECK_SKIP_PHASES`, `TASK_STATUS_LABELS`
+- Python: `snake_case` for locals, `UPPER_SNAKE_CASE` for constants
+- TypeScript: `camelCase` for locals, `UPPER_SNAKE_CASE` for constants
 
-**Types:**
-- Interfaces: `PascalCase` with `Props` suffix for component props
-  - Examples: `TaskCardProps`, `TaskStatus`
-- Enums: `PascalCase`
-- Python: Type hints use built-in types or Pydantic models
+**Classes/Types:**
+- Python: `PascalCase` (e.g., `SecurityProfile`, `ClaudeSDKClient`)
+- TypeScript: `PascalCase` for types/interfaces (e.g., `ExecutionParserContext`)
+
+**Constants:**
+- Module-level: `UPPER_SNAKE_CASE` (e.g., `DEFAULT_UTILITY_MODEL`, `SAFE_COMMANDS`)
+- Private cache variables: `_UPPER_SNAKE_CASE` (e.g., `_PROJECT_INDEX_CACHE`)
 
 ## Code Style
 
-**Formatting:**
+**Formatting - Python (Backend):**
+- Tool: Ruff (v0.14.10 via pre-commit)
+- Quote style: Double quotes
+- Indent style: Spaces (4 spaces per PEP 8)
+- Line endings: Auto
+- Key rules enabled:
+  - `E`, `W` (pycodestyle)
+  - `F` (Pyflakes)
+  - `I` (isort)
+  - `B` (flake8-bugbear)
+  - `C4` (flake8-comprehensions)
+  - `UP` (pyupgrade)
 
-Backend (Python):
-- Tool: ruff-format (v0.14.10)
-- Indentation: 4 spaces
-- Quotes: Single quotes preferred
-- Line length: ~100 characters (not strictly enforced)
-- PEP 8 compliant
-
-Frontend (TypeScript):
-- Tool: Biome (v2.3.11) for linting (formatting disabled)
-- Indentation: 2 spaces
-- Quotes: Mix of single and double (normalized by Biome)
-- Semicolons: Required
-- Line length: Keep under 100 characters when practical
+**Formatting - TypeScript (Frontend):**
+- Tool: Biome (v2.3.11)
+- Commands:
+  ```bash
+  cd apps/frontend && npx biome check --write .  # Lint + format
+  ```
+- TypeScript compiler: `tsc --noEmit` for type checking
+- Strict mode enabled in `tsconfig.json`
 
 **Linting:**
-
-Backend:
-- Tool: ruff (v0.14.10) with auto-fix
-- Config: `.pre-commit-config.yaml`
-- Rules: PEP 8 + type hints required
-- Run: `ruff check apps/backend/`
-
-Frontend:
-- Tool: Biome (v2.3.11)
-- Config: `apps/frontend/biome.jsonc`
-- Rules: Recommended with selective overrides:
-  - `noSecrets` disabled (false positives)
-  - `noDangerouslySetInnerHtml` set to warn (legitimate markdown rendering)
-  - `noConsole` disabled (debugging needs)
-  - `useNamingConvention` disabled
-- Run: `npx biome check --write .`
+- Python: Ruff handles both linting and formatting
+- TypeScript: Biome handles both (replaced ESLint for 15-25x faster performance)
 
 ## Import Organization
 
-**Order:**
+**Python Order (enforced by isort via Ruff):**
+1. Standard library imports (`import os`, `import json`)
+2. Third-party imports (`from claude_agent_sdk import ...`)
+3. Local imports (`from core.client import create_client`)
 
-TypeScript:
-1. External packages (react, electron, etc.)
-2. Internal modules (@/, relative imports)
-3. Type imports (import type {})
+**TypeScript Order:**
+1. React/external library imports
+2. Local component imports
+3. Type imports
 
-Python:
-1. Standard library imports
-2. Third-party packages
-3. Local application imports
-
-**Grouping:**
-- Blank lines between groups
-- Alphabetical sorting within groups (not strictly enforced)
-
-**Path Aliases (Frontend):**
-- `@/` → `src/`
-- `@shared/` → `src/shared/`
-- `@features/` → `src/renderer/components/features/`
-- `@components/` → `src/renderer/components/`
-- `@hooks/` → `src/renderer/hooks/`
-- `@lib/` → `src/renderer/lib/`
+**Path Aliases (TypeScript):**
+```typescript
+// tsconfig.json paths
+"@/*": ["src/renderer/*"]
+"@shared/*": ["src/shared/*"]
+"@preload/*": ["src/preload/*"]
+"@features/*": ["src/renderer/features/*"]
+"@components/*": ["src/renderer/shared/components/*"]
+"@hooks/*": ["src/renderer/shared/hooks/*"]
+"@lib/*": ["src/renderer/shared/lib/*"]
+```
 
 ## Error Handling
 
-**Patterns:**
+**Python Patterns:**
+```python
+# Try-except with specific exceptions
+try:
+    result = subprocess.run(cmd, capture_output=True, timeout=5)
+except (subprocess.TimeoutExpired, FileNotFoundError, OSError) as e:
+    logger.debug(f"Operation failed: {e}")
+    return None
 
-Backend (Python):
-- Throw exceptions, catch at command/agent boundaries
-- Custom error classes extend `Exception`
-- Async functions use try/except, no chained .catch()
-- Log errors with context before re-raising
+# Validation with early return
+def validate_something(value: str) -> tuple[bool, str]:
+    if not value:
+        return False, "Value is required"
+    if invalid_condition:
+        return False, "Value is invalid because..."
+    return True, ""
+```
 
-Frontend (TypeScript):
-- Throw errors, catch at component boundaries (error boundaries)
-- IPC errors propagated to UI with user-friendly messages
-- Async functions use try/catch
+**TypeScript Patterns:**
+```typescript
+// Result object pattern for detection functions
+interface DetectionResult {
+  isDetected: boolean;
+  message?: string;
+  details?: Record<string, unknown>;
+}
 
-**Error Types:**
-- Throw on: invalid input, missing dependencies, invariant violations
-- Log before throwing: Include context (user ID, file path, operation)
-- Include cause: `new Error('Failed to X', { cause: originalError })`
+function detectSomething(input: string): DetectionResult {
+  if (!input) {
+    return { isDetected: false };
+  }
+  // Detection logic...
+  return { isDetected: true, message: "Detected condition X" };
+}
+```
 
 ## Logging
 
-**Framework:**
-
-Backend:
-- `rich` library for terminal output
-- Custom logging in `task_logger/logger.py`, `core/debug.py`
-- Levels: debug, info, warn, error
-
-Frontend:
-- Custom app logger in `src/main/services/app-logger.ts`
-- Levels: info, warn, error, debug
-- Sentry integration for error tracking
+**Python Framework:** Standard library `logging`
 
 **Patterns:**
-- Log at service boundaries, not in utility functions
-- Log state transitions, external API calls, errors
-- Structured logging with context when possible
-- No console.log in committed frontend code (use app logger)
+```python
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Debug for verbose/diagnostic info
+logger.debug(f"Cache HIT for {key}")
+
+# Info for significant operations
+logger.info(f"Found Claude CLI: {path} (v{version})")
+
+# Warning for recoverable issues
+logger.warning(f"Invalid configuration: {value}, using default")
+
+# Error with context
+logger.error(f"Failed to process {file}: {error}")
+```
+
+**TypeScript Logging:** Console-based in development, suppressed in tests.
 
 ## Comments
 
 **When to Comment:**
+- Public functions: Always document with docstrings/JSDoc
+- Complex algorithms: Explain the "why" not the "what"
+- Security-related code: Explain security implications
+- Workarounds: Reference issue numbers
 
-Backend (Python):
-- Module docstrings required (PEP 257 format)
-- Function docstrings for public APIs with Args, Returns sections
-- Inline comments explain "why", not "what"
-- Complex algorithms need explanation
+**Python Docstrings:**
+```python
+def create_client(
+    project_dir: Path,
+    spec_dir: Path,
+    model: str,
+    agent_type: str = "coder",
+) -> ClaudeSDKClient:
+    """
+    Create a Claude Agent SDK client with multi-layered security.
 
-Frontend (TypeScript):
-- File headers with JSDoc-style comments describing purpose
-- Complex logic needs explanation
-- Avoid obvious comments (e.g., `// increment counter`)
+    Uses AGENT_CONFIGS for phase-aware tool and MCP server configuration.
 
-**JSDoc/TSDoc:**
+    Args:
+        project_dir: Root directory for the project (working directory)
+        spec_dir: Directory containing the spec (for settings file)
+        model: Claude model to use
+        agent_type: Agent type identifier from AGENT_CONFIGS
 
-Frontend:
-- Used for file headers
-- Format: `/**  * Description */`
-- `@param` and `@returns` tags for complex functions (not strictly required)
+    Returns:
+        Configured ClaudeSDKClient
 
-**TODO Comments:**
-- Format: `// TODO: description` (no username - use git blame)
-- Link to issue if exists: `// TODO: Fix race condition (issue #123)`
-- Examples found in codebase:
-  - `apps/backend/core/workspace.py:1578` - TODO for unimplemented feature
-  - `apps/frontend/src/renderer/stores/settings-store.ts:214` - TODO for i18n
-  - `apps/frontend/src/renderer/components/ideation/EnvConfigModal.tsx:1` - TODO for props interface
+    Raises:
+        ValueError: If agent_type is not found in AGENT_CONFIGS
+    """
+```
+
+**TypeScript JSDoc:**
+```typescript
+/**
+ * Detect rate limit from CLI output.
+ *
+ * @param output - Raw CLI output string
+ * @returns Detection result with isRateLimited flag and optional resetTime
+ */
+function detectRateLimit(output: string): RateLimitResult {
+  // ...
+}
+```
 
 ## Function Design
 
-**Size:**
-- Keep functions focused and reasonably sized
-- Extract helpers for complex logic
-- Many files >300 lines indicate room for refactoring
+**Size:** Keep functions focused on a single responsibility. Functions over 50 lines should be considered for splitting.
 
 **Parameters:**
-
-Backend (Python):
-- Type hints required for all parameters
-- Example: `def get_profile(project_dir: Path, force: bool = False) -> SecurityProfile:`
-
-Frontend (TypeScript):
-- TypeScript strict mode enabled
-- Use object destructuring for multiple parameters
+- Python: Use type hints for all parameters
+- TypeScript: Use explicit types, avoid `any`
+- Default values for optional parameters
+- Keyword arguments for functions with 3+ parameters
 
 **Return Values:**
-- Explicit returns required
-- Type hints (Python) or TypeScript return types
-- Return early for guard clauses
+- Python: Use tuple for multiple returns `-> tuple[bool, str]`
+- TypeScript: Use result objects for complex returns
+- Always annotate return types
 
 ## Module Design
 
-**Exports:**
+**Python Exports:**
+- Use `__all__` in `__init__.py` to control public API
+- Prefix internal functions/classes with underscore
 
-Frontend:
-- Named exports preferred
-- Default exports for React components
-- Barrel files (`index.ts`) for public APIs
+**TypeScript Barrel Files:**
+```typescript
+// index.ts barrel export pattern
+export { ExecutionPhaseParser } from './execution-phase-parser';
+export { IdeationPhaseParser } from './ideation-phase-parser';
+export type { ExecutionParserContext } from './types';
+```
 
-Backend:
-- Standard Python module exports
-- No `__all__` declarations typically
+## Security Conventions
 
-**Patterns:**
-- Avoid circular dependencies
-- Keep internal helpers private
+**Validation First:**
+```python
+# Always validate input before processing
+def _validate_custom_mcp_server(server: dict) -> bool:
+    """Validate a custom MCP server configuration for security."""
+    if not isinstance(server, dict):
+        return False
+
+    # Required fields
+    required_fields = {"id", "name", "type"}
+    if not all(field in server for field in required_fields):
+        return False
+
+    # Blocklist dangerous commands
+    DANGEROUS_COMMANDS = {"bash", "sh", "cmd", "powershell"}
+    if command in DANGEROUS_COMMANDS:
+        logger.warning(f"Rejected dangerous command: {command}")
+        return False
+
+    return True
+```
+
+**Sensitive Commands:** Always use allowlist approach, never blocklist alone.
 
 ## Internationalization (Frontend)
 
-**CRITICAL: All user-facing text must use i18n translation keys.**
+**Always use i18n for user-facing text:**
+```tsx
+import { useTranslation } from 'react-i18next';
 
-- Framework: react-i18next (v16.5.0)
-- Translation files: `apps/frontend/src/shared/i18n/locales/{lang}/*.json`
-- Namespaces: common, navigation, settings, dialogs, tasks, errors, onboarding, welcome
-- Usage pattern:
-  ```typescript
-  const { t } = useTranslation(['navigation', 'common']);
-  <span>{t('navigation:items.githubPRs')}</span>  // ✅ CORRECT
-  <span>GitHub PRs</span>                          // ❌ WRONG
-  ```
-- When adding new UI text:
-  1. Add translation key to ALL language files (minimum: en/*.json and fr/*.json)
-  2. Use `namespace:section.key` format
-  3. Never use hardcoded strings in JSX/TSX
+const { t } = useTranslation(['navigation', 'common']);
 
-## Cross-Platform Development
+// Correct
+<span>{t('navigation:items.githubPRs')}</span>
 
-**CRITICAL: Centralized platform abstraction required.**
-
-**Pattern:**
-- Backend: `apps/backend/core/platform/` module
-- Frontend: `apps/frontend/src/main/platform/` module
-- All platform checks MUST use these modules, not direct `process.platform` checks
-
-**Anti-pattern (violations found):**
-- Direct `process.platform === 'win32'` checks in multiple files
-- Hardcoded paths like `C:\Program Files` or `/opt/homebrew/bin`
-
-**Correct approach:**
-```typescript
-// ❌ WRONG - Direct platform check
-if (process.platform === 'win32') { }
-
-// ✅ CORRECT - Use abstraction
-import { isWindows, findExecutable } from './platform';
-if (isWindows()) { }
+// Wrong - hardcoded string
+<span>GitHub PRs</span>
 ```
 
-## Type Safety
+**Translation file structure:**
+- `apps/frontend/src/shared/i18n/locales/en/*.json`
+- `apps/frontend/src/shared/i18n/locales/fr/*.json`
 
-**Python:**
-- Type hints mandatory for function signatures
-- Pydantic models for data validation
-- mypy or similar type checker (not strictly enforced in practice)
+## Platform-Specific Code
 
-**TypeScript:**
-- Strict mode enabled in `tsconfig.json`
-- No `any` types preferred
-- Type inference used where clear
-- Explicit types for public APIs
+**Use platform abstraction module:**
+```typescript
+// Correct - use abstraction
+import { isWindows, getPathDelimiter } from './platform';
+
+// Wrong - direct check
+if (process.platform === 'win32') { ... }
+```
+
+**Platform modules:**
+- Frontend: `apps/frontend/src/main/platform/`
+- Backend: `apps/backend/core/platform/`
 
 ---
 
-*Convention analysis: 2026-01-20*
-*Update when patterns change*
+*Convention analysis: 2026-01-19*

@@ -1,83 +1,69 @@
-# Auto-Claude UI/UX Modernization
+# PR Review System Robustness
 
 ## What This Is
 
-Modernização completa do design system do Auto-Claude, padronizando todos os componentes visuais com uma biblioteca UI/UX moderna baseada em Radix UI + Tailwind CSS v4 + Motion. O projeto aplica um sistema de design consistente (cores HSL, tipografia, espaçamento, animações) em toda a aplicação desktop Electron, mantendo a estrutura e funcionalidades existentes.
+Improvements to Auto Claude's PR review system to make it trustworthy enough to replace human review. The system uses specialist agents (security, logic, quality, codebase-fit) with a finding-validator that re-investigates findings before presenting them. This milestone fixes gaps that cause false positives and missed context.
 
 ## Core Value
 
-Consistência visual em todo o app — todos os componentes seguindo o mesmo design system, eliminando inconsistências de estilo e criando uma experiência visual coesa e profissional.
+**When the system flags something, it's a real issue.** Trustworthy PR reviews that are faster, more thorough, and more accurate than human review.
 
 ## Requirements
 
 ### Validated
 
-- ✓ Electron 39.2.7 desktop app com React 19.2.3 — existing
-- ✓ Multi-agent autonomous coding framework (Python backend + TypeScript frontend) — existing
-- ✓ Spec creation pipeline com complexidade dinâmica — existing
-- ✓ Workspace isolation via git worktrees — existing
-- ✓ Internacionalização (i18n) com react-i18next 16.5.0 (português e francês) — existing
-- ✓ Radix UI primitives parcialmente implementados (14+ componentes) — existing
-- ✓ Tailwind CSS 4.1.17 configurado — existing
-- ✓ Zustand 5.0.9 para state management — existing
-- ✓ Integração com GitHub, GitLab, Linear — existing
+- ✓ Multi-agent PR review architecture — existing
+- ✓ Specialist agents (security, logic, quality, codebase-fit) — existing
+- ✓ Finding-validator for follow-up reviews — existing
+- ✓ Dismissal tracking with reasons — existing
+- ✓ CI status enforcement — existing
+- ✓ Context gathering (diff, comments, related files) — existing
 
 ### Active
 
-- [ ] Sistema de cores HSL completo - Aplicar paleta de cores HSL do ui.md (primary, secondary, accent, neutral, semantic colors)
-- [ ] Tipografia padronizada - Implementar sistema de fontes e tamanhos do ui.md
-- [ ] Espaçamento consistente - Aplicar tokens de espaçamento em todos os componentes
-- [ ] Componentes Radix UI modernizados - Padronizar Button, Input, Dialog, Select, Checkbox, Radio, Switch, Tabs, Tooltip, Dropdown usando referência ui.md
-- [ ] Motion (Framer Motion) integrado - Adicionar animações suaves em transições, modais, toasts
-- [ ] Dark mode aprimorado - Sistema de temas com tokens CSS variables
-- [ ] Tokens CSS centralizados - Criar sistema de design tokens (cores, espaçamento, tipografia, sombras, bordas)
-- [ ] Biblioteca de componentes documentada - Criar storybook ou playground interno para componentes
-- [ ] Migração incremental - Substituir componentes gradualmente, mantendo app funcionando
+- [ ] **REQ-001**: Finding-validator runs on initial reviews (not just follow-ups)
+- [ ] **REQ-002**: Fix line 1288 bug — include ai_reviews in follow-up context
+- [ ] **REQ-003**: Fetch formal PR reviews from `/pulls/{pr}/reviews` API
+- [ ] **REQ-004**: Add Read/Grep/Glob tool instructions to all specialist prompts
+- [ ] **REQ-005**: Expand JS/TS import analysis (path aliases, CommonJS, re-exports)
+- [ ] **REQ-006**: Add Python import analysis (currently skipped)
+- [ ] **REQ-007**: Increase related files limit from 20 to 50 with prioritization
+- [ ] **REQ-008**: Add reverse dependency analysis (what imports changed files)
 
 ### Out of Scope
 
-- Redesign de layouts ou estrutura de páginas — manter arquitetura de telas atual, apenas modernizar componentes dentro delas
-- Novos recursos ou funcionalidades — foco exclusivo em padronização visual do existente
-- Otimizações de performance — não é objetivo primário (bundle size, renderização)
-- Alterações no backend Python — apenas frontend (Electron/React)
-- Modificações em lógica de negócio — UI/UX pura, sem mexer em agentes, spec pipeline, workspace logic
+- Real-time review streaming — complexity, not needed for accuracy goal
+- Review caching/memoization — premature optimization
+- Custom specialist agents — current four dimensions sufficient
 
 ## Context
 
-**Referência UI/UX:**
-- Arquivo: `/Users/guilhermevarela/Documents/Projetos/Auto-Claude/ui.md`
-- Contém: Sistema completo de UI/UX do 1Code Desktop (Radix UI + Tailwind v4 + Motion + tokens CSS)
-- Tecnologias: React 19.2.1, TypeScript 5.4.5, Tailwind CSS 3.4.17 (base para upgrade para 4.1.17), Radix UI, Motion
-- Design tokens: Cores HSL, sistema de tipografia, espaçamento, animações
+**Problem**: False positives in PR reviews erode trust. Users have to second-guess every finding, defeating the purpose of automated review.
 
-**Codebase existente:**
-- Mapeamento completo em `.planning/codebase/` (STACK.md, ARCHITECTURE.md, STRUCTURE.md, CONVENTIONS.md, TESTING.md, INTEGRATIONS.md, CONCERNS.md)
-- Frontend: `apps/frontend/` com 80+ componentes React
-- Stack atual já tem Radix UI e Tailwind CSS 4.1.17, facilitando migração
-- Convenções: i18n obrigatório (react-i18next), PascalCase para componentes, Biome para linting
+**Root cause**: Finding-validator (which catches false positives) only runs during follow-up reviews. Initial reviews present unvalidated findings. Additionally, context gathering has bugs and gaps that cause the AI to make claims without complete information.
 
-**Motivação:**
-- Eliminar inconsistências visuais entre diferentes partes do app
-- Aplicar design moderno e profissional
-- Aproveitar componentes acessíveis do Radix UI
-- Criar base sólida para futuras evoluções visuais
+**Existing system**:
+- `apps/backend/runners/github/` — PR review orchestration
+- `apps/backend/runners/github/services/parallel_orchestrator_reviewer.py` — initial review
+- `apps/backend/runners/github/services/parallel_followup_reviewer.py` — follow-up review (has finding-validator)
+- `apps/backend/runners/github/context_gatherer.py` — gathers PR context
+- `apps/backend/prompts/github/pr_*.md` — specialist agent prompts
+
+**Reference**: Full PRD at `docs/PR_REVIEW_SYSTEM_IMPROVEMENTS.md`
 
 ## Constraints
 
-- **i18n obrigatório**: Todos os componentes novos/modificados devem suportar internacionalização completa (português e francês) via react-i18next, conforme convenções existentes
-- **Compatibilidade de stack**: Manter versões atuais - Electron 39.2.7, React 19.2.3, Tailwind CSS 4.1.17, Node.js 24+
-- **Migração incremental**: Componentes devem ser substituídos gradualmente sem quebrar funcionalidades existentes
-- **Cross-platform**: Componentes devem funcionar em Windows, macOS, Linux (requisito existente do Auto-Claude)
-- **Design tokens centralizados**: Todo o sistema de cores, tipografia, espaçamento deve vir de tokens CSS reutilizáveis
+- **Existing architecture**: Work within current multi-agent PR review structure
+- **Backward compatibility**: Don't break existing review workflows
+- **Performance**: Validation step should not significantly slow reviews (run in parallel where possible)
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Migração incremental vs. big bang | Manter app funcionando durante toda a modernização; reduzir risco de regressões | — Pending |
-| Radix UI + Tailwind v4 + Motion | Stack do ui.md já alinhado com stack atual do Auto-Claude; aproveitar investimento existente | — Pending |
-| Consistência visual como core value | Eliminar inconsistências é mais valioso que features novas no curto prazo | — Pending |
-| Manter layouts atuais | Focar em polimento visual, não em redesign de UX/fluxos; reduzir escopo e risco | — Pending |
+| Add finding-validator to initial reviews | Catches false positives before user sees them | — Pending |
+| Same validator for initial and follow-up | Consistency, proven approach from follow-up reviews | — Pending |
+| Expand import analysis incrementally | JS/TS first (REQ-005), Python second (REQ-006) | — Pending |
 
 ---
-*Last updated: 2026-01-20 after initialization*
+*Last updated: 2026-01-19 after initialization*
