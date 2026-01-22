@@ -228,12 +228,49 @@
   color: hsl(var(--destructive)) !important;
 }
 
+.text-card-foreground {
+  color: hsl(var(--card-foreground)) !important;
+}
+
+.text-popover-foreground {
+  color: hsl(var(--popover-foreground)) !important;
+}
+
+.text-primary-foreground {
+  color: hsl(var(--primary-foreground)) !important;
+}
+
+.text-secondary-foreground {
+  color: hsl(var(--secondary-foreground)) !important;
+}
+
+.text-success {
+  color: hsl(var(--success)) !important;
+}
+
+.text-warning {
+  color: hsl(var(--warning)) !important;
+}
+
+.text-info {
+  color: hsl(var(--info)) !important;
+}
+
 .border-border {
   border-color: hsl(var(--border)) !important;
 }
 
 .border-input {
   border-color: hsl(var(--input)) !important;
+}
+
+/* Force sidebar text colors */
+.bg-sidebar {
+  background-color: hsl(var(--sidebar)) !important;
+}
+
+.text-sidebar-foreground {
+  color: hsl(var(--sidebar-foreground)) !important;
 }
 
 /* CSS variables for light mode */
@@ -385,12 +422,31 @@
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
   font-family: var(--font-sans);
   font-feature-settings: "rlig" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Force text colors in dark mode */
+.dark {
+  color-scheme: dark;
+}
+
+.dark * {
+  border-color: hsl(var(--border));
+}
+
+/* Override any hardcoded text colors in dark mode */
+.dark button,
+.dark a,
+.dark span,
+.dark div,
+.dark p,
+.dark li {
+  color: inherit;
 }
 
 /* Typography utilities */
