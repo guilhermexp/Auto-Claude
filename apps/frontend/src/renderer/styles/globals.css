@@ -93,11 +93,11 @@
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
 
-  /* Border radius - from design system */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  /* Border radius - more rounded like Cursor/1Code */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
   --radius-2xl: 20px;
   --radius-3xl: 24px;
   --radius-full: 9999px;
@@ -338,54 +338,54 @@
   --shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.2);
 }
 
-/* Dark Mode */
+/* Dark Mode - 1Code inspired */
 .dark {
-  /* Layout Base */
-  --background: 240 10% 3.9%;
-  --foreground: 240 4.8% 95.9%;
+  /* Layout Base - almost pure black like 1Code */
+  --background: 0 0% 4%;
+  --foreground: 0 0% 98%;
 
-  /* Cards */
-  --card: 240 10% 3.9%;
+  /* Cards - slightly lighter than background */
+  --card: 0 0% 12%;
   --card-foreground: 0 0% 98%;
 
   /* Popovers */
   --popover: 0 0% 9%;
   --popover-foreground: 0 0% 98%;
 
-  /* Primary Brand Color - muted gray-blue for subtle dark mode */
-  --primary: 240 12% 65%;
-  --primary-foreground: 240 10% 3.9%;
+  /* Primary Brand Color - dark gray, keeping it subtle */
+  --primary: 240 4% 16%;
+  --primary-foreground: 0 0% 98%;
 
-  /* Secondary */
-  --secondary: 240 3.7% 15.9%;
+  /* Secondary - much lighter gray for switches visibility */
+  --secondary: 240 5% 45%;
   --secondary-foreground: 0 0% 98%;
 
-  /* Muted */
-  --muted: 240 5.9% 10%;
-  --muted-foreground: 240 4.4% 58%;
+  /* Muted - very dark for disabled/subtle elements */
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 60%;
 
-  /* Accent */
-  --accent: 240 5.9% 10%;
+  /* Accent - slightly lighter for hover states */
+  --accent: 0 0% 15%;
   --accent-foreground: 0 0% 98%;
 
   /* Destructive/Error */
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
 
-  /* Borders and Inputs */
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --input-background: 60 2% 18%;
+  /* Borders and Inputs - very subtle like 1Code */
+  --border: 0 0% 17%;
+  --input: 0 0% 17%;
+  --input-background: 0 0% 12%;
 
   /* Focus ring */
-  --ring: 228 100% 50%;
+  --ring: 240 5% 30%;
 
-  /* Border radius */
-  --radius: 0.5rem;
+  /* Border radius - more rounded */
+  --radius: 0.75rem;
 
-  /* Sidebar */
-  --sidebar: 240 10% 3.9%;
-  --sidebar-foreground: 240 4.8% 95.9%;
+  /* Sidebar - slightly lighter than main background */
+  --sidebar: 0 0% 9%;
+  --sidebar-foreground: 0 0% 98%;
 
   /* Semantic colors */
   --success: 142 71% 45%;
@@ -395,8 +395,8 @@
   --info: 221 83% 53%;
   --info-foreground: 0 0% 98%;
 
-  /* Shadows - deeper for dark mode */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.6);
+  /* Shadows - more subtle, flat design */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.7);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.8);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.9);

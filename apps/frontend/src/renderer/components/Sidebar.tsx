@@ -294,8 +294,16 @@ export function Sidebar({
     <TooltipProvider>
       <div className="flex h-full w-64 flex-col bg-sidebar border-r border-border">
         {/* Header with drag area - extra top padding for macOS traffic lights */}
-        <div className="electron-drag flex h-14 items-center px-4 pt-6">
-          <span className="electron-no-drag text-lg font-bold text-primary">Auto Claude</span>
+        <div className="electron-drag flex h-14 items-center justify-between px-4 pt-6 gap-2">
+          <div className="flex-1" />
+          <Button
+            className="electron-no-drag"
+            size="sm"
+            onClick={onNewTaskClick}
+            disabled={!selectedProjectId || !selectedProject?.autoBuildPath}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
         </div>
 
         <Separator className="mt-2" />
@@ -362,20 +370,6 @@ export function Sidebar({
             </Tooltip>
           </div>
 
-          {/* New Task button */}
-          <Button
-            className="w-full"
-            onClick={onNewTaskClick}
-            disabled={!selectedProjectId || !selectedProject?.autoBuildPath}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            {t('actions.newTask')}
-          </Button>
-          {selectedProject && !selectedProject.autoBuildPath && (
-            <p className="mt-2 text-xs text-muted-foreground text-center">
-              {t('messages.initializeToCreateTasks')}
-            </p>
-          )}
         </div>
       </div>
 
