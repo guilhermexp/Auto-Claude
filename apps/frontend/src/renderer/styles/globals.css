@@ -356,8 +356,8 @@
   --primary: 240 4% 16%;
   --primary-foreground: 0 0% 98%;
 
-  /* Secondary - medium gray for switches and badges */
-  --secondary: 0 0% 50%;
+  /* Secondary - dark gray like reference image */
+  --secondary: 0 0% 28%;
   --secondary-foreground: 0 0% 98%;
 
   /* Muted - very dark for disabled/subtle elements */
