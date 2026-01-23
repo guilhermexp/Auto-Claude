@@ -119,7 +119,10 @@
     "taskNotFoundForWorktree": "Task not found for worktree: {{specName}}",
     "failedToDeleteTaskWorktree": "Failed to delete task worktree: {{specName}}",
     "terminalWorktreeNotFound": "Terminal worktree not found: {{name}}",
-    "failedToDeleteTerminalWorktree": "Failed to delete terminal worktree: {{name}}"
+    "failedToDeleteTerminalWorktree": "Failed to delete terminal worktree: {{name}}",
+    "failedToLoadWorktrees": "Failed to load worktrees",
+    "failedToLoadTaskWorktrees": "Failed to load task worktrees",
+    "failedToLoadTerminalWorktrees": "Failed to load terminal worktrees"
   },
   "notification": {
     "accountSwitched": "Account Switched",
@@ -622,6 +625,117 @@
       "taskAffected": "Task affected",
       "technicalDetails": "Technical details",
       "goToSettings": "Go to Settings"
+    }
+  },
+  "githubIssues": {
+    "title": "GitHub Issues",
+    "openCount": "{{count}} open",
+    "analyzeGroup": "Analyze & Group Issues",
+    "analyzeGroupTooltip": "Analyze up to 200 open issues, group similar ones, and review proposed batches before creating tasks.",
+    "autoFixNew": "Auto-Fix New",
+    "autoFixTooltip": "Automatically fix new issues as they come in.",
+    "autoFixProcessing": "Processing {{count}} issue...",
+    "autoFixProcessing_plural": "Processing {{count}} issues...",
+    "searchPlaceholder": "Search issues...",
+    "filterOpen": "Open",
+    "filterClosed": "Closed",
+    "filterAll": "All",
+    "list": {
+      "noIssues": "No issues found",
+      "loadingMore": "Loading more...",
+      "scrollForMore": "Scroll for more",
+      "allLoaded": "All issues loaded"
+    },
+    "states": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "detail": {
+      "commentsCount": "{{count}} comment",
+      "commentsCount_plural": "{{count}} comments",
+      "viewTask": "View Task",
+      "createTask": "Create Task",
+      "taskLinked": "Task Linked",
+      "taskId": "Task ID: {{id}}",
+      "description": "Description",
+      "noDescription": "No description provided.",
+      "assignees": "Assignees",
+      "milestone": "Milestone"
+    },
+    "autoFix": {
+      "button": "Auto Fix",
+      "processing": "Processing...",
+      "failed": "Auto-fix failed",
+      "retry": "Retry Auto Fix",
+      "completed": "Spec created from issue"
+    },
+    "empty": {
+      "searchNoMatch": "No issues match your search",
+      "selectIssue": "Select an issue to view details"
+    },
+    "notConnected": {
+      "title": "GitHub Not Connected",
+      "description": "Configure your GitHub token and repository in project settings to sync issues.",
+      "openSettings": "Open Settings"
+    },
+    "investigation": {
+      "title": "Create Task from Issue",
+      "issueLabel": "Issue #{{number}}: {{title}}",
+      "description": "Create a task from this GitHub issue. The task will be added to your Kanban board in the Backlog column.",
+      "commentsFailed": "Failed to load comments",
+      "selectComments": "Select Comments to Include ({{selected}}/{{total}})",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "taskIncludes": "The task will include:",
+      "includeTitleDescription": "Issue title and description",
+      "includeLink": "Link back to the GitHub issue",
+      "includeLabels": "Labels and metadata from the issue",
+      "includeNoComments": "No comments (this issue has no comments)",
+      "complete": "Task created! View it in your Kanban board.",
+      "createTask": "Create Task",
+      "creating": "Creating...",
+      "done": "Done"
+    },
+    "batchWizard": {
+      "introTitle": "Analyze & Group Issues",
+      "introDescription": "This will analyze up to 200 open issues, group similar ones together, and let you review the proposed batches before creating any tasks.",
+      "startAnalysis": "Start Analysis",
+      "analyzingTitle": "Analyzing Issues...",
+      "analyzingDescription": "Computing similarity and validating batches...",
+      "analyzingProgress": "{{progress}}% complete",
+      "stats": {
+        "issuesAnalyzed": "{{count}} issues analyzed",
+        "batchesProposed": "{{count}} batches proposed",
+        "singleIssues": "{{count}} single issues"
+      },
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "singleIssuesTitle": "Single Issues (not grouped)",
+      "singleIssuesMore": "...and {{count}} more",
+      "selectionSummary": "{{batches}} batch selected ({{issues}} issues)",
+      "selectionSingles": "+ {{count}} single issue",
+      "selectionSingles_plural": "+ {{count}} single issues",
+      "creatingTitle": "Creating Batches...",
+      "creatingDescription": "Setting up the approved issue batches for processing.",
+      "doneTitle": "Batches Created",
+      "doneDescription": "Your selected issue batches are ready for processing.",
+      "dialogTitle": "Analyze & Group Issues",
+      "dialogSteps": {
+        "intro": "Analyze open issues and group similar ones for batch processing.",
+        "analyzing": "Analyzing issues for semantic similarity...",
+        "review": "Review and approve the proposed issue batches.",
+        "approving": "Creating the approved batches...",
+        "done": "Batches have been created successfully."
+      },
+      "creatingButton": "Creating...",
+      "approveCreate": "Approve & Create ({{count}} batch)",
+      "approveCreate_plural": "Approve & Create ({{count}} batches)",
+      "batchLabel": "Batch {{index}}",
+      "issueCount": "{{count}} issue",
+      "issueCount_plural": "{{count}} issues",
+      "similarity": "{{percent}}% similar",
+      "singleIssueReasoning": "Single issue - not grouped with others",
+      "selectionSummary_plural": "{{batches}} batches selected ({{issues}} issues)"
     }
   }
 }

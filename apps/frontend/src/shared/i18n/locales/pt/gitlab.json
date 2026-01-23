@@ -36,7 +36,7 @@
     "description": "Descrição",
     "noDescription": "Nenhuma descrição fornecida.",
     "assignees": "Designados",
-    "milestone": "Milestone"
+    "milestone": "Marco"
   },
   "investigation": {
     "title": "Criar Tarefa do Problema",
@@ -147,7 +147,7 @@
     "followupReviewResult": "Análise de Acompanhamento",
     "description": "Descrição",
     "noDescription": "Nenhuma descrição fornecida.",
-    "labels": "Labels",
+    "labels": "Rótulos",
     "status": {
       "notReviewed": "Não Analisado",
       "notReviewedDesc": "Execute uma análise de IA para analisar este MR",
@@ -201,7 +201,7 @@
       "test": "Teste",
       "docs": "Documentação",
       "pattern": "Padrão",
-      "performance": "Performance",
+      "performance": "Desempenho",
       "logic": "Lógica"
     }
   }

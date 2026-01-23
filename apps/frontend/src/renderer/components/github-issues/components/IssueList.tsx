@@ -68,7 +68,7 @@ export function IssueList({
   }
 
   if (issues.length === 0) {
-    return <EmptyState message="No issues found" />;
+    return <EmptyState message={t('githubIssues.list.noIssues')} />;
   }
 
   return (
@@ -97,15 +97,15 @@ export function IssueList({
             {isLoadingMore ? (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="text-sm">{t('issues.loadingMore', 'Loading more...')}</span>
+                <span className="text-sm">{t('githubIssues.list.loadingMore')}</span>
               </div>
             ) : hasMore ? (
               <span className="text-xs text-muted-foreground opacity-50">
-                {t('issues.scrollForMore', 'Scroll for more')}
+                {t('githubIssues.list.scrollForMore')}
               </span>
             ) : issues.length > 0 ? (
               <span className="text-xs text-muted-foreground opacity-50">
-                {t('issues.allLoaded', 'All issues loaded')}
+                {t('githubIssues.list.allLoaded')}
               </span>
             ) : null}
           </div>

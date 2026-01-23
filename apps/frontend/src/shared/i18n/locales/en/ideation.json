@@ -28,7 +28,9 @@
     "logsButton": "Logs",
     "hideButton": "Hide",
     "showButton": "Show",
-    "stopGenerationTooltip": "Stop generation"
+    "stopGenerationTooltip": "Stop generation",
+    "stop": "Stop",
+    "stopping": "Stopping..."
   },
   "statusMessages": {
     "waitingToStart": "Waiting to start...",
@@ -39,5 +41,165 @@
     "rationale": "Rationale",
     "convertToTask": "Convert to Task",
     "dismiss": "Dismiss"
+  },
+  "dialogs": {
+    "config": {
+      "title": "Ideation Configuration",
+      "description": "Configure which types of ideas to generate",
+      "typesTitle": "Ideation Types",
+      "contextTitle": "Context Sources",
+      "includeRoadmap": "Include Roadmap Context",
+      "includeKanban": "Include Kanban Context"
+    },
+    "addMore": {
+      "title": "Add More Ideas",
+      "description": "Select additional ideation types to generate. Your existing ideas will be preserved.",
+      "allTypesGenerated": "You've already generated all ideation types!",
+      "allTypesGeneratedHint": "Use \"Regenerate\" to refresh existing ideas.",
+      "selectedCount": "{{count}} selected",
+      "generateTypes": "Generate {{count}} Types",
+      "generateIdeas": "Generate Ideas"
+    }
+  },
+  "list": {
+    "empty": "No ideas to display"
+  },
+  "envConfig": {
+    "title": "Claude Authentication Required",
+    "description": "A Claude Code OAuth token is required to generate AI-powered feature ideas."
+  },
+  "typeDescriptions": {
+    "code_improvements": "Improvements to code quality, refactors, and developer experience.",
+    "ui_ux_improvements": "User interface and experience enhancements for clarity and usability.",
+    "documentation_gaps": "Missing or outdated documentation and helpful guides.",
+    "security_hardening": "Security fixes, hardening, and best practices.",
+    "performance_optimizations": "Performance improvements and optimization opportunities.",
+    "code_quality": "Refactoring opportunities, large files, code smells, and best practice violations."
+  },
+  "details": {
+    "effort": "Effort",
+    "files": "Files",
+    "buildsUpon": "Builds Upon",
+    "implementationApproach": "Implementation Approach",
+    "affectedFiles": "Affected Files",
+    "patternsToFollow": "Patterns to Follow",
+    "severity": "Severity",
+    "category": "Category",
+    "breakingChange": "Breaking Change",
+    "breakingChangeDescription": "This refactoring may break existing code or tests.",
+    "currentState": "Current State",
+    "proposedChange": "Proposed Change",
+    "codeExample": "Code Example",
+    "metrics": "Metrics",
+    "lines": "Lines",
+    "complexity": "Complexity",
+    "duplicateLines": "Duplicate Lines",
+    "testCoverage": "Test Coverage",
+    "bestPractice": "Best Practice",
+    "prerequisites": "Prerequisites",
+    "targetAudience": "Target Audience",
+    "currentDocumentation": "Current Documentation",
+    "proposedContent": "Proposed Content",
+    "affectedAreas": "Affected Areas",
+    "priority": "Priority",
+    "impact": "Impact",
+    "expectedImprovement": "Expected Improvement",
+    "implementation": "Implementation",
+    "tradeoffs": "Tradeoffs",
+    "userBenefit": "User Benefit",
+    "affectedComponents": "Affected Components",
+    "vulnerability": "Vulnerability",
+    "currentRisk": "Current Risk",
+    "remediation": "Remediation",
+    "references": "References",
+    "compliance": "Compliance"
+  },
+  "typeLabels": {
+    "code_improvements": "Code Improvements",
+    "ui_ux_improvements": "UI/UX Improvements",
+    "documentation_gaps": "Documentation",
+    "security_hardening": "Security",
+    "performance_optimizations": "Performance",
+    "code_quality": "Code Quality"
+  },
+  "statusLabels": {
+    "draft": "Draft",
+    "selected": "Selected",
+    "converted": "Converted",
+    "dismissed": "Dismissed",
+    "archived": "Archived"
+  },
+  "effortLabels": {
+    "trivial": "Trivial",
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large",
+    "complex": "Complex"
+  },
+  "impactLabels": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
+  },
+  "impactDisplay": "Impact {{level}}",
+  "severityLabels": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "critical": "Critical"
+  },
+  "codeQualitySeverityLabels": {
+    "suggestion": "Suggestion",
+    "minor": "Minor",
+    "major": "Major",
+    "critical": "Critical"
+  },
+  "uiuxCategories": {
+    "usability": "Usability",
+    "accessibility": "Accessibility",
+    "performance": "Performance",
+    "visual": "Visual Design",
+    "interaction": "Interaction"
+  },
+  "documentationCategories": {
+    "readme": "README",
+    "api_docs": "API Documentation",
+    "inline_comments": "Inline Comments",
+    "examples": "Examples & Tutorials",
+    "architecture": "Architecture Docs",
+    "troubleshooting": "Troubleshooting Guide"
+  },
+  "securityCategories": {
+    "authentication": "Authentication",
+    "authorization": "Authorization",
+    "input_validation": "Input Validation",
+    "data_protection": "Data Protection",
+    "dependencies": "Dependencies",
+    "configuration": "Configuration",
+    "secrets_management": "Secrets Management"
+  },
+  "performanceCategories": {
+    "bundle_size": "Bundle Size",
+    "runtime": "Runtime Performance",
+    "memory": "Memory Usage",
+    "database": "Database Queries",
+    "network": "Network Requests",
+    "rendering": "Rendering",
+    "caching": "Caching"
+  },
+  "codeQualityCategories": {
+    "large_files": "Large Files",
+    "code_smells": "Code Smells",
+    "complexity": "High Complexity",
+    "duplication": "Code Duplication",
+    "naming": "Naming Conventions",
+    "structure": "File Structure",
+    "linting": "Linting Issues",
+    "testing": "Test Coverage",
+    "types": "Type Safety",
+    "dependencies": "Dependency Issues",
+    "dead_code": "Dead Code",
+    "git_hygiene": "Git Hygiene"
   }
 }

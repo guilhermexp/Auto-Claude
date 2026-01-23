@@ -7,7 +7,8 @@
     "review": "Análise",
     "prCreated": "PR Criado",
     "complete": "Completo",
-    "archived": "Arquivado"
+    "archived": "Arquivado",
+    "queue": "Fila"
   },
   "actions": {
     "start": "Iniciar",
@@ -59,7 +60,9 @@
     "ai_review": "Análise de IA",
     "human_review": "Análise Humana",
     "done": "Feito",
-    "pr_created": "PR Criado"
+    "pr_created": "PR Criado",
+    "queue": "Fila",
+    "error": "Erro"
   },
   "kanban": {
     "emptyBacklog": "Nenhuma tarefa planejada",
@@ -93,7 +96,11 @@
     "selectedCountOne": "{{count}} tarefa selecionada",
     "selectedCountOther": "{{count}} tarefas selecionadas",
     "createPRs": "Criar PRs",
-    "clearSelection": "Limpar Seleção"
+    "clearSelection": "Limpar Seleção",
+    "emptyQueue": "A fila está vazia",
+    "emptyQueueHint": "As tarefas aguardarão aqui quando o limite de tarefas em paralelo for atingido",
+    "queueAllAriaLabel": "Mover todas as tarefas para a fila",
+    "queueSettings": "Configurações da fila"
   },
   "execution": {
     "phases": {
@@ -258,5 +265,41 @@
     "noTasksToSelect": "Nenhuma tarefa disponível para selecionar",
     "confirmBulkAction": "Confirmar ação em massa para {{count}} tarefas",
     "processingTasks": "Processando tarefas selecionadas..."
+  },
+  "queue": {
+    "limitReached": "Limite de tarefas paralelas atingido ({{current}}/{{max}}). Tarefa movida para a fila.",
+    "movedToQueue": "Tarefa movida para a fila.",
+    "autoPromoted": "Tarefa promovida automaticamente da fila para Em andamento.",
+    "capacityAvailable": "{{count}} vaga(s) disponível(is) em Em andamento.",
+    "queueAll": "Adicionar tudo à fila",
+    "queueAllSuccess": "Movidas {{count}} tarefas para a fila.",
+    "settings": {
+      "title": "Configurações da fila",
+      "description": "Configure o número máximo de tarefas que podem executar em paralelo no quadro \"Em andamento\"",
+      "maxParallelLabel": "Máximo de tarefas em paralelo",
+      "minValueError": "Deve ser pelo menos 1",
+      "maxValueError": "Não pode exceder 10",
+      "hint": "Quando este limite for atingido, novas tarefas esperarão na fila antes de mover para \"Em andamento\"",
+      "saved": "Configurações da fila salvas",
+      "saveFailed": "Falha ao salvar configurações da fila",
+      "retry": "Tente novamente"
+    }
+  },
+  "screenshot": {
+    "title": "Capturar captura de tela",
+    "description": "Selecione uma tela ou janela para capturar como imagem de referência",
+    "capture": "Capturar",
+    "capturing": "Capturando...",
+    "noSources": "Nenhuma tela ou janela encontrada",
+    "errors": {
+      "getSources": "Falha ao obter fontes de captura",
+      "fetchSources": "Falha ao buscar fontes de captura",
+      "capture": "Falha ao capturar captura de tela",
+      "captureFailed": "Falha ao capturar captura de tela"
+    }
+  },
+  "referenceImages": {
+    "title": "Imagens de referência (opcional)",
+    "description": "Adicione referências visuais como capturas de tela ou designs para ajudar a IA a entender seus requisitos."
   }
 }

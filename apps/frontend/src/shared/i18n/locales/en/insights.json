@@ -62,7 +62,8 @@
   },
   "notConfigured": {
     "title": "Graphiti memory is not configured",
-    "description": "To enable graph memory, set GRAPHITI_ENABLED=true in project settings."
+    "description": "To enable graph memory, set GRAPHITI_ENABLED=true in project settings.",
+    "hint": "To enable graph memory, set GRAPHITI_ENABLED=true in project settings."
   },
   "searchMemories": {
     "title": "Search Memories",
@@ -88,6 +89,115 @@
     "fileInsights": "File Insights",
     "subtasksCompleted": "Subtasks Completed",
     "expand": "Expand",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "sessionLabel": "Session #{{count}}"
+  },
+  "prReview": {
+    "title": "PR Review",
+    "followUp": "Follow-up",
+    "findingsCount": "{{count}} finding",
+    "findingsCount_plural": "{{count}} findings",
+    "details": "Details",
+    "collapse": "Collapse",
+    "keyFindings": "Key Findings",
+    "moreFindings": "+{{count}} more findings",
+    "gotchas": "Gotchas Discovered",
+    "patterns": "Patterns Identified",
+    "viewOnGitHub": "View PR on GitHub",
+    "severityLabels": {
+      "critical": "Critical",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "severityCount": "{{count}} {{severity}}",
+    "verdicts": {
+      "approve": "Approved",
+      "request_changes": "Changes Requested",
+      "comment": "Commented"
+    }
+  },
+  "tabs": {
+    "projectIndex": "Project Index",
+    "memories": "Memories"
+  },
+  "projectIndex": {
+    "title": "Project Structure",
+    "description": "AI-discovered knowledge about your codebase",
+    "refresh": "Refresh",
+    "refreshTooltip": "Re-analyze project structure",
+    "errorTitle": "Failed to load project index",
+    "noIndexTitle": "No Project Index Found",
+    "noIndexDescription": "Click the Refresh button to analyze your project structure and create an index.",
+    "analyzeProject": "Analyze Project",
+    "overview": "Overview",
+    "services": "Services",
+    "infrastructure": "Infrastructure",
+    "conventions": "Conventions",
+    "dockerServices": "Docker Services",
+    "serviceCount": "{{count}} service",
+    "serviceCount_plural": "{{count}} services",
+    "labels": {
+      "dockerCompose": "Docker Compose",
+      "ciCd": "CI/CD",
+      "deployment": "Deployment",
+      "pythonLinting": "Python Linting",
+      "jsLinting": "JS Linting",
+      "formatting": "Formatting",
+      "gitHooks": "Git Hooks",
+      "typescript": "TypeScript"
+    },
+    "values": {
+      "enabled": "Enabled"
+    }
+  },
+  "filters": {
+    "all": "All",
+    "pr": "PR Reviews",
+    "sessions": "Sessions",
+    "codebase": "Codebase",
+    "patterns": "Patterns",
+    "gotchas": "Gotchas"
+  },
+  "memoryTypes": {
+    "session_insight": "Session Insight",
+    "codebase_discovery": "Codebase Discovery",
+    "codebase_map": "Codebase Map",
+    "pattern": "Pattern",
+    "gotcha": "Gotcha",
+    "task_outcome": "Task Outcome",
+    "qa_result": "QA Result",
+    "historical_context": "Historical Context",
+    "pr_review": "PR Review",
+    "pr_finding": "PR Finding",
+    "pr_pattern": "PR Pattern",
+    "pr_gotcha": "PR Gotcha"
+  },
+  "serviceCard": {
+    "unknown": "unknown",
+    "testingLabel": "Testing",
+    "ormLabel": "ORM",
+    "portLabel": "Port",
+    "stylingLabel": "Styling",
+    "stateLabel": "State",
+    "appleFrameworks": "Apple Frameworks",
+    "spmDependencies": "SPM Dependencies",
+    "keyDirectories": "Key Directories"
+  },
+  "serviceSections": {
+    "environmentVariables": "Environment Variables ({{count}})",
+    "externalServices": "External Services",
+    "databases": "Databases",
+    "email": "Email",
+    "payments": "Payments",
+    "cache": "Cache",
+    "databaseModels": "Database Models ({{count}})",
+    "fieldsCount": "{{count}} fields",
+    "apiRoutes": "API Routes ({{count}})",
+    "monitoring": "Monitoring",
+    "metricsLabel": "Metrics",
+    "healthLabel": "Health",
+    "dependencies": "Dependencies ({{count}})",
+    "moreDependencies": "+{{count}} more"
   }
 }

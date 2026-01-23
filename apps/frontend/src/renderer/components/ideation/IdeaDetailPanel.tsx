@@ -34,9 +34,11 @@ interface IdeaDetailPanelProps {
 }
 
 export function IdeaDetailPanel({ idea, onClose, onConvert, onGoToTask, onDismiss, isConverting }: IdeaDetailPanelProps) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['common', 'ideation']);
   const isDismissed = idea.status === 'dismissed';
   const isConverted = idea.status === 'converted';
+  const typeLabel = t(`ideation:typeLabels.${idea.type}`, { defaultValue: IDEATION_TYPE_LABELS[idea.type] });
+  const statusLabel = t(`ideation:statusLabels.${idea.status}`, { defaultValue: idea.status });
 
   return (
     <div className="fixed inset-y-0 right-0 w-96 bg-card border-l border-border shadow-lg flex flex-col z-50">
@@ -47,11 +49,11 @@ export function IdeaDetailPanel({ idea, onClose, onConvert, onGoToTask, onDismis
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="outline" className={IDEATION_TYPE_COLORS[idea.type]}>
                 <TypeIcon type={idea.type} />
-                <span className="ml-1">{IDEATION_TYPE_LABELS[idea.type]}</span>
+                <span className="ml-1">{typeLabel}</span>
               </Badge>
               {idea.status !== 'draft' && (
                 <Badge variant="outline" className={IDEATION_STATUS_COLORS[idea.status]}>
-                  {idea.status}
+                  {statusLabel}
                 </Badge>
               )}
             </div>

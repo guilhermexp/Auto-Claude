@@ -4,7 +4,7 @@
     "collapse": "Recolher terminal"
   },
   "auth": {
-    "terminalTitle": "Auth: {{profileName}}",
+    "terminalTitle": "Autenticação: {{profileName}}",
     "maxTerminalsReached": "Não é possível abrir terminal de auth: máximo de terminais atingido. Feche um terminal primeiro."
   },
   "worktree": {
@@ -36,6 +36,6 @@
     "alreadyExists": "Um worktree com este nome já existe",
     "deleteTitle": "Excluir Worktree?",
     "deleteDescription": "Isso excluirá permanentemente o worktree e seu branch. Qualquer alteração não confirmada será perdida.",
-    "detached": "(detached)"
+    "detached": "(desanexado)"
   }
 }

@@ -10,6 +10,7 @@ import {
   FileCode,
   AlertTriangle
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '../../ui/badge';
 import { Card } from '../../ui/card';
 import {
@@ -40,21 +41,27 @@ function getCategoryIcon(category: string) {
 }
 
 export function PerformanceOptimizationDetails({ idea }: PerformanceOptimizationDetailsProps) {
+  const { t } = useTranslation('ideation');
+  const impactLabel = t(`impactLabels.${idea.impact}`, { defaultValue: idea.impact });
+  const effortLabel = t(`effortLabels.${idea.estimatedEffort}`, { defaultValue: idea.estimatedEffort });
+  const categoryLabel = t(`performanceCategories.${idea.category}`, {
+    defaultValue: PERFORMANCE_CATEGORY_LABELS[idea.category]
+  });
   return (
     <>
       {/* Metrics */}
       <div className="grid grid-cols-2 gap-2">
         <Card className="p-3 text-center">
           <div className={`text-lg font-semibold ${IDEATION_IMPACT_COLORS[idea.impact]}`}>
-            {idea.impact}
+            {impactLabel}
           </div>
-          <div className="text-xs text-muted-foreground">Impact</div>
+          <div className="text-xs text-muted-foreground">{t('details.impact')}</div>
         </Card>
         <Card className="p-3 text-center">
           <div className={`text-lg font-semibold ${IDEATION_EFFORT_COLORS[idea.estimatedEffort]}`}>
-            {idea.estimatedEffort}
+            {effortLabel}
           </div>
-          <div className="text-xs text-muted-foreground">Effort</div>
+          <div className="text-xs text-muted-foreground">{t('details.effort')}</div>
         </Card>
       </div>
 
@@ -62,10 +69,10 @@ export function PerformanceOptimizationDetails({ idea }: PerformanceOptimization
       <div>
         <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
           {getCategoryIcon(idea.category)}
-          Category
+          {t('details.category')}
         </h3>
         <Badge variant="outline">
-          {PERFORMANCE_CATEGORY_LABELS[idea.category]}
+          {categoryLabel}
         </Badge>
       </div>
 
@@ -74,7 +81,7 @@ export function PerformanceOptimizationDetails({ idea }: PerformanceOptimization
         <div>
           <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
-            Current State
+            {t('details.currentState')}
           </h3>
           <p className="text-sm text-muted-foreground">{idea.currentMetric}</p>
         </div>
@@ -84,7 +91,7 @@ export function PerformanceOptimizationDetails({ idea }: PerformanceOptimization
       <div>
         <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-success" />
-          Expected Improvement
+          {t('details.expectedImprovement')}
         </h3>
         <p className="text-sm text-muted-foreground">{idea.expectedImprovement}</p>
       </div>
@@ -93,7 +100,7 @@ export function PerformanceOptimizationDetails({ idea }: PerformanceOptimization
       <div>
         <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
           <Wrench className="h-4 w-4" />
-          Implementation
+          {t('details.implementation')}
         </h3>
         <p className="text-sm text-muted-foreground whitespace-pre-line">{idea.implementation}</p>
       </div>
@@ -103,7 +110,7 @@ export function PerformanceOptimizationDetails({ idea }: PerformanceOptimization
         <div>
           <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
             <FileCode className="h-4 w-4" />
-            Affected Areas
+            {t('details.affectedAreas')}
           </h3>
           <ul className="space-y-1">
             {idea.affectedAreas.map((area, i) => (
@@ -120,7 +127,7 @@ export function PerformanceOptimizationDetails({ idea }: PerformanceOptimization
         <div>
           <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-warning" />
-            Tradeoffs
+            {t('details.tradeoffs')}
           </h3>
           <p className="text-sm text-muted-foreground">{idea.tradeoffs}</p>
         </div>

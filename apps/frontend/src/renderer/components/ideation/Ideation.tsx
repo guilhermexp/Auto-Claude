@@ -1,6 +1,6 @@
+import { useTranslation } from 'react-i18next';
 import { TabsContent } from '../ui/tabs';
 import { EnvConfigModal } from '../EnvConfigModal';
-import { IDEATION_TYPE_DESCRIPTIONS } from '../../../shared/constants';
 import { IdeationEmptyState } from './IdeationEmptyState';
 import { IdeationHeader } from './IdeationHeader';
 import { IdeationFilters } from './IdeationFilters';
@@ -18,6 +18,7 @@ interface IdeationProps {
 }
 
 export function Ideation({ projectId, onGoToTask }: IdeationProps) {
+  const { t } = useTranslation('ideation');
   // Get showArchived from shared context for cross-page sync
   const { showArchived } = useViewState();
 
@@ -119,8 +120,8 @@ export function Ideation({ projectId, onGoToTask }: IdeationProps) {
           open={showEnvConfigModal}
           onOpenChange={setShowEnvConfigModal}
           onConfigured={handleEnvConfigured}
-          title="Claude Authentication Required"
-          description="A Claude Code OAuth token is required to generate AI-powered feature ideas."
+          title={t('envConfig.title')}
+          description={t('envConfig.description')}
           projectId={projectId}
         />
       </>
@@ -170,7 +171,7 @@ export function Ideation({ projectId, onGoToTask }: IdeationProps) {
               ))}
               {activeIdeas.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
-                  No ideas to display
+                  {t('list.empty')}
                 </div>
               )}
             </div>
@@ -187,7 +188,7 @@ export function Ideation({ projectId, onGoToTask }: IdeationProps) {
               <TabsContent key={type} value={type} className="flex-1 overflow-auto p-4">
                 <div className="mb-4 p-3 bg-muted/50 rounded-lg">
                   <p className="text-sm text-muted-foreground">
-                    {IDEATION_TYPE_DESCRIPTIONS[type]}
+                    {t(`typeDescriptions.${type}`)}
                   </p>
                 </div>
                 <div className="grid gap-3">
@@ -242,8 +243,8 @@ export function Ideation({ projectId, onGoToTask }: IdeationProps) {
         open={showEnvConfigModal}
         onOpenChange={setShowEnvConfigModal}
         onConfigured={handleEnvConfigured}
-        title="Claude Authentication Required"
-        description="A Claude Code OAuth token is required to generate AI-powered feature ideas."
+        title={t('envConfig.title')}
+        description={t('envConfig.description')}
         projectId={projectId}
       />
     </div>

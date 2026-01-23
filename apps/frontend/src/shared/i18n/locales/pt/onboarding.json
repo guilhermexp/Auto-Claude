@@ -74,6 +74,11 @@
       "tokenSavedDescription": "Seu token foi salvo com sucesso.",
       "tokenSaveFailed": "Falha ao salvar token",
       "tryAgain": "Por favor, tente novamente."
+    },
+    "alerts": {
+      "profileCreatedAuthFailed": "Perfil criado, mas falha ao preparar autenticação: {{error}}",
+      "authPrepareFailed": "Falha ao preparar autenticação: {{error}}",
+      "authStartFailedMessage": "Falha ao iniciar autenticação. Tente novamente."
     }
   },
   "memory": {
@@ -141,9 +146,9 @@
   "steps": {
     "welcome": "Bem-vindo",
     "authChoice": "Método de Auth",
-    "auth": "Auth",
+    "auth": "Autenticação",
     "claudeCode": "CLI",
-    "devtools": "Dev Tools",
+    "devtools": "Ferramentas",
     "privacy": "Privacidade",
     "memory": "Memória",
     "done": "Feito"

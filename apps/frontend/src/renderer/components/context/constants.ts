@@ -77,26 +77,26 @@ export const memoryTypeColors: Record<string, string> = {
 
 // Memory type labels for display
 export const memoryTypeLabels: Record<string, string> = {
-  session_insight: 'Session Insight',
-  codebase_discovery: 'Codebase Discovery',
-  codebase_map: 'Codebase Map',
-  pattern: 'Pattern',
-  gotcha: 'Gotcha',
-  task_outcome: 'Task Outcome',
-  qa_result: 'QA Result',
-  historical_context: 'Historical Context',
-  pr_review: 'PR Review',
-  pr_finding: 'PR Finding',
-  pr_pattern: 'PR Pattern',
-  pr_gotcha: 'PR Gotcha'
+  session_insight: 'memoryTypes.session_insight',
+  codebase_discovery: 'memoryTypes.codebase_discovery',
+  codebase_map: 'memoryTypes.codebase_map',
+  pattern: 'memoryTypes.pattern',
+  gotcha: 'memoryTypes.gotcha',
+  task_outcome: 'memoryTypes.task_outcome',
+  qa_result: 'memoryTypes.qa_result',
+  historical_context: 'memoryTypes.historical_context',
+  pr_review: 'memoryTypes.pr_review',
+  pr_finding: 'memoryTypes.pr_finding',
+  pr_pattern: 'memoryTypes.pr_pattern',
+  pr_gotcha: 'memoryTypes.pr_gotcha'
 };
 
 // Filter categories for grouping memory types
 export const memoryFilterCategories = {
-  all: { label: 'All', types: [] as string[] },
-  pr: { label: 'PR Reviews', types: ['pr_review', 'pr_finding', 'pr_pattern', 'pr_gotcha'] },
-  sessions: { label: 'Sessions', types: ['session_insight', 'task_outcome', 'qa_result', 'historical_context'] },
-  codebase: { label: 'Codebase', types: ['codebase_discovery', 'codebase_map'] },
-  patterns: { label: 'Patterns', types: ['pattern', 'pr_pattern'] },
-  gotchas: { label: 'Gotchas', types: ['gotcha', 'pr_gotcha'] }
+  all: { labelKey: 'filters.all', types: [] as string[] },
+  pr: { labelKey: 'filters.pr', types: ['pr_review', 'pr_finding', 'pr_pattern', 'pr_gotcha'] },
+  sessions: { labelKey: 'filters.sessions', types: ['session_insight', 'task_outcome', 'qa_result', 'historical_context'] },
+  codebase: { labelKey: 'filters.codebase', types: ['codebase_discovery', 'codebase_map'] },
+  patterns: { labelKey: 'filters.patterns', types: ['pattern', 'pr_pattern'] },
+  gotchas: { labelKey: 'filters.gotchas', types: ['gotcha', 'pr_gotcha'] }
 };

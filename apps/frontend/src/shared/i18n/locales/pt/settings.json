@@ -63,7 +63,7 @@
     },
     "fields": {
       "name": "Nome",
-      "preset": "Preset",
+      "preset": "Predefinição",
       "baseUrl": "URL Base",
       "apiKey": "Chave de API"
     },
@@ -218,9 +218,9 @@
     "sourceVenv": "Ambiente Virtual",
     "sourceHomebrew": "Homebrew",
     "sourceNvm": "NVM",
-    "sourceSystemPath": "System PATH",
+    "sourceSystemPath": "PATH do sistema",
     "sourceBundled": "Incluído",
-    "sourceFallback": "Fallback",
+    "sourceFallback": "Alternativa",
     "notDetected": "Não detectado",
     "autoClaudePath": "Caminho Auto Claude",
     "autoClaudePathDescription": "Caminho relativo ao diretório auto-claude em projetos",
@@ -266,6 +266,10 @@
       "label": "Modo YOLO",
       "description": "Inicie Claude com a flag --dangerously-skip-permissions, ignorando todos os prompts de segurança. Use com extremo cuidado.",
       "warning": "Este modo ignora o sistema de permissões do Claude. Ative apenas se você confiar totalmente no código sendo executado."
+    },
+    "autoNameClaude": {
+      "label": "Nomear terminais Claude automaticamente",
+      "description": "Use IA para gerar um nome descritivo para terminais Claude com base na sua primeira mensagem"
     }
   },
   "updates": {
@@ -394,11 +398,11 @@
   },
   "workspace": {
     "roles": {
-      "backend": "Backend",
-      "frontend": "Frontend",
+      "backend": "Back-end",
+      "frontend": "Front-end",
       "mobile": "Mobile",
       "shared": "Compartilhado",
-      "apiGateway": "API Gateway",
+      "apiGateway": "Gateway de API",
       "worker": "Worker",
       "other": "Outro"
     }
@@ -467,6 +471,12 @@
       "terminalErrorDescription": "Falha ao criar terminal: {{error}}",
       "authProcessFailed": "Falha ao iniciar processo de autenticação",
       "authProcessFailedDescription": "Não foi possível criar o terminal de autenticação. Por favor, tente novamente ou verifique os logs para mais detalhes."
+    },
+    "authenticating": "Autenticando...",
+    "alerts": {
+      "profileCreatedAuthFailed": "Perfil criado, mas falha ao preparar autenticação: {{error}}",
+      "authPrepareFailed": "Falha ao preparar autenticação: {{error}}",
+      "authStartFailedMessage": "Falha ao iniciar autenticação. Tente novamente."
     }
   },
   "debug": {
@@ -560,7 +570,7 @@
     "args": "Argumentos",
     "argsHint": "Argumentos separados por espaço",
     "url": "URL",
-    "headers": "Headers",
+    "headers": "Cabeçalhos",
     "headerName": "Nome do Header",
     "headerValue": "Valor do Header",
     "noCustomServers": "Nenhum servidor personalizado configurado. Adicione um para usar com seus agentes.",

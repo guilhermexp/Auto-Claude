@@ -1,22 +1,23 @@
 {
   "header": {
-    "title": "Roadmap",
+    "title": "Roteiro",
     "competitorAnalysis": "Análise Competitiva",
     "clickToViewAnalysis": "Clique para visualizar análise detalhada",
     "addFeature": "Adicionar Funcionalidade",
     "addFeatureTooltip": "Adicionar nova funcionalidade ao roadmap",
-    "regenerate": "Regenerar Roadmap",
-    "regenerateTooltip": "Regenerar Roadmap",
+    "regenerate": "Regenerar Roteiro",
+    "regenerateTooltip": "Regenerar Roteiro",
     "target": "Alvo:",
     "morePersonas": "+{{count}} mais personas",
     "secondaryPersonas": "Personas Secundários:",
     "featuresCount": "{{count}} funcionalidades",
-    "phasesCount": "{{count}} fases"
+    "phasesCount": "{{count}} fases",
+    "analysisSummary": "Analisados {{competitors}} concorrentes com {{painPoints}} pontos de dor identificados"
   },
   "emptyState": {
-    "title": "Nenhum Roadmap Ainda",
+    "title": "Nenhum Roteiro Ainda",
     "description": "Gere um roadmap alimentado por IA que compreenda seu público-alvo e crie um plano de funcionalidades estratégico.",
-    "generateButton": "Gerar Roadmap"
+    "generateButton": "Gerar Roteiro"
   },
   "tabs": {
     "kanban": "Kanban",
@@ -29,7 +30,8 @@
     "competitorInsight": "Insight Competitivo",
     "competitorInsightTooltip": "Esta funcionalidade aborda pontos fracos dos concorrentes",
     "goToTask": "Ir para Tarefa",
-    "build": "Criar"
+    "build": "Criar",
+    "impact": "{{impact}} impacto"
   },
   "phaseCard": {
     "progress": "Progresso",
@@ -47,10 +49,99 @@
     "planned": "Planejado",
     "proposed": "Proposto"
   },
+  "statusLabels": {
+    "draft": "Rascunho",
+    "active": "Ativo",
+    "archived": "Arquivado"
+  },
   "priorities": {
     "low": "Baixa",
     "medium": "Média",
     "high": "Alta",
-    "critical": "Crítica"
+    "critical": "Crítica",
+    "must": "Obrigatório",
+    "should": "Deveria ter",
+    "could": "Poderia ter",
+    "wont": "Não terá"
+  },
+  "complexities": {
+    "low": "Baixa",
+    "medium": "Média",
+    "high": "Alta"
+  },
+  "impacts": {
+    "low": "Baixo",
+    "medium": "Médio",
+    "high": "Alto"
+  },
+  "severities": {
+    "low": "Baixa",
+    "medium": "Média",
+    "high": "Alta"
+  },
+  "phaseStatuses": {
+    "completed": "Concluída",
+    "in_progress": "Em progresso",
+    "planned": "Planejada"
+  },
+  "featureDetail": {
+    "description": "Descrição",
+    "rationale": "Racional",
+    "complexity": "Complexidade",
+    "impact": "Impacto",
+    "dependencies": "Dependências",
+    "userStories": "Histórias de usuário",
+    "acceptanceCriteria": "Critérios de aceitação",
+    "competitorInsights": "Atende pontos de dor dos concorrentes",
+    "severity": "Severidade {{severity}}",
+    "goToTask": "Ir para a tarefa",
+    "convertToTask": "Converter em tarefa Auto-Build",
+    "deleteTitle": "Excluir funcionalidade?",
+    "deleteDescription": "Isso removerá permanentemente \"{{title}}\" do seu roadmap."
+  },
+  "generation": {
+    "phases": {
+      "analyzing": {
+        "label": "Analisando",
+        "description": "Analisando a estrutura do projeto e o codebase..."
+      },
+      "discovering": {
+        "label": "Descobrindo",
+        "description": "Descobrindo público-alvo e necessidades dos usuários..."
+      },
+      "generating": {
+        "label": "Gerando",
+        "description": "Gerando o roadmap de funcionalidades..."
+      },
+      "complete": {
+        "label": "Concluído",
+        "description": "Geração do roadmap concluída!"
+      },
+      "error": {
+        "label": "Erro",
+        "description": "Falha na geração"
+      }
+    },
+    "steps": {
+      "analyze": "Analisar",
+      "discover": "Descobrir",
+      "generate": "Gerar"
+    },
+    "stop": "Parar",
+    "stopping": "Parando...",
+    "stopTooltip": "Parar geração",
+    "progress": "Progresso"
+  },
+  "kanban": {
+    "dropHere": "Solte aqui",
+    "noFeatures": "Sem funcionalidades",
+    "dragHere": "Arraste funcionalidades aqui",
+    "unknownStatus": "Status desconhecido",
+    "columns": {
+      "under_review": "Em revisão",
+      "planned": "Planejado",
+      "in_progress": "Em progresso",
+      "done": "Concluído"
+    }
   }
 }

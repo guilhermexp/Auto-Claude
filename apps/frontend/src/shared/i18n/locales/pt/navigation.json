@@ -6,10 +6,10 @@
   "items": {
     "kanban": "Quadro Kanban",
     "terminals": "Terminais do Agente",
-    "insights": "Insights",
-    "roadmap": "Roadmap",
+    "insights": "Análises",
+    "roadmap": "Roteiro",
     "ideation": "Ideação",
-    "changelog": "Changelog",
+    "changelog": "Histórico de alterações",
     "context": "Contexto",
     "githubIssues": "Problemas do GitHub",
     "githubPRs": "PRs do GitHub",
@@ -76,6 +76,8 @@
     "pathChangeWarningTitle": "Trocar instalação de CLI?",
     "pathChangeWarningDescription": "Trocar instalações de CLI usará um binário Claude Code diferente. Qualquer sessão em execução continuará usando a instalação anterior até ser reiniciada.",
     "switchInstallationConfirm": "Trocar",
-    "versionUnknown": "versão desconhecida"
+    "versionUnknown": "versão desconhecida",
+    "updateWarningTerminalNote": "Uma janela do terminal será aberta para executar o comando de instalação. Aguarde a conclusão da instalação antes de continuar.",
+    "rollbackWarningTerminalNote": "Uma janela do terminal será aberta para executar o comando de instalação. Aguarde a conclusão da instalação antes de continuar."
   }
 }

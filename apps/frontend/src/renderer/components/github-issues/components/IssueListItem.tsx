@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { User, MessageCircle, Tag, Sparkles } from 'lucide-react';
 import { Badge } from '../../ui/badge';
 import { Button } from '../../ui/button';
@@ -8,6 +9,11 @@ import {
 import type { IssueListItemProps } from '../types';
 
 export function IssueListItem({ issue, isSelected, onClick, onInvestigate }: IssueListItemProps) {
+  const { t } = useTranslation('common');
+  const issueStateLabel = t(`githubIssues.states.${issue.state}`, {
+    defaultValue: GITHUB_ISSUE_STATE_LABELS[issue.state] ?? issue.state
+  });
+
   return (
     <div
       className={`group p-3 rounded-lg cursor-pointer transition-colors ${
@@ -24,7 +30,7 @@ export function IssueListItem({ issue, isSelected, onClick, onInvestigate }: Iss
               variant="outline"
               className={`text-xs ${GITHUB_ISSUE_STATE_COLORS[issue.state]}`}
             >
-              {GITHUB_ISSUE_STATE_LABELS[issue.state]}
+              {issueStateLabel}
             </Badge>
             <span className="text-xs text-muted-foreground">#{issue.number}</span>
           </div>

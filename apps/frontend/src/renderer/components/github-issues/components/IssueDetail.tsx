@@ -29,6 +29,7 @@ export function IssueDetail({
   // Determine which task ID to use - either already linked or just created
   const taskId = linkedTaskId || (investigationResult?.success ? investigationResult.taskId : undefined);
   const hasLinkedTask = !!taskId;
+  const issueStateLabel = t(`githubIssues.states.${issue.state}`, { defaultValue: GITHUB_ISSUE_STATE_LABELS[issue.state] });
 
   const handleViewTask = () => {
     if (taskId && onViewTask) {
@@ -47,7 +48,7 @@ export function IssueDetail({
                 variant="outline"
                 className={`${GITHUB_ISSUE_STATE_COLORS[issue.state]}`}
               >
-                {GITHUB_ISSUE_STATE_LABELS[issue.state]}
+                {issueStateLabel}
               </Badge>
               <span className="text-sm text-muted-foreground">#{issue.number}</span>
             </div>
@@ -75,7 +76,7 @@ export function IssueDetail({
           {issue.commentsCount > 0 && (
             <div className="flex items-center gap-1">
               <MessageCircle className="h-4 w-4" />
-              {issue.commentsCount} comments
+              {t('githubIssues.detail.commentsCount', { count: issue.commentsCount })}
             </div>
           )}
         </div>
@@ -104,13 +105,13 @@ export function IssueDetail({
           {hasLinkedTask ? (
             <Button onClick={handleViewTask} className="flex-1" variant="secondary">
               <Eye className="h-4 w-4 mr-2" />
-              View Task
+              {t('githubIssues.detail.viewTask')}
             </Button>
           ) : (
             <>
               <Button onClick={onInvestigate} className="flex-1">
                 <Sparkles className="h-4 w-4 mr-2" />
-                Create Task
+                {t('githubIssues.detail.createTask')}
               </Button>
               {projectId && autoFixConfig?.enabled && (
                 <AutoFixButton
@@ -130,7 +131,7 @@ export function IssueDetail({
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2 text-success">
                 <CheckCircle2 className="h-4 w-4" />
-                Task Linked
+                {t('githubIssues.detail.taskLinked')}
               </CardTitle>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
@@ -142,14 +143,14 @@ export function IssueDetail({
                       {investigationResult.analysis.estimatedComplexity}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
-                      Task ID: {taskId}
+                      {t('githubIssues.detail.taskId', { id: taskId })}
                     </span>
                   </div>
                 </>
               ) : (
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground">
-                    Task ID: {taskId}
+                    {t('githubIssues.detail.taskId', { id: taskId })}
                   </span>
                 </div>
               )}
@@ -160,7 +161,7 @@ export function IssueDetail({
         {/* Body */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Description</CardTitle>
+            <CardTitle className="text-sm">{t('githubIssues.detail.description')}</CardTitle>
           </CardHeader>
           <CardContent>
             {issue.body ? (
@@ -169,7 +170,7 @@ export function IssueDetail({
               </div>
             ) : (
               <p className="text-sm text-muted-foreground italic">
-                No description provided.
+                {t('githubIssues.detail.noDescription')}
               </p>
             )}
           </CardContent>
@@ -179,7 +180,7 @@ export function IssueDetail({
         {issue.assignees.length > 0 && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Assignees</CardTitle>
+              <CardTitle className="text-sm">{t('githubIssues.detail.assignees')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
@@ -198,7 +199,7 @@ export function IssueDetail({
         {issue.milestone && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Milestone</CardTitle>
+              <CardTitle className="text-sm">{t('githubIssues.detail.milestone')}</CardTitle>
             </CardHeader>
             <CardContent>
               <Badge variant="outline">{issue.milestone.title}</Badge>

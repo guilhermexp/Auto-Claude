@@ -4,6 +4,7 @@ import {
   Users,
   FileCode
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Badge } from '../../ui/badge';
 import { UIUX_CATEGORY_LABELS } from '../../../../shared/constants';
 import type { UIUXImprovementIdea } from '../../../../shared/types';
@@ -13,12 +14,16 @@ interface UIUXDetailsProps {
 }
 
 export function UIUXDetails({ idea }: UIUXDetailsProps) {
+  const { t } = useTranslation('ideation');
+  const categoryLabel = t(`uiuxCategories.${idea.category}`, {
+    defaultValue: UIUX_CATEGORY_LABELS[idea.category]
+  });
   return (
     <>
       {/* Category */}
       <div>
         <Badge variant="outline" className="text-sm">
-          {UIUX_CATEGORY_LABELS[idea.category]}
+          {categoryLabel}
         </Badge>
       </div>
 
@@ -26,7 +31,7 @@ export function UIUXDetails({ idea }: UIUXDetailsProps) {
       <div>
         <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
           <AlertCircle className="h-4 w-4" />
-          Current State
+          {t('details.currentState')}
         </h3>
         <p className="text-sm text-muted-foreground">{idea.currentState}</p>
       </div>
@@ -35,7 +40,7 @@ export function UIUXDetails({ idea }: UIUXDetailsProps) {
       <div>
         <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4" />
-          Proposed Change
+          {t('details.proposedChange')}
         </h3>
         <p className="text-sm text-muted-foreground">{idea.proposedChange}</p>
       </div>
@@ -44,7 +49,7 @@ export function UIUXDetails({ idea }: UIUXDetailsProps) {
       <div>
         <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
           <Users className="h-4 w-4" />
-          User Benefit
+          {t('details.userBenefit')}
         </h3>
         <p className="text-sm text-muted-foreground">{idea.userBenefit}</p>
       </div>
@@ -54,7 +59,7 @@ export function UIUXDetails({ idea }: UIUXDetailsProps) {
         <div>
           <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
             <FileCode className="h-4 w-4" />
-            Affected Components
+            {t('details.affectedComponents')}
           </h3>
           <ul className="space-y-1">
             {idea.affectedComponents.map((component, i) => (

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Users, Sparkles, CheckCircle2, AlertCircle, Square } from 'lucide-react';
 import { Button } from './ui/button';
@@ -45,7 +46,7 @@ interface RoadmapGenerationProgressProps {
 type GenerationPhase = Exclude<RoadmapGenerationStatus['phase'], 'idle'>;
 
 // Phase display configuration
-const PHASE_CONFIG: Record<
+const getPhaseConfig = (t: (key: string) => string): Record<
   GenerationPhase,
   {
     label: string;
@@ -54,49 +55,49 @@ const PHASE_CONFIG: Record<
     color: string;
     bgColor: string;
   }
-> = {
+> => ({
   analyzing: {
-    label: 'Analyzing',
-    description: 'Analyzing project structure and codebase...',
+    label: t('roadmap:generation.phases.analyzing.label'),
+    description: t('roadmap:generation.phases.analyzing.description'),
     icon: Search,
     color: 'bg-amber-500',
     bgColor: 'bg-amber-500/20',
   },
   discovering: {
-    label: 'Discovering',
-    description: 'Discovering target audience and user needs...',
+    label: t('roadmap:generation.phases.discovering.label'),
+    description: t('roadmap:generation.phases.discovering.description'),
     icon: Users,
     color: 'bg-info',
     bgColor: 'bg-info/20',
   },
   generating: {
-    label: 'Generating',
-    description: 'Generating feature roadmap...',
+    label: t('roadmap:generation.phases.generating.label'),
+    description: t('roadmap:generation.phases.generating.description'),
     icon: Sparkles,
     color: 'bg-primary',
     bgColor: 'bg-primary/20',
   },
   complete: {
-    label: 'Complete',
-    description: 'Roadmap generation complete!',
+    label: t('roadmap:generation.phases.complete.label'),
+    description: t('roadmap:generation.phases.complete.description'),
     icon: CheckCircle2,
     color: 'bg-success',
     bgColor: 'bg-success/20',
   },
   error: {
-    label: 'Error',
-    description: 'Generation failed',
+    label: t('roadmap:generation.phases.error.label'),
+    description: t('roadmap:generation.phases.error.description'),
     icon: AlertCircle,
     color: 'bg-destructive',
     bgColor: 'bg-destructive/20',
   },
-};
+});
 
 // Phases shown in the step indicator (excluding complete and error)
-const STEP_PHASES: { key: GenerationPhase; label: string }[] = [
-  { key: 'analyzing', label: 'Analyze' },
-  { key: 'discovering', label: 'Discover' },
-  { key: 'generating', label: 'Generate' },
+const getStepPhases = (t: (key: string) => string): { key: GenerationPhase; label: string }[] => [
+  { key: 'analyzing', label: t('roadmap:generation.steps.analyze') },
+  { key: 'discovering', label: t('roadmap:generation.steps.discover') },
+  { key: 'generating', label: t('roadmap:generation.steps.generate') },
 ];
 
 /**
@@ -105,9 +106,11 @@ const STEP_PHASES: { key: GenerationPhase; label: string }[] = [
 function PhaseStepsIndicator({
   currentPhase,
   reducedMotion,
+  steps,
 }: {
   currentPhase: RoadmapGenerationStatus['phase'];
   reducedMotion: boolean;
+  steps: { key: GenerationPhase; label: string }[];
 }) {
   const getPhaseState = (
     phaseKey: GenerationPhase
@@ -136,7 +139,7 @@ function PhaseStepsIndicator({
 
   return (
     <div className="flex items-center justify-center gap-1 mt-4">
-      {STEP_PHASES.map((phase, index) => {
+      {steps.map((phase, index) => {
         const state = getPhaseState(phase.key);
         return (
           <div key={phase.key} className="flex items-center">
@@ -168,11 +171,11 @@ function PhaseStepsIndicator({
               )}
               {phase.label}
             </motion.div>
-            {index < STEP_PHASES.length - 1 && (
+            {index < steps.length - 1 && (
               <div
                 className={cn(
                   'w-4 h-px mx-1',
-                  getPhaseState(STEP_PHASES[index + 1].key) !== 'pending'
+                  getPhaseState(steps[index + 1].key) !== 'pending'
                     ? 'bg-success/50'
                     : 'bg-border'
                 )}
@@ -195,6 +198,7 @@ export function RoadmapGenerationProgress({
   className,
   onStop
 }: RoadmapGenerationProgressProps) {
+  const { t } = useTranslation('roadmap');
   const { phase, progress, message, error } = generationStatus;
   const reducedMotion = useReducedMotion();
   const [isStopping, setIsStopping] = useState(false);
@@ -220,7 +224,9 @@ export function RoadmapGenerationProgress({
     return null;
   }
 
-  const config = PHASE_CONFIG[phase];
+  const phaseConfig = getPhaseConfig(t);
+  const steps = getStepPhases(t);
+  const config = phaseConfig[phase];
   const Icon = config.icon;
   const isActivePhase = phase !== 'complete' && phase !== 'error';
 
@@ -281,10 +287,10 @@ export function RoadmapGenerationProgress({
                 disabled={isStopping}
               >
                 <Square className="h-4 w-4 mr-1" />
-                {isStopping ? 'Stopping...' : 'Stop'}
+                {isStopping ? t('generation.stopping') : t('generation.stop')}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Stop generation</TooltipContent>
+            <TooltipContent>{t('generation.stopTooltip')}</TooltipContent>
           </Tooltip>
         </div>
       )}
@@ -333,7 +339,7 @@ export function RoadmapGenerationProgress({
       {isActivePhase && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Progress</span>
+            <span className="text-xs text-muted-foreground">{t('generation.progress')}</span>
             <span className="text-xs font-medium">{progress}%</span>
           </div>
           <div className="relative h-2 w-full overflow-hidden rounded-full bg-border">
@@ -358,7 +364,7 @@ export function RoadmapGenerationProgress({
       )}
 
       {/* Phase steps indicator */}
-      <PhaseStepsIndicator currentPhase={phase} reducedMotion={reducedMotion} />
+      <PhaseStepsIndicator currentPhase={phase} reducedMotion={reducedMotion} steps={steps} />
 
       {/* Error display - shows whenever error is present, regardless of phase */}
       <AnimatePresence mode="wait">

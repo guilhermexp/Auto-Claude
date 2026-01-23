@@ -15,7 +15,8 @@
   },
   "notConfigured": {
     "title": "Memória Graphiti não está configurada",
-    "description": "Para ativar memória gráfica, defina GRAPHITI_ENABLED=true nas configurações do projeto."
+    "description": "Para ativar memória gráfica, defina GRAPHITI_ENABLED=true nas configurações do projeto.",
+    "hint": "Para ativar a memória gráfica, defina GRAPHITI_ENABLED=true nas configurações do projeto."
   },
   "searchMemories": {
     "title": "Pesquisar Memórias",
@@ -41,6 +42,162 @@
     "fileInsights": "Insights dos Arquivos",
     "subtasksCompleted": "Subtarefas Concluídas",
     "expand": "Expandir",
-    "collapse": "Recolher"
+    "collapse": "Recolher",
+    "sessionLabel": "Sessão #{{count}}"
+  },
+  "prReview": {
+    "title": "Revisão de PR",
+    "followUp": "Acompanhamento",
+    "findingsCount": "{{count}} achado",
+    "findingsCount_plural": "{{count}} achados",
+    "details": "Detalhes",
+    "collapse": "Recolher",
+    "keyFindings": "Principais achados",
+    "moreFindings": "+{{count}} achados",
+    "gotchas": "Armadilhas descobertas",
+    "patterns": "Padrões identificados",
+    "viewOnGitHub": "Ver PR no GitHub",
+    "severityLabels": {
+      "critical": "Crítico",
+      "high": "Alto",
+      "medium": "Médio",
+      "low": "Baixo"
+    },
+    "severityCount": "{{count}} {{severity}}",
+    "verdicts": {
+      "approve": "Aprovado",
+      "request_changes": "Alterações solicitadas",
+      "comment": "Comentado"
+    }
+  },
+  "chat": {
+    "title": "Análises",
+    "subtitle": "Pergunte sobre sua base de código",
+    "newConversation": "Nova conversa",
+    "placeholder": "Pergunte sobre sua base de código...",
+    "inputHint": "Pressione Enter para enviar, Shift+Enter para nova linha",
+    "thinking": "Pensando...",
+    "assistant": "Assistente",
+    "you": "Você"
+  },
+  "history": {
+    "title": "Histórico de conversas",
+    "recent": "Recentes",
+    "today": "Hoje",
+    "yesterday": "Ontem",
+    "daysAgo": "{{count}} dias atrás",
+    "noConversations": "Nenhuma conversa ainda",
+    "messageCount": "{{count}} mensagem",
+    "messageCount_plural": "{{count}} mensagens"
+  },
+  "tools": {
+    "toolsUsed": "{{count}} ferramenta usada",
+    "toolsUsed_plural": "{{count}} ferramentas usadas",
+    "readingFile": "Lendo arquivo",
+    "searchingFiles": "Procurando arquivos",
+    "searchingCode": "Pesquisando código"
+  },
+  "suggestedTask": {
+    "title": "Tarefa sugerida",
+    "createTask": "Criar tarefa",
+    "creating": "Criando...",
+    "created": "Tarefa criada"
+  },
+  "emptyState": {
+    "title": "Iniciar uma conversa",
+    "description": "Pergunte sobre sua base de código, receba sugestões de melhorias ou discuta funcionalidades que gostaria de implementar.",
+    "suggestions": {
+      "architecture": "Qual é a arquitetura deste projeto?",
+      "improvements": "Sugira melhorias para qualidade do código",
+      "features": "Quais recursos posso adicionar em seguida?",
+      "security": "Há alguma preocupação de segurança?"
+    }
+  },
+  "deleteDialog": {
+    "title": "Excluir conversa?",
+    "description": "Isso excluirá permanentemente esta conversa e todas as mensagens. Esta ação não pode ser desfeita."
+  },
+  "tabs": {
+    "projectIndex": "Índice do Projeto",
+    "memories": "Memórias"
+  },
+  "projectIndex": {
+    "title": "Estrutura do Projeto",
+    "description": "Conhecimento descoberto por IA sobre sua base de código",
+    "refresh": "Atualizar",
+    "refreshTooltip": "Reanalisar estrutura do projeto",
+    "errorTitle": "Falha ao carregar índice do projeto",
+    "noIndexTitle": "Nenhum Índice de Projeto Encontrado",
+    "noIndexDescription": "Clique em Atualizar para analisar a estrutura do projeto e criar um índice.",
+    "analyzeProject": "Analisar Projeto",
+    "overview": "Visão Geral",
+    "services": "Serviços",
+    "infrastructure": "Infraestrutura",
+    "conventions": "Convenções",
+    "dockerServices": "Serviços Docker",
+    "serviceCount": "{{count}} serviço",
+    "serviceCount_plural": "{{count}} serviços",
+    "labels": {
+      "dockerCompose": "Docker Compose",
+      "ciCd": "CI/CD",
+      "deployment": "Deploy",
+      "pythonLinting": "Linting Python",
+      "jsLinting": "Linting JS",
+      "formatting": "Formatação",
+      "gitHooks": "Git Hooks",
+      "typescript": "TypeScript"
+    },
+    "values": {
+      "enabled": "Ativado"
+    }
+  },
+  "filters": {
+    "all": "Todos",
+    "pr": "Análises de PR",
+    "sessions": "Sessões",
+    "codebase": "Base de Código",
+    "patterns": "Padrões",
+    "gotchas": "Armadilhas"
+  },
+  "memoryTypes": {
+    "session_insight": "Insight de Sessão",
+    "codebase_discovery": "Descoberta da Base de Código",
+    "codebase_map": "Mapa da Base de Código",
+    "pattern": "Padrão",
+    "gotcha": "Armadilha",
+    "task_outcome": "Resultado de Tarefa",
+    "qa_result": "Resultado de QA",
+    "historical_context": "Contexto Histórico",
+    "pr_review": "Análise de PR",
+    "pr_finding": "Descoberta de PR",
+    "pr_pattern": "Padrão de PR",
+    "pr_gotcha": "Armadilha de PR"
+  },
+  "serviceCard": {
+    "unknown": "desconhecido",
+    "testingLabel": "Testes",
+    "ormLabel": "ORM",
+    "portLabel": "Porta",
+    "stylingLabel": "Estilo",
+    "stateLabel": "Estado",
+    "appleFrameworks": "Frameworks da Apple",
+    "spmDependencies": "Dependências SPM",
+    "keyDirectories": "Diretórios-chave"
+  },
+  "serviceSections": {
+    "environmentVariables": "Variáveis de ambiente ({{count}})",
+    "externalServices": "Serviços externos",
+    "databases": "Bancos de dados",
+    "email": "E-mail",
+    "payments": "Pagamentos",
+    "cache": "Cache",
+    "databaseModels": "Modelos do banco ({{count}})",
+    "fieldsCount": "{{count}} campos",
+    "apiRoutes": "Rotas de API ({{count}})",
+    "monitoring": "Monitoramento",
+    "metricsLabel": "Métricas",
+    "healthLabel": "Saúde",
+    "dependencies": "Dependências ({{count}})",
+    "moreDependencies": "+{{count}} mais"
   }
 }

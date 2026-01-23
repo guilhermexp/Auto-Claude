@@ -18,17 +18,19 @@
     "all": "Todas",
     "code": "Código",
     "uiux": "UI/UX",
-    "docs": "Docs",
+    "docs": "Documentação",
     "security": "Segurança",
-    "performance": "Performance"
+    "performance": "Desempenho"
   },
   "generationProgress": {
     "title": "Gerando Ideias",
     "complete": "{{completed}}/{{total}} completas",
-    "logsButton": "Logs",
+    "logsButton": "Registros",
     "hideButton": "Ocultar",
     "showButton": "Mostrar",
-    "stopGenerationTooltip": "Parar geração"
+    "stopGenerationTooltip": "Parar geração",
+    "stop": "Parar",
+    "stopping": "Parando..."
   },
   "statusMessages": {
     "waitingToStart": "Aguardando início...",
@@ -39,5 +41,165 @@
     "rationale": "Justificativa",
     "convertToTask": "Converter para Tarefa",
     "dismiss": "Descartar"
+  },
+  "dialogs": {
+    "config": {
+      "title": "Configuração de Ideação",
+      "description": "Configure quais tipos de ideias gerar",
+      "typesTitle": "Tipos de Ideação",
+      "contextTitle": "Fontes de Contexto",
+      "includeRoadmap": "Incluir contexto de Roteiro",
+      "includeKanban": "Incluir contexto do Kanban"
+    },
+    "addMore": {
+      "title": "Adicionar Mais Ideias",
+      "description": "Selecione tipos adicionais de ideação para gerar. Suas ideias existentes serão preservadas.",
+      "allTypesGenerated": "Você já gerou todos os tipos de ideação!",
+      "allTypesGeneratedHint": "Use \"Regenerar\" para atualizar as ideias existentes.",
+      "selectedCount": "{{count}} selecionadas",
+      "generateTypes": "Gerar {{count}} Tipos",
+      "generateIdeas": "Gerar Ideias"
+    }
+  },
+  "list": {
+    "empty": "Nenhuma ideia para exibir"
+  },
+  "envConfig": {
+    "title": "Autenticação Claude necessária",
+    "description": "É necessário um token OAuth do Claude Code para gerar ideias de funcionalidades com IA."
+  },
+  "typeDescriptions": {
+    "code_improvements": "Melhorias na qualidade do código, refatorações e experiência do desenvolvedor.",
+    "ui_ux_improvements": "Aprimoramentos de interface e experiência para clareza e usabilidade.",
+    "documentation_gaps": "Documentação ausente ou desatualizada e guias úteis.",
+    "security_hardening": "Correções de segurança, hardening e boas práticas.",
+    "performance_optimizations": "Melhorias de performance e oportunidades de otimização.",
+    "code_quality": "Oportunidades de refatoração, arquivos grandes, code smells e violações de boas práticas."
+  },
+  "details": {
+    "effort": "Esforço",
+    "files": "Arquivos",
+    "buildsUpon": "Baseado em",
+    "implementationApproach": "Abordagem de implementação",
+    "affectedFiles": "Arquivos afetados",
+    "patternsToFollow": "Padrões a seguir",
+    "severity": "Severidade",
+    "category": "Categoria",
+    "breakingChange": "Mudança incompatível",
+    "breakingChangeDescription": "Essa refatoração pode quebrar código ou testes existentes.",
+    "currentState": "Estado atual",
+    "proposedChange": "Mudança proposta",
+    "codeExample": "Exemplo de código",
+    "metrics": "Métricas",
+    "lines": "Linhas",
+    "complexity": "Complexidade",
+    "duplicateLines": "Linhas duplicadas",
+    "testCoverage": "Cobertura de testes",
+    "bestPractice": "Boa prática",
+    "prerequisites": "Pré-requisitos",
+    "targetAudience": "Público-alvo",
+    "currentDocumentation": "Documentação atual",
+    "proposedContent": "Conteúdo proposto",
+    "affectedAreas": "Áreas afetadas",
+    "priority": "Prioridade",
+    "impact": "Impacto",
+    "expectedImprovement": "Melhoria esperada",
+    "implementation": "Implementação",
+    "tradeoffs": "Compensações",
+    "userBenefit": "Benefício ao usuário",
+    "affectedComponents": "Componentes afetados",
+    "vulnerability": "Vulnerabilidade",
+    "currentRisk": "Risco atual",
+    "remediation": "Correção",
+    "references": "Referências",
+    "compliance": "Conformidade"
+  },
+  "typeLabels": {
+    "code_improvements": "Melhorias de código",
+    "ui_ux_improvements": "Melhorias de UI/UX",
+    "documentation_gaps": "Documentação",
+    "security_hardening": "Segurança",
+    "performance_optimizations": "Performance",
+    "code_quality": "Qualidade de código"
+  },
+  "statusLabels": {
+    "draft": "Rascunho",
+    "selected": "Selecionado",
+    "converted": "Convertido",
+    "dismissed": "Dispensado",
+    "archived": "Arquivado"
+  },
+  "effortLabels": {
+    "trivial": "Trivial",
+    "small": "Pequeno",
+    "medium": "Médio",
+    "large": "Grande",
+    "complex": "Complexo"
+  },
+  "impactLabels": {
+    "low": "Baixo",
+    "medium": "Médio",
+    "high": "Alto",
+    "critical": "Crítico"
+  },
+  "impactDisplay": "Impacto {{level}}",
+  "severityLabels": {
+    "low": "Baixa",
+    "medium": "Média",
+    "high": "Alta",
+    "critical": "Crítica"
+  },
+  "codeQualitySeverityLabels": {
+    "suggestion": "Sugestão",
+    "minor": "Menor",
+    "major": "Maior",
+    "critical": "Crítica"
+  },
+  "uiuxCategories": {
+    "usability": "Usabilidade",
+    "accessibility": "Acessibilidade",
+    "performance": "Performance",
+    "visual": "Design visual",
+    "interaction": "Interação"
+  },
+  "documentationCategories": {
+    "readme": "README",
+    "api_docs": "Documentação de API",
+    "inline_comments": "Comentários em linha",
+    "examples": "Exemplos e tutoriais",
+    "architecture": "Documentação de arquitetura",
+    "troubleshooting": "Guia de troubleshooting"
+  },
+  "securityCategories": {
+    "authentication": "Autenticação",
+    "authorization": "Autorização",
+    "input_validation": "Validação de entrada",
+    "data_protection": "Proteção de dados",
+    "dependencies": "Dependências",
+    "configuration": "Configuração",
+    "secrets_management": "Gerenciamento de segredos"
+  },
+  "performanceCategories": {
+    "bundle_size": "Tamanho do bundle",
+    "runtime": "Performance de execução",
+    "memory": "Uso de memória",
+    "database": "Consultas ao banco",
+    "network": "Requisições de rede",
+    "rendering": "Renderização",
+    "caching": "Cache"
+  },
+  "codeQualityCategories": {
+    "large_files": "Arquivos grandes",
+    "code_smells": "Code smells",
+    "complexity": "Alta complexidade",
+    "duplication": "Duplicação de código",
+    "naming": "Convenções de nomenclatura",
+    "structure": "Estrutura de arquivos",
+    "linting": "Problemas de lint",
+    "testing": "Cobertura de testes",
+    "types": "Segurança de tipos",
+    "dependencies": "Problemas de dependências",
+    "dead_code": "Código morto",
+    "git_hygiene": "Higiene de Git"
   }
 }
