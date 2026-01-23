@@ -13,7 +13,6 @@ import {
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +30,8 @@ import {
   AlertDialogTitle
 } from './ui/alert-dialog';
 import { cn } from '../lib/utils';
-import type { InsightsSessionSummary } from '../../shared/types';
+import type { InsightsSessionSummary, InsightsModelConfig } from '../../shared/types';
+import { InsightsModelSelector } from './InsightsModelSelector';
 
 interface ChatHistorySidebarProps {
   sessions: InsightsSessionSummary[];
@@ -41,6 +41,9 @@ interface ChatHistorySidebarProps {
   onSelectSession: (sessionId: string) => void;
   onDeleteSession: (sessionId: string) => Promise<boolean>;
   onRenameSession: (sessionId: string, newTitle: string) => Promise<boolean>;
+  modelConfig?: InsightsModelConfig;
+  onModelConfigChange?: (config: InsightsModelConfig) => void;
+  isModelSelectorDisabled?: boolean;
 }
 
 export function ChatHistorySidebar({
@@ -50,9 +53,12 @@ export function ChatHistorySidebar({
   onNewSession,
   onSelectSession,
   onDeleteSession,
-  onRenameSession
+  onRenameSession,
+  modelConfig,
+  onModelConfigChange,
+  isModelSelectorDisabled
 }: ChatHistorySidebarProps) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['insights', 'common']);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [deleteSessionId, setDeleteSessionId] = useState<string | null>(null);
@@ -89,11 +95,11 @@ export function ChatHistorySidebar({
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) {
-      return 'Today';
+      return t('insights:history.today', 'Today');
     } else if (diffDays === 1) {
-      return 'Yesterday';
+      return t('insights:history.yesterday', 'Yesterday');
     } else if (diffDays < 7) {
-      return `${diffDays} days ago`;
+      return t('insights:history.daysAgo', { count: diffDays, defaultValue: '{{count}} days ago' });
     } else {
       return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     }
@@ -110,77 +116,94 @@ export function ChatHistorySidebar({
   }, {} as Record<string, InsightsSessionSummary[]>);
 
   return (
-    <div className="flex h-full w-64 flex-col bg-muted/20">
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 py-3">
-        <h3 className="text-sm font-medium text-foreground">Chat History</h3>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={onNewSession}
-              aria-label={t('accessibility.newConversationAriaLabel')}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>{t('accessibility.newConversationAriaLabel')}</TooltipContent>
-        </Tooltip>
-      </div>
+    <div className="flex h-full flex-col">
+      {/* Title - 1Code style */}
+      <h2 className="text-lg font-semibold px-2 pb-4 text-foreground">
+        {t('insights:chat.title', 'Insights')}
+      </h2>
 
-      {/* Session list */}
       <ScrollArea className="flex-1">
+        {/* New Chat Button - 1Code style */}
+        <button
+          onClick={onNewSession}
+          className={cn(
+            'w-full flex items-center gap-2 px-3 py-1.5 text-sm h-8 rounded-md font-medium transition-all mb-2',
+            'border border-dashed border-muted-foreground/30',
+            'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
+          )}
+        >
+          <Plus className="h-4 w-4 opacity-50" />
+          <span className="truncate">{t('insights:chat.newConversation', 'New Conversation')}</span>
+        </button>
+
+        {/* Separator */}
+        <div className="border-t border-border/50 mx-1 my-3" />
+
+        {/* Session list */}
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : sessions.length === 0 ? (
           <div className="px-3 py-8 text-center text-sm text-muted-foreground">
-            No conversations yet
+            {t('insights:history.noConversations', 'No conversations yet')}
           </div>
         ) : (
-          <div className="py-2">
+          <div className="space-y-3">
             {Object.entries(groupedSessions).map(([dateLabel, dateSessions]) => (
-              <div key={dateLabel} className="mb-2">
-                <div className="px-3 py-1 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              <div key={dateLabel}>
+                {/* Section header - 1Code style */}
+                <h3 className="mb-1.5 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {dateLabel}
+                </h3>
+                <div className="space-y-0.5">
+                  {dateSessions.map((session) => (
+                    <SessionItem
+                      key={session.id}
+                      session={session}
+                      isActive={session.id === currentSessionId}
+                      isEditing={editingId === session.id}
+                      editTitle={editTitle}
+                      onSelect={() => onSelectSession(session.id)}
+                      onStartEdit={() => handleStartEdit(session)}
+                      onSaveEdit={handleSaveEdit}
+                      onCancelEdit={handleCancelEdit}
+                      onEditTitleChange={setEditTitle}
+                      onDelete={() => setDeleteSessionId(session.id)}
+                    />
+                  ))}
                 </div>
-                {dateSessions.map((session) => (
-                  <SessionItem
-                    key={session.id}
-                    session={session}
-                    isActive={session.id === currentSessionId}
-                    isEditing={editingId === session.id}
-                    editTitle={editTitle}
-                    onSelect={() => onSelectSession(session.id)}
-                    onStartEdit={() => handleStartEdit(session)}
-                    onSaveEdit={handleSaveEdit}
-                    onCancelEdit={handleCancelEdit}
-                    onEditTitleChange={setEditTitle}
-                    onDelete={() => setDeleteSessionId(session.id)}
-                  />
-                ))}
               </div>
             ))}
           </div>
         )}
       </ScrollArea>
 
+      {/* Model Selector at bottom - 1Code style */}
+      {onModelConfigChange && (
+        <div className="mt-auto pt-4 border-t border-border/50 mx-1">
+          <div className="px-1 pb-1">
+            <InsightsModelSelector
+              currentConfig={modelConfig}
+              onConfigChange={onModelConfigChange}
+              disabled={isModelSelectorDisabled}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Delete confirmation dialog */}
       <AlertDialog open={!!deleteSessionId} onOpenChange={() => setDeleteSessionId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete conversation?</AlertDialogTitle>
+            <AlertDialogTitle>{t('insights:deleteDialog.title', 'Delete conversation?')}</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete this conversation and all its messages.
-              This action cannot be undone.
+              {t('insights:deleteDialog.description', 'This will permanently delete this conversation and all its messages. This action cannot be undone.')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+            <AlertDialogCancel>{t('common:buttons.cancel', 'Cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>{t('common:buttons.delete', 'Delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -213,7 +236,7 @@ function SessionItem({
   onEditTitleChange,
   onDelete
 }: SessionItemProps) {
-  const { t } = useTranslation('common');
+  const { t } = useTranslation(['insights', 'common']);
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -225,12 +248,12 @@ function SessionItem({
 
   if (isEditing) {
     return (
-      <div className="group flex items-center gap-1 px-2 py-1">
+      <div className="flex items-center gap-1 px-2 py-1">
         <Input
           value={editTitle}
           onChange={(e) => onEditTitleChange(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="h-7 text-sm"
+          className="h-7 text-sm flex-1"
           autoFocus
         />
         <Button
@@ -238,7 +261,7 @@ function SessionItem({
           size="icon"
           className="h-7 w-7 shrink-0"
           onClick={onSaveEdit}
-          aria-label={t('accessibility.saveEditAriaLabel')}
+          aria-label={t('common:accessibility.saveEditAriaLabel', 'Save')}
         >
           <Check className="h-3.5 w-3.5 text-success" />
         </Button>
@@ -247,7 +270,7 @@ function SessionItem({
           size="icon"
           className="h-7 w-7 shrink-0"
           onClick={onCancelEdit}
-          aria-label={t('accessibility.cancelEditAriaLabel')}
+          aria-label={t('common:accessibility.cancelEditAriaLabel', 'Cancel')}
         >
           <X className="h-3.5 w-3.5 text-muted-foreground" />
         </Button>
@@ -255,45 +278,45 @@ function SessionItem({
     );
   }
 
+  // 1Code NavItem style
   return (
     <div
       className={cn(
-        'group relative cursor-pointer px-2 py-2 transition-colors hover:bg-muted',
-        isActive && 'bg-primary/10 hover:bg-primary/15'
+        'group relative cursor-pointer px-3 py-1.5 text-sm rounded-md font-medium transition-all',
+        isActive
+          ? 'bg-foreground/10 text-foreground'
+          : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
       )}
       onClick={onSelect}
     >
-      {/* Content with reserved space for the menu button */}
-      <div className="flex items-center gap-1.5 pr-7">
+      <div className="flex items-center gap-2 pr-6">
         <MessageSquare
           className={cn(
             'h-4 w-4 shrink-0',
-            isActive ? 'text-primary' : 'text-muted-foreground'
+            isActive ? 'opacity-100' : 'opacity-50'
           )}
         />
         <div className="min-w-0 flex-1">
-          <p
-            className={cn(
-              'line-clamp-2 text-sm leading-tight break-words',
-              isActive ? 'font-medium text-foreground' : 'text-foreground/80'
-            )}
-          >
+          <p className="truncate leading-tight">
             {session.title}
           </p>
-          <p className="text-[11px] text-muted-foreground mt-0.5">
-            {session.messageCount} message{session.messageCount !== 1 ? 's' : ''}
+          <p className="text-[10px] text-muted-foreground mt-0.5 font-normal">
+            {session.messageCount === 1
+              ? t('insights:history.messageCount', { count: session.messageCount, defaultValue: '{{count}} message' })
+              : t('insights:history.messageCount_plural', { count: session.messageCount, defaultValue: '{{count}} messages' })
+            }
           </p>
         </div>
       </div>
 
-      {/* Absolutely positioned menu button - always visible */}
+      {/* Menu button */}
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
           <Button
             variant="ghost"
             size="icon"
-            className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100 hover:bg-muted-foreground/20 transition-opacity"
-            aria-label={t('accessibility.moreOptionsAriaLabel')}
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6 opacity-0 group-hover:opacity-100 data-[state=open]:opacity-100 hover:bg-foreground/10 transition-opacity"
+            aria-label={t('common:accessibility.moreOptionsAriaLabel', 'More options')}
           >
             <MoreVertical className="h-3.5 w-3.5" />
           </Button>
@@ -301,14 +324,14 @@ function SessionItem({
         <DropdownMenuContent align="end" sideOffset={5} className="w-36 z-[100]">
           <DropdownMenuItem onSelect={onStartEdit}>
             <Pencil className="mr-2 h-3.5 w-3.5" />
-            Rename
+            {t('common:buttons.rename', 'Rename')}
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={onDelete}
             className="text-destructive focus:text-destructive"
           >
             <Trash2 className="mr-2 h-3.5 w-3.5" />
-            Delete
+            {t('common:buttons.delete', 'Delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

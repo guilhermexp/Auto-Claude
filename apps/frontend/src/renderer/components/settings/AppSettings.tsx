@@ -103,12 +103,12 @@ function NavItem({ icon: Icon, label, isActive, isDisabled, onClick }: NavItemPr
       onClick={onClick}
       disabled={isDisabled}
       className={cn(
-        'w-full flex items-center gap-2 px-3 py-1.5 text-sm h-7 rounded-md font-medium transition-all',
+        'w-full flex items-center gap-2 px-2.5 py-1.5 text-sm h-8 rounded-md font-medium transition-colors',
         isActive
           ? 'bg-foreground/10 text-foreground'
           : isDisabled
             ? 'opacity-50 cursor-not-allowed text-muted-foreground'
-            : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
+            : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground dark:hover:bg-white/5'
       )}
     >
       <Icon className={cn('h-4 w-4', isActive ? 'opacity-100' : 'opacity-50')} />
@@ -256,16 +256,16 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
     }}>
       <FullScreenDialogContent>
         <FullScreenDialogBody className="p-0">
-          <div className="flex h-full bg-background">
+          <div className="flex h-full bg-background dark:bg-[hsl(0_0%_5%)]">
             {/* Navigation sidebar - 1Code style: narrow, darker background */}
-            <nav className="w-80 shrink-0 px-3 py-4 flex flex-col">
+            <nav className="w-[360px] min-w-0 max-w-[360px] flex-[0_0_360px] py-4 flex flex-col bg-sidebar border-r border-border/60 dark:bg-[hsl(0_0%_7%)] overflow-hidden box-border">
               {/* Title */}
-              <h2 className="text-lg font-semibold px-2 pb-4 text-foreground">
+              <h2 className="text-lg font-semibold px-3 pb-4 text-foreground">
                 {t('title')}
               </h2>
 
-              <ScrollArea className="flex-1">
-                <div className="space-y-4">
+              <ScrollArea className="flex-1 w-full max-w-full px-3 box-border">
+                <div className="space-y-4 w-full max-w-full box-border overflow-hidden">
                   {/* APPLICATION Section */}
                   <div>
                     <h3 className="mb-1.5 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -293,9 +293,8 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
                             onRerunWizard();
                           }}
                           className={cn(
-                            'w-full flex items-center gap-2 px-3 py-1.5 text-sm h-7 rounded-md font-medium transition-all mt-1',
-                            'border border-dashed border-muted-foreground/30',
-                            'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
+                            'w-full flex items-center gap-2 px-2.5 py-1.5 text-sm h-8 rounded-md font-medium transition-colors mt-1',
+                            'text-muted-foreground hover:bg-foreground/5 hover:text-foreground dark:hover:bg-white/5'
                           )}
                         >
                           <Sparkles className="h-4 w-4 opacity-50" />
@@ -306,7 +305,7 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
                   </div>
 
                   {/* Separator */}
-                  <div className="border-t border-border/50 mx-1" />
+                  <div className="border-t border-border/40 mx-2" />
 
                   {/* PROJECT Section */}
                   <div>
@@ -353,10 +352,10 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
             </nav>
 
             {/* Main content - 1Code style: card-based with rounded corners */}
-            <div className="flex-1 min-w-0 h-full overflow-hidden py-4 pr-4">
-              <div className="flex flex-col relative h-full bg-card rounded-xl w-full overflow-hidden">
+            <div className="flex-1 min-w-0 h-full overflow-hidden py-4 pr-4 pl-4">
+              <div className="flex flex-col relative h-full bg-card rounded-xl w-full overflow-hidden border border-border/60 dark:border-white/5 dark:bg-[linear-gradient(180deg,hsl(0_0%_10%)_0%,hsl(0_0%_7%)_40%,hsl(0_0%_5%)_100%)]">
                 <ScrollArea className="flex-1">
-                  <div className="p-6 space-y-6">
+                  <div className="p-5 space-y-5">
                     {renderContent()}
                   </div>
                 </ScrollArea>

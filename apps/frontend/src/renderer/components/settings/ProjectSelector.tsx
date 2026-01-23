@@ -54,7 +54,7 @@ export function ProjectSelector({
         open={open}
         onOpenChange={setOpen}
       >
-        <SelectTrigger className="w-full [&_span]:truncate">
+        <SelectTrigger className="w-full [&_span]:truncate border-transparent bg-foreground/5 hover:bg-foreground/8 focus:ring-0 focus:border-border/50 h-8 px-2">
           <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
             <FolderOpen className="h-4 w-4 shrink-0 text-muted-foreground" />
             <SelectValue placeholder="Select a project..." className="truncate min-w-0 flex-1" />

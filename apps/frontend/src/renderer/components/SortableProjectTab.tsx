@@ -67,24 +67,24 @@ export function SortableProjectTab({
       {...attributes}
     >
       <Tooltip delayDuration={200}>
-        <TooltipTrigger asChild>
-          <div
-            className={cn(
-              'flex-1 flex items-center gap-1 sm:gap-2',
-              // Responsive padding: tighter on mobile, normal on desktop
-              'px-2 sm:px-3 md:px-4 py-2 sm:py-2.5',
-              'text-xs sm:text-sm',
-              'min-w-0 truncate hover:bg-muted/50 transition-colors',
-              'border-b-2 border-transparent cursor-pointer',
-              isActive && [
-                'bg-background border-b-primary text-foreground',
-                'hover:bg-background'
-              ],
-              !isActive && [
-                'text-muted-foreground',
-                'hover:text-foreground'
-              ]
-            )}
+      <TooltipTrigger asChild>
+        <div
+          className={cn(
+            'flex-1 flex items-center gap-1 sm:gap-2',
+            // Responsive padding: tighter on mobile, normal on desktop
+            'px-2 sm:px-2.5 md:px-3 py-1.5',
+            'text-xs',
+            'min-w-0 truncate hover:bg-muted/50 transition-colors',
+            'border-b-2 border-transparent cursor-pointer',
+            isActive && [
+              'bg-background border-b-primary text-foreground shadow-[0_6px_14px_rgba(0,0,0,0.25)]',
+              'hover:bg-background'
+            ],
+            !isActive && [
+              'text-[11px] text-muted-foreground/50 opacity-75',
+              'hover:text-foreground hover:opacity-100'
+            ]
+          )}
             onClick={onSelect}
           >
             {/* Drag handle - visible on hover, hidden on mobile */}
@@ -94,10 +94,13 @@ export function SortableProjectTab({
                 'hidden sm:block',
                 'opacity-0 group-hover:opacity-60 transition-opacity',
                 'cursor-grab active:cursor-grabbing',
-                'w-1 h-4 bg-muted-foreground rounded-full flex-shrink-0'
+                'w-1 h-3 bg-muted-foreground rounded-full flex-shrink-0'
               )}
             />
-            <span className="truncate font-medium">
+            <span className={cn(
+              'truncate',
+              isActive ? 'font-semibold text-foreground' : 'font-normal text-muted-foreground/50'
+            )}>
               {project.name}
             </span>
           </div>
@@ -114,7 +117,7 @@ export function SortableProjectTab({
 
       {/* Active tab controls - settings and archive, always accessible */}
       {isActive && (
-        <div className="flex items-center gap-0.5 mr-0.5 sm:mr-1 flex-shrink-0">
+        <div className="flex items-center gap-0.5 mr-0.5 flex-shrink-0">
           {/* Settings icon - responsive sizing */}
           {onSettingsClick && (
             <Tooltip delayDuration={200}>
@@ -122,7 +125,7 @@ export function SortableProjectTab({
                 <button
                   type="button"
                   className={cn(
-                    'h-5 w-5 sm:h-6 sm:w-6 p-0 rounded',
+                    'h-5 w-5 p-0 rounded',
                     'flex items-center justify-center',
                     'text-muted-foreground hover:text-foreground',
                     'hover:bg-muted/50 transition-colors',
@@ -134,7 +137,7 @@ export function SortableProjectTab({
                   }}
                   aria-label={t('projectTab.settings')}
                 >
-                  <Settings2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                  <Settings2 className="h-3 w-3" />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="bottom">
@@ -151,7 +154,7 @@ export function SortableProjectTab({
             <button
               type="button"
               className={cn(
-                'h-5 w-5 sm:h-6 sm:w-6 p-0 mr-0.5 sm:mr-1',
+                'h-5 w-5 p-0 mr-0.5',
                 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
                 'transition-opacity duration-200 rounded flex-shrink-0',
                 'hover:bg-destructive hover:text-destructive-foreground',

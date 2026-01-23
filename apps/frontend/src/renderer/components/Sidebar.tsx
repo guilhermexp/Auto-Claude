@@ -22,7 +22,6 @@ import {
   Wrench
 } from 'lucide-react';
 import { Button } from './ui/button';
-import { ScrollArea } from './ui/scroll-area';
 import { Separator } from './ui/separator';
 import {
   Tooltip,
@@ -273,22 +272,38 @@ export function Sidebar({
         disabled={!selectedProjectId}
         aria-keyshortcuts={item.shortcut}
         className={cn(
-          'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
+          'w-full text-left py-2 cursor-pointer group relative transition-colors duration-75',
+          'outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70',
+          'pl-2 pr-2 rounded-md',
           'disabled:pointer-events-none disabled:opacity-50',
           isActive
-            ? 'bg-foreground/10 text-foreground'
+            ? 'bg-foreground/5 text-foreground'
             : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
         )}
       >
-        <Icon className={cn('h-4 w-4 shrink-0', isActive ? 'opacity-100' : 'opacity-50')} />
-        <span className="flex-1 text-left">{t(item.labelKey)}</span>
+        <div className="flex items-center gap-2.5">
+          <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+            <Icon className={cn('h-4 w-4', isActive ? 'opacity-100' : 'opacity-60')} />
+          </div>
+          <span className="truncate text-sm leading-tight flex-1">{t(item.labelKey)}</span>
+          {item.shortcut && (
+            <span className={cn(
+              'flex-shrink-0 text-[10px] font-medium px-1 py-0.5 rounded',
+              'transition-[opacity] duration-150',
+              'opacity-0 group-hover:opacity-100',
+              isActive ? 'text-muted-foreground/60' : 'text-muted-foreground/40'
+            )}>
+              {item.shortcut}
+            </span>
+          )}
+        </div>
       </button>
     );
   };
 
   return (
     <TooltipProvider>
-      <div className="flex h-full w-64 flex-col bg-background border-r border-border">
+      <div className="flex h-full w-64 flex-col bg-sidebar border-r border-border/50 dark:bg-[hsl(0_0%_7%)]">
         {/* Header with drag area - extra top padding for macOS traffic lights */}
         <div className="electron-drag flex h-14 items-center justify-between px-4 pt-6 gap-2">
           <div className="flex-1" />
@@ -304,23 +319,25 @@ export function Sidebar({
 
         <Separator className="mt-2" />
 
-
-        <Separator />
-
         {/* Navigation */}
-        <ScrollArea className="flex-1">
-          <div className="px-3 py-4">
+        <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent px-3 pt-3 pb-4">
+          <div className="mb-6">
             {/* Project Section */}
-            <div>
-              <h3 className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="flex items-center h-4 mb-2 pl-1 gap-2 min-w-0">
+              <h3 className="text-xs font-medium text-muted-foreground whitespace-nowrap">
                 {t('sections.project')}
               </h3>
-              <nav className="space-y-1">
-                {visibleNavItems.map(renderNavItem)}
-              </nav>
+              {selectedProject?.name && (
+                <span className="text-[11px] text-muted-foreground/60 truncate">
+                  {selectedProject.name}
+                </span>
+              )}
             </div>
+            <nav className="list-none p-0 m-0 space-y-1.5">
+              {visibleNavItems.map(renderNavItem)}
+            </nav>
           </div>
-        </ScrollArea>
+        </div>
 
         <Separator />
 
@@ -331,23 +348,23 @@ export function Sidebar({
         <UpdateBanner />
 
         {/* Bottom section with Settings, Help, and New Task */}
-        <div className="p-4 space-y-3">
+        <div className="px-2 pb-3 pt-2 space-y-2">
           {/* Claude Code Status Badge */}
           <ClaudeCodeStatusBadge />
 
           {/* Settings and Help row */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   onClick={onSettingsClick}
                   className={cn(
-                    'flex-1 flex items-center gap-2 px-3 py-1.5 text-sm h-7 rounded-md font-medium transition-all',
+                    'flex-1 flex items-center gap-2.5 py-1.5 pl-2 pr-2 text-sm rounded-md transition-colors duration-75',
                     'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
                   )}
                 >
-                  <Settings className="h-4 w-4 opacity-50" />
-                  {t('actions.settings')}
+                  <Settings className="h-4 w-4 opacity-60" />
+                  <span className="text-sm leading-tight">{t('actions.settings')}</span>
                 </button>
               </TooltipTrigger>
               <TooltipContent side="top">{t('tooltips.settings')}</TooltipContent>
@@ -358,17 +375,16 @@ export function Sidebar({
                   onClick={() => window.open('https://github.com/AndyMik90/Auto-Claude/issues', '_blank')}
                   aria-label={t('tooltips.help')}
                   className={cn(
-                    'flex items-center justify-center w-7 h-7 rounded-md transition-all',
+                    'flex items-center justify-center w-7 h-7 rounded-md transition-colors duration-75',
                     'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
                   )}
                 >
-                  <HelpCircle className="h-4 w-4 opacity-50" />
+                  <HelpCircle className="h-4 w-4 opacity-60" />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="top">{t('tooltips.help')}</TooltipContent>
             </Tooltip>
           </div>
-
         </div>
       </div>
 

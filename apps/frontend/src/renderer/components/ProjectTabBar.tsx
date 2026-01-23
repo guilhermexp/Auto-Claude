@@ -86,7 +86,7 @@ export function ProjectTabBar({
 
   return (
     <div className={cn(
-      'flex items-center border-b border-border bg-background',
+      'flex items-center h-10 border-b border-border bg-background',
       'overflow-x-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent',
       className
     )}>
@@ -112,13 +112,13 @@ export function ProjectTabBar({
         })}
       </div>
 
-      <div className="flex items-center gap-2 px-2 py-1">
+      <div className="flex items-center gap-1.5 px-1.5 py-0.5">
         <AuthStatusIndicator />
         <UsageIndicator />
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
+          className="h-7 w-7"
           onClick={onAddProject}
           aria-label={t('projectTab.addProjectAriaLabel')}
         >

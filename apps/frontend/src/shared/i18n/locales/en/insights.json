@@ -2,7 +2,54 @@
   "title": "Insights & Memory",
   "graphMemoryStatus": "Graph Memory Status",
   "connected": "Connected",
-    "notAvailable": "Not Available",
+  "notAvailable": "Not Available",
+  "chat": {
+    "title": "Insights",
+    "subtitle": "Ask questions about your codebase",
+    "newConversation": "New Conversation",
+    "placeholder": "Ask about your codebase...",
+    "inputHint": "Press Enter to send, Shift+Enter for new line",
+    "thinking": "Thinking...",
+    "assistant": "Assistant",
+    "you": "You"
+  },
+  "history": {
+    "title": "Chat History",
+    "recent": "Recent",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "daysAgo": "{{count}} days ago",
+    "noConversations": "No conversations yet",
+    "messageCount": "{{count}} message",
+    "messageCount_plural": "{{count}} messages"
+  },
+  "tools": {
+    "toolsUsed": "{{count}} tool used",
+    "toolsUsed_plural": "{{count}} tools used",
+    "readingFile": "Reading file",
+    "searchingFiles": "Searching files",
+    "searchingCode": "Searching code"
+  },
+  "suggestedTask": {
+    "title": "Suggested Task",
+    "createTask": "Create Task",
+    "creating": "Creating...",
+    "created": "Task Created"
+  },
+  "emptyState": {
+    "title": "Start a Conversation",
+    "description": "Ask questions about your codebase, get suggestions for improvements, or discuss features you'd like to implement.",
+    "suggestions": {
+      "architecture": "What is the architecture of this project?",
+      "improvements": "Suggest improvements for code quality",
+      "features": "What features could I add next?",
+      "security": "Are there any security concerns?"
+    }
+  },
+  "deleteDialog": {
+    "title": "Delete conversation?",
+    "description": "This will permanently delete this conversation and all its messages. This action cannot be undone."
+  },
   "labels": {
     "database": "Database",
     "path": "Path",

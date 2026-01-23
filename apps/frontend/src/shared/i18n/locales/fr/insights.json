@@ -3,6 +3,53 @@
   "graphMemoryStatus": "Statut de la Mémoire Graphique",
   "connected": "Connecté",
   "notAvailable": "Non Disponible",
+  "chat": {
+    "title": "Insights",
+    "subtitle": "Posez des questions sur votre code",
+    "newConversation": "Nouvelle Conversation",
+    "placeholder": "Posez une question sur votre code...",
+    "inputHint": "Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne",
+    "thinking": "Réflexion...",
+    "assistant": "Assistant",
+    "you": "Vous"
+  },
+  "history": {
+    "title": "Historique des Conversations",
+    "recent": "Récent",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "daysAgo": "Il y a {{count}} jours",
+    "noConversations": "Aucune conversation pour l'instant",
+    "messageCount": "{{count}} message",
+    "messageCount_plural": "{{count}} messages"
+  },
+  "tools": {
+    "toolsUsed": "{{count}} outil utilisé",
+    "toolsUsed_plural": "{{count}} outils utilisés",
+    "readingFile": "Lecture du fichier",
+    "searchingFiles": "Recherche de fichiers",
+    "searchingCode": "Recherche dans le code"
+  },
+  "suggestedTask": {
+    "title": "Tâche Suggérée",
+    "createTask": "Créer une Tâche",
+    "creating": "Création...",
+    "created": "Tâche Créée"
+  },
+  "emptyState": {
+    "title": "Démarrer une Conversation",
+    "description": "Posez des questions sur votre code, obtenez des suggestions d'améliorations ou discutez des fonctionnalités que vous aimeriez implémenter.",
+    "suggestions": {
+      "architecture": "Quelle est l'architecture de ce projet ?",
+      "improvements": "Suggérer des améliorations pour la qualité du code",
+      "features": "Quelles fonctionnalités pourrais-je ajouter ?",
+      "security": "Y a-t-il des problèmes de sécurité ?"
+    }
+  },
+  "deleteDialog": {
+    "title": "Supprimer la conversation ?",
+    "description": "Cela supprimera définitivement cette conversation et tous ses messages. Cette action est irréversible."
+  },
   "labels": {
     "database": "Base de Données",
     "path": "Chemin",

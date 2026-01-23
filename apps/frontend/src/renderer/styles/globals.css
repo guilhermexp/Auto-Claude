@@ -373,9 +373,9 @@
   --destructive-foreground: 0 0% 98%;
 
   /* Borders and Inputs - very subtle like 1Code */
-  --border: 0 0% 17%;
-  --input: 0 0% 17%;
-  --input-background: 0 0% 12%;
+  --border: 0 0% 12%;
+  --input: 0 0% 14%;
+  --input-background: 0 0% 10%;
 
   /* Focus ring */
   --ring: 240 5% 30%;

@@ -31,10 +31,10 @@ export function SettingsCard({
   const { t } = useTranslation(['settings', 'common']);
 
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('space-y-3', className)}>
       {/* Section title above the card */}
       {(title || description) && (
-        <div className="pb-1">
+        <div className="pb-2">
           {title && (
             <h3 className="text-sm font-medium text-foreground">{title}</h3>
           )}
@@ -47,13 +47,13 @@ export function SettingsCard({
       {/* Card container */}
       <div className="bg-background rounded-lg border border-border overflow-hidden">
         {/* Card content */}
-        <div className="p-4 space-y-6">
+        <div className="p-5 space-y-5">
           {children}
         </div>
 
         {/* Card footer with save button */}
         {showSaveButton && (
-          <div className="bg-muted/50 px-4 py-3 flex items-center justify-between gap-4 border-t border-border">
+          <div className="bg-muted/50 px-5 py-3.5 flex items-center justify-between gap-4 border-t border-border">
             {/* Error message on the left */}
             {error && (
               <div className="flex-1 rounded-md bg-destructive/10 border border-destructive/30 px-3 py-1.5 text-sm text-destructive">

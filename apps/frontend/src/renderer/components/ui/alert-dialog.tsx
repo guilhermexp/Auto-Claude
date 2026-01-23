@@ -43,7 +43,7 @@ const alertDialogContentVariants = cva(
   {
     variants: {
       intent: {
-        default: 'border border-border',
+        default: 'border border-border/50',
         info: 'border border-info',
         warning: 'border border-warning',
         destructive: 'border border-destructive',

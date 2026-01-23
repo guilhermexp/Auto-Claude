@@ -51,18 +51,20 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Mode Toggle */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium text-foreground">Appearance Mode</Label>
-        <p className="text-sm text-muted-foreground">Choose light, dark, or system preference</p>
-        <div className="grid grid-cols-3 gap-3 max-w-md pt-1">
+      <div className="space-y-2">
+        <div className="space-y-1">
+          <Label className="text-sm font-medium text-foreground">Appearance Mode</Label>
+          <p className="text-sm text-muted-foreground">Choose light, dark, or system preference</p>
+        </div>
+        <div className="grid grid-cols-3 gap-2.5 max-w-md">
           {(['system', 'light', 'dark'] as const).map((mode) => (
             <button
               key={mode}
               onClick={() => handleModeChange(mode)}
               className={cn(
-                'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all',
+                'flex flex-col items-center gap-1.5 p-3.5 rounded-lg border-2 transition-all',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                 currentMode === mode
                   ? 'border-primary bg-primary/5'
@@ -77,10 +79,12 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
       </div>
 
       {/* Color Theme Grid */}
-      <div className="space-y-3">
-        <Label className="text-sm font-medium text-foreground">Color Theme</Label>
-        <p className="text-sm text-muted-foreground">Select a color palette for the interface</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+      <div className="space-y-2">
+        <div className="space-y-1">
+          <Label className="text-sm font-medium text-foreground">Color Theme</Label>
+          <p className="text-sm text-muted-foreground">Select a color palette for the interface</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {COLOR_THEMES.map((theme) => {
             const isSelected = currentColorTheme === theme.id;
             const bgColor = isDark ? theme.previewColors.darkBg : theme.previewColors.bg;
@@ -93,7 +97,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
                 key={theme.id}
                 onClick={() => handleColorThemeChange(theme.id)}
                 className={cn(
-                  'relative flex flex-col p-4 rounded-lg border-2 text-left transition-all',
+                  'relative flex flex-col p-3.5 rounded-lg border-2 text-left transition-all',
                   'hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   isSelected
                     ? 'border-primary bg-primary/5 shadow-sm'
@@ -108,7 +112,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
                 )}
 
                 {/* Preview swatches */}
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-2.5">
                   <div className="flex -space-x-1.5">
                     <div
                       className="w-6 h-6 rounded-full border-2 border-background shadow-sm"
