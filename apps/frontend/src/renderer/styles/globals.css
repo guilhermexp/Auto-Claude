@@ -273,6 +273,16 @@
   color: hsl(var(--sidebar-foreground)) !important;
 }
 
+/* Hide scrollbars for settings panel */
+.settings-scroll-viewport {
+  scrollbar-width: none;
+}
+
+.settings-scroll-viewport::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 /* CSS variables for light mode */
 :root {
   /* Layout Base */

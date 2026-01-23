@@ -13,6 +13,7 @@ interface TabState {
   openProjectIds: string[];
   activeProjectId: string | null;
   tabOrder: string[];
+  projectViews?: Record<string, string>;
 }
 
 interface StoreData {
@@ -158,7 +159,8 @@ export class ProjectStore {
     return this.data.tabState || {
       openProjectIds: [],
       activeProjectId: null,
-      tabOrder: []
+      tabOrder: [],
+      projectViews: {}
     };
   }
 
@@ -168,12 +170,20 @@ export class ProjectStore {
   saveTabState(tabState: TabState): void {
     // Filter out any project IDs that no longer exist
     const validProjectIds = this.data.projects.map(p => p.id);
+    const projectViews: Record<string, string> = {};
+    for (const [projectId, view] of Object.entries(tabState.projectViews || {})) {
+      if (validProjectIds.includes(projectId)) {
+        projectViews[projectId] = view;
+      }
+    }
+
     this.data.tabState = {
       openProjectIds: tabState.openProjectIds.filter(id => validProjectIds.includes(id)),
       activeProjectId: tabState.activeProjectId && validProjectIds.includes(tabState.activeProjectId)
         ? tabState.activeProjectId
         : null,
-      tabOrder: tabState.tabOrder.filter(id => validProjectIds.includes(id))
+      tabOrder: tabState.tabOrder.filter(id => validProjectIds.includes(id)),
+      projectViews
     };
     console.log('[ProjectStore] Saving tab state:', this.data.tabState);
     this.save();

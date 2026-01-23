@@ -19,6 +19,7 @@ export interface TabState {
   openProjectIds: string[];
   activeProjectId: string | null;
   tabOrder: string[];
+  projectViews?: Record<string, string>;
 }
 
 export interface ProjectAPI {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, RefreshCw, AlertCircle } from 'lucide-react';
 import { debugLog } from '../shared/utils/debug-logger';
@@ -123,6 +123,8 @@ export function App() {
   const openProjectIds = useProjectStore((state) => state.openProjectIds);
   const openProjectTab = useProjectStore((state) => state.openProjectTab);
   const setActiveProject = useProjectStore((state) => state.setActiveProject);
+  const projectViews = useProjectStore((state) => state.projectViews);
+  const setProjectView = useProjectStore((state) => state.setProjectView);
   const reorderTabs = useProjectStore((state) => state.reorderTabs);
   const tasks = useTaskStore((state) => state.tasks);
   const settings = useSettingsStore((state) => state.settings);
@@ -141,6 +143,8 @@ export function App() {
   const [settingsInitialSection, setSettingsInitialSection] = useState<AppSection | undefined>(undefined);
   const [settingsInitialProjectSection, setSettingsInitialProjectSection] = useState<ProjectSettingsSection | undefined>(undefined);
   const [activeView, setActiveView] = useState<SidebarView>('kanban');
+  const isRestoringViewRef = useRef(false);
+  const lastProjectKeyRef = useRef<string | null>(null);
   const [isOnboardingWizardOpen, setIsOnboardingWizardOpen] = useState(false);
   const [isVersionWarningModalOpen, setIsVersionWarningModalOpen] = useState(false);
   const [isRefreshingTasks, setIsRefreshingTasks] = useState(false);
@@ -178,6 +182,7 @@ export function App() {
   // Get tabs and selected project
   const projectTabs = getProjectTabs();
   const selectedProject = projects.find((p) => p.id === (activeProjectId || selectedProjectId));
+  const activeProjectKey = activeProjectId || selectedProjectId || null;
 
   // Initial load
   useEffect(() => {
@@ -243,6 +248,32 @@ export function App() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps -- projectTabs is intentionally omitted to avoid infinite re-render (computed array creates new reference each render)
   }, [projects, activeProjectId, selectedProjectId, openProjectIds, openProjectTab, setActiveProject]);
+
+  // Restore per-project view when switching projects
+  useEffect(() => {
+    if (!activeProjectKey) return;
+    if (lastProjectKeyRef.current === activeProjectKey) {
+      return;
+    }
+    lastProjectKeyRef.current = activeProjectKey;
+    const storedView = projectViews[activeProjectKey] as SidebarView | undefined;
+    if (storedView && storedView !== activeView) {
+      isRestoringViewRef.current = true;
+      setActiveView(storedView);
+    }
+  }, [activeProjectKey, projectViews, activeView]);
+
+  // Persist per-project view on change
+  useEffect(() => {
+    if (!activeProjectKey) return;
+    if (isRestoringViewRef.current) {
+      isRestoringViewRef.current = false;
+      return;
+    }
+    if (projectViews[activeProjectKey] !== activeView) {
+      setProjectView(activeProjectKey, activeView);
+    }
+  }, [activeProjectKey, activeView, setProjectView]);
 
   // Track if settings have been loaded at least once
   const [settingsHaveLoaded, setSettingsHaveLoaded] = useState(false);

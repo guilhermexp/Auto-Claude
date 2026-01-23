@@ -12,7 +12,7 @@ export function RoadmapEmptyState({ onGenerate }: RoadmapEmptyStateProps) {
           Generate an AI-powered roadmap that understands your project's target audience and
           creates a strategic feature plan.
         </p>
-        <Button onClick={onGenerate} size="lg">
+        <Button onClick={onGenerate} size="lg" variant="secondary">
           <Sparkles className="h-4 w-4 mr-2" />
           Generate Roadmap
         </Button>

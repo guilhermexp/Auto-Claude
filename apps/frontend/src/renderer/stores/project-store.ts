@@ -17,6 +17,7 @@ interface ProjectState {
   openProjectIds: string[]; // Array of open project IDs
   activeProjectId: string | null; // Currently active tab
   tabOrder: string[]; // Order of tabs for drag and drop
+  projectViews: Record<string, string>; // Per-project active view
 
   // Actions
   setProjects: (projects: Project[]) => void;
@@ -31,6 +32,7 @@ interface ProjectState {
   openProjectTab: (projectId: string) => void;
   closeProjectTab: (projectId: string) => void;
   setActiveProject: (projectId: string | null) => void;
+  setProjectView: (projectId: string, view: string) => void;
   reorderTabs: (fromIndex: number, toIndex: number) => void;
   restoreTabState: () => void;
 
@@ -51,6 +53,7 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   openProjectIds: [],
   activeProjectId: null,
   tabOrder: [],
+  projectViews: {},
 
   setProjects: (projects) => set({ projects }),
 
@@ -157,6 +160,21 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
     saveTabStateToMain();
   },
 
+  setProjectView: (projectId, view) => {
+    set((state) => {
+      if (state.projectViews[projectId] === view) {
+        return state;
+      }
+      return {
+        projectViews: {
+          ...state.projectViews,
+          [projectId]: view
+        }
+      };
+    });
+    saveTabStateToMain();
+  },
+
   reorderTabs: (fromIndex, toIndex) => {
     const state = get();
     const newTabOrder = [...state.tabOrder];
@@ -220,7 +238,8 @@ function saveTabStateToMain(): void {
     const tabState = {
       openProjectIds: store.openProjectIds,
       activeProjectId: store.activeProjectId,
-      tabOrder: store.tabOrder
+      tabOrder: store.tabOrder,
+      projectViews: store.projectViews
     };
     console.log('[ProjectStore] Saving tab state to main process:', tabState);
     try {
@@ -248,7 +267,8 @@ export async function loadProjects(): Promise<void> {
       useProjectStore.setState({
         openProjectIds: tabStateResult.data.openProjectIds || [],
         activeProjectId: tabStateResult.data.activeProjectId || null,
-        tabOrder: tabStateResult.data.tabOrder || []
+        tabOrder: tabStateResult.data.tabOrder || [],
+        projectViews: tabStateResult.data.projectViews || {}
       });
     }
 

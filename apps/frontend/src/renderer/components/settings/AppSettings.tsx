@@ -353,13 +353,9 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
 
             {/* Main content - 1Code style: card-based with rounded corners */}
             <div className="flex-1 min-w-0 h-full overflow-hidden py-4 pr-4 pl-4">
-              <div className="flex flex-col relative h-full bg-card rounded-xl w-full overflow-hidden border border-border/60 dark:border-white/5 dark:bg-[linear-gradient(180deg,hsl(0_0%_10%)_0%,hsl(0_0%_7%)_40%,hsl(0_0%_5%)_100%)]">
-                <ScrollArea className="flex-1">
-                  <div className="p-5 space-y-5">
-                    {renderContent()}
-                  </div>
-                </ScrollArea>
-              </div>
+              <ScrollArea className="flex-1 p-5" viewportClassName="settings-scroll-viewport">
+                {renderContent()}
+              </ScrollArea>
             </div>
           </div>
         </FullScreenDialogBody>

@@ -388,7 +388,7 @@ export function TerminalGrid({ projectPath, onNewTaskClick, isActive = false }: 
             </p>
           </div>
         </div>
-        <Button onClick={handleAddTerminal} className="gap-2">
+        <Button onClick={handleAddTerminal} variant="secondary" className="gap-2">
           <Plus className="h-4 w-4" />
           New Terminal
         </Button>
@@ -417,7 +417,7 @@ export function TerminalGrid({ projectPath, onNewTaskClick, isActive = false }: 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     size="sm"
                     className="h-7 text-xs gap-1.5"
                     disabled={isRestoring || isLoadingDates}
@@ -453,7 +453,7 @@ export function TerminalGrid({ projectPath, onNewTaskClick, isActive = false }: 
             )}
             {terminals.some((t) => t.status === 'running' && !t.isClaudeMode) && (
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 className="h-7 text-xs gap-1.5"
                 onClick={handleInvokeClaudeAll}
@@ -463,7 +463,7 @@ export function TerminalGrid({ projectPath, onNewTaskClick, isActive = false }: 
               </Button>
             )}
             <Button
-              variant="outline"
+              variant="secondary"
               size="sm"
               className="h-7 text-xs gap-1.5"
               onClick={handleAddTerminal}
@@ -478,7 +478,7 @@ export function TerminalGrid({ projectPath, onNewTaskClick, isActive = false }: 
             {/* File explorer toggle button */}
             {projectPath && (
               <Button
-                variant={fileExplorerOpen ? 'default' : 'outline'}
+                variant={fileExplorerOpen ? 'default' : 'secondary'}
                 size="sm"
                 className="h-7 text-xs gap-1.5"
                 onClick={toggleFileExplorer}
