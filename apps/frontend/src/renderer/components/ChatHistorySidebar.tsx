@@ -110,9 +110,9 @@ export function ChatHistorySidebar({
   }, {} as Record<string, InsightsSessionSummary[]>);
 
   return (
-    <div className="flex h-full w-64 flex-col border-r border-border bg-muted/30">
+    <div className="flex h-full w-64 flex-col bg-muted/20">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-3 py-3">
+      <div className="flex items-center justify-between px-3 py-3">
         <h3 className="text-sm font-medium text-foreground">Chat History</h3>
         <Tooltip>
           <TooltipTrigger asChild>

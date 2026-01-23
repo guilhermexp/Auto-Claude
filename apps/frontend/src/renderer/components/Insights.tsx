@@ -104,7 +104,7 @@ export function Insights({ projectId }: InsightsProps) {
   const [inputValue, setInputValue] = useState('');
   const [creatingTask, setCreatingTask] = useState<string | null>(null);
   const [taskCreated, setTaskCreated] = useState<Set<string>>(new Set());
-  const [showSidebar, setShowSidebar] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -216,7 +216,7 @@ export function Insights({ projectId }: InsightsProps) {
       {/* Main Chat Area */}
       <div className="flex flex-1 flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-border px-6 py-4">
+        <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
@@ -359,21 +359,22 @@ export function Insights({ projectId }: InsightsProps) {
       </ScrollArea>
 
       {/* Input */}
-      <div className="border-t border-border p-4">
-        <div className="flex gap-2">
+      <div className="p-4">
+        <div className="relative">
           <Textarea
             ref={textareaRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Ask about your codebase..."
-            className="min-h-[80px] resize-none"
+            className="min-h-[80px] resize-none pr-14"
             disabled={isLoading}
           />
           <Button
             onClick={handleSend}
             disabled={!inputValue.trim() || isLoading}
-            className="self-end"
+            size="icon"
+            className="absolute right-2 bottom-2 h-10 w-10 rounded-full"
           >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />

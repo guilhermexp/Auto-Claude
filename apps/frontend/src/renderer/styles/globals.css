@@ -344,8 +344,8 @@
   --background: 0 0% 4%;
   --foreground: 0 0% 98%;
 
-  /* Cards - subtle elevation from background (was 12%, too light) */
-  --card: 0 0% 7%;
+  /* Cards - same as background for flat design like Settings */
+  --card: 0 0% 4%;
   --card-foreground: 0 0% 98%;
 
   /* Popovers */
