@@ -274,25 +274,21 @@ export function Sidebar({
         aria-keyshortcuts={item.shortcut}
         className={cn(
           'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200',
-          'hover:bg-accent hover:text-accent-foreground',
           'disabled:pointer-events-none disabled:opacity-50',
-          isActive && 'bg-accent text-accent-foreground'
+          isActive
+            ? 'bg-foreground/10 text-foreground'
+            : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
         )}
       >
-        <Icon className="h-4 w-4 shrink-0" />
+        <Icon className={cn('h-4 w-4 shrink-0', isActive ? 'opacity-100' : 'opacity-50')} />
         <span className="flex-1 text-left">{t(item.labelKey)}</span>
-        {item.shortcut && (
-          <kbd className="pointer-events-none hidden h-5 select-none items-center gap-1 rounded-md border border-border bg-secondary px-1.5 font-mono text-[10px] font-medium text-secondary-foreground sm:flex">
-            {item.shortcut}
-          </kbd>
-        )}
       </button>
     );
   };
 
   return (
     <TooltipProvider>
-      <div className="flex h-full w-64 flex-col bg-sidebar border-r border-border">
+      <div className="flex h-full w-64 flex-col bg-background border-r border-border">
         {/* Header with drag area - extra top padding for macOS traffic lights */}
         <div className="electron-drag flex h-14 items-center justify-between px-4 pt-6 gap-2">
           <div className="flex-1" />
@@ -343,28 +339,31 @@ export function Sidebar({
           <div className="flex items-center gap-2">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex-1 justify-start gap-2"
+                <button
                   onClick={onSettingsClick}
+                  className={cn(
+                    'flex-1 flex items-center gap-2 px-3 py-1.5 text-sm h-7 rounded-md font-medium transition-all',
+                    'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
+                  )}
                 >
-                  <Settings className="h-4 w-4" />
+                  <Settings className="h-4 w-4 opacity-50" />
                   {t('actions.settings')}
-                </Button>
+                </button>
               </TooltipTrigger>
               <TooltipContent side="top">{t('tooltips.settings')}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
+                <button
                   onClick={() => window.open('https://github.com/AndyMik90/Auto-Claude/issues', '_blank')}
                   aria-label={t('tooltips.help')}
+                  className={cn(
+                    'flex items-center justify-center w-7 h-7 rounded-md transition-all',
+                    'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
+                  )}
                 >
-                  <HelpCircle className="h-4 w-4" />
-                </Button>
+                  <HelpCircle className="h-4 w-4 opacity-50" />
+                </button>
               </TooltipTrigger>
               <TooltipContent side="top">{t('tooltips.help')}</TooltipContent>
             </Tooltip>

@@ -26,7 +26,7 @@ import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
 import { cn } from '../../lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
-import { SettingsSection } from './SettingsSection';
+import { SettingsCard } from './SettingsCard';
 import { AuthTerminal } from './AuthTerminal';
 import { loadClaudeProfiles as loadGlobalClaudeProfiles } from '../../stores/claude-profile-store';
 import { useToast } from '../../hooks/use-toast';
@@ -36,12 +36,15 @@ interface IntegrationSettingsProps {
   settings: AppSettings;
   onSettingsChange: (settings: AppSettings) => void;
   isOpen: boolean;
+  onSave?: () => void;
+  isSaving?: boolean;
+  error?: string | null;
 }
 
 /**
  * Integration settings for Claude accounts and API keys
  */
-export function IntegrationSettings({ settings, onSettingsChange, isOpen }: IntegrationSettingsProps) {
+export function IntegrationSettings({ settings, onSettingsChange, isOpen, onSave, isSaving, error }: IntegrationSettingsProps) {
   const { t } = useTranslation('settings');
   const { t: tCommon } = useTranslation('common');
   const { toast } = useToast();
@@ -399,9 +402,12 @@ export function IntegrationSettings({ settings, onSettingsChange, isOpen }: Inte
   };
 
   return (
-    <SettingsSection
+    <SettingsCard
       title={t('integrations.title')}
       description={t('integrations.description')}
+      onSave={onSave}
+      isSaving={isSaving}
+      error={error}
     >
       <div className="space-y-6">
         {/* Claude Accounts Section */}
@@ -931,6 +937,6 @@ export function IntegrationSettings({ settings, onSettingsChange, isOpen }: Inte
           </div>
         </div>
       </div>
-    </SettingsSection>
+    </SettingsCard>
   );
 }

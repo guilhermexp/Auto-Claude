@@ -10,7 +10,7 @@ import {
   DEFAULT_PHASE_THINKING
 } from '../../../shared/constants';
 import { useSettingsStore, saveSettings } from '../../stores/settings-store';
-import { SettingsSection } from './SettingsSection';
+import { SettingsCard } from './SettingsCard';
 import { Label } from '../ui/label';
 import { Button } from '../ui/button';
 import {
@@ -35,12 +35,18 @@ const iconMap: Record<string, React.ElementType> = {
 
 const PHASE_KEYS: Array<keyof PhaseModelConfig> = ['spec', 'planning', 'coding', 'qa'];
 
+interface AgentProfileSettingsProps {
+  onSave?: () => void;
+  isSaving?: boolean;
+  error?: string | null;
+}
+
 /**
  * Agent Profile Settings component
  * Displays preset agent profiles for quick model/thinking level configuration
  * All presets show phase configuration for full customization
  */
-export function AgentProfileSettings() {
+export function AgentProfileSettings({ onSave, isSaving, error }: AgentProfileSettingsProps) {
   const { t } = useTranslation('settings');
   const settings = useSettingsStore((state) => state.settings);
   const selectedProfileId = settings.selectedAgentProfile || 'auto';
@@ -199,9 +205,12 @@ export function AgentProfileSettings() {
   };
 
   return (
-    <SettingsSection
+    <SettingsCard
       title={t('agentProfile.title')}
       description={t('agentProfile.sectionDescription')}
+      onSave={onSave}
+      isSaving={isSaving}
+      error={error}
     >
       <div className="space-y-4">
         {/* Description */}
@@ -320,6 +329,6 @@ export function AgentProfileSettings() {
         </div>
 
       </div>
-    </SettingsSection>
+    </SettingsCard>
   );
 }

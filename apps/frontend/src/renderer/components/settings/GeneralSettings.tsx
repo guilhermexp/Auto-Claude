@@ -4,7 +4,7 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Switch } from '../ui/switch';
-import { SettingsSection } from './SettingsSection';
+import { SettingsCard } from './SettingsCard';
 import { AgentProfileSettings } from './AgentProfileSettings';
 import {
   AVAILABLE_MODELS,
@@ -26,6 +26,9 @@ interface GeneralSettingsProps {
   settings: AppSettings;
   onSettingsChange: (settings: AppSettings) => void;
   section: 'agent' | 'paths';
+  onSave?: () => void;
+  isSaving?: boolean;
+  error?: string | null;
 }
 
 /**
@@ -90,7 +93,7 @@ function ToolDetectionDisplay({ info, isLoading, t }: ToolDetectionDisplayProps)
 /**
  * General settings component for agent configuration and paths
  */
-export function GeneralSettings({ settings, onSettingsChange, section }: GeneralSettingsProps) {
+export function GeneralSettings({ settings, onSettingsChange, section, onSave, isSaving, error }: GeneralSettingsProps) {
   const { t } = useTranslation('settings');
   const [toolsInfo, setToolsInfo] = useState<{
     python: ToolDetectionResult;
@@ -122,14 +125,17 @@ export function GeneralSettings({ settings, onSettingsChange, section }: General
 
   if (section === 'agent') {
     return (
-      <div className="space-y-8">
+      <div className="space-y-6">
         {/* Agent Profile Selection */}
-        <AgentProfileSettings />
+        <AgentProfileSettings onSave={onSave} isSaving={isSaving} error={error} />
 
         {/* Other Agent Settings */}
-        <SettingsSection
+        <SettingsCard
           title={t('general.otherAgentSettings')}
           description={t('general.otherAgentSettingsDescription')}
+          onSave={onSave}
+          isSaving={isSaving}
+          error={error}
         >
           <div className="space-y-6">
             <div className="space-y-3">
@@ -239,16 +245,19 @@ export function GeneralSettings({ settings, onSettingsChange, section }: General
               })}
             </div>
           </div>
-        </SettingsSection>
+        </SettingsCard>
       </div>
     );
   }
 
   // paths section
   return (
-    <SettingsSection
+    <SettingsCard
       title={t('general.paths')}
       description={t('general.pathsDescription')}
+      onSave={onSave}
+      isSaving={isSaving}
+      error={error}
     >
       <div className="space-y-6">
         <div className="space-y-3">
@@ -335,6 +344,6 @@ export function GeneralSettings({ settings, onSettingsChange, section }: General
           />
         </div>
       </div>
-    </SettingsSection>
+    </SettingsCard>
   );
 }

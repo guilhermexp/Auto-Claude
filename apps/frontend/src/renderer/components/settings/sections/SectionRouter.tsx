@@ -1,16 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import type { Project, ProjectSettings as ProjectSettingsType, AutoBuildVersionInfo, ProjectEnvConfig, LinearSyncStatus, GitHubSyncStatus, GitLabSyncStatus } from '../../../../shared/types';
-import { SettingsSection } from '../SettingsSection';
+import { SettingsCard } from '../SettingsCard';
 import { GeneralSettings } from '../../project-settings/GeneralSettings';
 import { SecuritySettings } from '../../project-settings/SecuritySettings';
 import { LinearIntegration } from '../integrations/LinearIntegration';
 import { GitHubIntegration } from '../integrations/GitHubIntegration';
 import { GitLabIntegration } from '../integrations/GitLabIntegration';
 import { InitializationGuard } from '../common/InitializationGuard';
-import type { ProjectSettingsSection } from '../ProjectSettingsContent';
+import type { ProjectSettingsCard } from '../ProjectSettingsContent';
 
 interface SectionRouterProps {
-  activeSection: ProjectSettingsSection;
+  activeSection: ProjectSettingsCard;
   project: Project;
   settings: ProjectSettingsType;
   setSettings: React.Dispatch<React.SetStateAction<ProjectSettingsType>>;
@@ -77,9 +77,10 @@ export function SectionRouter({
   switch (activeSection) {
     case 'general':
       return (
-        <SettingsSection
+        <SettingsCard
           title="General"
           description={`Configure Auto-Build, agent model, and notifications for ${project.name}`}
+          showSaveButton={false}
         >
           <GeneralSettings
             project={project}
@@ -90,14 +91,15 @@ export function SectionRouter({
             isUpdating={isUpdating}
             handleInitialize={handleInitialize}
           />
-        </SettingsSection>
+        </SettingsCard>
       );
 
     case 'linear':
       return (
-        <SettingsSection
+        <SettingsCard
           title={t('projectSections.linear.integrationTitle')}
           description={t('projectSections.linear.integrationDescription')}
+          showSaveButton={false}
         >
           <InitializationGuard
             initialized={!!project.autoBuildPath}
@@ -114,14 +116,15 @@ export function SectionRouter({
               onOpenLinearImport={onOpenLinearImport}
             />
           </InitializationGuard>
-        </SettingsSection>
+        </SettingsCard>
       );
 
     case 'github':
       return (
-        <SettingsSection
+        <SettingsCard
           title={t('projectSections.github.integrationTitle')}
           description={t('projectSections.github.integrationDescription')}
+          showSaveButton={false}
         >
           <InitializationGuard
             initialized={!!project.autoBuildPath}
@@ -140,14 +143,15 @@ export function SectionRouter({
               setSettings={setSettings}
             />
           </InitializationGuard>
-        </SettingsSection>
+        </SettingsCard>
       );
 
     case 'gitlab':
       return (
-        <SettingsSection
+        <SettingsCard
           title={t('projectSections.gitlab.integrationTitle')}
           description={t('projectSections.gitlab.integrationDescription')}
+          showSaveButton={false}
         >
           <InitializationGuard
             initialized={!!project.autoBuildPath}
@@ -166,14 +170,15 @@ export function SectionRouter({
               setSettings={setSettings}
             />
           </InitializationGuard>
-        </SettingsSection>
+        </SettingsCard>
       );
 
     case 'memory':
       return (
-        <SettingsSection
+        <SettingsCard
           title={t('projectSections.memory.integrationTitle')}
           description={t('projectSections.memory.integrationDescription')}
+          showSaveButton={false}
         >
           <InitializationGuard
             initialized={!!project.autoBuildPath}
@@ -191,7 +196,7 @@ export function SectionRouter({
               onToggle={() => {}}
             />
           </InitializationGuard>
-        </SettingsSection>
+        </SettingsCard>
       );
 
     default:

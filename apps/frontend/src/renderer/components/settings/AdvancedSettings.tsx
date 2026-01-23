@@ -12,7 +12,7 @@ import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
 import { Progress } from '../ui/progress';
-import { SettingsSection } from './SettingsSection';
+import { SettingsCard } from './SettingsCard';
 import type {
   AppSettings,
   AppUpdateAvailableEvent,
@@ -63,12 +63,15 @@ interface AdvancedSettingsProps {
   onSettingsChange: (settings: AppSettings) => void;
   section: 'updates' | 'notifications';
   version: string;
+  onSave?: () => void;
+  isSaving?: boolean;
+  error?: string | null;
 }
 
 /**
  * Advanced settings for updates and notifications
  */
-export function AdvancedSettings({ settings, onSettingsChange, section, version }: AdvancedSettingsProps) {
+export function AdvancedSettings({ settings, onSettingsChange, section, version, onSave, isSaving, error }: AdvancedSettingsProps) {
   const { t } = useTranslation('settings');
 
   // Electron app update state
@@ -227,9 +230,12 @@ export function AdvancedSettings({ settings, onSettingsChange, section, version 
 
   if (section === 'updates') {
     return (
-      <SettingsSection
+      <SettingsCard
         title={t('updates.title')}
         description={t('updates.description')}
+        onSave={onSave}
+        isSaving={isSaving}
+        error={error}
       >
         <div className="space-y-6">
           {/* Current Version Display */}
@@ -494,7 +500,7 @@ export function AdvancedSettings({ settings, onSettingsChange, section, version 
             </div>
           )}
         </div>
-      </SettingsSection>
+      </SettingsCard>
     );
   }
 
@@ -511,9 +517,12 @@ export function AdvancedSettings({ settings, onSettingsChange, section, version 
   ];
 
   return (
-    <SettingsSection
+    <SettingsCard
       title={t('notifications.title')}
       description={t('notifications.description')}
+      onSave={onSave}
+      isSaving={isSaving}
+      error={error}
     >
       <div className="space-y-4">
         {notificationItems.map((item) => (
@@ -537,6 +546,6 @@ export function AdvancedSettings({ settings, onSettingsChange, section, version 
           </div>
         ))}
       </div>
-    </SettingsSection>
+    </SettingsCard>
   );
 }

@@ -6,12 +6,15 @@ import { Input } from '../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Button } from '../ui/button';
 import { Switch } from '../ui/switch';
-import { SettingsSection } from './SettingsSection';
+import { SettingsCard } from './SettingsCard';
 import type { AppSettings, SupportedIDE, SupportedTerminal } from '../../../shared/types';
 
 interface DevToolsSettingsProps {
   settings: AppSettings;
   onSettingsChange: (settings: AppSettings) => void;
+  onSave?: () => void;
+  isSaving?: boolean;
+  error?: string | null;
 }
 
 interface DetectedTool {
@@ -77,7 +80,7 @@ const TERMINAL_NAMES: Partial<Record<SupportedTerminal, string>> = {
 /**
  * Developer Tools settings component for configuring preferred IDE and terminal
  */
-export function DevToolsSettings({ settings, onSettingsChange }: DevToolsSettingsProps) {
+export function DevToolsSettings({ settings, onSettingsChange, onSave, isSaving, error: saveError }: DevToolsSettingsProps) {
   const { t } = useTranslation('settings');
   const [detectedTools, setDetectedTools] = useState<DetectedTools | null>(null);
   const [isDetecting, setIsDetecting] = useState(false);
@@ -213,9 +216,12 @@ export function DevToolsSettings({ settings, onSettingsChange }: DevToolsSetting
   terminalOptions.push({ value: 'custom', label: 'Custom...', detected: false });
 
   return (
-    <SettingsSection
+    <SettingsCard
       title={t('devtools.title', 'Developer Tools')}
       description={t('devtools.description', 'Configure your preferred IDE and terminal for working with worktrees')}
+      onSave={onSave}
+      isSaving={isSaving}
+      error={saveError}
     >
       <div className="space-y-6">
         {/* Detect Tools Button */}
@@ -439,6 +445,6 @@ export function DevToolsSettings({ settings, onSettingsChange }: DevToolsSetting
           </div>
         )}
       </div>
-    </SettingsSection>
+    </SettingsCard>
   );
 }

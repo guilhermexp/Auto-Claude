@@ -2,7 +2,7 @@ import { Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import { Label } from '../ui/label';
-import { SettingsSection } from './SettingsSection';
+import { SettingsCard } from './SettingsCard';
 import { useSettingsStore } from '../../stores/settings-store';
 import { AVAILABLE_LANGUAGES, type SupportedLanguage } from '../../../shared/constants/i18n';
 import type { AppSettings } from '../../../shared/types';
@@ -10,13 +10,16 @@ import type { AppSettings } from '../../../shared/types';
 interface LanguageSettingsProps {
   settings: AppSettings;
   onSettingsChange: (settings: AppSettings) => void;
+  onSave?: () => void;
+  isSaving?: boolean;
+  error?: string | null;
 }
 
 /**
  * Language settings section for interface language selection
  * Changes apply immediately for live preview, saved on "Save Settings"
  */
-export function LanguageSettings({ settings, onSettingsChange }: LanguageSettingsProps) {
+export function LanguageSettings({ settings, onSettingsChange, onSave, isSaving, error }: LanguageSettingsProps) {
   const { t, i18n } = useTranslation('settings');
   const updateStoreSettings = useSettingsStore((state) => state.updateSettings);
 
@@ -34,9 +37,12 @@ export function LanguageSettings({ settings, onSettingsChange }: LanguageSetting
   };
 
   return (
-    <SettingsSection
+    <SettingsCard
       title={t('sections.language.title')}
       description={t('sections.language.description')}
+      onSave={onSave}
+      isSaving={isSaving}
+      error={error}
     >
       <div className="space-y-4">
         <div className="space-y-3">
@@ -72,6 +78,6 @@ export function LanguageSettings({ settings, onSettingsChange }: LanguageSetting
           </div>
         </div>
       </div>
-    </SettingsSection>
+    </SettingsCard>
   );
 }

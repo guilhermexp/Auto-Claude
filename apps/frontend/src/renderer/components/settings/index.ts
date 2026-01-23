@@ -9,5 +9,7 @@ export { ThemeSelector } from './ThemeSelector';
 export { GeneralSettings } from './GeneralSettings';
 export { IntegrationSettings } from './IntegrationSettings';
 export { AdvancedSettings } from './AdvancedSettings';
-export { SettingsSection } from './SettingsSection';
+export { SettingsCard } from './SettingsCard';
+export { SettingsRow } from './SettingsRow';
+export { SettingsSection } from './SettingsSection'; // Legacy - prefer SettingsCard
 export { useSettings } from './hooks/useSettings';

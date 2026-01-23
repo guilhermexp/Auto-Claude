@@ -4,7 +4,7 @@ import { Bug, FolderOpen, Copy, FileText, RefreshCw, Loader2, Check, AlertCircle
 import { Button } from '../ui/button';
 import { Switch } from '../ui/switch';
 import { Label } from '../ui/label';
-import { SettingsSection } from './SettingsSection';
+import { SettingsCard } from './SettingsCard';
 import { useSettingsStore } from '../../stores/settings-store';
 import { notifySentryStateChanged } from '../../lib/sentry';
 
@@ -81,9 +81,10 @@ export function DebugSettings() {
   };
 
   return (
-    <SettingsSection
+    <SettingsCard
       title={t('debug.title', 'Debug & Logs')}
       description={t('debug.description', 'Access logs and debug information for troubleshooting')}
+      showSaveButton={false}
     >
       <div className="space-y-6">
         {/* Error Reporting Toggle */}
@@ -227,6 +228,6 @@ export function DebugSettings() {
           </p>
         </div>
       </div>
-    </SettingsSection>
+    </SettingsCard>
   );
 }

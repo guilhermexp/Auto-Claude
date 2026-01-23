@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LinearTaskImportModal } from '../LinearTaskImportModal';
-import { SettingsSection } from './SettingsSection';
+import { SettingsCard } from './SettingsCard';
 import { useProjectSettings, UseProjectSettingsReturn } from '../project-settings/hooks/useProjectSettings';
 import { loadTasks } from '../../stores/task-store';
 import { EmptyProjectState } from './common/EmptyProjectState';
@@ -34,12 +34,13 @@ export function ProjectSettingsContent({
   // Show empty state if no project selected
   if (!project) {
     return (
-      <SettingsSection
+      <SettingsCard
         title={t('projectSettings.noProjectSelected.title')}
         description={t('projectSettings.noProjectSelected.description')}
+        showSaveButton={false}
       >
         <EmptyProjectState />
-      </SettingsSection>
+      </SettingsCard>
     );
   }
 

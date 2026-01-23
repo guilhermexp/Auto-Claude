@@ -3,7 +3,7 @@ import { Monitor, ZoomIn, ZoomOut, RotateCcw, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import { Label } from '../ui/label';
-import { SettingsSection } from './SettingsSection';
+import { SettingsCard } from './SettingsCard';
 import { useSettingsStore } from '../../stores/settings-store';
 import { UI_SCALE_MIN, UI_SCALE_MAX, UI_SCALE_DEFAULT, UI_SCALE_STEP } from '../../../shared/constants';
 import type { AppSettings } from '../../../shared/types';
@@ -11,6 +11,9 @@ import type { AppSettings } from '../../../shared/types';
 interface DisplaySettingsProps {
   settings: AppSettings;
   onSettingsChange: (settings: AppSettings) => void;
+  onSave?: () => void;
+  isSaving?: boolean;
+  error?: string | null;
 }
 
 // Preset scale values with translation keys
@@ -25,7 +28,7 @@ const SCALE_PRESETS = [
  * Provides preset buttons (100%, 125%, 150%) and a fine-tune slider (75-200%)
  * Changes apply immediately for live preview (like theme), saved on "Save Settings"
  */
-export function DisplaySettings({ settings, onSettingsChange }: DisplaySettingsProps) {
+export function DisplaySettings({ settings, onSettingsChange, onSave, isSaving, error }: DisplaySettingsProps) {
   const { t } = useTranslation('settings');
   const updateStoreSettings = useSettingsStore((state) => state.updateSettings);
 
@@ -91,9 +94,12 @@ export function DisplaySettings({ settings, onSettingsChange }: DisplaySettingsP
   };
 
   return (
-    <SettingsSection
+    <SettingsCard
       title={t('sections.display.title')}
       description={t('sections.display.description')}
+      onSave={onSave}
+      isSaving={isSaving}
+      error={error}
     >
       <div className="space-y-6">
         {/* Preset Buttons */}
@@ -241,6 +247,6 @@ export function DisplaySettings({ settings, onSettingsChange }: DisplaySettingsP
           </div>
         </div>
       </div>
-    </SettingsSection>
+    </SettingsCard>
   );
 }
