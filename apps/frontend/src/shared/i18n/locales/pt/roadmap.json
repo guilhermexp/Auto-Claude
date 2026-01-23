@@ -31,7 +31,11 @@
     "competitorInsightTooltip": "Esta funcionalidade aborda pontos fracos dos concorrentes",
     "goToTask": "Ir para Tarefa",
     "build": "Criar",
-    "impact": "{{impact}} impacto"
+    "impact": "{{impact}} impacto",
+    "phaseTooltip": "Fase: {{phase}}",
+    "votesTooltip": "{{count}} votos de feedback de usuários",
+    "externalSource": "Externo",
+    "importedFrom": "Importado de {{source}}"
   },
   "phaseCard": {
     "progress": "Progresso",

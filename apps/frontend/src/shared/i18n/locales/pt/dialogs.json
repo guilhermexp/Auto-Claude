@@ -199,5 +199,31 @@
     "step3": "Clique em \"Reautenticar\" no seu perfil",
     "gotIt": "Entendi",
     "goToSettings": "Ir para Configurações"
+  },
+  "competitorAnalysis": {
+    "enableTitle": "Ativar Análise Competitiva?",
+    "enableDescription": "Aprimore seu roadmap com insights de produtos concorrentes",
+    "whatItDoesTitle": "O que a análise competitiva faz:",
+    "whatItDoes": {
+      "item1": "Identifica 3–5 concorrentes principais com base no seu tipo de projeto",
+      "item2": "Pesquisa app stores, fóruns e redes sociais em busca de feedbacks e pontos de dor",
+      "item3": "Sugere funcionalidades que preencham lacunas nos produtos concorrentes"
+    },
+    "privacyTitle": "Serão realizadas buscas na web",
+    "privacyDescription": "Este recurso fará buscas na web para reunir informações de concorrentes. O nome e o tipo do projeto serão usados nas consultas. Nenhum código ou dado sensível é compartilhado.",
+    "optionalInfo": "Você pode gerar um roadmap sem análise competitiva se preferir. O roadmap ainda será baseado na estrutura do seu projeto e nas melhores práticas.",
+    "confirm": "Sim, Ativar Análise",
+    "cancelEnable": "Não, pular análise",
+    "cancelClose": "Cancelar",
+    "optionsTitle": "Opções de Análise Competitiva",
+    "optionsDescription": "Este projeto já possui uma análise competitiva de {{date}}",
+    "useExistingTitle": "Usar análise existente",
+    "recommended": "(Recomendado)",
+    "useExistingDescription": "Reutilize os insights de concorrentes que você já tem. Mais rápido e sem buscas adicionais.",
+    "runNewTitle": "Executar nova análise",
+    "runNewDescription": "Faça novas buscas na web para obter informações atualizadas dos concorrentes. Demora mais.",
+    "skipTitle": "Pular análise competitiva",
+    "skipDescription": "Gerar roadmap sem nenhum insight de concorrentes.",
+    "recently": "recentemente"
   }
 }

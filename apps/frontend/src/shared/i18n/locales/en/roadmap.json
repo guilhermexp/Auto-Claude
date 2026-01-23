@@ -31,7 +31,11 @@
     "competitorInsightTooltip": "This feature addresses competitor pain points",
     "goToTask": "Go to Task",
     "build": "Build",
-    "impact": "{{impact}} impact"
+    "impact": "{{impact}} impact",
+    "phaseTooltip": "Phase: {{phase}}",
+    "votesTooltip": "{{count}} votes from user feedback",
+    "externalSource": "External",
+    "importedFrom": "Imported from {{source}}"
   },
   "phaseCard": {
     "progress": "Progress",
