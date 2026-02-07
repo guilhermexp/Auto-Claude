@@ -208,33 +208,33 @@ describe('AuthStatusIndicator', () => {
       expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Authentication: API Key');
     });
 
-    it('should apply correct color classes for each provider', () => {
-      // Test Anthropic (orange)
+    it('should apply semantic token class for all providers', () => {
+      // All providers now use the same semantic token for consistent styling
       vi.mocked(useSettingsStore).mockReturnValue(
         createUseSettingsStoreMock({ activeProfileId: 'profile-1' })
       );
 
       const { rerender } = render(<AuthStatusIndicator />);
       const anthropicButton = screen.getByRole('button');
-      expect(anthropicButton.className).toContain('text-orange-500');
+      expect(anthropicButton.className).toContain('header-badge-auth');
 
-      // Test z.ai (blue)
+      // Test z.ai
       vi.mocked(useSettingsStore).mockReturnValue(
         createUseSettingsStoreMock({ activeProfileId: 'profile-3' })
       );
 
       rerender(<AuthStatusIndicator />);
       const zaiButton = screen.getByRole('button');
-      expect(zaiButton.className).toContain('text-blue-500');
+      expect(zaiButton.className).toContain('header-badge-auth');
 
-      // Test ZHIPU (purple)
+      // Test ZHIPU
       vi.mocked(useSettingsStore).mockReturnValue(
         createUseSettingsStoreMock({ activeProfileId: 'profile-4' })
       );
 
       rerender(<AuthStatusIndicator />);
       const zhipuButton = screen.getByRole('button');
-      expect(zhipuButton.className).toContain('text-purple-500');
+      expect(zhipuButton.className).toContain('header-badge-auth');
     });
   });
 

@@ -128,8 +128,8 @@ describe('AuthChoiceStep', () => {
         />
       );
 
-      const oauthButton = screen.getByText('Sign in with Anthropic').closest('.cursor-pointer');
-      fireEvent.click(oauthButton!);
+      const oauthButton = screen.getByTestId('auth-option-oauth');
+      fireEvent.click(oauthButton);
 
       expect(mockGoToNext).toHaveBeenCalledTimes(1);
     });
@@ -143,8 +143,8 @@ describe('AuthChoiceStep', () => {
         />
       );
 
-      const oauthButton = screen.getByText('Sign in with Anthropic').closest('.cursor-pointer');
-      fireEvent.click(oauthButton!);
+      const oauthButton = screen.getByTestId('auth-option-oauth');
+      fireEvent.click(oauthButton);
 
       expect(mockGoToNext).toHaveBeenCalled();
       expect(mockOnAPIKeyPathComplete).not.toHaveBeenCalled();
@@ -161,8 +161,8 @@ describe('AuthChoiceStep', () => {
         />
       );
 
-      const apiKeyButton = screen.getByText('Use Custom API Key').closest('.cursor-pointer');
-      fireEvent.click(apiKeyButton!);
+      const apiKeyButton = screen.getByTestId('auth-option-apikey');
+      fireEvent.click(apiKeyButton);
 
       // ProfileEditDialog should be rendered
       expect(screen.getByTestId('profile-edit-dialog')).toBeInTheDocument();
@@ -184,8 +184,8 @@ describe('AuthChoiceStep', () => {
       );
 
       // Click API Key button to open dialog
-      const apiKeyButton = screen.getByText('Use Custom API Key').closest('.cursor-pointer');
-      fireEvent.click(apiKeyButton!);
+      const apiKeyButton = screen.getByTestId('auth-option-apikey');
+      fireEvent.click(apiKeyButton);
 
       // Dialog should be open - verifies the API key path works
       expect(screen.getByTestId('profile-edit-dialog')).toBeInTheDocument();
@@ -313,9 +313,9 @@ describe('AuthChoiceStep', () => {
       expect(screen.getByText('Sign in with Anthropic')).toBeInTheDocument();
       expect(screen.getByText('Use Custom API Key')).toBeInTheDocument();
 
-      // Both should be clickable cards
-      const cards = document.querySelectorAll('.cursor-pointer');
-      expect(cards.length).toBeGreaterThanOrEqual(2);
+      // Both should be clickable cards using data-testid
+      expect(screen.getByTestId('auth-option-oauth')).toBeInTheDocument();
+      expect(screen.getByTestId('auth-option-apikey')).toBeInTheDocument();
     });
   });
 });
