@@ -51,16 +51,17 @@ const STATUS_OPTIONS: Array<{
   value: PRStatusFilter;
   labelKey: string;
   icon: typeof Sparkles;
-  color: string;
-  bgColor: string;
+  iconClass: string;
+  iconBgClass: string;
+  badgeClass: string;
 }> = [
-  { value: 'reviewing', labelKey: 'prReview.reviewing', icon: Loader2, color: 'text-amber-400', bgColor: 'bg-amber-500/20' },
-  { value: 'not_reviewed', labelKey: 'prReview.notReviewed', icon: Sparkles, color: 'text-slate-500', bgColor: 'bg-slate-500/20' },
-  { value: 'reviewed', labelKey: 'prReview.reviewed', icon: CheckCircle2, color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
-  { value: 'posted', labelKey: 'prReview.posted', icon: Send, color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
-  { value: 'changes_requested', labelKey: 'prReview.changesRequested', icon: AlertCircle, color: 'text-red-400', bgColor: 'bg-red-500/20' },
-  { value: 'ready_to_merge', labelKey: 'prReview.readyToMerge', icon: CheckCheck, color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
-  { value: 'ready_for_followup', labelKey: 'prReview.readyForFollowup', icon: RefreshCw, color: 'text-cyan-400', bgColor: 'bg-cyan-500/20' },
+  { value: 'reviewing', labelKey: 'prReview.reviewing', icon: Loader2, iconClass: 'github-pr-tone-reviewing-text', iconBgClass: 'github-pr-tone-reviewing-bg', badgeClass: 'github-pr-chip github-pr-chip-reviewing' },
+  { value: 'not_reviewed', labelKey: 'prReview.notReviewed', icon: Sparkles, iconClass: 'github-pr-tone-neutral-text', iconBgClass: 'github-pr-tone-neutral-bg', badgeClass: 'github-pr-chip github-pr-chip-neutral' },
+  { value: 'reviewed', labelKey: 'prReview.reviewed', icon: CheckCircle2, iconClass: 'github-pr-tone-reviewed-text', iconBgClass: 'github-pr-tone-reviewed-bg', badgeClass: 'github-pr-chip github-pr-chip-reviewed' },
+  { value: 'posted', labelKey: 'prReview.posted', icon: Send, iconClass: 'github-pr-tone-posted-text', iconBgClass: 'github-pr-tone-posted-bg', badgeClass: 'github-pr-chip github-pr-chip-posted' },
+  { value: 'changes_requested', labelKey: 'prReview.changesRequested', icon: AlertCircle, iconClass: 'github-pr-tone-danger-text', iconBgClass: 'github-pr-tone-danger-bg', badgeClass: 'github-pr-chip github-pr-chip-danger' },
+  { value: 'ready_to_merge', labelKey: 'prReview.readyToMerge', icon: CheckCheck, iconClass: 'github-pr-tone-success-text', iconBgClass: 'github-pr-tone-success-bg', badgeClass: 'github-pr-chip github-pr-chip-success' },
+  { value: 'ready_for_followup', labelKey: 'prReview.readyForFollowup', icon: RefreshCw, iconClass: 'github-pr-tone-followup-text', iconBgClass: 'github-pr-tone-followup-bg', badgeClass: 'github-pr-chip github-pr-chip-followup' },
 ];
 
 // Sort options
@@ -170,21 +171,21 @@ function FilterDropdown<T extends string>({
     }}>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
           className={cn(
-            "h-8 w-full justify-start border-dashed bg-transparent",
-            selected.length > 0 && "border-solid bg-accent/50"
+            "h-8 justify-start github-pr-action-button",
+            selected.length > 0 && "github-pr-action-button-active"
           )}
         >
-          <Icon className="mr-2 h-4 w-4 text-muted-foreground" />
+          <Icon className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
           <span className="truncate">{title}</span>
           {selected.length > 0 && (
             <>
               <Separator orientation="vertical" className="mx-2 h-4" />
               <Badge
                 variant="secondary"
-                className="rounded-sm px-1 font-normal lg:hidden"
+                className="rounded-sm px-1 font-normal lg:hidden github-pr-chip github-pr-chip-neutral"
               >
                 {selected.length}
               </Badge>
@@ -192,7 +193,7 @@ function FilterDropdown<T extends string>({
                 {selected.length > 2 ? (
                   <Badge
                     variant="secondary"
-                    className="rounded-sm px-1 font-normal"
+                    className="rounded-sm px-1 font-normal github-pr-chip github-pr-chip-neutral"
                   >
                     {selectedCountLabel}
                   </Badge>
@@ -202,7 +203,7 @@ function FilterDropdown<T extends string>({
                       <Badge
                         variant="secondary"
                         key={item}
-                        className="rounded-sm px-1 font-normal"
+                        className="rounded-sm px-1 font-normal github-pr-chip github-pr-chip-neutral"
                       >
                         {item}
                       </Badge>
@@ -214,8 +215,8 @@ function FilterDropdown<T extends string>({
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[240px] p-0">
-        <div className="px-3 py-2 border-b border-border/50">
+      <DropdownMenuContent align="start" className="w-[240px] p-0 github-pr-dropdown-menu">
+        <div className="px-3 py-2 github-pr-dropdown-header">
           <div className="text-xs font-semibold text-muted-foreground mb-1">
             {title}
           </div>
@@ -224,7 +225,7 @@ function FilterDropdown<T extends string>({
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
               <Input
                 placeholder={searchPlaceholder}
-                className="h-7 text-xs pl-7 bg-muted/50 border-none focus-visible:ring-1 focus-visible:ring-primary/50"
+                className="h-7 text-xs pl-7 github-pr-dropdown-search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => e.stopPropagation()}
@@ -255,9 +256,9 @@ function FilterDropdown<T extends string>({
                   role="option"
                   aria-selected={isSelected}
                   className={cn(
-                    "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-                    isSelected && "bg-accent/50",
-                    isFocused && "ring-2 ring-primary/50 bg-accent"
+                    "relative flex cursor-pointer select-none items-center rounded-md px-2 py-2 text-sm outline-none transition-colors github-pr-dropdown-option data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                    isSelected && "github-pr-dropdown-option-selected",
+                    isFocused && "github-pr-dropdown-option-focused"
                   )}
                   onClick={(e) => {
                     e.preventDefault();
@@ -285,11 +286,11 @@ function FilterDropdown<T extends string>({
         </div>
 
         {selected.length > 0 && (
-          <div className="p-1 border-t border-border/50 bg-muted/20">
+          <div className="p-1 github-pr-dropdown-footer">
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
-              className="w-full justify-center text-xs h-7 hover:bg-destructive/10 hover:text-destructive"
+              className="w-full justify-center text-xs h-7 github-pr-danger-button"
               onClick={() => onChange([])}
             >
               {clearLabel}
@@ -362,20 +363,20 @@ function SortDropdown({
     >
       <DropdownMenuTrigger asChild>
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
-          className="h-8 justify-start border-dashed bg-transparent"
+          className="h-8 justify-start github-pr-action-button"
         >
           <ArrowUpDown className="mr-2 h-4 w-4 text-muted-foreground" />
           <span className="truncate">{title}</span>
           <Separator orientation="vertical" className="mx-2 h-4" />
-          <Badge variant="secondary" className="rounded-sm px-1 font-normal">
+          <Badge variant="secondary" className="rounded-sm px-1 font-normal github-pr-chip github-pr-chip-neutral">
             {t(currentOption.labelKey)}
           </Badge>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[180px] p-0">
-        <div className="px-3 py-2 border-b border-border/50">
+      <DropdownMenuContent align="start" className="w-[180px] p-0 github-pr-dropdown-menu">
+        <div className="px-3 py-2 github-pr-dropdown-header">
           <div className="text-xs font-semibold text-muted-foreground">
             {title}
           </div>
@@ -395,14 +396,22 @@ function SortDropdown({
                 key={option.value}
                 role="option"
                 aria-selected={isSelected}
+                tabIndex={-1}
                 className={cn(
-                  "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground",
-                  isSelected && "bg-accent/50",
-                  isFocused && "bg-accent text-accent-foreground"
+                  "relative flex cursor-pointer select-none items-center rounded-md px-2 py-2 text-sm outline-none transition-colors github-pr-dropdown-option",
+                  isSelected && "github-pr-dropdown-option-selected",
+                  isFocused && "github-pr-dropdown-option-focused"
                 )}
                 onClick={() => {
                   onChange(option.value);
                   setIsOpen(false);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onChange(option.value);
+                    setIsOpen(false);
+                  }
                 }}
               >
                 <div className={cn(
@@ -439,19 +448,20 @@ export function PRFilterBar({
     STATUS_OPTIONS.find((opt) => opt.value === value);
 
   return (
-    <div className="px-4 py-2 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex items-center gap-2 h-9">
-        {/* Search Input - Flexible width */}
-        <div className="relative flex-1 max-w-md">
+    <div className="mx-3 mb-2 rounded-xl px-3 py-2 github-pr-filterbar">
+      <div className="flex items-center gap-2">
+        {/* Search Input */}
+        <div className="relative flex-shrink-0">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={t('prReview.searchPlaceholder')}
             value={filters.searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="h-8 pl-9 bg-background/50 focus:bg-background transition-colors"
+            className="h-8 w-10 pl-8 pr-2 transition-colors github-pr-search-input"
           />
           {filters.searchQuery && (
             <button
+              type="button"
               onClick={() => onSearchChange('')}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               aria-label={t('prReview.clearSearch')}
@@ -461,99 +471,90 @@ export function PRFilterBar({
           )}
         </div>
 
-        <Separator orientation="vertical" className="h-5 mx-1" />
-
         {/* Contributors Filter */}
-        <div className="flex-1 max-w-[240px]">
-          <FilterDropdown
-            title={t('prReview.contributors')}
-            icon={Users}
-            items={contributors}
-            selected={filters.contributors}
-            onChange={onContributorsChange}
-            searchable={true}
-            searchPlaceholder={t('prReview.searchContributors')}
-            selectedCountLabel={t('prReview.selectedCount', { count: filters.contributors.length })}
-            noResultsLabel={t('prReview.noResultsFound')}
-            clearLabel={t('prReview.clearFilters')}
-            renderItem={(contributor) => (
-               <div className="flex items-center gap-2 min-w-0">
-                 <div className="h-5 w-5 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <span className="text-[10px] font-medium text-primary">
-                      {contributor.slice(0, 2).toUpperCase()}
-                    </span>
-                 </div>
-                 <span className="truncate text-sm">{contributor}</span>
+        <FilterDropdown
+          title={t('prReview.contributors')}
+          icon={Users}
+          items={contributors}
+          selected={filters.contributors}
+          onChange={onContributorsChange}
+          searchable={true}
+          searchPlaceholder={t('prReview.searchContributors')}
+          selectedCountLabel={t('prReview.selectedCount', { count: filters.contributors.length })}
+          noResultsLabel={t('prReview.noResultsFound')}
+          clearLabel={t('prReview.clearFilters')}
+          renderItem={(contributor) => (
+             <div className="flex items-center gap-2 min-w-0">
+              <div className="h-5 w-5 rounded-full github-pr-contributor-badge flex items-center justify-center shrink-0">
+                  <span className="text-[10px] font-medium">
+                    {contributor.slice(0, 2).toUpperCase()}
+                  </span>
                </div>
-            )}
-          />
-        </div>
+               <span className="truncate text-sm">{contributor}</span>
+             </div>
+          )}
+        />
 
         {/* Status Filter */}
-        <div className="flex-1 max-w-[240px]">
-          <FilterDropdown
-            title={t('prReview.allStatuses')}
-            icon={Filter}
-            items={STATUS_OPTIONS.map((opt) => opt.value)}
-            selected={filters.statuses}
-            onChange={onStatusesChange}
-            selectedCountLabel={t('prReview.selectedCount', { count: filters.statuses.length })}
-            noResultsLabel={t('prReview.noResultsFound')}
-            clearLabel={t('prReview.clearFilters')}
-            renderItem={(status) => {
+        <FilterDropdown
+          title={t('prReview.allStatuses')}
+          icon={Filter}
+          items={STATUS_OPTIONS.map((opt) => opt.value)}
+          selected={filters.statuses}
+          onChange={onStatusesChange}
+          selectedCountLabel={t('prReview.selectedCount', { count: filters.statuses.length })}
+          noResultsLabel={t('prReview.noResultsFound')}
+          clearLabel={t('prReview.clearFilters')}
+          renderItem={(status) => {
+            const option = getStatusOption(status);
+            if (!option) return null;
+            const Icon = option.icon;
+            return (
+              <div className="flex items-center gap-2">
+                <div className={cn("p-1 rounded-full", option.iconBgClass)}>
+                   <Icon className={cn("h-3 w-3", option.iconClass)} />
+                </div>
+                <span className="text-sm">{t(option.labelKey)}</span>
+              </div>
+            );
+          }}
+          renderTrigger={(selected) => (
+            selected.map(status => {
               const option = getStatusOption(status);
               if (!option) return null;
               const Icon = option.icon;
               return (
-                <div className="flex items-center gap-2">
-                  <div className={cn("p-1 rounded-full", option.bgColor)}>
-                     <Icon className={cn("h-3 w-3", option.color)} />
-                  </div>
-                  <span className="text-sm">{t(option.labelKey)}</span>
-                </div>
+                <Badge
+                  variant="secondary"
+                  key={status}
+                  className={cn(
+                    "rounded-sm px-1 font-normal gap-1",
+                    option.badgeClass
+                  )}
+                >
+                  <Icon className="h-3 w-3" />
+                  <span className="truncate max-w-[80px]">{t(option.labelKey)}</span>
+                </Badge>
               );
-            }}
-            renderTrigger={(selected) => (
-              selected.map(status => {
-                const option = getStatusOption(status);
-                if (!option) return null;
-                const Icon = option.icon;
-                return (
-                  <Badge
-                    variant="secondary"
-                    key={status}
-                    className={cn(
-                      "rounded-sm px-1 font-normal gap-1",
-                      option.bgColor,
-                      option.color
-                    )}
-                  >
-                    <Icon className="h-3 w-3" />
-                    <span className="truncate max-w-[80px]">{t(option.labelKey)}</span>
-                  </Badge>
-                );
-              })
-            )}
-          />
-        </div>
+            })
+          )}
+        />
 
         {/* Sort Dropdown */}
-        <div className="flex-shrink-0">
-          <SortDropdown
-            value={filters.sortBy}
-            onChange={onSortChange}
-            options={SORT_OPTIONS}
-            title={t('prReview.sort.label')}
-          />
-        </div>
+        <SortDropdown
+          value={filters.sortBy}
+          onChange={onSortChange}
+          options={SORT_OPTIONS}
+          title={t('prReview.sort.label')}
+        />
 
         {/* Reset All */}
         {hasActiveFilters && (
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={onClearFilters}
-            className="h-8 px-2 lg:px-3 text-muted-foreground hover:text-foreground ml-auto"
+            className="h-8 px-2 lg:px-3 github-pr-action-button"
           >
             <span className="hidden lg:inline mr-2">{t('prReview.reset')}</span>
             <X className="h-4 w-4" />

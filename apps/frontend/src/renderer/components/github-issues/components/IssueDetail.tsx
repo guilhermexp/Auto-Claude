@@ -127,7 +127,7 @@ export function IssueDetail({
 
         {/* Task Linked Info */}
         {hasLinkedTask && (
-          <Card className="bg-success/5 border-success/30">
+          <Card className="github-issue-success-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-2 text-success">
                 <CheckCircle2 className="h-4 w-4" />
@@ -159,7 +159,7 @@ export function IssueDetail({
         )}
 
         {/* Body */}
-        <Card>
+        <Card className="github-issue-detail-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">{t('githubIssues.detail.description')}</CardTitle>
           </CardHeader>
@@ -178,7 +178,7 @@ export function IssueDetail({
 
         {/* Assignees */}
         {issue.assignees.length > 0 && (
-          <Card>
+          <Card className="github-issue-detail-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">{t('githubIssues.detail.assignees')}</CardTitle>
             </CardHeader>
@@ -197,7 +197,7 @@ export function IssueDetail({
 
         {/* Milestone */}
         {issue.milestone && (
-          <Card>
+          <Card className="github-issue-detail-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">{t('githubIssues.detail.milestone')}</CardTitle>
             </CardHeader>

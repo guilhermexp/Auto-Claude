@@ -15,10 +15,10 @@ export const ROADMAP_PRIORITY_LABELS: Record<string, string> = {
 };
 
 export const ROADMAP_PRIORITY_COLORS: Record<string, string> = {
-  must: 'bg-destructive/10 text-destructive border-destructive/30',
-  should: 'bg-warning/10 text-warning border-warning/30',
-  could: 'bg-info/10 text-info border-info/30',
-  wont: 'bg-muted text-muted-foreground border-muted'
+  must: 'roadmap-chip roadmap-chip-must',
+  should: 'roadmap-chip roadmap-chip-should',
+  could: 'roadmap-chip roadmap-chip-could',
+  wont: 'roadmap-chip roadmap-chip-wont'
 };
 
 // ============================================
@@ -26,9 +26,9 @@ export const ROADMAP_PRIORITY_COLORS: Record<string, string> = {
 // ============================================
 
 export const ROADMAP_COMPLEXITY_COLORS: Record<string, string> = {
-  low: 'bg-success/10 text-success',
-  medium: 'bg-warning/10 text-warning',
-  high: 'bg-destructive/10 text-destructive'
+  low: 'roadmap-chip roadmap-chip-complexity-low',
+  medium: 'roadmap-chip roadmap-chip-complexity-medium',
+  high: 'roadmap-chip roadmap-chip-complexity-high'
 };
 
 // ============================================
@@ -36,9 +36,9 @@ export const ROADMAP_COMPLEXITY_COLORS: Record<string, string> = {
 // ============================================
 
 export const ROADMAP_IMPACT_COLORS: Record<string, string> = {
-  low: 'bg-muted text-muted-foreground',
-  medium: 'bg-info/10 text-info',
-  high: 'bg-success/10 text-success'
+  low: 'roadmap-chip roadmap-chip-impact-low',
+  medium: 'roadmap-chip roadmap-chip-impact-medium',
+  high: 'roadmap-chip roadmap-chip-impact-high'
 };
 
 // ============================================

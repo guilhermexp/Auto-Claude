@@ -9,6 +9,7 @@ Detailed documentation for Auto Claude setup and usage.
 | **[CLI-USAGE.md](CLI-USAGE.md)** | Terminal-only usage for power users, headless servers, and CI/CD |
 | **[windows-development.md](windows-development.md)** | Windows-specific development guide (file encoding, paths, line endings) |
 | **[linux.md](linux.md)** | Linux-specific installation and build guide (Flatpak, AppImage) |
+| **[accounts-auth-troubleshooting.md](accounts-auth-troubleshooting.md)** | Troubleshooting for `Settings > Accounts` re-auth flow and migrated profiles |
 
 ## Quick Links
 

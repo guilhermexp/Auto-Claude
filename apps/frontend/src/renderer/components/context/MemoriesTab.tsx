@@ -121,9 +121,9 @@ export function MemoriesTab({
 
   return (
     <ScrollArea className="h-full">
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6 context-page-section">
         {/* Memory Status */}
-        <Card>
+        <Card className="context-card">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
@@ -131,12 +131,12 @@ export function MemoriesTab({
                 {t('graphMemoryStatus')}
               </CardTitle>
               {memoryStatus?.available ? (
-                <Badge variant="outline" className="bg-success/10 text-success border-success/30">
+                <Badge variant="outline" className="context-chip context-chip-success">
                   <CheckCircle className="h-3 w-3 mr-1" />
                   {t('connected')}
                 </Badge>
               ) : (
-                <Badge variant="outline" className="bg-muted text-muted-foreground">
+                <Badge variant="outline" className="context-chip context-chip-neutral">
                   <XCircle className="h-3 w-3 mr-1" />
                   {t('notAvailable')}
                 </Badge>
@@ -153,30 +153,30 @@ export function MemoriesTab({
 
                 {/* Memory Stats Summary */}
                 {recentMemories.length > 0 && (
-                  <div className="pt-3 border-t border-border/50">
+                  <div className="pt-3 context-divider">
                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                      <div className="text-center p-2 rounded-lg bg-muted/30">
+                      <div className="text-center p-2 rounded-lg context-stat-box context-stat-box-neutral">
                         <div className="text-lg font-semibold text-foreground">{memoryCounts.all}</div>
                         <div className="text-xs text-muted-foreground">{t('labels.total')}</div>
                       </div>
-                      <div className="text-center p-2 rounded-lg bg-cyan-500/10">
-                        <div className="text-lg font-semibold text-cyan-400">{memoryCounts.pr}</div>
+                      <div className="text-center p-2 rounded-lg context-stat-box context-stat-box-cyan">
+                        <div className="text-lg font-semibold context-tone-cyan">{memoryCounts.pr}</div>
                         <div className="text-xs text-muted-foreground">{t('labels.prReviews')}</div>
                       </div>
-                      <div className="text-center p-2 rounded-lg bg-amber-500/10">
-                        <div className="text-lg font-semibold text-amber-400">{memoryCounts.sessions}</div>
+                      <div className="text-center p-2 rounded-lg context-stat-box context-stat-box-warning">
+                        <div className="text-lg font-semibold context-tone-warning">{memoryCounts.sessions}</div>
                         <div className="text-xs text-muted-foreground">{t('labels.sessions')}</div>
                       </div>
-                      <div className="text-center p-2 rounded-lg bg-blue-500/10">
-                        <div className="text-lg font-semibold text-blue-400">{memoryCounts.codebase}</div>
+                      <div className="text-center p-2 rounded-lg context-stat-box context-stat-box-blue">
+                        <div className="text-lg font-semibold context-tone-blue">{memoryCounts.codebase}</div>
                         <div className="text-xs text-muted-foreground">{t('labels.codebase')}</div>
                       </div>
-                      <div className="text-center p-2 rounded-lg bg-purple-500/10">
-                        <div className="text-lg font-semibold text-purple-400">{memoryCounts.patterns}</div>
+                      <div className="text-center p-2 rounded-lg context-stat-box context-stat-box-purple">
+                        <div className="text-lg font-semibold context-tone-purple">{memoryCounts.patterns}</div>
                         <div className="text-xs text-muted-foreground">{t('labels.patterns')}</div>
                       </div>
-                      <div className="text-center p-2 rounded-lg bg-red-500/10">
-                        <div className="text-lg font-semibold text-red-400">{memoryCounts.gotchas}</div>
+                      <div className="text-center p-2 rounded-lg context-stat-box context-stat-box-danger">
+                        <div className="text-lg font-semibold context-tone-danger">{memoryCounts.gotchas}</div>
                         <div className="text-xs text-muted-foreground">{t('labels.gotchas')}</div>
                       </div>
                     </div>
@@ -205,8 +205,9 @@ export function MemoriesTab({
               value={localSearchQuery}
               onChange={(e) => setLocalSearchQuery(e.target.value)}
               onKeyDown={handleSearchKeyDown}
+              className="context-search-input"
             />
-            <Button onClick={handleSearch} disabled={searchLoading}>
+            <Button onClick={handleSearch} disabled={searchLoading} variant="secondary" className="context-action-button">
               <Search className={cn('h-4 w-4', searchLoading && 'animate-pulse')} />
             </Button>
           </div>
@@ -218,10 +219,10 @@ export function MemoriesTab({
                 {t('searchMemories.resultsFound', { count: searchResults.length })}
               </p>
               {searchResults.map((result, idx) => (
-                <Card key={idx} className="bg-muted/50">
+                <Card key={idx} className="context-card-soft">
                   <CardContent className="pt-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className="text-xs capitalize">
+                      <Badge variant="outline" className="text-xs capitalize context-chip context-chip-muted">
                         {result.type.replace('_', ' ')}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
@@ -260,11 +261,11 @@ export function MemoriesTab({
               return (
                 <Button
                   key={category}
-                  variant={isActive ? 'default' : 'outline'}
+                  variant="secondary"
                   size="sm"
                   className={cn(
-                    'gap-1.5 h-8',
-                    isActive && 'bg-accent text-accent-foreground',
+                    'gap-1.5 h-8 context-filter-pill',
+                    isActive && 'context-filter-pill-active',
                     !isActive && count === 0 && 'opacity-50'
                   )}
                   onClick={() => setActiveFilter(category)}
@@ -276,8 +277,8 @@ export function MemoriesTab({
                     <Badge
                       variant="secondary"
                       className={cn(
-                        'ml-1 px-1.5 py-0 text-xs',
-                        isActive && 'bg-background/20'
+                        'ml-1 px-1.5 py-0 text-xs context-chip context-chip-neutral',
+                        isActive && 'context-filter-pill-count-active'
                       )}
                     >
                       {count}
@@ -311,10 +312,10 @@ export function MemoriesTab({
                 {t('memoryBrowser.noMemoriesFiltered')}
               </p>
               <Button
-                variant="link"
+                variant="secondary"
                 size="sm"
                 onClick={() => setActiveFilter('all')}
-                className="mt-2"
+                className="mt-2 context-action-button"
               >
                 {t('memoryBrowser.showAll')}
               </Button>

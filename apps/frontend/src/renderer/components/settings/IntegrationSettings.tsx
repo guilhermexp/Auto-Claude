@@ -417,7 +417,7 @@ export function IntegrationSettings({ settings, onSettingsChange, isOpen, onSave
             <h4 className="text-sm font-semibold text-foreground">{t('integrations.claudeAccounts')}</h4>
           </div>
 
-          <div className="rounded-lg bg-muted/30 border border-border p-4">
+          <div className="rounded-lg p-4 settings-section-container">
             <p className="text-sm text-muted-foreground mb-4">
               {t('integrations.claudeAccountsDescription')}
             </p>
@@ -638,7 +638,7 @@ export function IntegrationSettings({ settings, onSettingsChange, isOpen, onSave
                     {/* Expanded token entry section */}
                     {expandedTokenProfileId === profile.id && (
                       <div className="px-3 pb-3 pt-0 border-t border-border/50 mt-0">
-                        <div className="bg-muted/30 rounded-lg p-3 mt-3 space-y-3">
+                        <div className="rounded-lg p-3 mt-3 space-y-3 settings-info-card">
                           <div className="flex items-center justify-between">
                             <Label className="text-xs font-medium text-muted-foreground">
                               {t('integrations.manualTokenEntry')}
@@ -761,7 +761,7 @@ export function IntegrationSettings({ settings, onSettingsChange, isOpen, onSave
               <h4 className="text-sm font-semibold text-foreground">{t('integrations.autoSwitching')}</h4>
             </div>
 
-            <div className="rounded-lg bg-muted/30 border border-border p-4 space-y-4">
+            <div className="rounded-lg p-4 space-y-4 settings-section-container">
               <p className="text-sm text-muted-foreground">
                 {t('integrations.autoSwitchingDescription')}
               </p>

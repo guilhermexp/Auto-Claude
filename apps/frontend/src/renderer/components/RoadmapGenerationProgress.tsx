@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Users, Sparkles, CheckCircle2, AlertCircle, Square, Clock } from 'lucide-react';
@@ -97,8 +97,8 @@ type GenerationPhase = Exclude<RoadmapGenerationStatus['phase'], 'idle'>;
 const getPhaseConfig = (t: (key: string) => string): Record<
   GenerationPhase,
   {
-    labelKey: string;
-    descriptionKey: string;
+    label: string;
+    description: string;
     icon: typeof Search;
     color: string;
     bgColor: string;
@@ -108,8 +108,8 @@ const getPhaseConfig = (t: (key: string) => string): Record<
     label: t('roadmap:generation.phases.analyzing.label'),
     description: t('roadmap:generation.phases.analyzing.description'),
     icon: Search,
-    color: 'bg-amber-500',
-    bgColor: 'bg-amber-500/20',
+    color: 'bg-warning',
+    bgColor: 'bg-warning/20',
   },
   discovering: {
     label: t('roadmap:generation.phases.discovering.label'),
@@ -270,7 +270,7 @@ function PhaseStepsIndicator({
                   />
                 </svg>
               )}
-              {t(phase.labelKey)}
+              {phase.label}
             </motion.div>
             {index < steps.length - 1 && (
               <div
@@ -300,7 +300,7 @@ export function RoadmapGenerationProgress({
   onStop
 }: RoadmapGenerationProgressProps) {
   const { t } = useTranslation('roadmap');
-  const { phase, progress, message, error } = generationStatus;
+  const { phase, progress, message, error, startedAt, lastActivityAt } = generationStatus;
   const reducedMotion = useReducedMotion();
   const [isStopping, setIsStopping] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -492,9 +492,9 @@ export function RoadmapGenerationProgress({
             transition={{ duration: 0.2 }}
             className="space-y-1"
           >
-            <h3 className="text-lg font-semibold">{t(config.labelKey)}</h3>
-            <p className="text-sm text-muted-foreground">{t(config.descriptionKey)}</p>
-            {message && message !== t(config.descriptionKey) && (
+            <h3 className="text-lg font-semibold">{config.label}</h3>
+            <p className="text-sm text-muted-foreground">{config.description}</p>
+            {message && message !== config.description && (
               <p className="text-xs text-muted-foreground mt-1">{message}</p>
             )}
           </motion.div>

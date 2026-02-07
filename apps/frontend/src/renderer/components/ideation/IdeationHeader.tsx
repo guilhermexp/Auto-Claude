@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { Lightbulb, Eye, EyeOff, Settings2, Plus, Trash2, RefreshCw, CheckSquare, X } from 'lucide-react';
+import { Lightbulb, Eye, EyeOff, Settings2, Plus, Trash2, RefreshCw, CheckSquare, X, Languages, Loader2 } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { cn } from '../../lib/utils';
 import { IDEATION_TYPE_COLORS } from '../../../shared/constants';
 import type { IdeationType } from '../../../shared/types';
 import { TypeIcon } from './TypeIcon';
@@ -22,6 +23,10 @@ interface IdeationHeaderProps {
   onRefresh: () => void;
   hasActiveIdeas: boolean;
   canAddMore: boolean;
+  showTranslateToggle?: boolean;
+  isTranslateEnabled?: boolean;
+  isTranslating?: boolean;
+  onToggleTranslate?: () => void;
 }
 
 export function IdeationHeader({
@@ -38,7 +43,11 @@ export function IdeationHeader({
   onClearSelection,
   onRefresh,
   hasActiveIdeas,
-  canAddMore
+  canAddMore,
+  showTranslateToggle = false,
+  isTranslateEnabled = false,
+  isTranslating = false,
+  onToggleTranslate,
 }: IdeationHeaderProps) {
   const { t } = useTranslation(['common', 'ideation']);
   const hasSelection = selectedCount > 0;
@@ -49,7 +58,9 @@ export function IdeationHeader({
           <div className="flex items-center gap-2 mb-1">
             <Lightbulb className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">{t('ideation:header.title')}</h2>
-            <Badge variant="outline">{t('ideation:header.ideasCount', { count: totalIdeas })}</Badge>
+            <Badge variant="outline" className="ideation-chip ideation-tone-neutral">
+              {t('ideation:header.ideasCount', { count: totalIdeas })}
+            </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
             {t('ideation:header.description')}
@@ -59,13 +70,13 @@ export function IdeationHeader({
           {/* Selection controls */}
           {hasSelection ? (
             <>
-              <Badge variant="secondary" className="mr-1">
+              <Badge variant="secondary" className="mr-1 ideation-chip ideation-tone-selected">
                 {t('ideation:header.selectedCount', { count: selectedCount })}
               </Badge>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
-                className="text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                className="ideation-action-button-danger"
                 onClick={onDeleteSelected}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
@@ -74,8 +85,9 @@ export function IdeationHeader({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     size="icon"
+                    className="ideation-action-button"
                     onClick={onClearSelection}
                     aria-label={t('accessibility.clearSelectionAriaLabel')}
                   >
@@ -91,8 +103,9 @@ export function IdeationHeader({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     size="icon"
+                    className="ideation-action-button"
                     onClick={onSelectAll}
                     aria-label={t('accessibility.selectAllAriaLabel')}
                   >
@@ -105,11 +118,42 @@ export function IdeationHeader({
           )}
 
           {/* View toggles */}
+          {showTranslateToggle && onToggleTranslate && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className={cn('ideation-action-button', isTranslateEnabled && 'ideation-action-button-active')}
+                  onClick={onToggleTranslate}
+                  aria-label={
+                    isTranslateEnabled
+                      ? t('ideation:header.translation.showOriginal')
+                      : t('ideation:header.translation.translateToPortuguese')
+                  }
+                >
+                  {isTranslating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Languages className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isTranslating
+                  ? t('ideation:header.translation.translating')
+                  : isTranslateEnabled
+                    ? t('ideation:header.translation.showOriginal')
+                    : t('ideation:header.translation.translateToPortuguese')}
+              </TooltipContent>
+            </Tooltip>
+          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant={showDismissed ? 'secondary' : 'outline'}
+                variant="secondary"
                 size="icon"
+                className={cn('ideation-action-button', showDismissed && 'ideation-action-button-active')}
                 onClick={onToggleShowDismissed}
                 aria-label={showDismissed ? t('accessibility.hideDismissedAriaLabel') : t('accessibility.showDismissedAriaLabel')}
               >
@@ -123,8 +167,9 @@ export function IdeationHeader({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="icon"
+                className="ideation-action-button"
                 onClick={onOpenConfig}
                 aria-label={t('accessibility.configureAriaLabel')}
               >
@@ -137,7 +182,8 @@ export function IdeationHeader({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="outline"
+                  variant="secondary"
+                  className="ideation-action-button"
                   onClick={onOpenAddMore}
                   aria-label={t('accessibility.addMoreAriaLabel')}
                 >
@@ -152,9 +198,9 @@ export function IdeationHeader({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="icon"
-                  className="text-muted-foreground hover:text-destructive"
+                  className="ideation-action-button-danger"
                   onClick={onDismissAll}
                   aria-label={t('accessibility.dismissAllAriaLabel')}
                 >
@@ -166,7 +212,13 @@ export function IdeationHeader({
           )}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="icon" onClick={onRefresh} aria-label={t('accessibility.regenerateIdeasAriaLabel')}>
+              <Button
+                variant="secondary"
+                size="icon"
+                className="ideation-action-button"
+                onClick={onRefresh}
+                aria-label={t('accessibility.regenerateIdeasAriaLabel')}
+              >
                 <RefreshCw className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -181,7 +233,7 @@ export function IdeationHeader({
           <Badge
             key={type}
             variant="outline"
-            className={IDEATION_TYPE_COLORS[type]}
+            className={`ideation-chip ${IDEATION_TYPE_COLORS[type]}`}
           >
             <TypeIcon type={type as IdeationType} />
             <span className="ml-1">{count}</span>

@@ -18,17 +18,17 @@ export interface PRHeaderProps {
 function getFileStatusStyle(status: string) {
   switch (status.toLowerCase()) {
     case 'added':
-      return 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30';
+      return 'github-pr-chip github-pr-chip-success';
     case 'removed':
     case 'deleted':
-      return 'bg-red-500/15 text-red-500 border-red-500/30';
+      return 'github-pr-chip github-pr-chip-danger';
     case 'modified':
     case 'changed':
-      return 'bg-amber-500/15 text-amber-500 border-amber-500/30';
+      return 'github-pr-chip github-pr-chip-warning';
     case 'renamed':
-      return 'bg-blue-500/15 text-blue-500 border-blue-500/30';
+      return 'github-pr-chip github-pr-chip-reviewed';
     default:
-      return 'bg-muted text-muted-foreground';
+      return 'github-pr-chip github-pr-chip-neutral';
   }
 }
 
@@ -48,10 +48,10 @@ export function PRHeader({ pr, isLoadingFiles = false }: PRHeaderProps) {
           <Badge
             variant={pr.state.toLowerCase() === 'open' ? 'success' : 'secondary'}
             className={cn(
-              "capitalize px-2.5 py-0.5",
+              'capitalize px-2.5 py-0.5 github-pr-chip',
               pr.state.toLowerCase() === 'open'
-                ? "bg-emerald-500/15 text-emerald-500 hover:bg-emerald-500/25 border-emerald-500/20"
-                : ""
+                ? 'github-pr-chip-success'
+                : 'github-pr-chip-neutral'
             )}
           >
             {t(`prReview.state.${pr.state.toLowerCase()}`)}
@@ -59,10 +59,10 @@ export function PRHeader({ pr, isLoadingFiles = false }: PRHeaderProps) {
           <span className="text-muted-foreground text-sm font-mono">#{pr.number}</span>
         </div>
         <Button
-          variant="ghost"
+          variant="secondary"
           size="icon"
           asChild
-          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+          className="h-8 w-8 github-pr-action-button"
         >
           <a href={pr.htmlUrl} target="_blank" rel="noopener noreferrer">
             <ExternalLink className="h-4 w-4" />
@@ -72,9 +72,9 @@ export function PRHeader({ pr, isLoadingFiles = false }: PRHeaderProps) {
 
       <h1 className="text-xl font-bold mb-4 leading-tight">{pr.title}</h1>
 
-      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted-foreground border-b border-border/40 pb-5">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted-foreground pb-5 px-3 py-3 rounded-xl github-pr-meta-strip">
         <div className="flex items-center gap-2">
-          <div className="bg-muted rounded-full p-1">
+          <div className="rounded-full p-1 github-pr-meta-icon">
             <User className="h-3.5 w-3.5" />
           </div>
           <span className="font-medium text-foreground">{pr.author.login}</span>
@@ -85,16 +85,17 @@ export function PRHeader({ pr, isLoadingFiles = false }: PRHeaderProps) {
           <span>{formatDate(pr.createdAt, i18n.language)}</span>
         </div>
 
-        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted/50 font-mono text-xs border border-border/50">
-          <GitBranch className="h-3 w-3" />
-          <span className="text-foreground">{pr.headRefName}</span>
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-md font-mono text-xs border github-pr-branch-info">
+            <GitBranch className="h-3 w-3" />
+            <span className="text-foreground">{pr.headRefName}</span>
           <span className="text-muted-foreground/50 mx-1">→</span>
           <span className="text-foreground">{pr.baseRefName}</span>
         </div>
 
-        <div className="flex items-center gap-4 ml-auto">
+          <div className="flex items-center gap-4 ml-auto">
           {/* Clickable files indicator */}
           <button
+            type="button"
             onClick={() => setShowFiles(!showFiles)}
             className={cn(
               "flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors",
@@ -115,10 +116,10 @@ export function PRHeader({ pr, isLoadingFiles = false }: PRHeaderProps) {
             )}
           </button>
           <div className="flex items-center gap-2 text-xs font-mono">
-            <span className="text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+            <span className="github-pr-inline-stat github-pr-inline-stat-success">
               +{pr.additions}
             </span>
-            <span className="text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">
+            <span className="github-pr-inline-stat github-pr-inline-stat-danger">
               -{pr.deletions}
             </span>
           </div>
@@ -127,18 +128,18 @@ export function PRHeader({ pr, isLoadingFiles = false }: PRHeaderProps) {
 
       {/* Collapsible file list */}
       {showFiles && (
-        <div className="mt-4 border border-border/40 rounded-lg overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="mt-4 rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 github-pr-file-list">
           {isLoadingFiles ? (
             <div className="p-4 flex items-center justify-center text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
               <span className="text-sm">{t('prReview.loadingFiles')}</span>
             </div>
           ) : hasFiles ? (
-            <div className="divide-y divide-border/40 max-h-[300px] overflow-y-auto">
+            <div className="space-y-1 p-1 max-h-[300px] overflow-y-auto">
               {pr.files.map((file, index) => (
                 <div
                   key={`${file.path}-${index}`}
-                  className="flex items-center gap-3 px-3 py-2 hover:bg-accent/30 transition-colors"
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent/30 transition-colors"
                 >
                   <FileCode className="h-4 w-4 text-muted-foreground shrink-0" />
                   <span className="font-mono text-xs truncate flex-1" title={file.path}>
@@ -146,7 +147,7 @@ export function PRHeader({ pr, isLoadingFiles = false }: PRHeaderProps) {
                   </span>
                   <Badge
                     variant="outline"
-                    className={cn("text-[10px] px-1.5 py-0 shrink-0", getFileStatusStyle(file.status))}
+                    className={cn('text-[10px] px-1.5 py-0 shrink-0', getFileStatusStyle(file.status))}
                   >
                     {file.status}
                   </Badge>

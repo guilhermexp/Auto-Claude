@@ -39,8 +39,9 @@ export function ProjectIndexTab({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
+                className="context-action-button"
                 onClick={onRefresh}
                 disabled={indexLoading}
               >
@@ -54,7 +55,7 @@ export function ProjectIndexTab({
 
         {/* Error state */}
         {indexError && (
-          <div className="flex items-center gap-3 p-4 rounded-lg bg-destructive/10 text-destructive">
+          <div className="flex items-center gap-3 p-4 rounded-lg context-error-banner">
             <AlertCircle className="h-5 w-5 shrink-0" />
             <div>
               <p className="font-medium">{t('projectIndex.errorTitle')}</p>
@@ -89,17 +90,17 @@ export function ProjectIndexTab({
         {projectIndex && (
           <div className="space-y-6">
             {/* Project Overview */}
-            <Card>
+            <Card className="context-card">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base">{t('projectIndex.overview')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="capitalize">
+                  <Badge variant="outline" className="capitalize context-chip context-chip-neutral">
                     {projectIndex.project_type}
                   </Badge>
                   {Object.keys(projectIndex.services).length > 0 && (
-                    <Badge variant="secondary">
+                    <Badge variant="secondary" className="context-chip context-chip-info">
                       {t('projectIndex.serviceCount', { count: Object.keys(projectIndex.services).length })}
                     </Badge>
                   )}
@@ -130,7 +131,7 @@ export function ProjectIndexTab({
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                   {t('projectIndex.infrastructure')}
                 </h3>
-                <Card>
+                <Card className="context-card">
                   <CardContent className="pt-6">
                     <div className="grid gap-4 sm:grid-cols-2">
                       {projectIndex.infrastructure.docker_compose && (
@@ -148,7 +149,7 @@ export function ProjectIndexTab({
                             <span className="text-xs text-muted-foreground">{t('projectIndex.dockerServices')}</span>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {projectIndex.infrastructure.docker_services.map((svc) => (
-                                <Badge key={svc} variant="secondary" className="text-xs">
+                                <Badge key={svc} variant="secondary" className="text-xs context-chip context-chip-neutral">
                                   {svc}
                                 </Badge>
                               ))}
@@ -167,7 +168,7 @@ export function ProjectIndexTab({
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                   {t('projectIndex.conventions')}
                 </h3>
-                <Card>
+                <Card className="context-card">
                   <CardContent className="pt-6">
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {projectIndex.conventions.python_linting && (

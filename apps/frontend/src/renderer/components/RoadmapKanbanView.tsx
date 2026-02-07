@@ -65,6 +65,20 @@ function getStatusIcon(iconName: string) {
   }
 }
 
+// Get icon class for status column
+function getStatusIconClass(columnId: string) {
+  switch (columnId) {
+    case 'done':
+      return 'roadmap-kanban-column-icon roadmap-kanban-column-icon-done';
+    case 'in_progress':
+      return 'roadmap-kanban-column-icon roadmap-kanban-column-icon-progress';
+    case 'planned':
+      return 'roadmap-kanban-column-icon roadmap-kanban-column-icon-planned';
+    default:
+      return 'roadmap-kanban-column-icon roadmap-kanban-column-icon-review';
+  }
+}
+
 function DroppableStatusColumn({
   column,
   features,
@@ -86,27 +100,15 @@ function DroppableStatusColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        'flex min-w-80 max-w-[32rem] flex-1 flex-col rounded-xl border border-white/5 bg-linear-to-b from-secondary/30 to-transparent backdrop-blur-sm transition-all duration-200',
+        'flex min-w-80 max-w-[32rem] flex-1 flex-col rounded-xl roadmap-kanban-column transition-all duration-200',
         column.color,
-        'border-t-2',
         isOver && 'drop-zone-highlight'
       )}
     >
       {/* Column header */}
-      <div className="flex items-center justify-between p-4 border-b border-white/5">
+      <div className="flex items-center justify-between p-4 roadmap-kanban-column-header">
         <div className="flex items-center gap-2.5">
-          <div
-            className={cn(
-              'w-6 h-6 rounded-full flex items-center justify-center',
-              column.id === 'done'
-                ? 'bg-success/10 text-success'
-                : column.id === 'in_progress'
-                ? 'bg-primary/10 text-primary'
-                : column.id === 'planned'
-                ? 'bg-info/10 text-info'
-                : 'bg-muted text-muted-foreground'
-            )}
-          >
+          <div className={getStatusIconClass(column.id)}>
             {getStatusIcon(column.icon)}
           </div>
           <h2 className="font-semibold text-sm text-foreground">
@@ -313,9 +315,9 @@ export function RoadmapKanbanView({
         <DragOverlay>
           {activeFeature ? (
             <div className="drag-overlay-card">
-              <Card className="p-4 w-80 shadow-2xl">
+              <Card className="p-4 w-80 shadow-2xl roadmap-kanban-card">
                 <div className="flex items-center gap-2 mb-1">
-                  <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 roadmap-chip roadmap-chip-neutral">
                     {getStatusLabelForFeature(activeFeature)}
                   </Badge>
                 </div>

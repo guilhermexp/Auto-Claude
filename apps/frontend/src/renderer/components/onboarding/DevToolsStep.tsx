@@ -392,7 +392,7 @@ export function DevToolsStep({ onNext, onBack }: DevToolsStepProps) {
 
             {/* Detection Summary */}
             {detectedTools && (
-              <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
+              <div className="text-xs text-muted-foreground p-3 rounded-md onboarding-info-card">
                 <p className="font-medium mb-1">Detected on your system:</p>
                 <ul className="list-disc list-inside space-y-0.5">
                   {detectedTools.ides.map((ide) => (

@@ -35,9 +35,9 @@ export function SuggestedTaskCard({
   const { t } = useTranslation('insights');
 
   return (
-    <div className="mt-3 bg-background rounded-lg border border-border/50 overflow-hidden">
+    <div className="mt-3 overflow-hidden insights-task-card">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-border/50 bg-muted/30">
+      <div className="px-4 py-3 insights-task-card-header">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
           <span className="text-sm font-medium text-primary">
@@ -85,7 +85,7 @@ export function SuggestedTaskCard({
       </div>
 
       {/* Footer with action */}
-      <div className="px-4 py-3 bg-muted/30 border-t border-border/50">
+      <div className="px-4 py-3 insights-task-card-footer">
         <Button
           size="sm"
           className="h-8"

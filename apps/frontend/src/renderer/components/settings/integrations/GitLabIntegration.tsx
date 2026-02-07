@@ -766,7 +766,7 @@ function ConnectionStatus({ isChecking, connectionStatus }: ConnectionStatusProp
   const { t } = useTranslation('gitlab');
 
   return (
-    <div className="rounded-lg border border-border bg-muted/30 p-3">
+    <div className="rounded-lg p-3 settings-info-card">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-foreground">{t('settings.connectionStatus')}</p>

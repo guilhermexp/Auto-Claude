@@ -394,7 +394,7 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
 
             {/* Keychain explanation - macOS only */}
             {navigator.platform.toLowerCase().includes('mac') && (
-              <Card className="border border-border bg-muted/30">
+              <Card className="onboarding-info-card">
                 <CardContent className="p-5">
                   <div className="flex items-start gap-4">
                     <Lock className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
@@ -412,7 +412,7 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
             )}
 
             {/* Profile list */}
-            <div className="rounded-lg bg-muted/30 border border-border p-4">
+            <div className="rounded-lg p-4 onboarding-section-container">
               {claudeProfiles.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border p-4 text-center mb-4">
                   <p className="text-sm text-muted-foreground">{t('oauth.noAccountsYet')}</p>
@@ -579,7 +579,7 @@ export function OAuthStep({ onNext, onBack, onSkip }: OAuthStepProps) {
                       {/* Expanded token entry section */}
                       {expandedTokenProfileId === profile.id && (
                         <div className="px-3 pb-3 pt-0 border-t border-border/50 mt-0">
-                          <div className="bg-muted/30 rounded-lg p-3 mt-3 space-y-3">
+                          <div className="rounded-lg p-3 mt-3 space-y-3 onboarding-info-card">
                             <div className="flex items-center justify-between">
                               <Label className="text-xs font-medium text-muted-foreground">
                                 {t('common:oauth.manualTokenEntry')}

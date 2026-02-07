@@ -17,12 +17,10 @@ import { cn, formatRelativeTime, sanitizeMarkdownForDisplay } from '../lib/utils
 import { PhaseProgressIndicator } from './PhaseProgressIndicator';
 import {
   TASK_CATEGORY_LABELS,
-  TASK_CATEGORY_COLORS,
   TASK_COMPLEXITY_COLORS,
   TASK_COMPLEXITY_LABELS,
   TASK_IMPACT_COLORS,
   TASK_IMPACT_LABELS,
-  TASK_PRIORITY_COLORS,
   TASK_PRIORITY_LABELS,
   EXECUTION_PHASE_LABELS,
   EXECUTION_PHASE_BADGE_COLORS,
@@ -45,6 +43,28 @@ const CategoryIcon: Record<TaskCategory, typeof Zap> = {
   ui_ux: Palette,
   infrastructure: Wrench,
   testing: FileCode
+};
+
+const KANBAN_PRIORITY_COLORS: Record<string, string> = {
+  low: 'kanban-task-chip-neutral',
+  medium: 'kanban-task-chip-info',
+  high: 'kanban-task-chip-warning',
+  urgent: 'kanban-task-chip-critical'
+};
+
+const KANBAN_COMPLEXITY_COLORS: Record<string, string> = {
+  trivial: 'kanban-task-chip-neutral',
+  small: 'kanban-task-chip-neutral',
+  medium: 'kanban-task-chip-info',
+  large: 'kanban-task-chip-warning',
+  complex: 'kanban-task-chip-critical'
+};
+
+const KANBAN_IMPACT_COLORS: Record<string, string> = {
+  low: 'kanban-task-chip-neutral',
+  medium: 'kanban-task-chip-info',
+  high: 'kanban-task-chip-warning',
+  critical: 'kanban-task-chip-critical'
 };
 
 // Catastrophic stuck detection interval (ms).
@@ -317,7 +337,7 @@ export const TaskCard = memo(function TaskCard({
   return (
     <Card
       className={cn(
-        'card-surface task-card-enhanced cursor-pointer',
+        'card-surface task-card-enhanced kanban-task-card cursor-pointer',
         isRunning && !isStuck && 'ring-2 ring-primary border-primary task-running-pulse',
         isStuck && 'ring-2 ring-warning border-warning task-stuck-pulse',
         isArchived && 'opacity-60 hover:opacity-80',
@@ -432,7 +452,7 @@ export const TaskCard = memo(function TaskCard({
             {task.metadata?.category && (
               <Badge
                 variant="outline"
-                className={cn('text-[10px] px-1.5 py-0', TASK_CATEGORY_COLORS[task.metadata.category])}
+                className="kanban-task-chip kanban-task-chip-neutral text-[10px] px-1.5 py-0"
               >
                 {CategoryIcon[task.metadata.category] && (
                   (() => {
@@ -447,7 +467,7 @@ export const TaskCard = memo(function TaskCard({
             {task.metadata?.impact && (task.metadata.impact === 'high' || task.metadata.impact === 'critical') && (
               <Badge
                 variant="outline"
-                className={cn('text-[10px] px-1.5 py-0', TASK_IMPACT_COLORS[task.metadata.impact])}
+                className={cn('kanban-task-chip text-[10px] px-1.5 py-0', KANBAN_IMPACT_COLORS[task.metadata.impact] ?? TASK_IMPACT_COLORS[task.metadata.impact])}
               >
                 {TASK_IMPACT_LABELS[task.metadata.impact]}
               </Badge>
@@ -456,7 +476,10 @@ export const TaskCard = memo(function TaskCard({
             {task.metadata?.complexity && (
               <Badge
                 variant="outline"
-                className={cn('text-[10px] px-1.5 py-0', TASK_COMPLEXITY_COLORS[task.metadata.complexity])}
+                className={cn(
+                  'kanban-task-chip text-[10px] px-1.5 py-0',
+                  KANBAN_COMPLEXITY_COLORS[task.metadata.complexity] ?? TASK_COMPLEXITY_COLORS[task.metadata.complexity]
+                )}
               >
                 {TASK_COMPLEXITY_LABELS[task.metadata.complexity]}
               </Badge>
@@ -465,7 +488,7 @@ export const TaskCard = memo(function TaskCard({
             {task.metadata?.priority && (task.metadata.priority === 'urgent' || task.metadata.priority === 'high') && (
               <Badge
                 variant="outline"
-                className={cn('text-[10px] px-1.5 py-0', TASK_PRIORITY_COLORS[task.metadata.priority])}
+                className={cn('kanban-task-chip text-[10px] px-1.5 py-0', KANBAN_PRIORITY_COLORS[task.metadata.priority])}
               >
                 {TASK_PRIORITY_LABELS[task.metadata.priority]}
               </Badge>
@@ -474,7 +497,7 @@ export const TaskCard = memo(function TaskCard({
             {task.metadata?.securitySeverity && (
               <Badge
                 variant="outline"
-                className={cn('text-[10px] px-1.5 py-0', TASK_IMPACT_COLORS[task.metadata.securitySeverity])}
+                className={cn('kanban-task-chip text-[10px] px-1.5 py-0', KANBAN_IMPACT_COLORS[task.metadata.securitySeverity] ?? TASK_IMPACT_COLORS[task.metadata.securitySeverity])}
               >
                 {task.metadata.securitySeverity} {t('metadata.severity')}
               </Badge>

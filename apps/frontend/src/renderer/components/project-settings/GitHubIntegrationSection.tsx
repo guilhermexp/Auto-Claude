@@ -59,7 +59,7 @@ export function GitHubIntegrationSection({
     >
       {/* Project-Specific Configuration Notice */}
       {projectName && (
-        <div className="rounded-lg border border-info/30 bg-info/5 p-3 mb-4">
+        <div className="rounded-lg p-3 mb-4 settings-update-card">
           <div className="flex items-start gap-2">
             <Info className="h-4 w-4 text-info mt-0.5 shrink-0" />
             <div className="flex-1">
@@ -102,7 +102,7 @@ export function GitHubIntegrationSection({
                   Use Manual Token
                 </Button>
               </div>
-              <div className="flex items-center gap-2 p-3 rounded-lg border border-success/30 bg-success/5">
+              <div className="flex items-center gap-2 p-3 rounded-lg settings-profile-card-active">
                 <CheckCircle2 className="h-4 w-4 text-success" />
                 <span className="text-sm text-foreground">Authenticated via GitHub OAuth (gh CLI)</span>
               </div>
@@ -183,7 +183,7 @@ export function GitHubIntegrationSection({
 
           {/* Info about accessing issues */}
           {gitHubConnectionStatus?.connected && (
-            <div className="rounded-lg border border-info/30 bg-info/5 p-3">
+            <div className="rounded-lg p-3 settings-update-card">
               <div className="flex items-start gap-3">
                 <Github className="h-5 w-5 text-info mt-0.5" />
                 <div className="flex-1">

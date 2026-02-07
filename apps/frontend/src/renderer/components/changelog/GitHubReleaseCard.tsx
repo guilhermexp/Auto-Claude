@@ -42,7 +42,7 @@ export function GitHubReleaseCard({
   };
 
   return (
-    <Card>
+    <Card className="changelog-options-card">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2">
           <Github className="h-5 w-5" />

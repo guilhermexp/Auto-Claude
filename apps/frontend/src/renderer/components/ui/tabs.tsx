@@ -16,8 +16,8 @@ const tabsListVariants = cva(
         lg: 'h-12 p-1.5',
       },
       variant: {
-        default: 'bg-secondary',
-        outline: 'border border-border bg-transparent',
+        default: 'flat-tabs-list',
+        outline: 'border border-border/30 bg-transparent',
         pills: 'bg-transparent gap-1',
       },
     },
@@ -29,7 +29,7 @@ const tabsListVariants = cva(
 );
 
 const tabsTriggerVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-foreground/70 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=inactive]:hover:text-foreground/90',
+  'inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-muted-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm data-[state=inactive]:hover:text-foreground',
   {
     variants: {
       size: {

@@ -24,8 +24,8 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
     };
 
     return (
-      <div className="p-4 bg-card border-t border-border/50">
-        <div className="relative bg-background rounded-xl border border-border/50 overflow-hidden focus-within:ring-1 focus-within:ring-primary/50 focus-within:border-primary/50 transition-all">
+      <div className="p-4 insights-input-container">
+        <div className="relative overflow-hidden insights-input-field">
           <Textarea
             ref={ref}
             value={value}

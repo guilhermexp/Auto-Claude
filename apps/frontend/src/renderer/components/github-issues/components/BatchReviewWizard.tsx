@@ -299,10 +299,8 @@ export function BatchReviewWizard({
                   <div
                     key={issue.issueNumber}
                     onClick={() => toggleSingleIssueSelection(issue.issueNumber)}
-                    className={`p-2 rounded border text-sm truncate cursor-pointer transition-colors ${
-                      selectedSingleIssueNumbers.has(issue.issueNumber)
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:bg-accent'
+                    className={`p-2 rounded text-sm truncate cursor-pointer transition-colors github-issue-list-item ${
+                      selectedSingleIssueNumbers.has(issue.issueNumber) ? 'github-issue-list-item-selected' : ''
                     }`}
                   >
                     <Checkbox
@@ -446,10 +444,8 @@ function BatchCard({
 
   return (
     <div
-      className={`rounded-lg border transition-colors ${
-        isSelected
-          ? 'border-primary bg-primary/5'
-          : 'border-border bg-card'
+      className={`rounded-lg transition-colors github-issue-list-item ${
+        isSelected ? 'github-issue-list-item-selected' : ''
       }`}
     >
       <div className="flex items-center gap-3 p-3">

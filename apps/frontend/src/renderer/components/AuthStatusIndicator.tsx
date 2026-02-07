@@ -45,7 +45,7 @@ const OAUTH_FALLBACK = {
   name: 'OAuth',
   provider: 'anthropic' as const,
   providerLabel: 'Anthropic',
-  badgeColor: 'bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/15'
+  badgeColor: 'header-badge-auth'
 } as const;
 
 export function AuthStatusIndicator() {
@@ -163,7 +163,7 @@ export function AuthStatusIndicator() {
         <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border bg-red-500/10 text-red-500 border-red-500/20">
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 header-badge-usage-critical text-destructive">
                 <AlertTriangle className="h-3.5 w-3.5 motion-safe:animate-pulse" />
               </div>
             </TooltipTrigger>
@@ -189,7 +189,7 @@ export function AuthStatusIndicator() {
           <TooltipTrigger asChild>
             <button
               type="button"
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border transition-all hover:opacity-80 ${authStatus.badgeColor}`}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 ${authStatus.badgeColor}`}
               aria-label={t('common:usage.authenticationAriaLabel', { provider: badgeLabel })}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -206,11 +206,7 @@ export function AuthStatusIndicator() {
                   <Shield className="h-3.5 w-3.5" />
                   <span className="font-semibold text-xs">{t('common:usage.authenticationDetails')}</span>
                 </div>
-                <div className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
-                  isOAuth
-                    ? 'bg-orange-500/15 text-orange-500'
-                    : 'bg-primary/15 text-primary'
-                }`}>
+                <div className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-muted text-muted-foreground">
                   {isOAuth ? t('common:usage.oauth') : t('common:usage.apiKey')}
                 </div>
               </div>
@@ -282,7 +278,7 @@ export function AuthStatusIndicator() {
         <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border bg-red-500/10 text-red-500 border-red-500/20 text-xs font-semibold">
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 header-badge-usage-critical text-destructive text-xs font-semibold">
                 {Math.round(usage.sessionPercent)}%
               </div>
             </TooltipTrigger>

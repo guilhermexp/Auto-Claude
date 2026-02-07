@@ -377,6 +377,9 @@ export interface ElectronAPI {
   // Spell check
   setSpellCheckLanguages: (language: string) => Promise<IPCResult<{ success: boolean }>>;
 
+  // Translation
+  translateText: (text: string, targetLanguage?: string) => Promise<string>;
+
   // Sentry error reporting
   notifySentryStateChanged: (enabled: boolean) => void;
   getSentryDsn: () => Promise<string>;

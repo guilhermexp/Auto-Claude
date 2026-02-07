@@ -126,7 +126,7 @@ export function MemoryBackendSection({
       </div>
 
       {!envConfig.graphitiEnabled && (
-        <div className="rounded-lg border border-border bg-muted/30 p-3">
+        <div className="rounded-lg p-3 settings-info-card">
           <p className="text-xs text-muted-foreground">
             Using file-based memory. Session insights are stored locally in JSON files.
             Enable Memory for persistent cross-session context with semantic search.

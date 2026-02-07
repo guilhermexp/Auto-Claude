@@ -462,7 +462,7 @@ export function GraphitiStep({ onNext, onBack, onSkip }: GraphitiStepProps) {
 
         {/* Azure OpenAI Settings */}
         {needsAzure && (
-          <div className="space-y-3 p-3 rounded-md bg-muted/50">
+          <div className="space-y-3 p-3 rounded-md onboarding-section-container">
             <p className="text-sm font-medium text-foreground">Azure OpenAI Settings</p>
             <div className="space-y-2">
               <Label htmlFor="azure-key" className="text-xs text-muted-foreground">API Key</Label>
@@ -662,7 +662,7 @@ export function GraphitiStep({ onNext, onBack, onSkip }: GraphitiStepProps) {
 
         {/* Ollama Settings */}
         {needsOllama && (
-          <div className="space-y-3 p-3 rounded-md bg-muted/50">
+          <div className="space-y-3 p-3 rounded-md onboarding-section-container">
             <p className="text-sm font-medium text-foreground">Ollama Settings (Local)</p>
             <div className="space-y-2">
               <Label htmlFor="ollama-url" className="text-xs text-muted-foreground">Base URL</Label>
@@ -858,7 +858,7 @@ export function GraphitiStep({ onNext, onBack, onSkip }: GraphitiStepProps) {
                 </Card>
 
                 {/* Enable toggle */}
-                <Card className="border border-border bg-card">
+                <Card className="onboarding-feature-card">
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">

@@ -77,7 +77,7 @@ export function SortableFeatureCard({
       {...listeners}
     >
       <Card
-        className="p-3 hover:bg-muted/50 cursor-pointer transition-colors"
+        className="p-3 cursor-pointer transition-colors roadmap-kanban-card"
         onClick={onClick}
       >
         {/* Header - Title with priority badge and action button */}
@@ -95,7 +95,7 @@ export function SortableFeatureCard({
                   <TooltipTrigger asChild>
                     <Badge
                       variant="outline"
-                      className="text-[10px] px-1.5 py-0 text-muted-foreground border-muted-foreground/30"
+                      className="text-[10px] px-1.5 py-0 roadmap-chip roadmap-chip-neutral"
                     >
                       <Layers className="h-2.5 w-2.5 mr-0.5" />
                       {phaseName.length > 12 ? `${phaseName.slice(0, 12)}...` : phaseName}
@@ -111,7 +111,7 @@ export function SortableFeatureCard({
                   <TooltipTrigger asChild>
                     <Badge
                       variant="outline"
-                      className="text-[10px] px-1.5 py-0 text-primary border-primary/50"
+                      className="text-[10px] px-1.5 py-0 roadmap-chip roadmap-chip-competitor"
                     >
                       <TrendingUp className="h-2.5 w-2.5" />
                     </Badge>
@@ -183,7 +183,7 @@ export function SortableFeatureCard({
               <TooltipTrigger asChild>
                 <Badge
                   variant="outline"
-                  className="text-[10px] px-1.5 py-0 text-muted-foreground"
+                  className="text-[10px] px-1.5 py-0 roadmap-chip roadmap-chip-neutral"
                 >
                   <ThumbsUp className="h-2.5 w-2.5 mr-0.5" />
                   {feature.votes}
@@ -200,7 +200,7 @@ export function SortableFeatureCard({
               <TooltipTrigger asChild>
                 <Badge
                   variant="outline"
-                  className="text-[10px] px-1.5 py-0 text-orange-500 border-orange-500/30"
+                  className="text-[10px] px-1.5 py-0 roadmap-chip roadmap-chip-external"
                 >
                   {feature.source?.provider === 'canny' ? 'Canny' : t('featureCard.externalSource')}
                 </Badge>

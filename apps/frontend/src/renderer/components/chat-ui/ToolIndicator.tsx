@@ -116,10 +116,10 @@ export function ToolUsageHistory({ tools }: ToolUsageHistoryProps) {
     : t('tools.toolsUsed_plural', { count: tools.length, defaultValue: '{{count}} tools used' });
 
   return (
-    <div className="bg-background rounded-lg border border-border/50 overflow-hidden">
+    <div className="overflow-hidden insights-tool-card">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
       >
         <span className="flex items-center gap-1.5">
           {Object.entries(toolCounts).map(([name, count]) => {
@@ -141,7 +141,7 @@ export function ToolUsageHistory({ tools }: ToolUsageHistoryProps) {
       </button>
 
       {expanded && (
-        <div className="border-t border-border/50 bg-muted/30 p-2 space-y-1">
+        <div className="p-2 space-y-1 insights-tool-card-content">
           {tools.map((tool, index) => {
             const Icon = getToolIcon(tool.name);
             return (

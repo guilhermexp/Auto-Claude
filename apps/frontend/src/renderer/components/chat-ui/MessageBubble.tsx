@@ -58,7 +58,7 @@ export function MessageBubble({
         <span className="text-[10px] text-muted-foreground block">
           {t('chat.assistant', 'Assistant')}
         </span>
-        <div className="bg-muted/50 rounded-2xl rounded-tl-sm px-4 py-3">
+        <div className="insights-message-bubble rounded-2xl rounded-tl-sm px-4 py-3">
           <div className="prose prose-sm dark:prose-invert max-w-none">
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
               {message.content}

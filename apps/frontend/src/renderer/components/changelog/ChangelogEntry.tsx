@@ -16,10 +16,8 @@ export function TaskCard({ task, isSelected, onToggle }: TaskCardProps) {
   return (
     <label
       className={cn(
-        'flex flex-col rounded-lg border p-4 cursor-pointer transition-all',
-        isSelected
-          ? 'border-primary bg-primary/5 ring-1 ring-primary'
-          : 'border-border hover:border-primary/50 hover:bg-muted/30'
+        'flex flex-col rounded-lg p-4 cursor-pointer transition-all changelog-list-item',
+        isSelected && 'changelog-list-item-selected'
       )}
     >
       <div className="flex items-start gap-3">
@@ -59,7 +57,7 @@ export function CommitCard({ commit }: CommitCardProps) {
   const commitDate = new Date(commit.date).toLocaleDateString();
 
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-border p-3 bg-background">
+    <div className="flex items-start gap-3 rounded-lg p-3 changelog-list-item">
       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
         <GitCommit className="h-4 w-4 text-muted-foreground" />
       </div>

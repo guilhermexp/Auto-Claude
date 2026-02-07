@@ -94,7 +94,7 @@ export function LinearIntegrationSection({
 
           {/* Import Existing Tasks Button */}
           {linearConnectionStatus?.connected && (
-            <div className="rounded-lg border border-info/30 bg-info/5 p-3">
+            <div className="rounded-lg p-3 settings-update-card">
               <div className="flex items-start gap-3">
                 <Import className="h-5 w-5 text-info mt-0.5" />
                 <div className="flex-1">
@@ -136,7 +136,7 @@ export function LinearIntegrationSection({
           </div>
 
           {envConfig.linearRealtimeSync && (
-            <div className="rounded-lg border border-warning/30 bg-warning/5 p-3 ml-6">
+            <div className="rounded-lg p-3 ml-6 settings-warning-card">
               <p className="text-xs text-warning">
                 When enabled, new Linear issues will be automatically imported into AutoBuild.
                 Make sure to configure your team/project filters below to control which issues are imported.

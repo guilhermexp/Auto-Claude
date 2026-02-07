@@ -64,11 +64,9 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
               key={mode}
               onClick={() => handleModeChange(mode)}
               className={cn(
-                'flex flex-col items-center gap-1.5 p-3.5 rounded-lg border-2 transition-all',
+                'flex flex-col items-center gap-1.5 p-3.5 rounded-lg transition-all settings-mode-button',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                currentMode === mode
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/50 hover:bg-accent/50'
+                currentMode === mode && 'settings-mode-button-selected'
               )}
             >
               {getModeIcon(mode)}
@@ -97,11 +95,9 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
                 key={theme.id}
                 onClick={() => handleColorThemeChange(theme.id)}
                 className={cn(
-                  'relative flex flex-col p-3.5 rounded-lg border-2 text-left transition-all',
-                  'hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                  isSelected
-                    ? 'border-primary bg-primary/5 shadow-sm'
-                    : 'border-border hover:border-primary/50 hover:bg-accent/30'
+                  'relative flex flex-col p-3.5 rounded-lg text-left transition-all settings-theme-card',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                  isSelected && 'settings-theme-card-selected'
                 )}
               >
                 {/* Selection indicator */}

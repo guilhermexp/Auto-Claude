@@ -233,7 +233,7 @@ export function MemoryStep({ onNext, onBack }: MemoryStepProps) {
             )}
 
             {/* Enable Memory Toggle */}
-            <div className="flex items-center justify-between p-4 rounded-lg border border-border bg-card">
+            <div className="flex items-center justify-between p-4 rounded-lg onboarding-feature-card">
               <div className="flex items-center gap-3">
                 <Database className="h-5 w-5 text-muted-foreground" />
                 <div>
@@ -252,7 +252,7 @@ export function MemoryStep({ onNext, onBack }: MemoryStepProps) {
 
             {/* Memory Disabled Info */}
             {!config.enabled && (
-              <div className="rounded-lg border border-border bg-muted/30 p-4">
+              <div className="rounded-lg p-4 onboarding-info-card">
                 <div className="flex items-start gap-3">
                   <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                   <p className="text-sm text-muted-foreground">

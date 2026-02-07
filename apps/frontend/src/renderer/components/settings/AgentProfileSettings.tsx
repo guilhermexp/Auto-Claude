@@ -146,11 +146,8 @@ export function AgentProfileSettings({ onSave, isSaving, error }: AgentProfileSe
         key={profile.id}
         onClick={() => handleSelectProfile(profile.id)}
         className={cn(
-          'relative w-full rounded-lg border p-4 text-left transition-all duration-200',
-          'hover:border-primary/50 hover:shadow-sm',
-          isSelected
-            ? 'border-primary bg-primary/5'
-            : 'border-border bg-card'
+          'relative w-full rounded-lg p-4 text-left transition-all duration-200 settings-preset-button',
+          isSelected && 'settings-preset-button-selected'
         )}
       >
         {/* Selected indicator */}
@@ -214,7 +211,7 @@ export function AgentProfileSettings({ onSave, isSaving, error }: AgentProfileSe
     >
       <div className="space-y-4">
         {/* Description */}
-        <div className="rounded-lg bg-muted/50 p-3">
+        <div className="rounded-lg p-3 settings-info-card">
           <p className="text-xs text-muted-foreground">
             {t('agentProfile.profilesInfo')}
           </p>
@@ -226,7 +223,7 @@ export function AgentProfileSettings({ onSave, isSaving, error }: AgentProfileSe
         </div>
 
         {/* Phase Configuration - shown for all profiles */}
-        <div className="mt-6 rounded-lg border border-border bg-card">
+        <div className="mt-6 rounded-lg settings-info-card">
           {/* Header - Collapsible */}
           <button
             type="button"

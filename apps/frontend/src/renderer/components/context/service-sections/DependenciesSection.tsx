@@ -24,9 +24,9 @@ export function DependenciesSection({ dependencies }: DependenciesSectionProps) 
     <Collapsible
       open={expanded}
       onOpenChange={setExpanded}
-      className="border-t border-border pt-3"
+      className="context-divider pt-3"
     >
-      <CollapsibleTrigger className="flex w-full items-center justify-between text-xs font-medium hover:text-foreground">
+      <CollapsibleTrigger className="flex w-full items-center justify-between text-xs font-medium context-section-trigger">
         <div className="flex items-center gap-2">
           <Package className="h-3 w-3" />
           {t('serviceSections.dependencies', { count: dependencies.length })}
@@ -36,12 +36,12 @@ export function DependenciesSection({ dependencies }: DependenciesSectionProps) 
       <CollapsibleContent className="mt-2">
         <div className="flex flex-wrap gap-1">
           {dependencies.slice(0, 20).map(dep => (
-            <Badge key={dep} variant="outline" className="text-xs font-mono">
+            <Badge key={dep} variant="outline" className="text-xs font-mono context-chip context-chip-muted">
               {dep}
             </Badge>
           ))}
           {dependencies.length > 20 && (
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-xs context-chip context-chip-neutral">
               {t('serviceSections.moreDependencies', { count: dependencies.length - 20 })}
             </Badge>
           )}

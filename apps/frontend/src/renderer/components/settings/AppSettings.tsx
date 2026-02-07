@@ -31,7 +31,10 @@ function GitLabIcon({ className }: { className?: string }) {
 import {
   FullScreenDialog,
   FullScreenDialogContent,
-  FullScreenDialogBody
+  FullScreenDialogBody,
+  FullScreenDialogHeader,
+  FullScreenDialogTitle,
+  FullScreenDialogDescription
 } from '../ui/full-screen-dialog';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '../../lib/utils';
@@ -209,14 +212,17 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
         return <LanguageSettings settings={settings} onSettingsChange={setSettings} {...saveProps} />;
       case 'devtools':
         return <DevToolsSettings settings={settings} onSettingsChange={setSettings} {...saveProps} />;
+      case 'terminal-fonts':
+        return <TerminalFontSettings />;
       case 'agent':
         return <GeneralSettings settings={settings} onSettingsChange={setSettings} section="agent" {...saveProps} />;
       case 'paths':
         return <GeneralSettings settings={settings} onSettingsChange={setSettings} section="paths" {...saveProps} />;
       case 'integrations':
-        return <IntegrationSettings settings={settings} onSettingsChange={setSettings} isOpen={open} {...saveProps} />;
       case 'api-profiles':
-        return <ProfileList />;
+      case 'accounts':
+        // Legacy section ids ("integrations"/"api-profiles") now route to the unified Accounts screen
+        return <AccountSettings settings={settings} onSettingsChange={setSettings} isOpen={open} />;
       case 'updates':
         return <AdvancedSettings settings={settings} onSettingsChange={setSettings} section="updates" version={version} {...saveProps} />;
       case 'notifications':
@@ -254,17 +260,23 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
       }
       onOpenChange(newOpen);
     }}>
-      <FullScreenDialogContent>
+      <FullScreenDialogContent className="w-[95vw] max-w-[1400px] h-[88vh] max-h-[920px]">
+        <FullScreenDialogHeader className="sr-only">
+          <FullScreenDialogTitle>{t('title')}</FullScreenDialogTitle>
+          <FullScreenDialogDescription>
+            {t('description', { defaultValue: 'Configure application and project settings.' })}
+          </FullScreenDialogDescription>
+        </FullScreenDialogHeader>
         <FullScreenDialogBody className="p-0">
-          <div className="flex h-full bg-background dark:bg-[hsl(0_0%_5%)]">
+          <div className="flex h-full min-h-0 bg-background dark:bg-[hsl(0_0%_5%)]">
             {/* Navigation sidebar - 1Code style: narrow, darker background */}
-            <nav className="w-[360px] min-w-0 max-w-[360px] flex-[0_0_360px] py-4 flex flex-col bg-sidebar border-r border-border/60 dark:bg-[hsl(0_0%_7%)] overflow-hidden box-border">
+            <nav className="w-[360px] min-w-0 max-w-[360px] flex-[0_0_360px] py-4 flex flex-col bg-sidebar border-r border-border/60 dark:bg-[hsl(0_0%_7%)] overflow-hidden box-border min-h-0">
               {/* Title */}
               <h2 className="text-lg font-semibold px-3 pb-4 text-foreground">
                 {t('title')}
               </h2>
 
-              <ScrollArea className="flex-1 w-full max-w-full px-3 box-border">
+              <ScrollArea className="flex-1 min-h-0 w-full max-w-full px-3 box-border">
                 <div className="space-y-4 w-full max-w-full box-border overflow-hidden">
                   {/* APPLICATION Section */}
                   <div>
@@ -352,9 +364,11 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
             </nav>
 
             {/* Main content - 1Code style: card-based with rounded corners */}
-            <div className="flex-1 min-w-0 h-full overflow-hidden py-4 pr-4 pl-4">
-              <ScrollArea className="flex-1 p-5" viewportClassName="settings-scroll-viewport">
-                {renderContent()}
+            <div className="flex-1 min-w-0 min-h-0 h-full overflow-hidden py-5 px-5 md:py-6 md:px-6 flex flex-col">
+              <ScrollArea className="flex-1 min-h-0 px-1 py-1 md:px-2" viewportClassName="settings-scroll-viewport">
+                <div className="mx-auto w-full max-w-[1080px]">
+                  {renderContent()}
+                </div>
               </ScrollArea>
             </div>
           </div>

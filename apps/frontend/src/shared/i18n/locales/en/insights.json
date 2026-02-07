@@ -3,6 +3,10 @@
   "graphMemoryStatus": "Graph Memory Status",
   "connected": "Connected",
   "notAvailable": "Not Available",
+  "sidebar": {
+    "show": "Show history",
+    "hide": "Hide history"
+  },
   "chat": {
     "title": "Insights",
     "subtitle": "Ask questions about your codebase",
@@ -11,7 +15,14 @@
     "inputHint": "Press Enter to send, Shift+Enter for new line",
     "thinking": "Thinking...",
     "assistant": "Assistant",
-    "you": "You"
+    "you": "You",
+    "translation": {
+      "translateToPortuguese": "Translate responses to Portuguese",
+      "showOriginal": "Show original text",
+      "translating": "Translating responses...",
+      "errorTitle": "Translation unavailable",
+      "errorDescription": "Some messages could not be translated right now."
+    }
   },
   "history": {
     "title": "Chat History",

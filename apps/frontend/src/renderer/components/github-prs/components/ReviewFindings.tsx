@@ -140,29 +140,29 @@ export function ReviewFindings({
       {/* Quick Select Actions */}
       <div className="flex items-center gap-2 flex-wrap">
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
+          className="github-pr-action-button text-xs"
           onClick={selectImportant}
-          className="text-xs"
           disabled={counts.important === 0}
         >
           <AlertTriangle className="h-3 w-3 mr-1" />
           {t('prReview.selectCriticalHigh', { count: counts.important })}
         </Button>
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
+          className="github-pr-action-button text-xs"
           onClick={selectAll}
-          className="text-xs"
         >
           <CheckSquare className="h-3 w-3 mr-1" />
           {t('prReview.selectAll')}
         </Button>
         <Button
-          variant="outline"
+          variant="secondary"
           size="sm"
+          className="github-pr-action-button text-xs"
           onClick={selectNone}
-          className="text-xs"
           disabled={selectedIds.size === 0}
         >
           <Square className="h-3 w-3 mr-1" />

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Key, ChevronDown, ChevronRight } from 'lucide-react';
 import { Badge } from '../../ui/badge';
+import { cn } from '../../../lib/utils';
 import {
   Collapsible,
   CollapsibleContent,
@@ -25,9 +26,9 @@ export function EnvironmentSection({ environment }: EnvironmentSectionProps) {
     <Collapsible
       open={expanded}
       onOpenChange={setExpanded}
-      className="border-t border-border pt-3"
+      className="context-divider pt-3"
     >
-      <CollapsibleTrigger className="flex w-full items-center justify-between text-xs font-medium hover:text-foreground">
+      <CollapsibleTrigger className="flex w-full items-center justify-between text-xs font-medium context-section-trigger">
         <div className="flex items-center gap-2">
           <Key className="h-3 w-3" />
           {t('serviceSections.environmentVariables', { count: environment.detected_count })}
@@ -37,11 +38,17 @@ export function EnvironmentSection({ environment }: EnvironmentSectionProps) {
       <CollapsibleContent className="mt-2 space-y-1.5">
         {Object.entries(environment.variables).slice(0, 10).map(([key, envVar]) => (
           <div key={key} className="flex items-start gap-2 text-xs">
-            <Badge variant={envVar.sensitive ? "destructive" : "outline"} className="text-xs shrink-0">
+            <Badge
+              variant={envVar.sensitive ? "destructive" : "outline"}
+              className={cn(
+                "text-xs shrink-0 context-chip",
+                envVar.sensitive ? "context-chip-danger" : "context-chip-muted"
+              )}
+            >
               {envVar.type}
             </Badge>
             <code className="flex-1 font-mono text-muted-foreground truncate">{key}</code>
-            {envVar.required && <span className="text-orange-500 shrink-0">*</span>}
+            {envVar.required && <span className="context-tone-warning shrink-0">*</span>}
           </div>
         ))}
       </CollapsibleContent>

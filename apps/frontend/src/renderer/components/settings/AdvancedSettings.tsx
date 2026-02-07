@@ -271,7 +271,7 @@ export function AdvancedSettings({ settings, onSettingsChange, section, version,
       >
         <div className="space-y-6">
           {/* Current Version Display */}
-          <div className="rounded-lg border border-border bg-muted/50 p-5 space-y-4">
+          <div className="rounded-lg p-5 space-y-4 settings-info-card">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{t('updates.version')}</p>
@@ -310,7 +310,7 @@ export function AdvancedSettings({ settings, onSettingsChange, section, version,
 
           {/* Electron App Update Section - shows when update available */}
           {(appUpdateInfo || isAppUpdateDownloaded) && (
-            <div className="rounded-lg border-2 border-info/50 bg-info/5 p-5 space-y-4">
+            <div className="space-y-4 settings-update-card">
               <div className="flex items-center gap-2 text-info">
                 <Sparkles className="h-5 w-5" />
                 <h3 className="font-semibold">{t('updates.appUpdateReady')}</h3>
@@ -418,7 +418,7 @@ export function AdvancedSettings({ settings, onSettingsChange, section, version,
             </div>
           )}
 
-          <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+          <div className="flex items-center justify-between settings-toggle-row">
             <div className="space-y-1">
               <Label className="font-medium text-foreground">{t('updates.autoUpdateProjects')}</Label>
               <p className="text-sm text-muted-foreground">
@@ -433,7 +433,7 @@ export function AdvancedSettings({ settings, onSettingsChange, section, version,
             />
           </div>
 
-          <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+          <div className="flex items-center justify-between settings-toggle-row">
             <div className="space-y-1">
               <Label className="font-medium text-foreground">{t('updates.betaUpdates')}</Label>
               <p className="text-sm text-muted-foreground">
@@ -457,7 +457,7 @@ export function AdvancedSettings({ settings, onSettingsChange, section, version,
 
           {/* Stable Downgrade Section - shown when user turns off beta while on prerelease */}
           {stableDowngradeInfo && !appUpdateInfo && (
-            <div className="rounded-lg border-2 border-warning/50 bg-warning/5 p-5 space-y-4">
+            <div className="space-y-4 settings-downgrade-card">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-warning">
                   <ArrowDownToLine className="h-5 w-5" />
@@ -556,6 +556,14 @@ export function AdvancedSettings({ settings, onSettingsChange, section, version,
   }
 
   // notifications section
+  const notificationSettings: NotificationSettings = {
+    onTaskComplete: true,
+    onTaskFailed: true,
+    onReviewNeeded: true,
+    sound: false,
+    ...(settings.notifications ?? {})
+  };
+
   const notificationItems: Array<{
     key: keyof NotificationSettings;
     labelKey: string;
@@ -577,18 +585,18 @@ export function AdvancedSettings({ settings, onSettingsChange, section, version,
     >
       <div className="space-y-4">
         {notificationItems.map((item) => (
-          <div key={item.key} className="flex items-center justify-between p-4 rounded-lg border border-border">
+          <div key={item.key} className="flex items-center justify-between settings-toggle-row">
             <div className="space-y-1">
               <Label className="font-medium text-foreground">{t(item.labelKey)}</Label>
               <p className="text-sm text-muted-foreground">{t(item.descriptionKey)}</p>
             </div>
             <Switch
-              checked={settings.notifications[item.key]}
+              checked={Boolean(notificationSettings[item.key])}
               onCheckedChange={(checked) =>
                 onSettingsChange({
                   ...settings,
                   notifications: {
-                    ...settings.notifications,
+                    ...notificationSettings,
                     [item.key]: checked
                   }
                 })

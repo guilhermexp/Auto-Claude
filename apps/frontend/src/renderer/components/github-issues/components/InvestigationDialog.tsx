@@ -154,7 +154,7 @@ export function InvestigationDialog({
                     {comments.map((comment) => (
                       <div
                         key={comment.id}
-                        className="flex gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+                        className="flex gap-3 p-3 rounded-lg github-issue-list-item cursor-pointer"
                         onClick={() => toggleComment(comment.id)}
                       >
                         <Checkbox

@@ -46,6 +46,7 @@ const browserMockAPI: ElectronAPI = {
 
   // Settings
   ...settingsMock,
+  translateText: async (text: string, _targetLanguage?: string) => text,
 
   // Roadmap Operations
   getRoadmap: async () => ({

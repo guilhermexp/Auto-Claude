@@ -44,8 +44,8 @@ export function FindingItem({ finding, selected, posted = false, onToggle }: Fin
   return (
     <div
       className={cn(
-        "rounded-lg border bg-background p-3 space-y-2 transition-colors",
-        selected && !posted && "ring-2 ring-primary/50",
+        'rounded-lg border bg-background p-3 space-y-2 transition-colors github-pr-finding-item',
+        selected && !posted && 'github-pr-finding-item-selected',
         posted && "opacity-60"
       )}
     >
@@ -63,12 +63,12 @@ export function FindingItem({ finding, selected, posted = false, onToggle }: Fin
         )}
         <div className="flex-1 min-w-0 space-y-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <Badge variant="outline" className="text-xs shrink-0">
+            <Badge variant="outline" className="text-xs shrink-0 github-pr-chip github-pr-chip-neutral">
               <CategoryIcon className="h-3 w-3 mr-1" />
               {categoryLabel}
             </Badge>
             {posted && (
-              <Badge variant="outline" className="text-xs shrink-0 text-success border-success/50">
+              <Badge variant="outline" className="text-xs shrink-0 github-pr-chip github-pr-chip-success">
                 {t('prReview.posted')}
               </Badge>
             )}

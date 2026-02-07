@@ -32,15 +32,15 @@ export const serviceTypeIcons: Record<string, React.ElementType> = {
 
 // Service type color mapping
 export const serviceTypeColors: Record<string, string> = {
-  backend: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-  frontend: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-  worker: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-  scraper: 'bg-green-500/10 text-green-400 border-green-500/30',
-  library: 'bg-gray-500/10 text-gray-400 border-gray-500/30',
-  proxy: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
-  mobile: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
-  desktop: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30',
-  unknown: 'bg-muted text-muted-foreground border-muted'
+  backend: 'context-chip-info',
+  frontend: 'context-chip-purple',
+  worker: 'context-chip-warning',
+  scraper: 'context-chip-success',
+  library: 'context-chip-muted',
+  proxy: 'context-chip-cyan',
+  mobile: 'context-chip-orange',
+  desktop: 'context-chip-blue',
+  unknown: 'context-chip-neutral'
 };
 
 // Memory type icon mapping
@@ -61,18 +61,18 @@ export const memoryTypeIcons: Record<string, React.ElementType> = {
 
 // Memory type colors for badges and styling
 export const memoryTypeColors: Record<string, string> = {
-  session_insight: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-  codebase_discovery: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-  codebase_map: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
-  pattern: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-  gotcha: 'bg-red-500/10 text-red-400 border-red-500/30',
-  task_outcome: 'bg-green-500/10 text-green-400 border-green-500/30',
-  qa_result: 'bg-teal-500/10 text-teal-400 border-teal-500/30',
-  historical_context: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
-  pr_review: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
-  pr_finding: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
-  pr_pattern: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-  pr_gotcha: 'bg-red-500/10 text-red-400 border-red-500/30'
+  session_insight: 'context-chip-warning',
+  codebase_discovery: 'context-chip-blue',
+  codebase_map: 'context-chip-blue',
+  pattern: 'context-chip-purple',
+  gotcha: 'context-chip-danger',
+  task_outcome: 'context-chip-success',
+  qa_result: 'context-chip-teal',
+  historical_context: 'context-chip-muted',
+  pr_review: 'context-chip-cyan',
+  pr_finding: 'context-chip-orange',
+  pr_pattern: 'context-chip-purple',
+  pr_gotcha: 'context-chip-danger'
 };
 
 // Memory type labels for display

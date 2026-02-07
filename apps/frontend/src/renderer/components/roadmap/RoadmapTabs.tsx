@@ -87,7 +87,7 @@ export function RoadmapTabs({
           {['must', 'should', 'could', 'wont'].map((priority: string) => {
             const features = roadmap.features.filter((f: RoadmapFeature) => f.priority === priority);
             return (
-              <Card key={priority} className="p-4">
+              <Card key={priority} className="p-4 roadmap-section-card">
                 <div className="flex items-center gap-2 mb-3">
                   <Badge variant="outline" className={ROADMAP_PRIORITY_COLORS[priority]}>
                     {t(`priorities.${priority}`, { defaultValue: ROADMAP_PRIORITY_LABELS[priority] })}
@@ -100,7 +100,7 @@ export function RoadmapTabs({
                   {features.map((feature: RoadmapFeature) => (
                     <div
                       key={feature.id}
-                      className="p-2 rounded-md bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
+                      className="p-2 rounded-md cursor-pointer transition-colors roadmap-kanban-card"
                       onClick={() => onFeatureSelect(feature)}
                     >
                       <div className="font-medium text-sm">{feature.title}</div>
@@ -118,7 +118,7 @@ export function RoadmapTabs({
                           {t('featureCard.impact', { impact: feature.impact })}
                         </Badge>
                         {hasCompetitorInsight(feature) && (
-                          <Badge variant="outline" className="text-xs text-primary border-primary/50">
+                          <Badge variant="outline" className="text-xs roadmap-chip roadmap-chip-competitor">
                             <TrendingUp className="h-3 w-3 mr-1" />
                             {t('featureCard.competitorInsight')}
                           </Badge>

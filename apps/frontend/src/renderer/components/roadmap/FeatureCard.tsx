@@ -24,7 +24,7 @@ export function FeatureCard({
   const complexityLabel = t(`complexities.${feature.complexity}`, { defaultValue: feature.complexity });
   const impactLabel = t(`impacts.${feature.impact}`, { defaultValue: feature.impact });
   return (
-    <Card className="p-4 hover:bg-muted/50 cursor-pointer transition-colors" onClick={onClick}>
+    <Card className="p-4 cursor-pointer transition-colors roadmap-kanban-card" onClick={onClick}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -46,7 +46,7 @@ export function FeatureCard({
             {hasCompetitorInsight && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Badge variant="outline" className="text-xs text-primary border-primary/50">
+                  <Badge variant="outline" className="text-xs roadmap-chip roadmap-chip-competitor">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     {t('featureCard.competitorInsight')}
                   </Badge>

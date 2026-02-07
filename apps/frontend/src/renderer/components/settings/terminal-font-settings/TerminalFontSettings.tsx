@@ -210,7 +210,7 @@ export function TerminalFontSettings() {
         </div>
 
         {/* Import/Export Actions */}
-        <div className="flex items-center gap-2 p-4 rounded-lg border bg-card">
+        <div className="flex items-center gap-2 p-4 rounded-lg settings-info-card">
           <span className="text-sm font-medium text-foreground">
             {t('terminalFonts.configActions', { defaultValue: 'Configuration:' })}
           </span>
@@ -313,7 +313,7 @@ export function TerminalFontSettings() {
               defaultValue: 'Preview your terminal settings in real-time (updates within 300ms)',
             })}
           </p>
-          <div className="rounded-lg border bg-card overflow-hidden">
+          <div className="rounded-lg overflow-hidden settings-info-card">
             <LivePreviewTerminal settings={settings} />
           </div>
         </div>

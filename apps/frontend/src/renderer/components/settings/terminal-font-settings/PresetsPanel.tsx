@@ -272,9 +272,8 @@ export function PresetsPanel({ currentSettings, onPresetApply, onReset }: Preset
                   key={preset.id}
                   onClick={() => handleApplyBuiltInPreset(preset.id)}
                   className={cn(
-                    'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all',
-                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                    'border-border hover:border-primary/50 hover:bg-accent/50'
+                    'flex flex-col items-center gap-2 p-4 rounded-lg transition-all settings-preset-button',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
                   )}
                   title={t(preset.description)}
                 >
@@ -304,9 +303,8 @@ export function PresetsPanel({ currentSettings, onPresetApply, onReset }: Preset
               type="button"
               onClick={handleResetToDefaults}
               className={cn(
-                'inline-flex items-center gap-2 px-4 py-2 rounded-lg border-2 transition-all',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                'border-border hover:border-primary/50 hover:bg-accent/50 text-sm font-medium'
+                'inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm font-medium settings-preset-button',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
               )}
               title={t('settings:terminalFonts.presets.resetToOS', {
                 os: osLabel,
@@ -391,9 +389,8 @@ export function PresetsPanel({ currentSettings, onPresetApply, onReset }: Preset
                   <div
                   key={preset.id}
                   className={cn(
-                    'flex items-center justify-between p-3 rounded-lg border',
-                    'border-border bg-card',
-                    'transition-colors'
+                    'flex items-center justify-between p-3 rounded-lg',
+                    'transition-colors settings-info-card'
                   )}
                 >
                   <div className="flex-1">

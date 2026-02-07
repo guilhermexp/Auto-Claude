@@ -38,10 +38,10 @@ export function CollapsibleCard({
     <Collapsible
       open={isOpen}
       onOpenChange={setIsOpen}
-      className={cn("border rounded-lg bg-card shadow-sm overflow-hidden", className)}
+      className={cn("rounded-xl border overflow-hidden github-pr-detail-card", className)}
     >
       <CollapsibleTrigger asChild>
-        <div className="p-4 flex items-center justify-between gap-3 bg-muted/30 cursor-pointer hover:bg-muted/40 transition-colors">
+        <div className="p-4 flex items-center justify-between gap-3 cursor-pointer transition-colors github-pr-detail-card-header">
           <div className="flex items-center gap-3 min-w-0">
             <div className="shrink-0">
               {isOpen ? (

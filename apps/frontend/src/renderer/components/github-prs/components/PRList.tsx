@@ -119,16 +119,16 @@ function PRStatusFlow({
       return null; // No label for not started
     }
     if (flowState === 'reviewing') {
-      return { label: t('prReview.reviewing'), textColor: 'text-amber-400' };
+      return { label: t('prReview.reviewing'), textColor: 'github-pr-flow-label-reviewing' };
     }
     if (flowState === 'reviewed') {
-      return { label: t('prReview.pendingPost'), textColor: 'text-blue-400' };
+      return { label: t('prReview.pendingPost'), textColor: 'github-pr-flow-label-reviewed' };
     }
     if (flowState === 'posted') {
       const statusConfig = {
-        success: { label: t('prReview.readyToMerge'), textColor: 'text-emerald-400' },
-        warning: { label: t('prReview.changesRequested'), textColor: 'text-red-400' },
-        followup: { label: t('prReview.readyForFollowup'), textColor: 'text-cyan-400' },
+        success: { label: t('prReview.readyToMerge'), textColor: 'github-pr-flow-label-success' },
+        warning: { label: t('prReview.changesRequested'), textColor: 'github-pr-flow-label-danger' },
+        followup: { label: t('prReview.readyForFollowup'), textColor: 'github-pr-flow-label-followup' },
       };
       return statusConfig[finalStatus];
     }
@@ -243,8 +243,8 @@ export function PRList({
   }
 
   return (
-    <ScrollArea className="flex-1">
-      <div className="divide-y divide-border">
+    <ScrollArea className="flex-1 px-3 pb-3">
+      <div className="github-pr-list-stack">
         {prs.map((pr) => {
           const reviewState = getReviewStateForPR(pr.number);
           const isReviewingPR = reviewState?.isReviewing ?? false;
@@ -252,11 +252,12 @@ export function PRList({
 
           return (
             <button
+              type="button"
               key={pr.number}
               onClick={() => onSelectPR(pr.number)}
               className={cn(
-                'w-full p-4 text-left transition-colors hover:bg-accent/50',
-                selectedPRNumber === pr.number && 'bg-accent'
+                'w-full p-4 rounded-xl border text-left transition-colors github-pr-list-item',
+                selectedPRNumber === pr.number && 'github-pr-list-item-selected'
               )}
             >
               <div className="flex items-start gap-3">
@@ -264,7 +265,7 @@ export function PRList({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="text-sm text-muted-foreground">#{pr.number}</span>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs github-pr-chip github-pr-chip-neutral">
                       {pr.headRefName}
                     </Badge>
                     {/* Review status flow dots + label */}
@@ -318,8 +319,9 @@ export function PRList({
           <div className="py-4 flex justify-center">
             {hasMore && onLoadMore ? (
               <Button
-                variant="outline"
+                variant="secondary"
                 size="sm"
+                className="github-pr-action-button"
                 onClick={onLoadMore}
                 disabled={isLoadingMore}
               >

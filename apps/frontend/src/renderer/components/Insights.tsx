@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next';
 import {
   Bot,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Languages,
+  PanelLeftClose,
+  PanelLeft
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { ScrollArea } from './ui/scroll-area';
-import { cn } from '../lib/utils';
 import {
   useInsightsStore,
   loadInsightsSession,
@@ -30,6 +32,11 @@ import {
   ChatInput,
   EmptyState
 } from './chat-ui';
+import { Button } from './ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
+import { cn } from '../lib/utils';
+import { useTextTranslation } from '../hooks/useTextTranslation';
+import { toast } from '../hooks/use-toast';
 
 // createSafeLink - factory function that creates a SafeLink component with i18n support
 const createSafeLink = (opensInNewWindowText: string) => {
@@ -72,13 +79,23 @@ interface InsightsProps {
 }
 
 export function Insights({ projectId }: InsightsProps) {
-  const { t } = useTranslation(['insights', 'common']);
+  const { t, i18n } = useTranslation(['insights', 'common']);
   const session = useInsightsStore((state) => state.session);
   const sessions = useInsightsStore((state) => state.sessions);
   const status = useInsightsStore((state) => state.status);
   const streamingContent = useInsightsStore((state) => state.streamingContent);
   const currentTool = useInsightsStore((state) => state.currentTool);
   const isLoadingSessions = useInsightsStore((state) => state.isLoadingSessions);
+  const isPortugueseUi = i18n.resolvedLanguage === 'pt';
+  const {
+    isEnabled: isTranslationEnabled,
+    isTranslating,
+    lastError,
+    toggleEnabled: toggleTranslation,
+    clearError: clearTranslationError,
+    getText: getTranslatedText,
+    ensureTranslations,
+  } = useTextTranslation('pt');
 
   // Create markdown components with translated accessibility text
   const markdownComponents = useMemo(() => ({
@@ -88,8 +105,12 @@ export function Insights({ projectId }: InsightsProps) {
   const [inputValue, setInputValue] = useState('');
   const [creatingTask, setCreatingTask] = useState<string | null>(null);
   const [taskCreated, setTaskCreated] = useState<Set<string>>(new Set());
+  const [isUserAtBottom, setIsUserAtBottom] = useState(true);
+  const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Scroll threshold in pixels - user is considered "at bottom" if within this distance
   const SCROLL_BOTTOM_THRESHOLD = 100;
@@ -131,7 +152,7 @@ export function Insights({ projectId }: InsightsProps) {
     if (isUserAtBottom && viewportEl) {
       viewportEl.scrollTop = viewportEl.scrollHeight;
     }
-  }, [isUserAtBottom, viewportEl]);
+  }, [session?.messages?.length, streamingContent, currentTool, isUserAtBottom, viewportEl]);
 
   // Focus textarea on mount
   useEffect(() => {
@@ -141,7 +162,7 @@ export function Insights({ projectId }: InsightsProps) {
   // Reset taskCreated when switching sessions
   useEffect(() => {
     setTaskCreated(new Set());
-  }, []);
+  }, [session?.id]);
 
   const handleSend = () => {
     const message = inputValue.trim();
@@ -208,11 +229,100 @@ export function Insights({ projectId }: InsightsProps) {
 
   const isLoading = status.phase === 'thinking' || status.phase === 'streaming';
   const messages = session?.messages || [];
+  const translationEntries = useMemo(() => {
+    if (!isPortugueseUi || !isTranslationEnabled) {
+      return [];
+    }
+
+    return messages.flatMap((message) => {
+      if (message.role !== 'assistant') {
+        return [];
+      }
+
+      const entries = [
+        { key: `${message.id}:content`, text: message.content },
+      ];
+
+      if (message.suggestedTask?.title) {
+        entries.push({
+          key: `${message.id}:suggestedTaskTitle`,
+          text: message.suggestedTask.title,
+        });
+      }
+
+      if (message.suggestedTask?.description) {
+        entries.push({
+          key: `${message.id}:suggestedTaskDescription`,
+          text: message.suggestedTask.description,
+        });
+      }
+
+      return entries;
+    });
+  }, [isPortugueseUi, isTranslationEnabled, messages]);
+
+  useEffect(() => {
+    if (!isTranslationEnabled) {
+      return;
+    }
+
+    void ensureTranslations(translationEntries);
+  }, [isTranslationEnabled, ensureTranslations, translationEntries]);
+
+  useEffect(() => {
+    if (!lastError) {
+      return;
+    }
+
+    toast({
+      variant: 'destructive',
+      title: t('insights:chat.translation.errorTitle'),
+      description: t('insights:chat.translation.errorDescription'),
+    });
+    clearTranslationError();
+  }, [lastError, clearTranslationError, t]);
+
+  const displayedMessages = useMemo(() => {
+    if (!isTranslationEnabled) {
+      return messages;
+    }
+
+    return messages.map((message) => {
+      if (message.role !== 'assistant') {
+        return message;
+      }
+
+      return {
+        ...message,
+        content: getTranslatedText(`${message.id}:content`, message.content),
+        suggestedTask: message.suggestedTask
+          ? {
+              ...message.suggestedTask,
+              title: getTranslatedText(
+                `${message.id}:suggestedTaskTitle`,
+                message.suggestedTask.title
+              ),
+              description: getTranslatedText(
+                `${message.id}:suggestedTaskDescription`,
+                message.suggestedTask.description
+              ),
+            }
+          : undefined,
+      };
+    });
+  }, [isTranslationEnabled, messages, getTranslatedText]);
 
   return (
     <div className="flex h-full bg-background">
-      {/* Left Panel: Chat History Sidebar - 1Code style */}
-      <nav className="w-80 shrink-0 px-3 py-4 flex flex-col">
+      {/* Left Panel: Chat History Sidebar - Collapsible */}
+      <nav
+        className={cn(
+          'shrink-0 flex flex-col insights-sidebar',
+          isSidebarCollapsed
+            ? 'w-0 px-0 py-0 opacity-0 overflow-hidden'
+            : 'w-80 px-3 py-4'
+        )}
+      >
         <ChatHistorySidebar
           sessions={sessions}
           currentSessionId={session?.id || null}
@@ -227,17 +337,71 @@ export function Insights({ projectId }: InsightsProps) {
         />
       </nav>
 
-      {/* Right Panel: Chat Area - 1Code style with rounded card */}
-      <div className="flex-1 min-w-0 h-full overflow-hidden py-4 pr-4">
-        <div className="flex flex-col h-full bg-card rounded-xl overflow-hidden">
+      {/* Right Panel: Chat Area */}
+      <div className={cn(
+        'flex-1 min-w-0 h-full overflow-hidden py-4 pr-4',
+        isSidebarCollapsed ? 'pl-4' : ''
+      )}>
+        <div className="flex flex-col h-full insights-chat-card overflow-hidden">
+          {/* Header with sidebar toggle and translation button */}
+          <div className="shrink-0 flex items-center justify-between px-4 pt-4 pb-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 insights-sidebar-toggle"
+                  onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                >
+                  {isSidebarCollapsed ? (
+                    <PanelLeft className="h-4 w-4" />
+                  ) : (
+                    <PanelLeftClose className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                {isSidebarCollapsed
+                  ? t('insights:sidebar.show', 'Show history')
+                  : t('insights:sidebar.hide', 'Hide history')}
+              </TooltipContent>
+            </Tooltip>
+
+            {isPortugueseUi && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant={isTranslationEnabled ? 'secondary' : 'ghost'}
+                    size="sm"
+                    className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                    onClick={toggleTranslation}
+                  >
+                    {isTranslating ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Languages className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  {isTranslating
+                    ? t('insights:chat.translation.translating')
+                    : isTranslationEnabled
+                      ? t('insights:chat.translation.showOriginal')
+                      : t('insights:chat.translation.translateToPortuguese')}
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+
           {/* Messages Area */}
-          <ScrollArea className="flex-1">
+          <ScrollArea className="flex-1" onViewportRef={setViewportEl}>
             <div className="p-6">
               {messages.length === 0 && !streamingContent ? (
                 <EmptyState onSuggestionClick={handleSuggestionClick} />
               ) : (
                 <div className="space-y-6">
-                  {messages.map((message) => (
+                  {displayedMessages.map((message) => (
                     <MessageBubble
                       key={message.id}
                       message={message}
@@ -259,7 +423,7 @@ export function Insights({ projectId }: InsightsProps) {
                           {t('insights:chat.assistant', 'Assistant')}
                         </span>
                         {streamingContent && (
-                          <div className="bg-muted/50 rounded-2xl rounded-tl-sm px-4 py-3">
+                          <div className="insights-message-bubble rounded-2xl rounded-tl-sm px-4 py-3">
                             <div className="prose prose-sm dark:prose-invert max-w-none">
                               <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                 {streamingContent}

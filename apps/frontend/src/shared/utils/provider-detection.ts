@@ -98,15 +98,7 @@ export function getProviderLabel(provider: ApiProvider): string {
  * @param provider - The provider type
  * @returns CSS classes for badge styling
  */
-export function getProviderBadgeColor(provider: ApiProvider): string {
-  switch (provider) {
-    case 'anthropic':
-      return 'bg-orange-500/10 text-orange-500 border-orange-500/20 hover:bg-orange-500/15';
-    case 'zai':
-      return 'bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/15';
-    case 'zhipu':
-      return 'bg-purple-500/10 text-purple-500 border-purple-500/20 hover:bg-purple-500/15';
-    case 'unknown':
-      return 'bg-gray-500/10 text-gray-500 border-gray-500/20 hover:bg-gray-500/15';
-  }
+export function getProviderBadgeColor(_provider: ApiProvider): string {
+  // All providers now use the same flat UI badge style
+  return 'header-badge-auth';
 }

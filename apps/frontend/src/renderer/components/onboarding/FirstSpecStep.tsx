@@ -28,7 +28,7 @@ interface TipCardProps {
 
 function TipCard({ icon, title, description }: TipCardProps) {
   return (
-    <Card className="border border-border bg-card/50">
+    <Card className="onboarding-feature-card">
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">

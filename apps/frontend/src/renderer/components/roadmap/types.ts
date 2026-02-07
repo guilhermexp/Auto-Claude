@@ -37,6 +37,10 @@ export interface RoadmapHeaderProps {
   onAddFeature: () => void;
   onRefresh: () => void;
   onViewCompetitorAnalysis?: () => void;
+  showTranslateToggle?: boolean;
+  isTranslateEnabled?: boolean;
+  isTranslating?: boolean;
+  onToggleTranslate?: () => void;
 }
 
 export interface RoadmapEmptyStateProps {

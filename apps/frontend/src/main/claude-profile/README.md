@@ -129,6 +129,18 @@ const status = isProfileRateLimited(profile);
 5. **Readability** - Smaller files are easier to navigate and understand
 6. **Type Safety** - Clear module boundaries with explicit TypeScript types
 
+## Re-auth Lifecycle Notes
+
+For migrated profiles (`~/.claude` -> `~/.claude-profiles/*`), treat `needs re-auth` as transient state that must be cleared as soon as login succeeds.
+
+Key rules:
+- Clear auth-failure markers immediately when login success is detected.
+- Clear migrated-profile markers after successful re-auth to avoid repeated prompts on next startup.
+- Keep `needsReauthProfiles` synchronized (add/remove) during startup snapshots to prevent stale badges.
+
+Troubleshooting and validation checklist:
+- [`guides/accounts-auth-troubleshooting.md`](../../../../../guides/accounts-auth-troubleshooting.md)
+
 ## Backward Compatibility
 
 All existing imports continue to work without modification:

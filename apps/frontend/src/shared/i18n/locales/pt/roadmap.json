@@ -12,7 +12,14 @@
     "secondaryPersonas": "Personas Secundários:",
     "featuresCount": "{{count}} funcionalidades",
     "phasesCount": "{{count}} fases",
-    "analysisSummary": "Analisados {{competitors}} concorrentes com {{painPoints}} pontos de dor identificados"
+    "analysisSummary": "Analisados {{competitors}} concorrentes com {{painPoints}} pontos de dor identificados",
+    "translation": {
+      "translateToPortuguese": "Traduzir roteiro para português",
+      "showOriginal": "Mostrar texto original",
+      "translating": "Traduzindo roteiro...",
+      "errorTitle": "Tradução indisponível",
+      "errorDescription": "Não foi possível traduzir parte do roteiro agora."
+    }
   },
   "emptyState": {
     "title": "Nenhum Roteiro Ainda",

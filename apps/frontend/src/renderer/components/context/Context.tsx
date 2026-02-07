@@ -30,15 +30,15 @@ export function Context({ projectId }: ContextProps) {
   const handleSearch = useMemorySearch(projectId);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden">
+    <div className="flex h-full flex-col overflow-hidden context-page">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col h-full">
         <div className="flex justify-center px-6 py-3">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="index" className="gap-2">
+          <TabsList className="grid w-full max-w-md grid-cols-2 context-tabs-list">
+            <TabsTrigger value="index" className="gap-2 context-tabs-trigger">
               <FolderTree className="h-4 w-4" />
               {t('tabs.projectIndex')}
             </TabsTrigger>
-            <TabsTrigger value="memories" className="gap-2">
+            <TabsTrigger value="memories" className="gap-2 context-tabs-trigger">
               <Brain className="h-4 w-4" />
               {t('tabs.memories')}
             </TabsTrigger>

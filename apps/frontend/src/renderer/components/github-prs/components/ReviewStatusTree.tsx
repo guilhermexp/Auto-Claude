@@ -58,7 +58,7 @@ export function ReviewStatusTree({
   // If not reviewed, show simple status
   if (status === 'not_reviewed' && !isReviewing) {
     return (
-      <div className="flex flex-wrap items-center justify-between gap-y-3 p-4 border rounded-lg bg-card shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-y-3 p-4 border rounded-xl github-pr-detail-card">
         <div className="flex items-center gap-3 min-w-0">
           <div className="h-2.5 w-2.5 shrink-0 rounded-full bg-muted-foreground/30" />
           <span className="font-medium text-muted-foreground truncate">{t('prReview.notReviewed')}</span>
@@ -293,7 +293,7 @@ export function ReviewStatusTree({
       onOpenChange={setIsOpen}
     >
       <div className="p-4 pt-0">
-        <div className="relative pl-2 ml-2 border-l border-border/50 space-y-4 pt-4">
+        <div className="relative pl-2 ml-2 border-l space-y-4 pt-4 github-pr-status-timeline">
           {steps.map((step) => (
             <div key={step.id} className="relative flex items-start gap-3 pl-4">
               {/* Node Dot */}

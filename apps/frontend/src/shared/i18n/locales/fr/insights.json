@@ -3,6 +3,10 @@
   "graphMemoryStatus": "Statut de la Mémoire Graphique",
   "connected": "Connecté",
   "notAvailable": "Non Disponible",
+  "sidebar": {
+    "show": "Afficher l'historique",
+    "hide": "Masquer l'historique"
+  },
   "chat": {
     "title": "Insights",
     "subtitle": "Posez des questions sur votre code",
@@ -11,7 +15,14 @@
     "inputHint": "Appuyez sur Entrée pour envoyer, Maj+Entrée pour une nouvelle ligne",
     "thinking": "Réflexion...",
     "assistant": "Assistant",
-    "you": "Vous"
+    "you": "Vous",
+    "translation": {
+      "translateToPortuguese": "Traduire les réponses en portugais",
+      "showOriginal": "Afficher le texte original",
+      "translating": "Traduction des réponses...",
+      "errorTitle": "Traduction indisponible",
+      "errorDescription": "Certains messages n'ont pas pu être traduits pour le moment."
+    }
   },
   "history": {
     "title": "Historique des Conversations",

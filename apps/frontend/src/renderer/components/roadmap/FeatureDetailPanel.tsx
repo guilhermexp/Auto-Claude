@@ -134,7 +134,7 @@ export function FeatureDetailPanel({
             </h3>
             <div className="space-y-2">
               {feature.userStories.map((story, i) => (
-                <div key={i} className="text-sm p-2 bg-muted/50 rounded-md italic">
+                <div key={i} className="text-sm p-2 rounded-md italic roadmap-kanban-card">
                   "{story}"
                 </div>
               ))}
@@ -188,21 +188,21 @@ export function FeatureDetailPanel({
               {competitorInsights.map((insight) => (
                 <div
                   key={insight.id}
-                  className="p-2 bg-primary/5 border border-primary/20 rounded-md"
+                  className="p-2 rounded-md roadmap-kanban-card"
                 >
                   <p className="text-sm text-foreground">{insight.description}</p>
                   <div className="flex items-center gap-2 mt-1">
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs roadmap-chip roadmap-chip-neutral">
                       {insight.source}
                     </Badge>
                     <Badge
                       variant="outline"
-                      className={`text-xs ${
+                      className={`text-xs roadmap-chip ${
                         insight.severity === 'high'
-                          ? 'text-red-500 border-red-500/50'
+                          ? 'roadmap-chip-must'
                           : insight.severity === 'medium'
-                          ? 'text-yellow-500 border-yellow-500/50'
-                          : 'text-green-500 border-green-500/50'
+                          ? 'roadmap-chip-should'
+                          : 'roadmap-chip-complexity-low'
                       }`}
                     >
                       {t('roadmap:featureDetail.severity', { severity: t(`roadmap:severities.${insight.severity}`, { defaultValue: insight.severity }) })}

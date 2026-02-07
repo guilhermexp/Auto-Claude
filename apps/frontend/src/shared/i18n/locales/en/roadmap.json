@@ -12,7 +12,14 @@
     "secondaryPersonas": "Secondary Personas:",
     "featuresCount": "{{count}} features",
     "phasesCount": "{{count}} phases",
-    "analysisSummary": "Analyzed {{competitors}} competitors with {{painPoints}} pain points identified"
+    "analysisSummary": "Analyzed {{competitors}} competitors with {{painPoints}} pain points identified",
+    "translation": {
+      "translateToPortuguese": "Translate roadmap to Portuguese",
+      "showOriginal": "Show original text",
+      "translating": "Translating roadmap...",
+      "errorTitle": "Translation unavailable",
+      "errorDescription": "Some roadmap content could not be translated right now."
+    }
   },
   "emptyState": {
     "title": "No Roadmap Yet",

@@ -24,6 +24,23 @@ import { configureTools, getToolPath, getToolInfo, isPathFromWrongPlatform, preW
 import { parseEnvFile } from './utils';
 
 const settingsPath = getSettingsPath();
+const TRANSLATE_ENDPOINT = 'https://translate.googleapis.com/translate_a/single';
+const TRANSLATION_LANGUAGE_PATTERN = /^[a-z]{2,3}(?:-[A-Za-z]{2,8})?$/;
+
+function extractTranslatedText(payload: unknown): string {
+  if (!Array.isArray(payload) || !Array.isArray(payload[0])) {
+    throw new Error('Unexpected translation response format');
+  }
+
+  return (payload[0] as unknown[])
+    .map((part) => {
+      if (!Array.isArray(part) || typeof part[0] !== 'string') {
+        return '';
+      }
+      return part[0];
+    })
+    .join('');
+}
 
 /**
  * Auto-detect the auto-claude source path relative to the app location.
@@ -325,6 +342,44 @@ export function registerSettingsHandlers(
           data: { hasCompletedOnboarding: false }
         };
       }
+    }
+  );
+
+  // ============================================
+  // Translation Operations
+  // ============================================
+
+  ipcMain.handle(
+    IPC_CHANNELS.TRANSLATION_TRANSLATE_TEXT,
+    async (_, text: string, targetLanguage: string = 'pt'): Promise<string> => {
+      if (typeof text !== 'string' || !text.trim()) {
+        return text;
+      }
+
+      const normalizedTarget = typeof targetLanguage === 'string'
+        ? targetLanguage.trim().toLowerCase()
+        : 'pt';
+
+      if (!TRANSLATION_LANGUAGE_PATTERN.test(normalizedTarget)) {
+        throw new Error(`Invalid target language: ${targetLanguage}`);
+      }
+
+      const params = new URLSearchParams({
+        client: 'gtx',
+        sl: 'auto',
+        tl: normalizedTarget,
+        dt: 't',
+        q: text,
+      });
+
+      const response = await fetch(`${TRANSLATE_ENDPOINT}?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error(`Translation request failed with status ${response.status}`);
+      }
+
+      const payload = (await response.json()) as unknown;
+      const translated = extractTranslatedText(payload);
+      return translated || text;
     }
   );
 

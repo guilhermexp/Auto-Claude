@@ -467,7 +467,7 @@ export function Worktrees({ projectId }: WorktreesProps) {
   }
 
   return (
-    <div className="flex h-full flex-col p-6">
+    <div className="flex h-full flex-col p-6 worktrees-page">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div>
@@ -481,8 +481,9 @@ export function Worktrees({ projectId }: WorktreesProps) {
         </div>
         <div className="flex items-center gap-2">
           <Button
-            variant={isSelectionMode ? 'default' : 'outline'}
+            variant="secondary"
             size="sm"
+            className={isSelectionMode ? 'worktrees-action-button-active' : 'worktrees-action-button'}
             onClick={() => {
               if (isSelectionMode) {
                 setIsSelectionMode(false);
@@ -496,8 +497,9 @@ export function Worktrees({ projectId }: WorktreesProps) {
             {isSelectionMode ? t('common:selection.done') : t('common:selection.select')}
           </Button>
           <Button
-            variant="outline"
+            variant="secondary"
             size="sm"
+            className="worktrees-action-button"
             onClick={loadWorktrees}
             disabled={isLoading}
           >
@@ -509,11 +511,12 @@ export function Worktrees({ projectId }: WorktreesProps) {
 
       {/* Selection controls bar - visible when selection mode is enabled */}
       {isSelectionMode && totalWorktrees > 0 && (
-        <div className="flex items-center justify-between py-2 mb-4 border-b border-border shrink-0">
+        <div className="flex items-center justify-between py-2 mb-4 border-b border-border shrink-0 worktrees-selection-bar">
           <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={isAllSelected ? deselectAll : selectAll}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground worktrees-inline-action"
             >
               {/* tri-state icon: isAllSelected -> CheckSquare, isSomeSelected -> Minus, none -> Square */}
               {isAllSelected ? <CheckSquare className="h-4 w-4 text-primary" /> : isSomeSelected ? <Minus className="h-4 w-4" /> : <Square className="h-4 w-4" />}
@@ -527,6 +530,7 @@ export function Worktrees({ projectId }: WorktreesProps) {
             <Button
               variant="destructive"
               size="sm"
+              className="worktrees-danger-button"
               disabled={selectedWorktreeIds.size === 0}
               onClick={handleBulkDelete}
             >
@@ -585,7 +589,7 @@ export function Worktrees({ projectId }: WorktreesProps) {
                   const task = findTaskForWorktree(worktree.specName);
                   const taskId = `${TASK_PREFIX}${worktree.specName}`;
                   return (
-                    <Card key={worktree.specName} className="overflow-hidden">
+                    <Card key={worktree.specName} className="overflow-hidden worktrees-card">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -608,14 +612,14 @@ export function Worktrees({ projectId }: WorktreesProps) {
                               )}
                             </div>
                           </div>
-                          <Badge variant="outline" className="shrink-0 ml-2">
+                          <Badge variant="outline" className="shrink-0 ml-2 worktrees-chip">
                             {worktree.specName}
                           </Badge>
                         </div>
                       </CardHeader>
                       <CardContent className="pt-0">
                         {/* Stats */}
-                        <div className="flex flex-wrap gap-4 text-sm mb-4">
+                        <div className="flex flex-wrap gap-4 text-sm mb-4 worktrees-stats-row">
                           <div className="flex items-center gap-1.5 text-muted-foreground">
                             <FileCode className="h-3.5 w-3.5" />
                             <span>{t('dialogs:worktrees.filesChanged', { count: worktree.filesChanged })}</span>
@@ -635,10 +639,10 @@ export function Worktrees({ projectId }: WorktreesProps) {
                         </div>
 
                         {/* Branch info */}
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4 bg-muted/50 rounded-md p-2">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4 rounded-md p-2 worktrees-branch-info">
                           <span className="font-mono">{worktree.baseBranch || t('common:labels.orphaned')}</span>
                           <ChevronRight className="h-3 w-3" />
-                          <span className="font-mono text-info">{worktree.isOrphaned ? t('common:labels.orphaned') : worktree.branch}</span>
+                          <span className="font-mono worktrees-branch-target">{worktree.isOrphaned ? t('common:labels.orphaned') : worktree.branch}</span>
                         </div>
 
                         {/* Actions */}
@@ -673,8 +677,9 @@ export function Worktrees({ projectId }: WorktreesProps) {
                             </Button>
                           )}
                           <Button
-                            variant="outline"
+                            variant="secondary"
                             size="sm"
+                            className="worktrees-action-button"
                             onClick={() => {
                               // Copy worktree path to clipboard
                               navigator.clipboard.writeText(worktree.path);
@@ -684,9 +689,9 @@ export function Worktrees({ projectId }: WorktreesProps) {
                             {t('dialogs:worktrees.copyPath')}
                           </Button>
                           <Button
-                            variant="outline"
+                            variant="secondary"
                             size="sm"
-                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                            className="worktrees-danger-button"
                             onClick={() => confirmDelete(worktree)}
                             disabled={!task && !worktree.isOrphaned}
                           >
@@ -711,7 +716,7 @@ export function Worktrees({ projectId }: WorktreesProps) {
                 {terminalWorktrees.map((wt) => {
                   const terminalId = `${TERMINAL_PREFIX}${wt.name}`;
                   return (
-                    <Card key={wt.name} className="overflow-hidden">
+                    <Card key={wt.name} className="overflow-hidden worktrees-card">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
                           <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -735,7 +740,7 @@ export function Worktrees({ projectId }: WorktreesProps) {
                             </div>
                           </div>
                           {wt.taskId && (
-                            <Badge variant="outline" className="shrink-0 ml-2">
+                            <Badge variant="outline" className="shrink-0 ml-2 worktrees-chip">
                               {wt.taskId}
                             </Badge>
                           )}
@@ -744,10 +749,10 @@ export function Worktrees({ projectId }: WorktreesProps) {
                     <CardContent className="pt-0">
                       {/* Branch info */}
                       {wt.baseBranch && wt.branchName && (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4 bg-muted/50 rounded-md p-2">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4 rounded-md p-2 worktrees-branch-info">
                           <span className="font-mono">{wt.baseBranch}</span>
                           <ChevronRight className="h-3 w-3" />
-                          <span className="font-mono text-amber-500">{wt.branchName}</span>
+                          <span className="font-mono worktrees-branch-target-secondary">{wt.branchName}</span>
                         </div>
                       )}
 
@@ -761,8 +766,9 @@ export function Worktrees({ projectId }: WorktreesProps) {
                       {/* Actions */}
                       <div className="flex flex-wrap gap-2">
                         <Button
-                          variant="outline"
+                          variant="secondary"
                           size="sm"
+                          className="worktrees-action-button"
                           onClick={() => {
                             // Copy worktree path to clipboard
                             navigator.clipboard.writeText(wt.worktreePath);
@@ -772,9 +778,9 @@ export function Worktrees({ projectId }: WorktreesProps) {
                           {t('dialogs:worktrees.copyPath')}
                         </Button>
                         <Button
-                          variant="outline"
+                          variant="secondary"
                           size="sm"
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          className="worktrees-danger-button"
                           onClick={() => setTerminalWorktreeToDelete(wt)}
                         >
                           <Trash2 className="h-3.5 w-3.5 mr-1.5" />
@@ -809,7 +815,7 @@ export function Worktrees({ projectId }: WorktreesProps) {
               <div className="rounded-lg bg-muted p-4 text-sm space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">{t('dialogs:worktrees.mergeSourceBranch')}</span>
-                  <span className="font-mono text-info">{selectedWorktree.branch}</span>
+                  <span className="font-mono worktrees-branch-target">{selectedWorktree.branch}</span>
                 </div>
                 <div className="flex items-center justify-center">
                   <ChevronRight className="h-4 w-4 text-muted-foreground rotate-90" />
@@ -834,8 +840,8 @@ export function Worktrees({ projectId }: WorktreesProps) {
             <div className="py-4">
               <div className={`rounded-lg p-4 text-sm ${
                 mergeResult.success
-                  ? 'bg-success/10 border border-success/30'
-                  : 'bg-destructive/10 border border-destructive/30'
+                  ? 'worktrees-result-success'
+                  : 'worktrees-result-error'
               }`}>
                 <div className="flex items-start gap-2">
                   {mergeResult.success ? (
@@ -866,7 +872,8 @@ export function Worktrees({ projectId }: WorktreesProps) {
 
           <DialogFooter>
             <Button
-              variant="outline"
+              variant="secondary"
+              className="worktrees-action-button"
               onClick={() => {
                 setShowMergeDialog(false);
                 setMergeResult(null);

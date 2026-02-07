@@ -397,11 +397,11 @@ export function DevToolsSettings({ settings, onSettingsChange, onSave, isSaving,
         </div>
 
         {/* YOLO Mode Toggle */}
-        <div className="space-y-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-4">
+        <div className="space-y-3 settings-warning-card">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <Label htmlFor="yolo-mode" className="text-amber-200">
+              <AlertTriangle className="h-4 w-4 text-warning" />
+              <Label htmlFor="yolo-mode" className="text-warning">
                 {t('devtools.yoloMode.label', 'YOLO Mode')}
               </Label>
             </div>
@@ -416,11 +416,11 @@ export function DevToolsSettings({ settings, onSettingsChange, onSave, isSaving,
               }}
             />
           </div>
-          <p className="text-xs text-amber-400/80">
+          <p className="text-xs text-warning/80">
             {t('devtools.yoloMode.description', 'Start Claude with --dangerously-skip-permissions flag, bypassing all safety prompts. Use with extreme caution.')}
           </p>
           {settings.dangerouslySkipPermissions && (
-            <p className="text-xs text-amber-500 font-medium flex items-center gap-1">
+            <p className="text-xs text-warning font-medium flex items-center gap-1">
               <AlertTriangle className="h-3 w-3" />
               {t('devtools.yoloMode.warning', 'This mode bypasses Claude\'s permission system. Only enable if you fully trust the code being executed.')}
             </p>
@@ -429,7 +429,7 @@ export function DevToolsSettings({ settings, onSettingsChange, onSave, isSaving,
 
         {/* Detection Summary */}
         {detectedTools && !isDetecting && (
-          <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded-md">
+          <div className="text-xs text-muted-foreground p-3 rounded-md settings-info-card">
             <p className="font-medium mb-1">{t('devtools.detected', 'Detected on your system')}:</p>
             <ul className="list-disc list-inside space-y-0.5">
               {detectedTools.ides.map((ide) => (

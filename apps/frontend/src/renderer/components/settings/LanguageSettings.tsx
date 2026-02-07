@@ -60,11 +60,9 @@ export function LanguageSettings({ settings, onSettingsChange, onSave, isSaving,
                   key={lang.value}
                   onClick={() => handleLanguageChange(lang.value)}
                   className={cn(
-                    'flex items-center gap-3 p-4 rounded-lg border-2 transition-all',
+                    'flex items-center gap-3 p-4 rounded-lg transition-all settings-preset-button',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                    isSelected
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:border-primary/50 hover:bg-accent/50'
+                    isSelected && 'settings-preset-button-selected'
                   )}
                 >
                   <Globe className="h-5 w-5 shrink-0" />

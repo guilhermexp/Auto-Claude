@@ -241,7 +241,6 @@ function saveTabStateToMain(): void {
       tabOrder: store.tabOrder,
       projectViews: store.projectViews
     };
-    console.log('[ProjectStore] Saving tab state to main process:', tabState);
     try {
       await window.electronAPI.saveTabState(tabState);
     } catch (err) {
@@ -261,8 +260,6 @@ export async function loadProjects(): Promise<void> {
   try {
     // First, load tab state from main process (reliable persistence)
     const tabStateResult = await window.electronAPI.getTabState();
-    console.log('[ProjectStore] Loaded tab state from main process:', tabStateResult.data);
-
     if (tabStateResult.success && tabStateResult.data) {
       useProjectStore.setState({
         openProjectIds: tabStateResult.data.openProjectIds || [],
@@ -274,12 +271,6 @@ export async function loadProjects(): Promise<void> {
 
     // Then load projects
     const result = await window.electronAPI.getProjects();
-    console.log('[ProjectStore] getProjects result:', {
-      success: result.success,
-      projectCount: result.data?.length,
-      projectIds: result.data?.map(p => p.id)
-    });
-
     if (result.success && result.data) {
       store.setProjects(result.data);
 
@@ -298,20 +289,10 @@ export async function loadProjects(): Promise<void> {
         ? currentState.activeProjectId
         : null;
 
-      console.log('[ProjectStore] Tab state cleanup:', {
-        originalOpenProjectIds: currentState.openProjectIds,
-        validOpenProjectIds,
-        originalTabOrder: currentState.tabOrder,
-        validTabOrder,
-        originalActiveProjectId: currentState.activeProjectId,
-        validActiveProjectId
-      });
-
       // Update store with cleaned tab state if needed
       if (validOpenProjectIds.length !== currentState.openProjectIds.length ||
           validTabOrder.length !== currentState.tabOrder.length ||
           validActiveProjectId !== currentState.activeProjectId) {
-        console.log('[ProjectStore] Updating cleaned tab state');
         useProjectStore.setState({
           openProjectIds: validOpenProjectIds,
           tabOrder: validTabOrder,
@@ -319,8 +300,6 @@ export async function loadProjects(): Promise<void> {
         });
         // Save cleaned state back to main process
         saveTabStateToMain();
-      } else {
-        console.log('[ProjectStore] Tab state is valid, no cleanup needed');
       }
 
       // Restore last selected project from localStorage for backward compatibility,

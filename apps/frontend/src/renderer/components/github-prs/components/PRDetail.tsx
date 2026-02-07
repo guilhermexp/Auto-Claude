@@ -62,11 +62,11 @@ interface PRDetailProps {
 function getStatusColor(status: PRReviewResult['overallStatus']): string {
   switch (status) {
     case 'approve':
-      return 'bg-success/20 text-success border-success/50';
+      return 'github-pr-chip github-pr-chip-success';
     case 'request_changes':
-      return 'bg-destructive/20 text-destructive border-destructive/50';
+      return 'github-pr-chip github-pr-chip-danger';
     default:
-      return 'bg-muted';
+      return 'github-pr-chip github-pr-chip-neutral';
   }
 }
 
@@ -817,8 +817,8 @@ ${t('prReview.blockedStatusMessageFooter')}`;
   };
 
   return (
-    <ScrollArea className="flex-1">
-      <div className="p-6 max-w-5xl mx-auto space-y-6">
+    <ScrollArea className="flex-1 github-pr-detail-scroll">
+      <div className="p-6 max-w-5xl mx-auto space-y-6 github-pr-detail-stack">
 
         {/* Refactored Header */}
         <PRHeader pr={pr} isLoadingFiles={isLoadingFiles} />
@@ -827,7 +827,7 @@ ${t('prReview.blockedStatusMessageFooter')}`;
         {mergeReadiness && mergeReadiness.blockers.length > 0 && reviewResult?.success && (
           prStatus.status === 'ready_to_merge' || prStatus.status === 'reviewed_pending_post'
         ) && (
-          <Card className="border-warning/50 bg-warning/10 animate-in fade-in slide-in-from-top-2 duration-300">
+          <Card className="animate-in fade-in slide-in-from-top-2 duration-300 github-pr-warning-panel">
             <CardContent className="py-4">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
@@ -847,8 +847,8 @@ ${t('prReview.blockedStatusMessageFooter')}`;
                     <div className="flex items-center gap-3 mt-3">
                       <Button
                         size="sm"
-                        variant="outline"
-                        className="border-warning/50 text-warning hover:bg-warning/20"
+                        variant="secondary"
+                        className="github-pr-action-button"
                         onClick={handleUpdateBranch}
                         disabled={isUpdatingBranch}
                       >
@@ -1013,8 +1013,8 @@ ${t('prReview.blockedStatusMessageFooter')}`;
                 <Button
                   onClick={handleMerge}
                   disabled={isMerging}
-                  variant="outline"
-                  className="flex-1 sm:flex-none gap-1.5 text-muted-foreground hover:text-foreground"
+                  variant="secondary"
+                  className="flex-1 sm:flex-none gap-1.5 github-pr-action-button"
                   title={t('prReview.mergeViaGitHub')}
                 >
                   {isMerging ? (
@@ -1053,6 +1053,7 @@ ${t('prReview.blockedStatusMessageFooter')}`;
                    {t('prReview.failedPostCleanReview')}
                  </div>
                  <button
+                   type="button"
                    onClick={() => setShowCleanReviewErrorDetails(!showCleanReviewErrorDetails)}
                    aria-expanded={showCleanReviewErrorDetails}
                    aria-controls={cleanReviewErrorDetailsId}
@@ -1133,30 +1134,30 @@ ${t('prReview.blockedStatusMessageFooter')}`;
             <div className="p-4 space-y-6">
               {/* Follow-up Review Resolution Status */}
               {reviewResult.isFollowupReview && (
-                <div className="flex flex-wrap items-center gap-3 pb-4 border-b border-border/50">
+                <div className="flex flex-wrap items-center gap-3 pb-3 mb-1 github-pr-detail-divider">
                   {(reviewResult.resolvedFindings?.length ?? 0) > 0 && (
-                    <Badge variant="outline" className="bg-success/10 text-success border-success/30 px-3 py-1">
+                    <Badge variant="outline" className="github-pr-chip github-pr-chip-success px-3 py-1">
                       <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
                       {t('prReview.resolved', { count: reviewResult.resolvedFindings?.length ?? 0 })}
                     </Badge>
                   )}
                   {(reviewResult.unresolvedFindings?.length ?? 0) > 0 && (
-                    <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 px-3 py-1">
+                    <Badge variant="outline" className="github-pr-chip github-pr-chip-warning px-3 py-1">
                       <AlertCircle className="h-3.5 w-3.5 mr-1.5" />
                       {t('prReview.stillOpen', { count: reviewResult.unresolvedFindings?.length ?? 0 })}
                     </Badge>
                   )}
                   {(reviewResult.newFindingsSinceLastReview?.length ?? 0) > 0 && (
-                    <Badge variant="outline" className="bg-destructive/10 text-destructive border-destructive/30 px-3 py-1">
+                    <Badge variant="outline" className="github-pr-chip github-pr-chip-danger px-3 py-1">
                       <XCircle className="h-3.5 w-3.5 mr-1.5" />
                       {t('prReview.newIssue', { count: reviewResult.newFindingsSinceLastReview?.length ?? 0 })}
                     </Badge>
                   )}
                   {/* Re-run follow-up review button */}
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     size="sm"
-                    className="h-7 px-2 ml-auto text-muted-foreground hover:text-foreground"
+                    className="h-7 px-2 ml-auto github-pr-action-button"
                     onClick={onRunFollowupReview}
                     disabled={isReviewing}
                     title={t('prReview.rerunFollowup')}
@@ -1170,7 +1171,7 @@ ${t('prReview.blockedStatusMessageFooter')}`;
                 </div>
               )}
 
-              <div className="bg-muted/30 p-4 rounded-lg text-sm text-muted-foreground leading-relaxed">
+              <div className="p-4 rounded-lg text-sm text-muted-foreground leading-relaxed github-pr-summary-box">
                 {reviewResult.summary}
               </div>
 
@@ -1187,7 +1188,7 @@ ${t('prReview.blockedStatusMessageFooter')}`;
 
         {/* Review Error */}
         {reviewResult && !reviewResult.success && reviewResult.error && (
-          <Card className="border-destructive/50 bg-destructive/5">
+          <Card className="github-pr-detail-card border-destructive/50 bg-destructive/5">
             <CardContent className="pt-6">
               <div className="flex items-start gap-3 text-destructive">
                 <XCircle className="h-5 w-5 mt-0.5" />
@@ -1206,7 +1207,7 @@ ${t('prReview.blockedStatusMessageFooter')}`;
             title={t('prReview.workflowsAwaitingApproval', { count: workflowsAwaiting.awaiting_approval })}
             icon={<Clock className="h-4 w-4 text-warning" />}
             badge={
-              <Badge variant="outline" className="text-xs bg-warning/10 text-warning border-warning/30">
+              <Badge variant="outline" className="text-xs github-pr-chip github-pr-chip-warning">
                 <AlertTriangle className="h-3 w-3 mr-1" />
                 {t('prReview.blockedByWorkflows')}
               </Badge>
@@ -1223,7 +1224,7 @@ ${t('prReview.blockedStatusMessageFooter')}`;
                 {workflowsAwaiting.workflow_runs.map((workflow) => (
                   <div
                     key={workflow.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border/50"
+                    className="flex items-center justify-between p-3 rounded-lg border github-pr-workflow-item"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <Clock className="h-4 w-4 text-warning shrink-0" />
@@ -1239,8 +1240,8 @@ ${t('prReview.blockedStatusMessageFooter')}`;
                     <div className="flex items-center gap-2 shrink-0">
                       <Button
                         size="sm"
-                        variant="outline"
-                        className="h-7 text-xs"
+                        variant="secondary"
+                        className="h-7 text-xs github-pr-action-button"
                         onClick={() => window.open(workflow.html_url, '_blank')}
                       >
                         <ExternalLink className="h-3 w-3 mr-1" />
@@ -1268,7 +1269,7 @@ ${t('prReview.blockedStatusMessageFooter')}`;
               </div>
 
               {workflowsAwaiting.workflow_runs.length > 1 && (
-                <div className="flex justify-end pt-2 border-t border-border/50">
+                <div className="flex justify-end pt-2 github-pr-detail-divider-top">
                   <Button
                     size="sm"
                     variant="default"
@@ -1295,7 +1296,7 @@ ${t('prReview.blockedStatusMessageFooter')}`;
             icon={<FileText className="h-4 w-4 text-muted-foreground" />}
             badge={
               isReviewing ? (
-                <Badge variant="outline" className="text-xs bg-blue-500/10 text-blue-500 border-blue-500/30">
+                <Badge variant="outline" className="text-xs github-pr-chip github-pr-chip-reviewing">
                   <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                   {t('prReview.aiReviewInProgress')}
                 </Badge>
@@ -1318,10 +1319,10 @@ ${t('prReview.blockedStatusMessageFooter')}`;
         )}
 
         {/* Description */}
-        <Card>
+        <Card className="github-pr-detail-card">
           <CardContent className="pt-6">
             <h3 className="text-sm font-medium text-muted-foreground mb-2">{t('prReview.description')}</h3>
-             <ScrollArea className="h-[400px] w-full rounded-md border p-4 bg-muted/10">
+             <ScrollArea className="h-[400px] w-full rounded-lg p-4 github-pr-description-panel">
               {pr.body ? (
                 <pre className="whitespace-pre-wrap text-sm text-muted-foreground font-sans break-words">
                   {pr.body}

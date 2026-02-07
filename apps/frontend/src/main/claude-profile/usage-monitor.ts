@@ -20,6 +20,7 @@ import { getCredentialsFromKeychain, clearKeychainCache } from './credential-uti
 import { reactiveTokenRefresh, ensureValidToken } from './token-refresh';
 import { isProfileRateLimited } from './rate-limit-manager';
 import { getOperationRegistry } from './operation-registry';
+import { isProfileAuthenticated } from './profile-utils';
 
 // Re-export for backward compatibility
 export type { ApiProvider };
@@ -373,18 +374,15 @@ export class UsageMonitor extends EventEmitter {
     // missing credentials to show the re-auth indicator. Proactively check all profiles
     // for missing credentials and populate needsReauthProfiles.
     if (!this.currentUsage) {
-      // Check all OAuth profiles for missing credentials
+      // Check all OAuth profiles for missing credentials.
+      // Keep the needsReauth set in sync (add/remove) to avoid stale flags.
       for (const profile of settings.profiles) {
-        if (profile.configDir) {
-          const expandedConfigDir = profile.configDir.startsWith('~')
-            ? profile.configDir.replace(/^~/, homedir())
-            : profile.configDir;
-          const creds = getCredentialsFromKeychain(expandedConfigDir);
-          if (!creds.token) {
-            // Credentials are missing - mark for re-auth
-            this.needsReauthProfiles.add(profile.id);
-            this.debugLog('[UsageMonitor:getAllProfilesUsage] Profile needs re-auth (no credentials): ' + profile.name);
-          }
+        const authenticated = isProfileAuthenticated(profile);
+        if (authenticated) {
+          this.needsReauthProfiles.delete(profile.id);
+        } else {
+          this.needsReauthProfiles.add(profile.id);
+          this.debugLog('[UsageMonitor:getAllProfilesUsage] Profile needs re-auth (missing credentials): ' + profile.name);
         }
       }
 

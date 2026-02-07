@@ -108,7 +108,7 @@ export function PrivacyStep({ onNext, onBack }: PrivacyStepProps) {
           </Card>
 
           {/* Toggle */}
-          <Card className="border border-border bg-card">
+          <Card className="onboarding-feature-card">
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">

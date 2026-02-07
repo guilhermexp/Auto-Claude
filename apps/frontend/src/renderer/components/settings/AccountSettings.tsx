@@ -488,7 +488,8 @@ export function AccountSettings({ settings, onSettingsChange, isOpen }: AccountS
     setAuthTerminal(null);
     setAuthenticatingProfileId(null);
     await loadClaudeProfiles();
-  }, [loadClaudeProfiles]);
+    await loadProfileUsageData(true);
+  }, [loadClaudeProfiles, loadProfileUsageData]);
 
   const handleAuthTerminalError = useCallback(() => {
     // Don't auto-close on error
@@ -665,9 +666,9 @@ export function AccountSettings({ settings, onSettingsChange, isOpen }: AccountS
       title={t('accounts.title')}
       description={t('accounts.description')}
     >
-      <div className="space-y-6">
+      <div className="space-y-6 min-w-0">
         {/* Tabs for Claude Code vs Custom Endpoints */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'claude-code' | 'custom-endpoints')}>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'claude-code' | 'custom-endpoints')} className="min-w-0">
           <TabsList className="w-full justify-start">
             <TabsTrigger value="claude-code" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -680,8 +681,8 @@ export function AccountSettings({ settings, onSettingsChange, isOpen }: AccountS
           </TabsList>
 
           {/* Claude Code Tab Content */}
-          <TabsContent value="claude-code">
-            <div className="rounded-lg bg-muted/30 border border-border p-4">
+          <TabsContent value="claude-code" className="min-w-0">
+            <div className="rounded-lg p-4 min-w-0 settings-section-container">
               <p className="text-sm text-muted-foreground mb-4">
                 {t('accounts.claudeCode.description')}
               </p>
@@ -700,25 +701,26 @@ export function AccountSettings({ settings, onSettingsChange, isOpen }: AccountS
                   {claudeProfiles.map((profile) => {
                     // Get usage data to check needsReauthentication flag
                     const usageData = profileUsageData.get(profile.id);
-                    const needsReauth = usageData?.needsReauthentication ?? false;
+                    const isInActiveAuthFlow = authenticatingProfileId === profile.id || authTerminal?.profileId === profile.id;
+                    const needsReauth = !isInActiveAuthFlow && (usageData?.needsReauthentication ?? false);
 
                     return (
                     <div
                       key={profile.id}
                       className={cn(
-                        "rounded-lg border transition-colors",
+                        "rounded-lg transition-colors settings-profile-card",
                         needsReauth
-                          ? "border-destructive/50 bg-destructive/5"
+                          ? "settings-profile-card-warning"
                           : profile.id === activeClaudeProfileId && !activeApiProfileId
-                            ? "border-primary bg-primary/5"
-                            : "border-border bg-background"
+                            ? "settings-profile-card-active"
+                            : ""
                       )}
                     >
                       <div className={cn(
-                        "flex items-center justify-between p-3",
+                        "flex flex-wrap items-start justify-between gap-3 p-3",
                         expandedTokenProfileId !== profile.id && "hover:bg-muted/50"
                       )}>
-                        <div className="flex items-center gap-3">
+                        <div className="flex min-w-0 flex-1 items-start gap-3">
                           <div className={cn(
                             "h-7 w-7 rounded-full flex items-center justify-center text-xs font-medium shrink-0",
                             profile.id === activeClaudeProfileId && !activeApiProfileId
@@ -727,7 +729,7 @@ export function AccountSettings({ settings, onSettingsChange, isOpen }: AccountS
                           )}>
                             {(editingProfileId === profile.id ? editingProfileName : profile.name).charAt(0).toUpperCase()}
                           </div>
-                          <div className="min-w-0">
+                          <div className="min-w-0 flex-1">
                             {editingProfileId === profile.id ? (
                               <div className="flex items-center gap-2">
                                 <Input
@@ -787,7 +789,7 @@ export function AccountSettings({ settings, onSettingsChange, isOpen }: AccountS
                                   )}
                                 </div>
                                 {profile.email && (
-                                  <span className="text-xs text-muted-foreground">{profile.email}</span>
+                                  <span className="block max-w-full truncate text-xs text-muted-foreground">{profile.email}</span>
                                 )}
                                 {/* Usage bars - show if we have usage data */}
                                 {usageData && profile.isAuthenticated && !needsReauth && (
@@ -845,7 +847,7 @@ export function AccountSettings({ settings, onSettingsChange, isOpen }: AccountS
                           </div>
                         </div>
                         {editingProfileId !== profile.id && (
-                          <div className="flex items-center gap-1">
+                          <div className="flex max-w-full shrink-0 flex-wrap items-center justify-end gap-1">
                             {!profile.isAuthenticated ? (
                               <Button
                                 variant="outline"
@@ -958,7 +960,7 @@ export function AccountSettings({ settings, onSettingsChange, isOpen }: AccountS
                       {/* Expanded token entry section */}
                       {expandedTokenProfileId === profile.id && (
                         <div className="px-3 pb-3 pt-0 border-t border-border/50 mt-0">
-                          <div className="bg-muted/30 rounded-lg p-3 mt-3 space-y-3">
+                          <div className="rounded-lg p-3 mt-3 space-y-3 settings-info-card">
                             <div className="flex items-center justify-between">
                               <Label className="text-xs font-medium text-muted-foreground">
                                 {t('accounts.claudeCode.manualTokenEntry')}
@@ -1029,8 +1031,8 @@ export function AccountSettings({ settings, onSettingsChange, isOpen }: AccountS
 
               {/* Embedded Auth Terminal */}
               {authTerminal && (
-                <div className="mb-4">
-                  <div className="rounded-lg border border-primary/30 overflow-hidden" style={{ height: '320px' }}>
+                <div className="mb-4 min-w-0">
+                  <div className="rounded-lg border border-primary/30 overflow-auto max-w-full" style={{ height: '320px' }}>
                     <AuthTerminal
                       terminalId={authTerminal.terminalId}
                       configDir={authTerminal.configDir}
@@ -1075,7 +1077,7 @@ export function AccountSettings({ settings, onSettingsChange, isOpen }: AccountS
           </TabsContent>
 
           {/* Custom Endpoints Tab Content */}
-          <TabsContent value="custom-endpoints">
+          <TabsContent value="custom-endpoints" className="min-w-0">
             <div className="space-y-4">
               {/* Header with Add button */}
               <div className="flex items-center justify-between">
@@ -1126,10 +1128,8 @@ export function AccountSettings({ settings, onSettingsChange, isOpen }: AccountS
                       <div
                         key={profile.id}
                         className={cn(
-                          'flex items-center justify-between p-4 rounded-lg border transition-colors',
-                          isActive
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border hover:bg-accent/50'
+                          'flex items-center justify-between p-4 rounded-lg transition-colors settings-profile-card',
+                          isActive && 'settings-profile-card-active'
                         )}
                       >
                         <div className="flex-1 min-w-0">
@@ -1277,7 +1277,7 @@ export function AccountSettings({ settings, onSettingsChange, isOpen }: AccountS
               <h4 className="text-sm font-semibold text-foreground">{t('accounts.autoSwitching.title')}</h4>
             </div>
 
-            <div className="rounded-lg bg-muted/30 border border-border p-4 space-y-4">
+            <div className="rounded-lg p-4 space-y-4 settings-section-container">
               <p className="text-sm text-muted-foreground">
                 {t('accounts.autoSwitching.description')}
               </p>

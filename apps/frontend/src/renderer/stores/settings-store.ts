@@ -366,19 +366,34 @@ export async function loadSettings(): Promise<void> {
 
     if (result.success && result.data) {
       // Apply migrations
-      let migratedSettings = migrateOnboardingCompleted(result.data);
+      let migratedSettings = await migrateOnboardingCompleted(result.data);
       migratedSettings = migrateToDarkMode(migratedSettings);
-      store.setSettings(migratedSettings);
+
+      // Normalize settings to ensure all required nested keys exist for legacy files.
+      const normalizedSettings: AppSettings = {
+        ...DEFAULT_APP_SETTINGS,
+        ...migratedSettings,
+        notifications: {
+          ...DEFAULT_APP_SETTINGS.notifications,
+          ...(migratedSettings.notifications ?? {})
+        }
+      };
+
+      store.setSettings(normalizedSettings);
 
       // Track which settings changed for persistence
       const settingsToSave: Partial<AppSettings> = {};
 
-      if (migratedSettings.onboardingCompleted !== result.data.onboardingCompleted) {
-        settingsToSave.onboardingCompleted = migratedSettings.onboardingCompleted;
+      if (normalizedSettings.onboardingCompleted !== result.data.onboardingCompleted) {
+        settingsToSave.onboardingCompleted = normalizedSettings.onboardingCompleted;
       }
 
-      if (migratedSettings.theme !== result.data.theme) {
-        settingsToSave.theme = migratedSettings.theme;
+      if (normalizedSettings.theme !== result.data.theme) {
+        settingsToSave.theme = normalizedSettings.theme;
+      }
+
+      if (JSON.stringify(normalizedSettings.notifications) !== JSON.stringify(result.data.notifications ?? {})) {
+        settingsToSave.notifications = normalizedSettings.notifications;
       }
 
       // Persist changed settings

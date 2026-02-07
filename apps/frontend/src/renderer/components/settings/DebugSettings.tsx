@@ -88,7 +88,7 @@ export function DebugSettings() {
     >
       <div className="space-y-6">
         {/* Error Reporting Toggle */}
-        <div className="rounded-lg border border-border p-4">
+        <div className="settings-toggle-row">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Shield className="h-5 w-5 text-muted-foreground" />
@@ -166,7 +166,7 @@ export function DebugSettings() {
         {debugInfo && (
           <div className="space-y-4">
             {/* System Information */}
-            <div className="rounded-lg border border-border p-4">
+            <div className="settings-info-card">
               <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
                 <Bug className="h-4 w-4" />
                 {t('debug.systemInfo', 'System Information')}
@@ -182,7 +182,7 @@ export function DebugSettings() {
             </div>
 
             {/* Logs Path */}
-            <div className="rounded-lg border border-border p-4">
+            <div className="settings-info-card">
               <h4 className="font-medium text-sm mb-2 flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 {t('debug.logsLocation', 'Logs Location')}
@@ -194,9 +194,9 @@ export function DebugSettings() {
 
             {/* Recent Errors */}
             {debugInfo.recentErrors.length > 0 && (
-              <div className="rounded-lg border border-border p-4">
+              <div className="settings-info-card">
                 <h4 className="font-medium text-sm mb-3 flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-amber-500" />
+                  <AlertCircle className="h-4 w-4 text-warning" />
                   {t('debug.recentErrors', 'Recent Errors')} ({debugInfo.recentErrors.length})
                 </h4>
                 <div className="space-y-1 max-h-48 overflow-y-auto">
@@ -210,9 +210,9 @@ export function DebugSettings() {
             )}
 
             {debugInfo.recentErrors.length === 0 && (
-              <div className="rounded-lg border border-border p-4">
+              <div className="settings-info-card">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Check className="h-4 w-4 text-green-500" />
+                  <Check className="h-4 w-4 text-success" />
                   {t('debug.noRecentErrors', 'No recent errors')}
                 </div>
               </div>
@@ -221,7 +221,7 @@ export function DebugSettings() {
         )}
 
         {/* Help Text */}
-        <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-md">
+        <div className="text-xs text-muted-foreground p-3 rounded-md settings-info-card">
           <p className="font-medium mb-1">{t('debug.helpTitle', 'Reporting Issues')}</p>
           <p>
             {t('debug.helpText', 'When reporting bugs, click "Copy Debug Info" to get system information and recent errors that help us diagnose the issue.')}

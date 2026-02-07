@@ -23,7 +23,7 @@ export function AutoBuildIntegration({
     <section className="space-y-4">
       <h3 className="text-sm font-semibold text-foreground">Auto-Build Integration</h3>
       {!autoBuildPath ? (
-        <div className="rounded-lg border border-border bg-muted/50 p-4">
+        <div className="rounded-lg p-4 settings-info-card">
           <div className="flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-warning mt-0.5 shrink-0" />
             <div className="flex-1">
@@ -53,7 +53,7 @@ export function AutoBuildIntegration({
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-border bg-muted/50 p-4 space-y-3">
+        <div className="rounded-lg p-4 space-y-3 settings-info-card">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-success" />

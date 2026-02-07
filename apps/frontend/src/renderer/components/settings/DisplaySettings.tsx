@@ -118,11 +118,9 @@ export function DisplaySettings({ settings, onSettingsChange, onSave, isSaving, 
                   key={preset.value}
                   onClick={() => handlePresetChange(preset.value)}
                   className={cn(
-                    'flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-all',
+                    'flex flex-col items-center gap-2 p-4 rounded-lg transition-all settings-preset-button',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                    isSelected
-                      ? 'border-primary bg-primary/5'
-                      : 'border-border hover:border-primary/50 hover:bg-accent/50'
+                    isSelected && 'settings-preset-button-selected'
                   )}
                 >
                   <Monitor className="h-4 w-4" />

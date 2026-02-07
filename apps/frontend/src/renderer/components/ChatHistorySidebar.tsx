@@ -123,21 +123,17 @@ export function ChatHistorySidebar({
       </h2>
 
       <ScrollArea className="flex-1">
-        {/* New Chat Button - 1Code style */}
+        {/* New Chat Button */}
         <button
           onClick={onNewSession}
-          className={cn(
-            'w-full flex items-center gap-2 px-3 py-1.5 text-sm h-8 rounded-md font-medium transition-all mb-2',
-            'border border-dashed border-muted-foreground/30',
-            'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
-          )}
+          className="w-full flex items-center gap-2 px-3 py-1.5 text-sm h-8 font-medium mb-2 insights-new-chat-button"
         >
           <Plus className="h-4 w-4 opacity-50" />
           <span className="truncate">{t('insights:chat.newConversation', 'New Conversation')}</span>
         </button>
 
         {/* Separator */}
-        <div className="border-t border-border/50 mx-1 my-3" />
+        <div className="border-t border-border/30 mx-1 my-3" />
 
         {/* Session list */}
         {isLoading ? (
@@ -179,9 +175,9 @@ export function ChatHistorySidebar({
         )}
       </ScrollArea>
 
-      {/* Model Selector at bottom - 1Code style */}
+      {/* Model Selector at bottom */}
       {onModelConfigChange && (
-        <div className="mt-auto pt-4 border-t border-border/50 mx-1">
+        <div className="mt-auto pt-4 border-t border-border/30 mx-1">
           <div className="px-1 pb-1">
             <InsightsModelSelector
               currentConfig={modelConfig}
@@ -278,14 +274,14 @@ function SessionItem({
     );
   }
 
-  // 1Code NavItem style
+  // Session item with semantic tokens
   return (
     <div
       className={cn(
-        'group relative cursor-pointer px-3 py-1.5 text-sm rounded-md font-medium transition-all',
+        'group relative cursor-pointer px-3 py-1.5 text-sm font-medium insights-session-item',
         isActive
-          ? 'bg-foreground/10 text-foreground'
-          : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
+          ? 'insights-session-item-active text-foreground'
+          : 'text-muted-foreground hover:text-foreground'
       )}
       onClick={onSelect}
     >

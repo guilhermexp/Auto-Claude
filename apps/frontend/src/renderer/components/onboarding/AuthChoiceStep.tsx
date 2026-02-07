@@ -25,9 +25,7 @@ function AuthOptionCard({ icon, title, description, onClick, variant = 'default'
   return (
     <Card
       data-testid={dataTestId}
-      className={`border border-border bg-card/50 backdrop-blur-sm cursor-pointer transition-all hover:border-primary/50 hover:shadow-md ${
-        variant === 'oauth' ? 'hover:bg-accent/5' : ''
-      }`}
+      className="onboarding-option-card"
       onClick={onClick}
     >
       <CardContent className="p-6">

@@ -3,6 +3,10 @@
   "graphMemoryStatus": "Status da Memória Gráfica",
   "connected": "Conectado",
   "notAvailable": "Não Disponível",
+  "sidebar": {
+    "show": "Mostrar histórico",
+    "hide": "Ocultar histórico"
+  },
   "labels": {
     "database": "Banco de Dados",
     "path": "Caminho",
@@ -78,7 +82,14 @@
     "inputHint": "Pressione Enter para enviar, Shift+Enter para nova linha",
     "thinking": "Pensando...",
     "assistant": "Assistente",
-    "you": "Você"
+    "you": "Você",
+    "translation": {
+      "translateToPortuguese": "Traduzir respostas para português",
+      "showOriginal": "Mostrar texto original",
+      "translating": "Traduzindo respostas...",
+      "errorTitle": "Tradução indisponível",
+      "errorDescription": "Não foi possível traduzir algumas mensagens agora."
+    }
   },
   "history": {
     "title": "Histórico de conversas",

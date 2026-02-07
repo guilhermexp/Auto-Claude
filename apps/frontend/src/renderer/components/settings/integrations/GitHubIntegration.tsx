@@ -597,7 +597,7 @@ interface ConnectionStatusProps {
 
 function ConnectionStatus({ isChecking, connectionStatus }: ConnectionStatusProps) {
   return (
-    <div className="rounded-lg border border-border bg-muted/30 p-3">
+    <div className="rounded-lg p-3 settings-info-card">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-foreground">Connection Status</p>

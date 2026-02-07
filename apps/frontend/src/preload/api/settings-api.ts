@@ -39,6 +39,9 @@ export interface SettingsAPI {
 
   // Spell check
   setSpellCheckLanguages: (language: string) => Promise<IPCResult<{ success: boolean }>>;
+
+  // Translation
+  translateText: (text: string, targetLanguage?: string) => Promise<string>;
 }
 
 export const createSettingsAPI = (): SettingsAPI => ({
@@ -90,5 +93,9 @@ export const createSettingsAPI = (): SettingsAPI => ({
 
   // Spell check - sync spell checker language with app language
   setSpellCheckLanguages: (language: string): Promise<IPCResult<{ success: boolean }>> =>
-    ipcRenderer.invoke(IPC_CHANNELS.SPELLCHECK_SET_LANGUAGES, language)
+    ipcRenderer.invoke(IPC_CHANNELS.SPELLCHECK_SET_LANGUAGES, language),
+
+  // Translation - executed in main process to avoid renderer CSP limits
+  translateText: (text: string, targetLanguage: string = 'pt'): Promise<string> =>
+    ipcRenderer.invoke(IPC_CHANNELS.TRANSLATION_TRANSLATE_TEXT, text, targetLanguage)
 });

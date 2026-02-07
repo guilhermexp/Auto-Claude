@@ -28,7 +28,7 @@ function NotConnectedState({
         <h3 className="text-lg font-medium mb-2">{t("prReview.notConnected")}</h3>
         <p className="text-sm text-muted-foreground mb-4">{error || t("prReview.connectPrompt")}</p>
         {onOpenSettings && (
-          <Button onClick={onOpenSettings} variant="outline">
+          <Button onClick={onOpenSettings} variant="secondary" className="github-pr-action-button">
             <Settings className="h-4 w-4 mr-2" />
             {t("prReview.openSettings")}
           </Button>
@@ -186,9 +186,9 @@ export function GitHubPRs({ onOpenSettings, isActive = false }: GitHubPRsProps) 
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full">
+    <div className="flex-1 flex flex-col h-full github-prs-page">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+      <div className="mx-3 mt-3 mb-2 rounded-xl px-4 py-3 flex items-center justify-between github-prs-header">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-medium flex items-center gap-2">
             <GitPullRequest className="h-4 w-4" />
@@ -209,13 +209,14 @@ export function GitHubPRs({ onOpenSettings, isActive = false }: GitHubPRsProps) 
             {prs.length} {t("prReview.open")}
           </span>
         </div>
-        <Button variant="ghost" size="icon" onClick={refresh} disabled={isLoading}>
+        <Button variant="secondary" size="icon" className="github-pr-action-button" onClick={refresh} disabled={isLoading}>
           <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
         </Button>
       </div>
 
       {/* Content - Resizable split panels */}
       <ResizablePanels
+        className="github-prs-panels"
         defaultLeftWidth={50}
         minLeftWidth={30}
         maxLeftWidth={70}

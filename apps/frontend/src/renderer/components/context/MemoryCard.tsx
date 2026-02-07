@@ -68,7 +68,7 @@ function SectionHeader({ icon: Icon, title, count }: { icon: React.ComponentType
       <Icon className="h-4 w-4 text-muted-foreground" />
       <span className="text-sm font-medium text-foreground">{title}</span>
       {count !== undefined && count > 0 && (
-        <Badge variant="secondary" className="text-xs px-1.5 py-0">
+        <Badge variant="secondary" className="text-xs px-1.5 py-0 context-chip context-chip-neutral">
           {count}
         </Badge>
       )}
@@ -147,17 +147,17 @@ export function MemoryCard({ memory }: MemoryCardProps) {
   const specId = parsed?.spec_id;
 
   return (
-    <Card className="bg-muted/30 border-border/50 hover:border-border transition-colors">
+    <Card className="context-card-soft transition-colors">
       <CardContent className="pt-4 pb-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1 min-w-0">
-            <div className="p-2 rounded-lg bg-accent/10">
-              <Icon className="h-4 w-4 text-accent" />
+            <div className="p-2 rounded-lg context-icon-badge">
+              <Icon className="h-4 w-4 context-tone-info" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline" className={`text-xs capitalize font-medium ${typeColor}`}>
+                <Badge variant="outline" className={`text-xs capitalize font-medium context-chip ${typeColor}`}>
                   {typeLabel}
                 </Badge>
                 {sessionLabel && (
@@ -181,10 +181,10 @@ export function MemoryCard({ memory }: MemoryCardProps) {
           </div>
           {hasContent && (
             <Button
-              variant="ghost"
+              variant="secondary"
               size="sm"
               onClick={() => setExpanded(!expanded)}
-              className="shrink-0 gap-1"
+              className="shrink-0 gap-1 context-action-button"
             >
               {expanded ? (
                 <>
@@ -203,7 +203,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
 
         {/* Expanded Content */}
         {expanded && parsed && (
-          <div className="mt-4 space-y-4 pt-4 border-t border-border/50">
+          <div className="mt-4 space-y-4 pt-4 context-divider">
             {/* What Worked */}
             {parsed.what_worked && parsed.what_worked.length > 0 && (
               <div>
@@ -283,7 +283,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
                       ? pattern
                       : (pattern?.pattern || pattern?.applies_to || JSON.stringify(pattern));
                     return text ? (
-                      <Badge key={idx} variant="secondary" className="text-xs">
+                      <Badge key={idx} variant="secondary" className="text-xs context-chip context-chip-purple">
                         {text}
                       </Badge>
                     ) : null;
@@ -315,7 +315,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
                 <SectionHeader icon={FileCode} title={t('memoryCard.changedFiles')} count={parsed.discoveries.changed_files.length} />
                 <div className="flex flex-wrap gap-1.5 pl-4">
                   {parsed.discoveries.changed_files.map((file, idx) => (
-                    <Badge key={idx} variant="outline" className="text-xs font-mono">
+                    <Badge key={idx} variant="outline" className="text-xs font-mono context-chip context-chip-muted">
                       {file}
                     </Badge>
                   ))}
@@ -331,7 +331,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
                   {parsed.discoveries.file_insights.map((insight, idx) => (
                     <div key={idx} className="text-sm">
                       {insight.path && (
-                        <Badge variant="outline" className="text-xs font-mono mb-1">
+                        <Badge variant="outline" className="text-xs font-mono mb-1 context-chip context-chip-muted">
                           {insight.path}
                         </Badge>
                       )}
@@ -353,7 +353,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
                 <SectionHeader icon={CheckCircle2} title={t('memoryCard.subtasksCompleted')} count={parsed.subtasks_completed.length} />
                 <div className="flex flex-wrap gap-1.5 pl-4">
                   {parsed.subtasks_completed.map((task, idx) => (
-                    <Badge key={idx} variant="secondary" className="text-xs font-mono">
+                    <Badge key={idx} variant="secondary" className="text-xs font-mono context-chip context-chip-neutral">
                       {task}
                     </Badge>
                   ))}
@@ -365,7 +365,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
 
         {/* Fallback for unparseable content */}
         {expanded && !parsed && (
-          <pre className="mt-4 text-xs text-muted-foreground whitespace-pre-wrap font-mono p-3 bg-background rounded-lg max-h-64 overflow-auto border border-border/50">
+          <pre className="mt-4 text-xs text-muted-foreground whitespace-pre-wrap font-mono p-3 rounded-lg max-h-64 overflow-auto context-prebox">
             {memory.content}
           </pre>
         )}

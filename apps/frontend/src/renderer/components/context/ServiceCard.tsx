@@ -27,14 +27,14 @@ export function ServiceCard({ name, service }: ServiceCardProps) {
   const serviceTypeLabel = service.type || t('serviceCard.unknown');
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden context-card">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2">
             <Icon className="h-4 w-4" />
             {name}
           </CardTitle>
-          <Badge variant="outline" className={cn('capitalize text-xs', colorClass)}>
+          <Badge variant="outline" className={cn('capitalize text-xs context-chip', colorClass)}>
             {serviceTypeLabel}
           </Badge>
         </div>
@@ -48,22 +48,22 @@ export function ServiceCard({ name, service }: ServiceCardProps) {
         {/* Language & Framework */}
         <div className="flex flex-wrap gap-1.5">
           {service.language && (
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-xs context-chip context-chip-neutral">
               {service.language}
             </Badge>
           )}
           {service.framework && (
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-xs context-chip context-chip-neutral">
               {service.framework}
             </Badge>
           )}
           {service.package_manager && (
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs context-chip context-chip-muted">
               {service.package_manager}
             </Badge>
           )}
           {service.build_tool && (
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs context-chip context-chip-muted">
               {service.build_tool}
             </Badge>
           )}
@@ -111,11 +111,11 @@ export function ServiceCard({ name, service }: ServiceCardProps) {
 
         {/* Apple Frameworks (iOS/Swift) */}
         {service.apple_frameworks && service.apple_frameworks.length > 0 && (
-          <div className="pt-2 border-t border-border">
+          <div className="pt-2 context-divider">
             <p className="text-xs text-muted-foreground mb-1.5">{t('serviceCard.appleFrameworks')}</p>
             <div className="flex flex-wrap gap-1">
               {service.apple_frameworks.map((fw) => (
-                <Badge key={fw} variant="secondary" className="text-xs">
+                <Badge key={fw} variant="secondary" className="text-xs context-chip context-chip-neutral">
                   {fw}
                 </Badge>
               ))}
@@ -125,11 +125,11 @@ export function ServiceCard({ name, service }: ServiceCardProps) {
 
         {/* SPM Dependencies (iOS/Swift) */}
         {service.spm_dependencies && service.spm_dependencies.length > 0 && (
-          <div className="pt-2 border-t border-border">
+          <div className="pt-2 context-divider">
             <p className="text-xs text-muted-foreground mb-1.5">{t('serviceCard.spmDependencies')}</p>
             <div className="flex flex-wrap gap-1">
               {service.spm_dependencies.map((dep) => (
-                <Badge key={dep} variant="outline" className="text-xs font-mono">
+                <Badge key={dep} variant="outline" className="text-xs font-mono context-chip context-chip-muted">
                   {dep}
                 </Badge>
               ))}
@@ -147,13 +147,13 @@ export function ServiceCard({ name, service }: ServiceCardProps) {
 
         {/* Key Directories */}
         {service.key_directories && Object.keys(service.key_directories).length > 0 && (
-          <div className="pt-2 border-t border-border">
+          <div className="pt-2 context-divider">
             <p className="text-xs text-muted-foreground mb-1.5">{t('serviceCard.keyDirectories')}</p>
             <div className="flex flex-wrap gap-1">
               {Object.entries(service.key_directories).slice(0, 6).map(([dir, info]) => (
                 <Tooltip key={dir}>
                   <TooltipTrigger asChild>
-                    <Badge variant="outline" className="text-xs font-mono cursor-help">
+                    <Badge variant="outline" className="text-xs font-mono cursor-help context-chip context-chip-muted">
                       {dir}
                     </Badge>
                   </TooltipTrigger>

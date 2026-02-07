@@ -24,9 +24,9 @@ export function MonitoringSection({ monitoring }: MonitoringSectionProps) {
     <Collapsible
       open={expanded}
       onOpenChange={setExpanded}
-      className="border-t border-border pt-3"
+      className="context-divider pt-3"
     >
-      <CollapsibleTrigger className="flex w-full items-center justify-between text-xs font-medium hover:text-foreground">
+      <CollapsibleTrigger className="flex w-full items-center justify-between text-xs font-medium context-section-trigger">
         <div className="flex items-center gap-2">
           <Activity className="h-3 w-3" />
           {t('serviceSections.monitoring')}

@@ -16,10 +16,8 @@ export function IssueListItem({ issue, isSelected, onClick, onInvestigate }: Iss
 
   return (
     <div
-      className={`group p-3 rounded-lg cursor-pointer transition-colors ${
-        isSelected
-          ? 'bg-accent/50 border border-accent'
-          : 'hover:bg-muted/50 border border-transparent'
+      className={`group p-3 rounded-lg cursor-pointer transition-colors github-issue-list-item ${
+        isSelected ? 'github-issue-list-item-selected' : ''
       }`}
       onClick={onClick}
     >

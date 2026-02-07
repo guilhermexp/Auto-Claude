@@ -46,20 +46,19 @@ const getColorClass = (percent: number): string => {
  * Get background/border color classes for badges based on usage percentage
  */
 const getBadgeColorClasses = (percent: number): string => {
-  if (percent >= THRESHOLD_CRITICAL) return 'text-red-500 bg-red-500/10 border-red-500/20';
-  if (percent >= THRESHOLD_WARNING) return 'text-orange-500 bg-orange-500/10 border-orange-500/20';
-  if (percent >= THRESHOLD_ELEVATED) return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
-  return 'text-green-500 bg-green-500/10 border-green-500/20';
+  if (percent >= THRESHOLD_CRITICAL) return 'header-badge-usage-critical';
+  if (percent >= THRESHOLD_WARNING) return 'header-badge-usage-warning';
+  return 'header-badge-usage';
 };
 
 /**
- * Get gradient background class based on usage percentage
+ * Get fill class based on usage percentage
  */
 const getGradientClass = (percent: number): string => {
-  if (percent >= THRESHOLD_CRITICAL) return 'bg-gradient-to-r from-red-600 to-red-500';
-  if (percent >= THRESHOLD_WARNING) return 'bg-gradient-to-r from-orange-600 to-orange-500';
-  if (percent >= THRESHOLD_ELEVATED) return 'bg-gradient-to-r from-yellow-600 to-yellow-500';
-  return 'bg-gradient-to-r from-green-600 to-green-500';
+  if (percent >= THRESHOLD_CRITICAL) return 'bg-red-500';
+  if (percent >= THRESHOLD_WARNING) return 'bg-orange-500';
+  if (percent >= THRESHOLD_ELEVATED) return 'bg-yellow-500';
+  return 'bg-green-500';
 };
 
 /**
@@ -555,9 +554,7 @@ export function UsageIndicator() {
                   <div
                     className={`h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden ${getGradientClass(usage.sessionPercent)}`}
                     style={{ width: `${Math.min(usage.sessionPercent, 100)}%` }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent motion-safe:animate-pulse" />
-                  </div>
+                  />
                 </div>
                 {usage.sessionUsageValue != null && usage.sessionUsageLimit != null && (
                   <div className="flex items-center justify-between text-[10px]">
@@ -590,9 +587,7 @@ export function UsageIndicator() {
                   <div
                     className={`h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden ${getGradientClass(usage.weeklyPercent)}`}
                     style={{ width: `${Math.min(usage.weeklyPercent, 100)}%` }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent motion-safe:animate-pulse" />
-                  </div>
+                  />
                 </div>
                 {usage.weeklyUsageValue != null && usage.weeklyUsageLimit != null && (
                   <div className="flex items-center justify-between text-[10px]">

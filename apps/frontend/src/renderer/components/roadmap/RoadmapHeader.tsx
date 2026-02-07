@@ -1,13 +1,24 @@
 import { useTranslation } from 'react-i18next';
-import { Target, Users, BarChart3, RefreshCw, Plus, TrendingUp } from 'lucide-react';
+import { Target, Users, BarChart3, RefreshCw, Plus, TrendingUp, Languages, Loader2 } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { getFeatureStats } from '../../stores/roadmap-store';
+import { cn } from '../../lib/utils';
 import { ROADMAP_PRIORITY_COLORS } from '../../../shared/constants';
 import type { RoadmapHeaderProps } from './types';
 
-export function RoadmapHeader({ roadmap, competitorAnalysis, onAddFeature, onRefresh, onViewCompetitorAnalysis }: RoadmapHeaderProps) {
+export function RoadmapHeader({
+  roadmap,
+  competitorAnalysis,
+  onAddFeature,
+  onRefresh,
+  onViewCompetitorAnalysis,
+  showTranslateToggle = false,
+  isTranslateEnabled = false,
+  isTranslating = false,
+  onToggleTranslate,
+}: RoadmapHeaderProps) {
   const { t } = useTranslation(['roadmap', 'common']);
   const stats = getFeatureStats(roadmap);
   const statusLabel = t(`roadmap:statusLabels.${roadmap.status}`, { defaultValue: roadmap.status });
@@ -19,13 +30,15 @@ export function RoadmapHeader({ roadmap, competitorAnalysis, onAddFeature, onRef
           <div className="flex items-center gap-2 mb-1">
             <Target className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">{roadmap.projectName}</h2>
-            <Badge variant="outline">{statusLabel}</Badge>
+            <Badge variant="outline" className="roadmap-chip roadmap-chip-neutral">
+              {statusLabel}
+            </Badge>
             {competitorAnalysis && (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Badge
                     variant="secondary"
-                    className="gap-1 cursor-pointer hover:bg-secondary/80 transition-colors"
+                    className="gap-1 cursor-pointer roadmap-chip roadmap-chip-competitor hover:bg-secondary/80 transition-colors"
                     onClick={onViewCompetitorAnalysis}
                   >
                     <TrendingUp className="h-3 w-3" />
@@ -49,20 +62,56 @@ export function RoadmapHeader({ roadmap, competitorAnalysis, onAddFeature, onRef
           <p className="text-sm text-muted-foreground max-w-xl">{roadmap.vision}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" onClick={onAddFeature}>
-                <Plus className="h-4 w-4 mr-1" />
-                {t('roadmap:header.addFeature')}
-              </Button>
+          {showTranslateToggle && onToggleTranslate && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className={cn('roadmap-action-button', isTranslateEnabled && 'roadmap-action-button-active')}
+                  onClick={onToggleTranslate}
+                  aria-label={
+                    isTranslateEnabled
+                      ? t('roadmap:header.translation.showOriginal')
+                      : t('roadmap:header.translation.translateToPortuguese')
+                  }
+                >
+                  {isTranslating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Languages className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {isTranslating
+                  ? t('roadmap:header.translation.translating')
+                  : isTranslateEnabled
+                    ? t('roadmap:header.translation.showOriginal')
+                    : t('roadmap:header.translation.translateToPortuguese')}
+              </TooltipContent>
+            </Tooltip>
+          )}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="secondary" size="sm" className="roadmap-action-button" onClick={onAddFeature}>
+                  <Plus className="h-4 w-4 mr-1" />
+                  {t('roadmap:header.addFeature')}
+                </Button>
             </TooltipTrigger>
             <TooltipContent>{t('roadmap:header.addFeatureTooltip')}</TooltipContent>
           </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="icon" onClick={onRefresh} aria-label={t('accessibility.regenerateRoadmapAriaLabel')}>
-                <RefreshCw className="h-4 w-4" />
-              </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="roadmap-action-button"
+                  onClick={onRefresh}
+                  aria-label={t('accessibility.regenerateRoadmapAriaLabel')}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
             </TooltipTrigger>
             <TooltipContent>{t('roadmap:header.regenerateTooltip')}</TooltipContent>
           </Tooltip>

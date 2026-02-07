@@ -5,7 +5,14 @@
     "description": "AI-generated feature ideas for your project",
     "selectedCount": "{{count}} selected",
     "deleteButton": "Delete",
-    "addMoreButton": "Add More"
+    "addMoreButton": "Add More",
+    "translation": {
+      "translateToPortuguese": "Translate ideas to Portuguese",
+      "showOriginal": "Show original text",
+      "translating": "Translating ideas...",
+      "errorTitle": "Translation unavailable",
+      "errorDescription": "Some items could not be translated right now."
+    }
   },
   "emptyState": {
     "title": "No Ideas Yet",

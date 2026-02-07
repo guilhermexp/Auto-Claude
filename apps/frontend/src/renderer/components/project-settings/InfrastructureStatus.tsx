@@ -15,7 +15,7 @@ export function InfrastructureStatus({
   isCheckingInfrastructure,
 }: InfrastructureStatusProps) {
   return (
-    <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-3">
+    <div className="rounded-lg p-3 space-y-3 settings-info-card">
       <div className="flex items-center justify-between">
         <span className="text-sm font-medium text-foreground">Memory Infrastructure</span>
         {isCheckingInfrastructure && (

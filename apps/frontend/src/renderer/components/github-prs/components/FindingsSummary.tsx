@@ -24,25 +24,25 @@ export function FindingsSummary({ findings, selectedCount }: FindingsSummaryProp
   };
 
   return (
-    <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-muted/50">
+    <div className="flex items-center justify-between gap-2 p-2 rounded-lg github-pr-findings-summary">
       <div className="flex items-center gap-2 flex-wrap">
         {counts.critical > 0 && (
-          <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/30">
+          <Badge variant="outline" className="github-pr-chip github-pr-chip-danger">
             {counts.critical} {t('prReview.severity.critical')}
           </Badge>
         )}
         {counts.high > 0 && (
-          <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/30">
+          <Badge variant="outline" className="github-pr-chip github-pr-chip-warning">
             {counts.high} {t('prReview.severity.high')}
           </Badge>
         )}
         {counts.medium > 0 && (
-          <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/30">
+          <Badge variant="outline" className="github-pr-chip github-pr-chip-warning-soft">
             {counts.medium} {t('prReview.severity.medium')}
           </Badge>
         )}
         {counts.low > 0 && (
-          <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/30">
+          <Badge variant="outline" className="github-pr-chip github-pr-chip-reviewed">
             {counts.low} {t('prReview.severity.low')}
           </Badge>
         )}

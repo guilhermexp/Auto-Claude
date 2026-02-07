@@ -30,12 +30,12 @@ export const IDEATION_TYPE_DESCRIPTIONS: Record<string, string> = {
 
 // Ideation type colors
 export const IDEATION_TYPE_COLORS: Record<string, string> = {
-  code_improvements: 'bg-success/10 text-success border-success/30',
-  ui_ux_improvements: 'bg-info/10 text-info border-info/30',
-  documentation_gaps: 'bg-amber-500/10 text-amber-500 border-amber-500/30',
-  security_hardening: 'bg-destructive/10 text-destructive border-destructive/30',
-  performance_optimizations: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-  code_quality: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30'
+  code_improvements: 'ideation-tone-code',
+  ui_ux_improvements: 'ideation-tone-uiux',
+  documentation_gaps: 'ideation-tone-docs',
+  security_hardening: 'ideation-tone-security',
+  performance_optimizations: 'ideation-tone-performance',
+  code_quality: 'ideation-tone-quality'
 };
 
 // Ideation type icons (Lucide icon names)
@@ -53,11 +53,11 @@ export const IDEATION_TYPE_ICONS: Record<string, string> = {
 // ============================================
 
 export const IDEATION_STATUS_COLORS: Record<string, string> = {
-  draft: 'bg-muted text-muted-foreground',
-  selected: 'bg-primary/10 text-primary',
-  converted: 'bg-success/10 text-success',
-  dismissed: 'bg-destructive/10 text-destructive line-through',
-  archived: 'bg-violet-500/10 text-violet-400'
+  draft: 'ideation-tone-neutral',
+  selected: 'ideation-tone-selected',
+  converted: 'ideation-tone-converted',
+  dismissed: 'ideation-tone-dismissed line-through',
+  archived: 'ideation-tone-archived'
 };
 
 // ============================================
@@ -66,11 +66,11 @@ export const IDEATION_STATUS_COLORS: Record<string, string> = {
 
 // Ideation effort colors (full spectrum for code_improvements)
 export const IDEATION_EFFORT_COLORS: Record<string, string> = {
-  trivial: 'bg-success/10 text-success',
-  small: 'bg-info/10 text-info',
-  medium: 'bg-warning/10 text-warning',
-  large: 'bg-orange-500/10 text-orange-400',
-  complex: 'bg-destructive/10 text-destructive'
+  trivial: 'ideation-tone-effort-trivial',
+  small: 'ideation-tone-effort-small',
+  medium: 'ideation-tone-effort-medium',
+  large: 'ideation-tone-effort-large',
+  complex: 'ideation-tone-effort-complex'
 };
 
 // ============================================
@@ -78,10 +78,10 @@ export const IDEATION_EFFORT_COLORS: Record<string, string> = {
 // ============================================
 
 export const IDEATION_IMPACT_COLORS: Record<string, string> = {
-  low: 'bg-muted text-muted-foreground',
-  medium: 'bg-info/10 text-info',
-  high: 'bg-warning/10 text-warning',
-  critical: 'bg-destructive/10 text-destructive'
+  low: 'ideation-tone-impact-low',
+  medium: 'ideation-tone-impact-medium',
+  high: 'ideation-tone-impact-high',
+  critical: 'ideation-tone-impact-critical'
 };
 
 // ============================================
@@ -90,10 +90,10 @@ export const IDEATION_IMPACT_COLORS: Record<string, string> = {
 
 // Security severity colors
 export const SECURITY_SEVERITY_COLORS: Record<string, string> = {
-  low: 'bg-info/10 text-info',
-  medium: 'bg-warning/10 text-warning',
-  high: 'bg-orange-500/10 text-orange-500',
-  critical: 'bg-destructive/10 text-destructive'
+  low: 'ideation-tone-severity-low',
+  medium: 'ideation-tone-severity-medium',
+  high: 'ideation-tone-severity-high',
+  critical: 'ideation-tone-severity-critical'
 };
 
 // UI/UX category labels
@@ -155,10 +155,10 @@ export const CODE_QUALITY_CATEGORY_LABELS: Record<string, string> = {
 
 // Code quality severity colors
 export const CODE_QUALITY_SEVERITY_COLORS: Record<string, string> = {
-  suggestion: 'bg-info/10 text-info',
-  minor: 'bg-warning/10 text-warning',
-  major: 'bg-orange-500/10 text-orange-500',
-  critical: 'bg-destructive/10 text-destructive'
+  suggestion: 'ideation-tone-quality-suggestion',
+  minor: 'ideation-tone-quality-minor',
+  major: 'ideation-tone-quality-major',
+  critical: 'ideation-tone-quality-critical'
 };
 
 // ============================================

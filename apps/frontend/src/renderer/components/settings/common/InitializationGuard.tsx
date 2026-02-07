@@ -19,7 +19,7 @@ export function InitializationGuard({
 }: InitializationGuardProps) {
   if (!initialized) {
     return (
-      <div className="rounded-lg border border-border bg-muted/50 p-4 text-center text-sm text-muted-foreground">
+      <div className="rounded-lg p-4 text-center text-sm text-muted-foreground settings-info-card">
         Initialize Auto-Build first to configure {title.toLowerCase()}
       </div>
     );

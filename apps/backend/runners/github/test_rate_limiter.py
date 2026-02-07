@@ -111,7 +111,7 @@ class TestCostTracker:
         cost = CostTracker.calculate_cost(
             input_tokens=1_000_000,
             output_tokens=1_000_000,
-            model="claude-opus-4-5-20251101",
+            model="claude-opus-4-6-20251101",
         )
         # $15 input + $75 output = $90 for 1M each
         assert cost == 90.0
@@ -488,7 +488,7 @@ class TestIntegration:
         limiter.track_ai_cost(
             input_tokens=20_000,
             output_tokens=10_000,
-            model="claude-opus-4-5-20251101",
+            model="claude-opus-4-6-20251101",
             operation_name="Architecture review",
         )
 

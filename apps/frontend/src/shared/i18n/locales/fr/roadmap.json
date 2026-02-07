@@ -11,7 +11,14 @@
     "morePersonas": "+{{count}} personas supplémentaires",
     "secondaryPersonas": "Personas Secondaires :",
     "featuresCount": "{{count}} fonctionnalités",
-    "phasesCount": "{{count}} phases"
+    "phasesCount": "{{count}} phases",
+    "translation": {
+      "translateToPortuguese": "Traduire la roadmap en portugais",
+      "showOriginal": "Afficher le texte original",
+      "translating": "Traduction de la roadmap...",
+      "errorTitle": "Traduction indisponible",
+      "errorDescription": "Une partie de la roadmap ne peut pas être traduite maintenant."
+    }
   },
   "emptyState": {
     "title": "Aucune Roadmap Encore",

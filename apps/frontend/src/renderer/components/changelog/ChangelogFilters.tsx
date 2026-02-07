@@ -94,10 +94,8 @@ export function ChangelogFilters({
           >
             <label
               className={cn(
-                'flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-all',
-                sourceMode === 'tasks'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/50'
+                'flex items-start gap-3 rounded-lg p-3 cursor-pointer transition-all changelog-source-card',
+                sourceMode === 'tasks' && 'changelog-source-card-selected'
               )}
             >
               <RadioGroupItem value="tasks" className="mt-1" />
@@ -119,10 +117,8 @@ export function ChangelogFilters({
 
             <label
               className={cn(
-                'flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-all',
-                sourceMode === 'git-history'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/50'
+                'flex items-start gap-3 rounded-lg p-3 cursor-pointer transition-all changelog-source-card',
+                sourceMode === 'git-history' && 'changelog-source-card-selected'
               )}
             >
               <RadioGroupItem value="git-history" className="mt-1" />
@@ -141,10 +137,8 @@ export function ChangelogFilters({
 
             <label
               className={cn(
-                'flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-all',
-                sourceMode === 'branch-diff'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/50'
+                'flex items-start gap-3 rounded-lg p-3 cursor-pointer transition-all changelog-source-card',
+                sourceMode === 'branch-diff' && 'changelog-source-card-selected'
               )}
             >
               <RadioGroupItem value="branch-diff" className="mt-1" />
@@ -165,7 +159,7 @@ export function ChangelogFilters({
 
         {/* Git History Options */}
         {sourceMode === 'git-history' && (
-          <Card>
+          <Card className="changelog-options-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">Git History Options</CardTitle>
             </CardHeader>
@@ -328,7 +322,7 @@ export function ChangelogFilters({
 
         {/* Branch Diff Options */}
         {sourceMode === 'branch-diff' && (
-          <Card>
+          <Card className="changelog-options-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">Branch Comparison</CardTitle>
             </CardHeader>

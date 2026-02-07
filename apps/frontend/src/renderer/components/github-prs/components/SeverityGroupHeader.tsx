@@ -36,11 +36,12 @@ export function SeverityGroupHeader({
     <button
       type="button"
       onClick={onToggle}
-      className="w-full flex items-center justify-between p-3 hover:bg-black/5 dark:hover:bg-white/5 rounded-t-lg transition-colors"
+      className="w-full flex items-center justify-between p-3 rounded-t-lg transition-colors github-pr-severity-header"
     >
       <div className="flex items-center gap-3">
         {/* Group Checkbox */}
-        <div
+        <button
+          type="button"
           onClick={onSelectAll}
           className="cursor-pointer"
         >
@@ -51,13 +52,13 @@ export function SeverityGroupHeader({
           ) : (
             <Square className="h-4 w-4 text-muted-foreground" />
           )}
-        </div>
+        </button>
 
         <Icon className={cn("h-4 w-4", config.color)} />
         <span className={cn("font-medium text-sm", config.color)}>
           {t(config.labelKey)}
         </span>
-        <Badge variant="secondary" className="text-xs">
+        <Badge variant="secondary" className="text-xs github-pr-chip github-pr-chip-neutral">
           {count}
         </Badge>
         <span className="text-xs text-muted-foreground hidden sm:inline">

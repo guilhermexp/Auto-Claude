@@ -333,15 +333,14 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
       <div
         ref={setNodeRef}
         className={cn(
-          'flex flex-col rounded-xl border border-white/5 bg-linear-to-b from-secondary/30 to-transparent backdrop-blur-sm transition-all duration-200',
+          'flex flex-col rounded-xl kanban-column transition-all duration-200',
           getColumnBorderColor(),
-          'border-t-2',
           isOver && 'drop-zone-highlight'
         )}
         style={{ width: COLLAPSED_COLUMN_WIDTH, minWidth: COLLAPSED_COLUMN_WIDTH, maxWidth: COLLAPSED_COLUMN_WIDTH }}
       >
         {/* Expand button at top */}
-        <div className="flex justify-center p-2 border-b border-white/5">
+        <div className="flex justify-center p-2 kanban-column-header">
           <Tooltip delayDuration={200}>
             <TooltipTrigger asChild>
               <Button
@@ -386,15 +385,14 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
       <div
         ref={setNodeRef}
         className={cn(
-          'flex flex-1 flex-col rounded-xl border border-white/5 bg-linear-to-b from-secondary/30 to-transparent backdrop-blur-sm transition-all duration-200',
+          'flex flex-1 flex-col rounded-xl kanban-column transition-all duration-200',
           !columnWidth && 'min-w-80 max-w-[30rem]',
           getColumnBorderColor(),
-          'border-t-2',
           isOver && 'drop-zone-highlight'
         )}
       >
         {/* Column header - enhanced styling */}
-        <div className="flex items-center justify-between p-4 border-b border-white/5">
+        <div className="flex items-center justify-between p-4 kanban-column-header">
         <div className="flex items-center gap-2.5">
           {/* Collapse button */}
           {onToggleCollapsed && (
@@ -461,7 +459,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
                   className={cn(
                     'h-7 w-7 transition-colors',
                     isLocked
-                      ? 'text-amber-500 bg-amber-500/10 hover:bg-amber-500/20'
+                      ? 'text-warning bg-warning/10 hover:bg-warning/20'
                       : 'hover:bg-muted-foreground/10 hover:text-muted-foreground'
                   )}
                   onClick={onToggleLocked}
@@ -482,7 +480,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors"
+                  className="h-7 w-7 hover:bg-info/10 hover:text-info transition-colors"
                   onClick={onQueueAll}
                   title={t('queue.queueAll')}
                 >
@@ -506,7 +504,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
             <Button
               variant="ghost"
               size="icon"
-              className="h-7 w-7 hover:bg-cyan-500/10 hover:text-cyan-400 transition-colors"
+              className="h-7 w-7 hover:bg-info/10 hover:text-info transition-colors"
               onClick={onQueueSettings}
               title={t('kanban.queueSettings')}
             >
@@ -627,7 +625,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
           title={isLocked ? t('kanban.columnLocked') : undefined}
         >
           {/* Wider invisible hit area for easier grabbing */}
-          <div className="absolute inset-y-0 -left-1 -right-1" />
+          <div className="absolute inset-y-0 -left-1 -right-1 bg-transparent !border-none" />
         </div>
       )}
     </div>
@@ -1530,7 +1528,7 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
 
       {selectedTaskIds.size > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-border bg-card shadow-lg backdrop-blur-sm">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl kanban-column shadow-lg">
             <span className="text-sm font-medium text-foreground">
               {t('kanban.selectedCountOther', { count: selectedTaskIds.size })}
             </span>

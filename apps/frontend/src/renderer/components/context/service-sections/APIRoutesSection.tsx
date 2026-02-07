@@ -25,9 +25,9 @@ export function APIRoutesSection({ api }: APIRoutesSectionProps) {
     <Collapsible
       open={expanded}
       onOpenChange={setExpanded}
-      className="border-t border-border pt-3"
+      className="context-divider pt-3"
     >
-      <CollapsibleTrigger className="flex w-full items-center justify-between text-xs font-medium hover:text-foreground">
+      <CollapsibleTrigger className="flex w-full items-center justify-between text-xs font-medium context-section-trigger">
         <div className="flex items-center gap-2">
           <Route className="h-3 w-3" />
           {t('serviceSections.apiRoutes', { count: api.total_routes })}
@@ -39,13 +39,13 @@ export function APIRoutesSection({ api }: APIRoutesSectionProps) {
           <div key={idx} className="flex items-start gap-2 text-xs">
             <div className="flex gap-1 shrink-0">
               {route.methods.map(method => (
-                <Badge key={method} variant="secondary" className="text-xs">
+                <Badge key={method} variant="secondary" className="text-xs context-chip context-chip-info">
                   {method}
                 </Badge>
               ))}
             </div>
             <code className="flex-1 font-mono text-muted-foreground truncate">{route.path}</code>
-            {route.requires_auth && <Lock className="h-3 w-3 text-orange-500 shrink-0" />}
+            {route.requires_auth && <Lock className="h-3 w-3 context-tone-warning shrink-0" />}
           </div>
         ))}
       </CollapsibleContent>

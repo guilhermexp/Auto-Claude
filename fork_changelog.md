@@ -1,0 +1,116 @@
+# Private Change Log
+
+Tracks local/private fork changes against upstream.
+
+## 2026-02-07T02:43:29Z
+
+- Branch: develop
+- HEAD: 6e28fc32
+- Upstream base: upstream/develop
+- Previous synced upstream commit (from changelog): not-found
+- Target upstream commit for this run: d639f6ef
+- Private commits: 80
+- Commit list:
+  - 6e28fc32 Add i18n support for competitor analysis dialogs and feature card
+  - 6ff33cc9 update port in18
+  - fc27c633 persistencia de estado entre troca projetos
+  - 9fbe4401 init
+  - 5583ef9f .
+  - 25bbb32c Remove Card wrapper from empty states and darken card color
+  - 9a0547e9 feat(ui): redesign Settings page with 1Code-inspired style
+  - def6bef0 fix(ui): darken secondary color to match reference (28%)
+  - e0299890 fix(ui): balance secondary color for switches and keyboard shortcuts
+  - c31d9f88 fix(ui): drastically increase switch visibility in dark mode
+  - f0144452 Merge remote-tracking branch 'upstream/develop' into develop
+  - e6e738cb feat(ui): implement dark mode as default with 1Code-inspired design
+  - 0660f124 style: change primary color to muted gray-blue in dark mode
+  - cf5cfe10 chore: remove debug logs for dark mode migration
+  - c0aa1039 fix: add missing text color utilities and force dark mode inheritance
+  - 9f635d8a fix: use direct CSS classes instead of @utility for dark mode
+  - 9c2870d7 fix: add Tailwind v4 custom utilities for dark mode colors
+  - fa439ff9 debug: add logs to track theme application in App.tsx
+  - d2f67a67 debug: add console logs to track dark mode migration
+  - dbf11e6c fix: dark mode migration now handles undefined theme
+  - 739dc14c feat: migrate existing users from system theme to dark mode
+  - fd2423ea fix: export design system components and set dark mode as default
+  - e2507cce docs(phase-08): complete dark mode system polish and documentation
+  - 692cc44e refactor(dark-mode): verify and document component dark mode compatibility
+  - bba63a4a docs(dark-mode): add comprehensive dark mode system documentation
+  - 9967c16b feat(dark-mode): add smooth theme transitions with animation tokens
+  - 0b48b44b docs(phase-08): create plan for dark mode system polish and documentation
+  - 214a029b docs(07-01): complete Motion & Animation System plan
+  - e942034a docs(motion): add comprehensive animation system documentation
+  - 6239c695 feat(motion): add optional Motion variants to Dialog and Tabs
+  - e27b1031 feat(motion): add animation duration and easing tokens
+  - 100c1b2c docs(phase-07): create plan for motion and animation system
+  - 1b6176e1 docs(phase-06): complete phase execution
+  - f6e9b388 docs(06-01): update STATE.md and create SUMMARY.md
+  - 37e5d455 docs(navigation): add comprehensive navigation and utility components documentation
+  - 9857b7e9 refactor(navigation): document spacing token integration
+  - 77b68740 feat(navigation): add size and variant options to Progress component
+  - 8ed96140 feat(navigation): add size and variant options to Tabs component
+  - c142bb37 docs(phase-06): create plan for navigation and utility components modernization
+  - 8239d08b docs(phase-05): complete phase execution
+  - bdf8c963 docs(05-01): add plan summary and update project state
+  - 9840d769 docs(overlays): add comprehensive overlay components documentation
+  - a7eed348 refactor(overlays): document spacing token integration
+  - b5f5749f feat(overlays): add intent variants to AlertDialog component
+  - 14cf585c feat(overlays): add width variants to Popover component
+  - 82f1cd80 feat(overlays): add size variants to Select component
+  - 7ca40931 feat(overlays): add size variants to Dialog component
+  - ad74d2d3 docs(phase-05): create plan for overlay components modernization
+  - edd6f63f docs(04-01): complete form components modernization plan
+  - 211da0dc docs(04-01): add comprehensive form components documentation
+  - ffdf6d08 feat(04-01): create FormField wrapper component
+  - b20dc243 feat(04-01): add orientation and spacing variants to RadioGroup
+  - 980d31b8 feat(04-01): add size and resize variants to Textarea component
+  - 1edf30fa feat(04-01): migrate Label to Radix UI primitive
+  - 40fb70df feat(04-01): add size and validation variants to Input component
+  - dbd56ade docs(phase-04): create plan for form components modernization
+  - 025cb6e1 docs(phase-03): complete phase execution
+  - fa74199b docs: update STATE.md with Phase 03 completion
+  - 2d6ccc79 docs(spacing): add comprehensive spacing and layout system documentation
+  - cdb4e566 feat(spacing): add Container, Stack, and Grid layout components
+  - 6a4f5ecc feat(spacing): add spacing scale and container width tokens
+  - aeeebb85 docs(03): create phase plan
+  - 08c2f89f docs(phase-02): complete phase execution
+  - 926b59c4 docs(state): update project state after completing plan 02-01
+  - 85e03461 docs(typography): add comprehensive typography system documentation
+  - 5ac16522 feat(typography): add Text and Heading components
+  - 085a3b8d feat(typography): add font size, weight, and line height tokens
+  - 56f88b58 docs(02): create phase plan
+  - 314490f5 docs(phase-01): complete phase execution
+  - e1ae1d4d docs(state): update project state after plan 01-01 completion
+  - 718008c6 docs(design-tokens): create plan 01-01 summary
+  - 626608f6 docs(design-tokens): create comprehensive token documentation
+  - 16498ec5 refactor(design-tokens): simplify globals.css to HSL system
+  - ece32eae docs(01): create phase plan
+  - 0cacfcd8 docs: create roadmap for UI/UX modernization
+  - 525b2450 docs: initialize Auto-Claude UI/UX Modernization
+  - 82b53797 docs: map existing codebase
+  - 7763fbc6 Merge branch 'AndyMik90:develop' into develop
+  - 5a625690 add port
+  - 9dbbc17d add idioma port
+
+- Sync result: merged
+- Last synced upstream commit: d639f6ef
+
+## 2026-02-07T04:52:33Z
+
+- Branch: develop
+- HEAD: 07f861ed
+- Upstream base: upstream/develop
+- Previous synced upstream commit (from changelog): d639f6ef
+- Target upstream commit for this run: d639f6ef
+- Private commits: 81
+- Change scope: local fixes and documentation update (no upstream merge in this run)
+- Local changes summary:
+  - Fix re-auth state cleanup on successful login in `apps/frontend/src/main/terminal/claude-integration-handler.ts`.
+  - Keep startup re-auth cache synchronized in `apps/frontend/src/main/claude-profile/usage-monitor.ts`.
+  - Refresh/suppress stale `Needs re-auth` badge during active auth flow in `apps/frontend/src/renderer/components/settings/AccountSettings.tsx`.
+  - Add troubleshooting guide `guides/accounts-auth-troubleshooting.md` and index link in `guides/README.md`.
+  - Document re-auth lifecycle expectations in `apps/frontend/src/main/claude-profile/README.md`.
+- Validation:
+  - `npm test` -> 114 files passed, 2865 tests passed, 6 skipped.
+- Sync result: local-update-only
+- Last synced upstream commit: d639f6ef

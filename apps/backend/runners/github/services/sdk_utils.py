@@ -31,7 +31,7 @@ def _short_model_name(model: str | None) -> str:
 
     Examples:
         claude-sonnet-4-5-20250929 -> sonnet-4.5
-        claude-opus-4-5-20251101 -> opus-4.5
+        claude-opus-4-6-20251101 -> opus-4.6
         claude-3-5-sonnet-20241022 -> sonnet-3.5
     """
     if not model:
@@ -40,8 +40,8 @@ def _short_model_name(model: str | None) -> str:
     model_lower = model.lower()
 
     # Handle new model naming (claude-{model}-{version}-{date})
-    if "opus-4-5" in model_lower or "opus-4.5" in model_lower:
-        return "opus-4.5"
+    if "opus-4-6" in model_lower or "opus-4.6" in model_lower:
+        return "opus-4.6"
     if "sonnet-4-5" in model_lower or "sonnet-4.5" in model_lower:
         return "sonnet-4.5"
     if "haiku-4" in model_lower:

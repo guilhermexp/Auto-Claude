@@ -21,16 +21,16 @@ export function PhaseCard({
   const phaseStatusLabel = t(`phaseStatuses.${phase.status}`, { defaultValue: phase.status });
 
   return (
-    <Card className="p-4">
+    <Card className="p-4 roadmap-phase-card">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center ${
               phase.status === 'completed'
-                ? 'bg-success/10 text-success'
+                ? 'roadmap-kanban-column-icon-done'
                 : phase.status === 'in_progress'
-                ? 'bg-primary/10 text-primary'
-                : 'bg-muted text-muted-foreground'
+                ? 'roadmap-kanban-column-icon-progress'
+                : 'roadmap-kanban-column-icon-review'
             }`}
           >
             {phase.status === 'completed' ? (
@@ -92,7 +92,7 @@ export function PhaseCard({
           {features.slice(0, 5).map((feature) => (
             <div
               key={feature.id}
-              className="flex items-center justify-between p-2 rounded-md bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
+              className="flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors roadmap-kanban-card"
               onClick={() => onFeatureSelect(feature)}
             >
               <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -104,14 +104,14 @@ export function PhaseCard({
                 </Badge>
                 <span className="text-sm truncate">{feature.title}</span>
                 {feature.competitorInsightIds && feature.competitorInsightIds.length > 0 && (
-                  <TrendingUp className="h-3 w-3 text-primary flex-shrink-0" />
+                  <TrendingUp className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                 )}
               </div>
               {feature.status === 'done' ? (
                 <CheckCircle2 className="h-4 w-4 text-success flex-shrink-0" />
               ) : feature.linkedSpecId ? (
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   className="h-6 px-2"
                   onClick={(e) => {
@@ -124,7 +124,7 @@ export function PhaseCard({
                 </Button>
               ) : (
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   className="h-6 px-2 flex-shrink-0"
                   onClick={(e) => {

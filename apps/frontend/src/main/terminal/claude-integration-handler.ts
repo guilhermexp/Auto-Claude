@@ -483,6 +483,21 @@ export function handleOAuthToken(
       return;
     }
 
+    const clearReauthStateAfterLogin = () => {
+      try {
+        const usageMonitor = getUsageMonitor();
+        usageMonitor.clearAuthFailedProfile(profileId);
+      } catch (error) {
+        console.warn('[ClaudeIntegration] Failed to clear auth failure state after login success:', error);
+      }
+
+      // If this profile came from migration, a successful login means re-auth is complete.
+      if (profileManager.isProfileMigrated(profileId)) {
+        profileManager.clearMigratedProfile(profileId);
+        console.warn('[ClaudeIntegration] Cleared migration flag after login success:', profileId);
+      }
+    };
+
     // Clear Keychain cache to get fresh credentials
     clearKeychainCache(profile.configDir);
 
@@ -529,6 +544,7 @@ export function handleOAuthToken(
       updateProfileSubscriptionMetadata(profile, keychainCreds);
       profile.isAuthenticated = true;
       profileManager.saveProfile(profile);
+      clearReauthStateAfterLogin();
 
       console.warn('[ClaudeIntegration] Profile credentials verified via Keychain (not caching token):', profileId);
 
@@ -555,6 +571,9 @@ export function handleOAuthToken(
 
       if (hasCredentials) {
         console.warn('[ClaudeIntegration] Profile credentials verified (no Keychain token):', profileId);
+        profile.isAuthenticated = true;
+        profileManager.saveProfile(profile);
+        clearReauthStateAfterLogin();
 
         // Set flag to watch for Claude's ready state (onboarding complete)
         terminal.awaitingOnboardingComplete = true;

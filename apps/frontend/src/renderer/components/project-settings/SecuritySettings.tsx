@@ -237,7 +237,7 @@ export function SecuritySettings({
     // Azure OpenAI
     if (embeddingProvider === 'azure_openai') {
       return (
-        <div className="space-y-3 p-3 rounded-md bg-muted/50">
+        <div className="space-y-3 p-3 rounded-md settings-info-card">
           <Label className="text-sm font-medium text-foreground">Azure OpenAI Configuration</Label>
           <div className="space-y-2">
             <Label className="text-xs text-muted-foreground">API Key</Label>
@@ -374,7 +374,7 @@ export function SecuritySettings({
           </div>
 
           {!envConfig.graphitiEnabled && (
-            <div className="rounded-lg border border-border bg-muted/30 p-3">
+            <div className="rounded-lg p-3 settings-info-card">
               <p className="text-xs text-muted-foreground">
                 Using file-based memory. Session insights are stored locally in JSON files.
                 Enable Memory for persistent cross-session context with semantic search.

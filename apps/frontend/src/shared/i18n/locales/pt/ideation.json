@@ -5,7 +5,14 @@
     "description": "Ideias de funcionalidades geradas por IA para seu projeto",
     "selectedCount": "{{count}} selecionadas",
     "deleteButton": "Excluir",
-    "addMoreButton": "Adicionar Mais"
+    "addMoreButton": "Adicionar Mais",
+    "translation": {
+      "translateToPortuguese": "Traduzir ideias para português",
+      "showOriginal": "Mostrar texto original",
+      "translating": "Traduzindo ideias...",
+      "errorTitle": "Tradução indisponível",
+      "errorDescription": "Não foi possível traduzir alguns itens agora."
+    }
   },
   "emptyState": {
     "title": "Nenhuma Ideia Ainda",

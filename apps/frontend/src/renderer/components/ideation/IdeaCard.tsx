@@ -5,6 +5,7 @@ import { Badge } from '../ui/badge';
 import { Card } from '../ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
 import { Checkbox } from '../ui/checkbox';
+import { cn } from '../../lib/utils';
 import {
   IDEATION_TYPE_LABELS,
   IDEATION_TYPE_COLORS,
@@ -61,9 +62,11 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
 
   return (
     <Card
-      className={`p-4 hover:bg-muted/50 cursor-pointer transition-colors ${
-        isInactive ? 'opacity-50' : ''
-      } ${isSelected ? 'ring-2 ring-primary bg-primary/5' : ''}`}
+      className={cn(
+        'p-4 cursor-pointer transition-colors ideation-card',
+        isInactive && 'opacity-50',
+        isSelected ? 'ideation-card-selected' : 'hover:bg-muted/40'
+      )}
       onClick={onClick}
     >
       <div className="flex items-start gap-3">
@@ -86,50 +89,50 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
         <div className="flex-1 flex items-start justify-between">
           <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <Badge variant="outline" className={IDEATION_TYPE_COLORS[idea.type]}>
+            <Badge variant="outline" className={`ideation-chip ${IDEATION_TYPE_COLORS[idea.type]}`}>
               <TypeIcon type={idea.type} />
               <span className="ml-1">{typeLabel}</span>
             </Badge>
             {idea.status !== 'draft' && (
-              <Badge variant="outline" className={IDEATION_STATUS_COLORS[idea.status]}>
+              <Badge variant="outline" className={`ideation-chip ${IDEATION_STATUS_COLORS[idea.status]}`}>
                 {statusLabel}
               </Badge>
             )}
             {isCodeImprovementIdea(idea) && (
-              <Badge variant="outline" className={IDEATION_EFFORT_COLORS[(idea as CodeImprovementIdea).estimatedEffort]}>
+              <Badge variant="outline" className={`ideation-chip ${IDEATION_EFFORT_COLORS[(idea as CodeImprovementIdea).estimatedEffort]}`}>
                 {t(`ideation:effortLabels.${(idea as CodeImprovementIdea).estimatedEffort}`, {
                   defaultValue: (idea as CodeImprovementIdea).estimatedEffort
                 })}
               </Badge>
             )}
             {isUIUXIdea(idea) && (
-              <Badge variant="outline">
+              <Badge variant="outline" className="ideation-chip ideation-tone-neutral">
                 {t(`ideation:uiuxCategories.${(idea as UIUXImprovementIdea).category}`, {
                   defaultValue: UIUX_CATEGORY_LABELS[(idea as UIUXImprovementIdea).category]
                 })}
               </Badge>
             )}
             {isDocumentationGapIdea(idea) && (
-              <Badge variant="outline">
+              <Badge variant="outline" className="ideation-chip ideation-tone-neutral">
                 {t(`ideation:documentationCategories.${(idea as DocumentationGapIdea).category}`, {
                   defaultValue: DOCUMENTATION_CATEGORY_LABELS[(idea as DocumentationGapIdea).category]
                 })}
               </Badge>
             )}
             {isSecurityHardeningIdea(idea) && (
-              <Badge variant="outline" className={SECURITY_SEVERITY_COLORS[(idea as SecurityHardeningIdea).severity]}>
+              <Badge variant="outline" className={`ideation-chip ${SECURITY_SEVERITY_COLORS[(idea as SecurityHardeningIdea).severity]}`}>
                 {t(`ideation:severityLabels.${(idea as SecurityHardeningIdea).severity}`, {
                   defaultValue: (idea as SecurityHardeningIdea).severity
                 })}
               </Badge>
             )}
             {isPerformanceOptimizationIdea(idea) && (
-              <Badge variant="outline" className={IDEATION_IMPACT_COLORS[(idea as PerformanceOptimizationIdea).impact]}>
+              <Badge variant="outline" className={`ideation-chip ${IDEATION_IMPACT_COLORS[(idea as PerformanceOptimizationIdea).impact]}`}>
                 {t('ideation:impactDisplay', { level: impactLabel })}
               </Badge>
             )}
             {isCodeQualityIdea(idea) && (
-              <Badge variant="outline" className={CODE_QUALITY_SEVERITY_COLORS[(idea as CodeQualityIdea).severity]}>
+              <Badge variant="outline" className={`ideation-chip ${CODE_QUALITY_SEVERITY_COLORS[(idea as CodeQualityIdea).severity]}`}>
                 {t(`ideation:codeQualitySeverityLabels.${(idea as CodeQualityIdea).severity}`, {
                   defaultValue: (idea as CodeQualityIdea).severity
                 })}
@@ -147,9 +150,9 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     size="sm"
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 ideation-icon-button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onConvert(idea);
@@ -164,9 +167,9 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     size="sm"
-                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                    className="h-8 w-8 p-0 ideation-icon-button-danger"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDismiss(idea);
@@ -186,9 +189,9 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     size="sm"
-                    className="h-8 w-8 p-0 text-primary"
+                    className="h-8 w-8 p-0 ideation-icon-button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onGoToTask(idea.taskId!);
@@ -208,9 +211,9 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     size="sm"
-                    className="h-8 w-8 p-0 text-primary"
+                    className="h-8 w-8 p-0 ideation-icon-button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onGoToTask(idea.taskId!);

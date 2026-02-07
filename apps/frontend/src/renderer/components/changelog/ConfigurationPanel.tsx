@@ -104,7 +104,7 @@ export function ConfigurationPanel({
         </div>
 
         {/* Version & Date */}
-        <Card>
+        <Card className="changelog-options-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Release Info</CardTitle>
           </CardHeader>
@@ -141,7 +141,7 @@ export function ConfigurationPanel({
         </Card>
 
         {/* Format & Audience */}
-        <Card>
+        <Card className="changelog-options-card">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Output Style</CardTitle>
           </CardHeader>
@@ -233,7 +233,7 @@ export function ConfigurationPanel({
             </Button>
           </CollapsibleTrigger>
           <CollapsibleContent className="pt-2">
-            <Card>
+            <Card className="changelog-options-card">
               <CardContent className="pt-4">
                 <div className="space-y-2">
                   <Label htmlFor="instructions">Custom Instructions</Label>
