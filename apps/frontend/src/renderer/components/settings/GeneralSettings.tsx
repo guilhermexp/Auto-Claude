@@ -16,7 +16,6 @@ import {
 import type {
   AppSettings,
   FeatureModelConfig,
-  FeatureThinkingConfig,
   ModelTypeShort,
   ThinkingLevel,
   ToolDetectionResult
@@ -99,6 +98,7 @@ export function GeneralSettings({ settings, onSettingsChange, section, onSave, i
     python: ToolDetectionResult;
     git: ToolDetectionResult;
     gh: ToolDetectionResult;
+    glab: ToolDetectionResult;
     claude: ToolDetectionResult;
   } | null>(null);
   const [isLoadingTools, setIsLoadingTools] = useState(false);
@@ -109,7 +109,7 @@ export function GeneralSettings({ settings, onSettingsChange, section, onSave, i
       setIsLoadingTools(true);
       window.electronAPI
         .getCliToolsInfo()
-        .then((result: { success: boolean; data?: { python: ToolDetectionResult; git: ToolDetectionResult; gh: ToolDetectionResult; claude: ToolDetectionResult } }) => {
+        .then((result: { success: boolean; data?: { python: ToolDetectionResult; git: ToolDetectionResult; gh: ToolDetectionResult; glab: ToolDetectionResult; claude: ToolDetectionResult } }) => {
           if (result.success && result.data) {
             setToolsInfo(result.data);
           }
@@ -309,6 +309,24 @@ export function GeneralSettings({ settings, onSettingsChange, section, onSave, i
           {!settings.githubCLIPath && (
             <ToolDetectionDisplay
               info={toolsInfo?.gh || null}
+              isLoading={isLoadingTools}
+              t={t}
+            />
+          )}
+        </div>
+        <div className="space-y-3">
+          <Label htmlFor="gitlabCLIPath" className="text-sm font-medium text-foreground">{t('general.gitlabCLIPath')}</Label>
+          <p className="text-sm text-muted-foreground">{t('general.gitlabCLIPathDescription')}</p>
+          <Input
+            id="gitlabCLIPath"
+            placeholder={t('general.gitlabCLIPathPlaceholder')}
+            className="w-full max-w-lg"
+            value={settings.gitlabCLIPath || ''}
+            onChange={(e) => onSettingsChange({ ...settings, gitlabCLIPath: e.target.value })}
+          />
+          {!settings.gitlabCLIPath && (
+            <ToolDetectionDisplay
+              info={toolsInfo?.glab || null}
               isLoading={isLoadingTools}
               t={t}
             />

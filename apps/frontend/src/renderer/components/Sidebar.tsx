@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Plus,
@@ -19,7 +19,9 @@ import {
   Sparkles,
   GitBranch,
   HelpCircle,
-  Wrench
+  Wrench,
+  PanelLeft,
+  PanelLeftClose
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
@@ -43,13 +45,18 @@ import {
   removeProject,
   initializeProject
 } from '../stores/project-store';
-import { useSettingsStore } from '../stores/settings-store';
+import { useSettingsStore, saveSettings } from '../stores/settings-store';
+import {
+  useProjectEnvStore,
+  loadProjectEnvConfig,
+  clearProjectEnvConfig
+} from '../stores/project-env-store';
 import { AddProjectModal } from './AddProjectModal';
 import { GitSetupModal } from './GitSetupModal';
 import { RateLimitIndicator } from './RateLimitIndicator';
 import { ClaudeCodeStatusBadge } from './ClaudeCodeStatusBadge';
 import { UpdateBanner } from './UpdateBanner';
-import type { Project, AutoBuildVersionInfo, GitStatus, ProjectEnvConfig } from '../../shared/types';
+import type { Project, GitStatus } from '../../shared/types';
 
 export type SidebarView = 'kanban' | 'terminals' | 'roadmap' | 'context' | 'ideation' | 'github-issues' | 'gitlab-issues' | 'github-prs' | 'gitlab-merge-requests' | 'changelog' | 'insights' | 'worktrees' | 'agent-tools';
 
@@ -109,45 +116,65 @@ export function Sidebar({
   const [gitStatus, setGitStatus] = useState<GitStatus | null>(null);
   const [pendingProject, setPendingProject] = useState<Project | null>(null);
   const [isInitializing, setIsInitializing] = useState(false);
-  const [envConfig, setEnvConfig] = useState<ProjectEnvConfig | null>(null);
 
   const selectedProject = projects.find((p) => p.id === selectedProjectId);
 
-  // Load env config when project changes to check GitHub/GitLab enabled state
-  useEffect(() => {
-    const loadEnvConfig = async () => {
-      if (selectedProject?.autoBuildPath) {
-        try {
-          const result = await window.electronAPI.getProjectEnv(selectedProject.id);
-          if (result.success && result.data) {
-            setEnvConfig(result.data);
-          } else {
-            setEnvConfig(null);
-          }
-        } catch {
-          setEnvConfig(null);
-        }
-      } else {
-        setEnvConfig(null);
-      }
-    };
-    loadEnvConfig();
-  }, [selectedProject?.id, selectedProject?.autoBuildPath]);
+  // Sidebar collapsed state from settings
+  const isCollapsed = settings.sidebarCollapsed ?? false;
 
-  // Compute visible nav items based on GitHub/GitLab enabled state
+  const toggleSidebar = () => {
+    saveSettings({ sidebarCollapsed: !isCollapsed });
+  };
+
+  // Subscribe to project-env-store for reactive GitHub/GitLab tab visibility
+  const githubEnabled = useProjectEnvStore((state) => state.envConfig?.githubEnabled ?? false);
+  const gitlabEnabled = useProjectEnvStore((state) => state.envConfig?.gitlabEnabled ?? false);
+
+  // Track the last loaded project ID to avoid redundant loads
+  const lastLoadedProjectIdRef = useRef<string | null>(null);
+
+  // Compute visible nav items based on GitHub/GitLab enabled state from store
   const visibleNavItems = useMemo(() => {
     const items = [...baseNavItems];
 
-    if (envConfig?.githubEnabled) {
+    if (githubEnabled) {
       items.push(...githubNavItems);
     }
 
-    if (envConfig?.gitlabEnabled) {
+    if (gitlabEnabled) {
       items.push(...gitlabNavItems);
     }
 
     return items;
-  }, [envConfig?.githubEnabled, envConfig?.gitlabEnabled]);
+  }, [githubEnabled, gitlabEnabled]);
+
+  // Load envConfig when project changes to ensure store is populated
+  useEffect(() => {
+    // Track whether this effect is still current (for race condition handling)
+    let isCurrent = true;
+
+    const initializeEnvConfig = async () => {
+      if (selectedProject?.id && selectedProject?.autoBuildPath) {
+        // Only reload if the project ID differs from what we last loaded
+        if (selectedProject.id !== lastLoadedProjectIdRef.current) {
+          lastLoadedProjectIdRef.current = selectedProject.id;
+          await loadProjectEnvConfig(selectedProject.id);
+          // Check if this effect was cancelled while loading
+          if (!isCurrent) return;
+        }
+      } else {
+        // Clear the store if no project is selected or has no autoBuildPath
+        lastLoadedProjectIdRef.current = null;
+        clearProjectEnvConfig();
+      }
+    };
+    initializeEnvConfig();
+
+    // Cleanup function to mark this effect as stale
+    return () => {
+      isCurrent = false;
+    };
+  }, [selectedProject?.id, selectedProject?.autoBuildPath]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -265,7 +292,7 @@ export function Sidebar({
     const isActive = activeView === item.id;
     const Icon = item.icon;
 
-    return (
+    const button = (
       <button
         key={item.id}
         onClick={() => handleNavClick(item.id)}
@@ -299,6 +326,25 @@ export function Sidebar({
         </div>
       </button>
     );
+
+    // Wrap in tooltip when collapsed
+    if (isCollapsed) {
+      return (
+        <Tooltip key={item.id}>
+          <TooltipTrigger asChild>{button}</TooltipTrigger>
+          <TooltipContent side="right">
+            <span>{t(item.labelKey)}</span>
+            {item.shortcut && (
+              <kbd className="ml-2 rounded border border-border bg-secondary px-1 font-mono text-[10px]">
+                {item.shortcut}
+              </kbd>
+            )}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return button;
   };
 
   return (
@@ -350,7 +396,7 @@ export function Sidebar({
         {/* Bottom section with Settings, Help, and New Task */}
         <div className="px-2 pb-3 pt-2 space-y-2">
           {/* Claude Code Status Badge */}
-          <ClaudeCodeStatusBadge />
+          {!isCollapsed && <ClaudeCodeStatusBadge />}
 
           {/* Settings and Help row */}
           <div className="flex items-center gap-1">
@@ -367,7 +413,7 @@ export function Sidebar({
                   <span className="text-sm leading-tight">{t('actions.settings')}</span>
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="top">{t('tooltips.settings')}</TooltipContent>
+              <TooltipContent side={isCollapsed ? "right" : "top"}>{t('tooltips.settings')}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -382,7 +428,7 @@ export function Sidebar({
                   <HelpCircle className="h-4 w-4 opacity-60" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="top">{t('tooltips.help')}</TooltipContent>
+              <TooltipContent side={isCollapsed ? "right" : "top"}>{t('tooltips.help')}</TooltipContent>
             </Tooltip>
           </div>
         </div>

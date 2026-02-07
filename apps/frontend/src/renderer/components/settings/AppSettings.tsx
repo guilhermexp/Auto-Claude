@@ -4,7 +4,6 @@ import {
   Palette,
   Bot,
   FolderOpen,
-  Key,
   Package,
   Bell,
   Settings2,
@@ -16,7 +15,8 @@ import {
   Globe,
   Code,
   Bug,
-  Server
+  Terminal,
+  Users
 } from 'lucide-react';
 
 // GitLab icon component (lucide-react doesn't have one)
@@ -40,11 +40,11 @@ import { ThemeSettings } from './ThemeSettings';
 import { DisplaySettings } from './DisplaySettings';
 import { LanguageSettings } from './LanguageSettings';
 import { GeneralSettings } from './GeneralSettings';
-import { IntegrationSettings } from './IntegrationSettings';
 import { AdvancedSettings } from './AdvancedSettings';
 import { DevToolsSettings } from './DevToolsSettings';
 import { DebugSettings } from './DebugSettings';
-import { ProfileList } from './ProfileList';
+import { TerminalFontSettings } from './terminal-font-settings/TerminalFontSettings';
+import { AccountSettings } from './AccountSettings';
 import { ProjectSelector } from './ProjectSelector';
 import { ProjectSettingsContent, ProjectSettingsSection } from './ProjectSettingsContent';
 import { useProjectStore } from '../../stores/project-store';
@@ -59,7 +59,7 @@ interface AppSettingsDialogProps {
 }
 
 // App-level settings sections
-export type AppSection = 'appearance' | 'display' | 'language' | 'devtools' | 'agent' | 'paths' | 'integrations' | 'api-profiles' | 'updates' | 'notifications' | 'debug';
+export type AppSection = 'appearance' | 'display' | 'language' | 'devtools' | 'terminal-fonts' | 'agent' | 'paths' | 'integrations' | 'accounts' | 'api-profiles' | 'updates' | 'notifications' | 'debug';
 
 interface NavItemConfig<T extends string> {
   id: T;
@@ -71,10 +71,10 @@ const appNavItemsConfig: NavItemConfig<AppSection>[] = [
   { id: 'display', icon: Monitor },
   { id: 'language', icon: Globe },
   { id: 'devtools', icon: Code },
+  { id: 'terminal-fonts', icon: Terminal },
   { id: 'agent', icon: Bot },
   { id: 'paths', icon: FolderOpen },
-  { id: 'integrations', icon: Key },
-  { id: 'api-profiles', icon: Server },
+  { id: 'accounts', icon: Users },
   { id: 'updates', icon: Package },
   { id: 'notifications', icon: Bell },
   { id: 'debug', icon: Bug }

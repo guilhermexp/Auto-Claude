@@ -1,11 +1,59 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Users, Sparkles, CheckCircle2, AlertCircle, Square } from 'lucide-react';
+import { Search, Users, Sparkles, CheckCircle2, AlertCircle, Square, Clock } from 'lucide-react';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { cn } from '../lib/utils';
 import type { RoadmapGenerationStatus } from '../../shared/types/roadmap';
+
+/**
+ * Formats elapsed time in seconds into a human-readable string.
+ * Examples: "0:05", "1:23", "12:05", "1:00:05"
+ *
+ * @param seconds - The elapsed time in seconds
+ * @returns Formatted time string (MM:SS or H:MM:SS for >= 1 hour)
+ */
+function formatElapsedTime(seconds: number): string {
+  if (seconds < 0) return '0:00';
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  if (hours > 0) {
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  return `${minutes}:${secs.toString().padStart(2, '0')}`;
+}
+
+/**
+ * Formats a timestamp into a human-readable relative time string.
+ * Examples: "just now", "5s ago", "2m ago", "1h ago"
+ *
+ * @param timestamp - The Date object or timestamp to format
+ * @returns Formatted relative time string
+ */
+function formatTimeAgo(timestamp: Date | string | undefined): string {
+  if (!timestamp) return '';
+
+  const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSecs = Math.floor(diffMs / 1000);
+
+  if (diffSecs < 5) return 'just now';
+  if (diffSecs < 60) return `${diffSecs}s ago`;
+
+  const diffMins = Math.floor(diffSecs / 60);
+  if (diffMins < 60) return `${diffMins}m ago`;
+
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays}d ago`;
+}
 
 /**
  * Hook to detect user's reduced motion preference.
@@ -49,8 +97,8 @@ type GenerationPhase = Exclude<RoadmapGenerationStatus['phase'], 'idle'>;
 const getPhaseConfig = (t: (key: string) => string): Record<
   GenerationPhase,
   {
-    label: string;
-    description: string;
+    labelKey: string;
+    descriptionKey: string;
     icon: typeof Search;
     color: string;
     bgColor: string;
@@ -99,6 +147,59 @@ const getStepPhases = (t: (key: string) => string): { key: GenerationPhase; labe
   { key: 'discovering', label: t('roadmap:generation.steps.discover') },
   { key: 'generating', label: t('roadmap:generation.steps.generate') },
 ];
+
+/**
+ * Internal component for heartbeat animation indicator.
+ * Shows a subtle pulsing animation to indicate the process is alive.
+ * Respects user's reduced motion preference.
+ */
+function HeartbeatIndicator({
+  isActive,
+  reducedMotion,
+  color,
+  processingLabel,
+  tooltipText,
+}: {
+  isActive: boolean;
+  reducedMotion: boolean;
+  color: string;
+  processingLabel: string;
+  tooltipText: string;
+}) {
+  if (!isActive) return null;
+
+  // Heartbeat animation: subtle scale pulse to show process is alive
+  const heartbeatAnimation = reducedMotion
+    ? { scale: 1, opacity: 1 }
+    : {
+        scale: [1, 1.05, 1],
+        opacity: [0.7, 1, 0.7],
+      };
+
+  const heartbeatTransition = reducedMotion
+    ? { duration: 0 }
+    : {
+        duration: 2,
+        repeat: Infinity,
+        ease: 'easeInOut' as const,
+      };
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <motion.div
+          className="flex items-center gap-1.5 cursor-help"
+          animate={heartbeatAnimation}
+          transition={heartbeatTransition}
+        >
+          <div className={cn('h-2 w-2 rounded-full', color)} />
+          <span className="text-xs text-muted-foreground">{processingLabel}</span>
+        </motion.div>
+      </TooltipTrigger>
+      <TooltipContent>{tooltipText}</TooltipContent>
+    </Tooltip>
+  );
+}
 
 /**
  * Internal component for showing phase steps indicator
@@ -169,7 +270,7 @@ function PhaseStepsIndicator({
                   />
                 </svg>
               )}
-              {phase.label}
+              {t(phase.labelKey)}
             </motion.div>
             {index < steps.length - 1 && (
               <div
@@ -202,6 +303,71 @@ export function RoadmapGenerationProgress({
   const { phase, progress, message, error } = generationStatus;
   const reducedMotion = useReducedMotion();
   const [isStopping, setIsStopping] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [lastActivityDisplay, setLastActivityDisplay] = useState('');
+
+  /**
+   * Calculate elapsed time from startedAt timestamp
+   */
+  const calculateElapsedTime = useCallback(() => {
+    if (!startedAt) return 0;
+    const startDate = startedAt instanceof Date ? startedAt : new Date(startedAt);
+    const now = new Date();
+    return Math.floor((now.getTime() - startDate.getTime()) / 1000);
+  }, [startedAt]);
+
+  /**
+   * Update elapsed time every second while generation is active
+   */
+  useEffect(() => {
+    // Only track time for active phases (not idle, complete, or error)
+    const isActivePhase = phase !== 'idle' && phase !== 'complete' && phase !== 'error';
+
+    if (!isActivePhase || !startedAt) {
+      // Reset elapsed time when not active or no start time
+      if (phase === 'idle') {
+        setElapsedTime(0);
+      }
+      return;
+    }
+
+    // Calculate initial elapsed time
+    setElapsedTime(calculateElapsedTime());
+
+    // Set up interval to update every second
+    const intervalId = setInterval(() => {
+      setElapsedTime(calculateElapsedTime());
+    }, 1000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [phase, startedAt, calculateElapsedTime]);
+
+  /**
+   * Update last activity display periodically for relative time
+   */
+  useEffect(() => {
+    // Only track last activity for active phases
+    const isActivePhase = phase !== 'idle' && phase !== 'complete' && phase !== 'error';
+
+    if (!isActivePhase || !lastActivityAt) {
+      setLastActivityDisplay('');
+      return;
+    }
+
+    // Calculate initial display
+    setLastActivityDisplay(formatTimeAgo(lastActivityAt));
+
+    // Update every 5 seconds to keep relative time current
+    const intervalId = setInterval(() => {
+      setLastActivityDisplay(formatTimeAgo(lastActivityAt));
+    }, 5000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [phase, lastActivityAt]);
 
   /**
    * Handle stop button click with error handling and double-click prevention
@@ -326,9 +492,9 @@ export function RoadmapGenerationProgress({
             transition={{ duration: 0.2 }}
             className="space-y-1"
           >
-            <h3 className="text-lg font-semibold">{config.label}</h3>
-            <p className="text-sm text-muted-foreground">{config.description}</p>
-            {message && message !== config.description && (
+            <h3 className="text-lg font-semibold">{t(config.labelKey)}</h3>
+            <p className="text-sm text-muted-foreground">{t(config.descriptionKey)}</p>
+            {message && message !== t(config.descriptionKey) && (
               <p className="text-xs text-muted-foreground mt-1">{message}</p>
             )}
           </motion.div>
