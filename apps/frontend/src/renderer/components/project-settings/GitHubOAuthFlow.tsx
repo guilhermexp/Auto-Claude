@@ -19,15 +19,15 @@ interface GitHubOAuthFlowProps {
   onCancel?: () => void;
 }
 
-// Debug logging helper - logs when DEBUG env var is set or in development
-const DEBUG = process.env.NODE_ENV === 'development' || process.env.DEBUG === 'true';
+// Debug logging helper - only logs when DEBUG env var is explicitly set
+const DEBUG = typeof process !== 'undefined' && process.env?.DEBUG === 'true';
 
 function debugLog(message: string, data?: unknown) {
   if (DEBUG) {
     if (data !== undefined) {
-      console.warn(`[GitHubOAuth] ${message}`, data);
+      console.debug(`[GitHubOAuth] ${message}`, data);
     } else {
-      console.warn(`[GitHubOAuth] ${message}`);
+      console.debug(`[GitHubOAuth] ${message}`);
     }
   }
 }

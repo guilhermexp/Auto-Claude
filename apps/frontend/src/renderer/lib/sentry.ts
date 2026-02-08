@@ -40,6 +40,7 @@ let sentryInitialized = false;
  * Called by settings store after initial load from disk
  */
 export function markSettingsLoaded(): void {
+  if (settingsLoaded) return;
   settingsLoaded = true;
   console.log('[Sentry] Settings loaded, error reporting ready');
 }

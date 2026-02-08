@@ -99,21 +99,13 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
   // Tab management actions
   openProjectTab: (projectId) => {
     const state = get();
-    console.log('[ProjectStore] openProjectTab called:', {
-      projectId,
-      currentOpenProjectIds: state.openProjectIds,
-      currentTabOrder: state.tabOrder
-    });
     if (!state.openProjectIds.includes(projectId)) {
       const newOpenProjectIds = [...state.openProjectIds, projectId];
       const newTabOrder = state.tabOrder.includes(projectId)
         ? state.tabOrder
         : [...state.tabOrder, projectId];
 
-      console.log('[ProjectStore] Adding new tab:', {
-        newOpenProjectIds,
-        newTabOrder
-      });
+      console.debug('[ProjectStore] Opening new tab:', projectId);
 
       set({
         openProjectIds: newOpenProjectIds,
@@ -124,7 +116,6 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       // Save to main process (debounced)
       saveTabStateToMain();
     } else {
-      console.log('[ProjectStore] Project already open, just activating');
       // Project already open, just make it active
       get().setActiveProject(projectId);
     }

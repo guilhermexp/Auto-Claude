@@ -681,51 +681,54 @@ export function App() {
     }
   };
 
-  const handleInitialize = async () => {
+  const handleInitialize = () => {
     if (!pendingProject) return;
 
     const projectId = pendingProject.id;
-    console.warn('[InitDialog] Starting initialization for project:', projectId);
+    console.debug('[InitDialog] Starting initialization for project:', projectId);
     setIsInitializing(true);
     setInitSuccess(false);
     setInitError(null); // Clear any previous errors
-    try {
-      const result = await initializeProject(projectId);
-      console.warn('[InitDialog] Initialization result:', result);
 
-      if (result?.success) {
-        console.warn('[InitDialog] Initialization successful, closing dialog');
-        // Get the updated project from store
-        const updatedProject = useProjectStore.getState().projects.find(p => p.id === projectId);
-        console.warn('[InitDialog] Updated project:', updatedProject);
+    queueMicrotask(async () => {
+      try {
+        const result = await initializeProject(projectId);
+        console.debug('[InitDialog] Initialization result:', result);
 
-        // Mark as successful to prevent onOpenChange from treating this as a skip
-        setInitSuccess(true);
-        setIsInitializing(false);
+        if (result?.success) {
+          console.debug('[InitDialog] Initialization successful, closing dialog');
+          // Get the updated project from store
+          const updatedProject = useProjectStore.getState().projects.find(p => p.id === projectId);
+          console.debug('[InitDialog] Updated project:', updatedProject);
 
-        // Now close the dialog
-        setShowInitDialog(false);
-        setPendingProject(null);
+          // Mark as successful to prevent onOpenChange from treating this as a skip
+          setInitSuccess(true);
+          setIsInitializing(false);
 
-        // Show GitHub setup modal
-        if (updatedProject) {
-          setGitHubSetupProject(updatedProject);
-          setShowGitHubSetup(true);
+          // Now close the dialog
+          setShowInitDialog(false);
+          setPendingProject(null);
+
+          // Show GitHub setup modal
+          if (updatedProject) {
+            setGitHubSetupProject(updatedProject);
+            setShowGitHubSetup(true);
+          }
+        } else {
+          // Initialization failed - show error but keep dialog open
+          console.debug('[InitDialog] Initialization failed, showing error');
+          const errorMessage = result?.error || 'Failed to initialize Auto Claude. Please try again.';
+          setInitError(errorMessage);
+          setIsInitializing(false);
         }
-      } else {
-        // Initialization failed - show error but keep dialog open
-        console.warn('[InitDialog] Initialization failed, showing error');
-        const errorMessage = result?.error || 'Failed to initialize Auto Claude. Please try again.';
+      } catch (error) {
+        // Unexpected error occurred
+        console.error('[InitDialog] Unexpected error during initialization:', error);
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
         setInitError(errorMessage);
         setIsInitializing(false);
       }
-    } catch (error) {
-      // Unexpected error occurred
-      console.error('[InitDialog] Unexpected error during initialization:', error);
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-      setInitError(errorMessage);
-      setIsInitializing(false);
-    }
+    });
   };
 
   const handleGitHubSetupComplete = async (settings: {
@@ -772,7 +775,7 @@ export function App() {
   };
 
   const handleSkipInit = () => {
-    console.warn('[InitDialog] User skipped initialization');
+    console.debug('[InitDialog] User skipped initialization');
     if (pendingProject) {
       setSkippedInitProjectId(pendingProject.id);
     }
@@ -984,7 +987,7 @@ export function App() {
 
         {/* Initialize Auto Claude Dialog */}
         <Dialog open={showInitDialog} onOpenChange={(open) => {
-          console.warn('[InitDialog] onOpenChange called', { open, pendingProject: !!pendingProject, isInitializing, initSuccess });
+          console.debug('[InitDialog] onOpenChange called', { open, pendingProject: !!pendingProject, isInitializing, initSuccess });
           // Only trigger skip if user manually closed the dialog
           // Don't trigger if: successful init, no pending project, or currently initializing
           if (!open && pendingProject && !isInitializing && !initSuccess) {
