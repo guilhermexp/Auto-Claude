@@ -9,15 +9,18 @@ import type { ImplementationPlan, TaskStatus, RoadmapGenerationStatus, Roadmap, 
 
 /**
  * Batched update queue for IPC events.
- * Collects updates within a 16ms window (one frame) and flushes them together.
+ * Collects updates within a window and flushes them together.
  * This prevents multiple sequential re-renders when multiple IPC events arrive.
+ *
+ * IMPORTANT: Logs are handled by a SEPARATE buffer with a longer flush interval
+ * (LOG_FLUSH_INTERVAL_MS) to avoid triggering expensive React reconciliation every
+ * batch tick. Only status, plan, and progress go through the main batch queue.
  */
 interface BatchedUpdate {
   status?: TaskStatus;
   reviewReason?: import('../../shared/types').ReviewReason;
   progress?: ExecutionProgress;
   plan?: ImplementationPlan;
-  logs?: string[]; // Batched log lines
   queuedAt?: number; // For debug timing
 }
 
@@ -47,21 +50,65 @@ const batchQueue = new Map<string, BatchedUpdate>();
 let batchTimeout: NodeJS.Timeout | null = null;
 let storeActionsRef: StoreActions | null = null;
 
-function flushBatch(): void {
-  if (batchQueue.size === 0 || !storeActionsRef) return;
+/**
+ * Separate log buffer with a longer flush interval.
+ * Logs arrive at high frequency (~10-50/sec per task) but each store update
+ * triggers a full React reconciliation (~120-300ms). By accumulating logs and
+ * flushing every LOG_FLUSH_INTERVAL_MS, we reduce log-triggered re-renders
+ * from ~10/sec to ~1/sec without any visible delay for the user.
+ */
+const logBuffer = new Map<string, string[]>();
+let logFlushTimeout: NodeJS.Timeout | null = null;
+const LOG_FLUSH_INTERVAL_MS = 1000;
 
-  const flushStart = performance.now();
-  const updateCount = batchQueue.size;
-  let totalUpdates = 0;
+/**
+ * Flush accumulated logs to the store.
+ * Runs on a separate, slower cadence than the main batch queue.
+ */
+function flushLogs(): void {
+  if (logBuffer.size === 0 || !storeActionsRef) {
+    logFlushTimeout = null;
+    return;
+  }
+
+  const actions = storeActionsRef;
   let totalLogs = 0;
 
-  // Capture current actions reference to avoid stale closures during batch processing
+  unstable_batchedUpdates(() => {
+    logBuffer.forEach((logs, taskId) => {
+      if (logs.length > 0) {
+        actions.batchAppendLogs(taskId, logs);
+        totalLogs += logs.length;
+      }
+    });
+  });
+
+  if (window.DEBUG) {
+    console.warn(`[IPC LogBuffer] Flushed ${totalLogs} log lines for ${logBuffer.size} tasks`);
+  }
+
+  logBuffer.clear();
+  logFlushTimeout = null;
+}
+
+/**
+ * Flush the main batch queue (status, plan, progress — NOT logs).
+ * Logs are handled by the separate logBuffer/flushLogs to avoid
+ * triggering expensive React reconciliation at high frequency.
+ */
+function flushBatch(): void {
+  if (batchQueue.size === 0 || !storeActionsRef) {
+    batchTimeout = null;
+    return;
+  }
+
   const actions = storeActionsRef;
+  let totalUpdates = 0;
 
   // Batch all React updates together
   unstable_batchedUpdates(() => {
     batchQueue.forEach((updates, taskId) => {
-      // Apply updates in order: plan first (has most data), then status, then progress, then logs
+      // Apply updates in order: plan first (has most data), then status, then progress
       if (updates.plan) {
         actions.updateTaskFromPlan(taskId, updates.plan);
         totalUpdates++;
@@ -74,18 +121,11 @@ function flushBatch(): void {
         actions.updateExecutionProgress(taskId, updates.progress);
         totalUpdates++;
       }
-      // Batch append all logs at once (instead of one state update per log line)
-      if (updates.logs && updates.logs.length > 0) {
-        actions.batchAppendLogs(taskId, updates.logs);
-        totalLogs += updates.logs.length;
-        totalUpdates++;
-      }
     });
   });
 
   if (window.DEBUG) {
-    const flushDuration = performance.now() - flushStart;
-    console.warn(`[IPC Batch] Flushed ${totalUpdates} updates (${totalLogs} logs) for ${updateCount} tasks in ${flushDuration.toFixed(2)}ms`);
+    console.warn(`[IPC Batch] Flushed ${totalUpdates} updates for ${batchQueue.size} tasks`);
   }
 
   batchQueue.clear();
@@ -120,22 +160,18 @@ function queueUpdate(taskId: string, update: BatchedUpdate): void {
     }
   }
 
-  // For logs, accumulate rather than replace
-  let mergedLogs = existing.logs;
-  if (update.logs) {
-    mergedLogs = [...(existing.logs || []), ...update.logs];
-  }
-
   batchQueue.set(taskId, {
     ...existing,
     ...update,
-    logs: mergedLogs,
     queuedAt: existing.queuedAt || performance.now()
   });
 
-  // Schedule flush after 16ms (one frame at 60fps)
+  // Schedule flush after 100ms to coalesce high-frequency progress ticks.
+  // Phase changes bypass batching entirely (handled above), so this only
+  // affects progress ticks and logs. 100ms keeps the UI visually smooth
+  // while significantly reducing re-renders vs the previous 16ms interval.
   if (!batchTimeout) {
-    batchTimeout = setTimeout(flushBatch, 16);
+    batchTimeout = setTimeout(flushBatch, 100);
   }
 }
 
@@ -183,6 +219,12 @@ export function useIpcListeners(): void {
       (taskId: string, error: string, projectId?: string) => {
         // Filter by project to prevent multi-project interference (issue #723)
         if (!isTaskForCurrentProject(projectId)) return;
+        // Force-flush any buffered logs before showing the error
+        if (logFlushTimeout) {
+          clearTimeout(logFlushTimeout);
+          logFlushTimeout = null;
+          flushLogs();
+        }
         // Errors are not batched - show immediately
         setError(`Task ${taskId}: ${error}`);
         appendLog(taskId, `[ERROR] ${error}`);
@@ -193,8 +235,14 @@ export function useIpcListeners(): void {
       (taskId: string, log: string, projectId?: string) => {
         // Filter by project to prevent multi-project interference (issue #723)
         if (!isTaskForCurrentProject(projectId)) return;
-        // Logs are now batched to reduce state updates (was causing 100+ updates/sec)
-        queueUpdate(taskId, { logs: [log] });
+        // Logs accumulate in a separate buffer with a slower flush cadence (1s)
+        // to avoid triggering expensive React reconciliation on every tick.
+        const existing = logBuffer.get(taskId) || [];
+        existing.push(log);
+        logBuffer.set(taskId, existing);
+        if (!logFlushTimeout) {
+          logFlushTimeout = setTimeout(flushLogs, LOG_FLUSH_INTERVAL_MS);
+        }
       }
     );
 
@@ -363,6 +411,11 @@ export function useIpcListeners(): void {
         clearTimeout(batchTimeout);
         flushBatch();
         batchTimeout = null;
+      }
+      if (logFlushTimeout) {
+        clearTimeout(logFlushTimeout);
+        flushLogs();
+        logFlushTimeout = null;
       }
       cleanupProgress();
       cleanupError();

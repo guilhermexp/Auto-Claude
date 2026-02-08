@@ -28,7 +28,7 @@ export function DiffViewDialog({
 }: DiffViewDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+      <AlertDialogContent className="max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Eye className="h-5 w-5 text-purple-400" />
@@ -40,11 +40,11 @@ export function DiffViewDialog({
         </AlertDialogHeader>
         <div className="flex-1 overflow-auto min-h-0 -mx-6 px-6">
           {worktreeDiff?.files && worktreeDiff.files.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {worktreeDiff.files.map((file, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-2 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                  className="flex items-center justify-between py-1.5 px-2 rounded bg-secondary/30 hover:bg-secondary/50 transition-colors"
                 >
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <FileCode className={cn(
@@ -81,7 +81,7 @@ export function DiffViewDialog({
             </div>
           )}
         </div>
-        <AlertDialogFooter className="mt-4">
+        <AlertDialogFooter className="mt-2">
           <AlertDialogCancel>Close</AlertDialogCancel>
         </AlertDialogFooter>
       </AlertDialogContent>

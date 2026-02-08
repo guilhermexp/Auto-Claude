@@ -113,7 +113,13 @@ def validate_subtask_files(subtask: dict, project_dir: Path) -> dict:
     invalid_paths = []
 
     resolved_project = Path(project_dir).resolve()
+    # Glob metacharacters — paths containing these are patterns, not literal files
+    glob_chars = {"*", "?", "[", "]"}
     for file_path in subtask.get("files_to_modify", []):
+        # Skip glob patterns (e.g. "apps/**", "packages/**/*.ts") — the AI planner
+        # sometimes uses them to indicate a directory scope rather than specific files
+        if any(c in file_path for c in glob_chars):
+            continue
         full_path = (resolved_project / file_path).resolve()
         if not full_path.is_relative_to(resolved_project):
             invalid_paths.append(file_path)

@@ -52,6 +52,9 @@ export const taskMachine = createMachine(
           PLANNING_STARTED: 'planning',
           // Fallback: if coding starts from backlog (e.g., resumed task), go to coding
           CODING_STARTED: 'coding',
+          // Defense-in-depth: if USER_RESUMED arrives while in backlog (e.g., race condition
+          // where handleManualStatusChange sends USER_RESUMED before actor is rebuilt), go to coding
+          USER_RESUMED: { target: 'coding', actions: 'clearReviewReason' },
           USER_STOPPED: 'backlog'
         }
       },

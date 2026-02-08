@@ -272,6 +272,16 @@ async function main() {
   }
 
   runCommand('electron-builder', builderArgs, frontendDir, env);
+
+  // Open the dist folder containing the built artifacts
+  if (platforms.includes('mac')) {
+    const distDir = path.join(frontendDir, 'dist');
+    const arch = archs[0] || os.arch();
+    const macDistDir = path.join(distDir, `mac-${arch}`);
+    const targetDir = fs.existsSync(macDistDir) ? macDistDir : distDir;
+    console.log(`[package] Opening output folder: ${targetDir}`);
+    spawnSync('open', [targetDir], { stdio: 'ignore' });
+  }
 }
 
 // Run main() only when this file is executed directly (not when imported for testing)

@@ -771,12 +771,8 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
 
         // 3. Find new tasks not in order (prepend at top)
         const newTasks = columnTasks.filter(t => !validOrderSet.has(t.id));
-        // Sort new tasks by createdAt (newest first)
-        newTasks.sort((a, b) => {
-          const dateA = new Date(a.createdAt).getTime();
-          const dateB = new Date(b.createdAt).getTime();
-          return dateB - dateA;
-        });
+        // Sort new tasks by createdAt (newest first) — use string comparison to avoid Date parsing
+        newTasks.sort((a, b) => (b.createdAt > a.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0));
 
         // 4. Sort ordered tasks by their index in validOrder
         // Pre-compute index map for O(n) sorting instead of O(n²) with indexOf
@@ -789,11 +785,8 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
         grouped[statusKey] = [...newTasks, ...orderedTasks];
       } else {
         // No custom order: fallback to createdAt sort (newest first)
-        grouped[statusKey].sort((a, b) => {
-          const dateA = new Date(a.createdAt).getTime();
-          const dateB = new Date(b.createdAt).getTime();
-          return dateB - dateA;
-        });
+        // Use string comparison to avoid Date parsing overhead on every render
+        grouped[statusKey].sort((a, b) => (b.createdAt > a.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0));
       }
     });
 
@@ -1092,11 +1085,8 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
         }
 
         // Get the oldest task in queue (FIFO ordering)
-        const nextTask = queuedTasks.sort((a, b) => {
-          const dateA = new Date(a.createdAt).getTime();
-          const dateB = new Date(b.createdAt).getTime();
-          return dateA - dateB; // Ascending order (oldest first)
-        })[0];
+        // Use string comparison to avoid Date parsing overhead
+        const nextTask = queuedTasks.sort((a, b) => (a.createdAt > b.createdAt ? 1 : a.createdAt < b.createdAt ? -1 : 0))[0];
 
         console.log(`[Queue] Auto-promoting task ${nextTask.id} from Queue to In Progress (${inProgressCount + 1}/${maxParallelTasks})`);
         const result = await persistTaskStatus(nextTask.id, 'in_progress');
@@ -1173,47 +1163,33 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
 
   // Create a callback to toggle collapsed state and save to storage
   const handleToggleColumnCollapsed = useCallback((status: typeof TASK_STATUS_COLUMNS[number]) => {
-    // Capture projectId at function start to avoid stale closure in setTimeout
-    const currentProjectId = projectId;
     toggleColumnCollapsed(status);
-    // Save preferences after toggling
-    if (currentProjectId) {
-      // Use setTimeout to ensure state is updated before saving
-      setTimeout(() => {
-        saveKanbanPreferences(currentProjectId);
-      }, 0);
+    // Zustand set() is synchronous, so state is already updated — save directly
+    if (projectId) {
+      saveKanbanPreferences(projectId);
     }
   }, [toggleColumnCollapsed, saveKanbanPreferences, projectId]);
 
   // Create a callback to expand all collapsed columns and save to storage
   const handleExpandAll = useCallback(() => {
-    // Capture projectId at function start to avoid stale closure in setTimeout
-    const currentProjectId = projectId;
     // Expand all collapsed columns
     for (const status of TASK_STATUS_COLUMNS) {
       if (columnPreferences?.[status]?.isCollapsed) {
         setColumnCollapsed(status, false);
       }
     }
-    // Save preferences after expanding
-    if (currentProjectId) {
-      setTimeout(() => {
-        saveKanbanPreferences(currentProjectId);
-      }, 0);
+    // Zustand set() is synchronous, so state is already updated — save directly
+    if (projectId) {
+      saveKanbanPreferences(projectId);
     }
   }, [columnPreferences, setColumnCollapsed, saveKanbanPreferences, projectId]);
 
   // Create a callback to toggle locked state and save to storage
   const handleToggleColumnLocked = useCallback((status: typeof TASK_STATUS_COLUMNS[number]) => {
-    // Capture projectId at function start to avoid stale closure in setTimeout
-    const currentProjectId = projectId;
     toggleColumnLocked(status);
-    // Save preferences after toggling
-    if (currentProjectId) {
-      // Use setTimeout to ensure state is updated before saving
-      setTimeout(() => {
-        saveKanbanPreferences(currentProjectId);
-      }, 0);
+    // Zustand set() is synchronous, so state is already updated — save directly
+    if (projectId) {
+      saveKanbanPreferences(projectId);
     }
   }, [toggleColumnLocked, saveKanbanPreferences, projectId]);
 

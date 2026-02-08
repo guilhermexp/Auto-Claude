@@ -90,6 +90,14 @@ export class TaskStateManager {
   }
 
   handleUiEvent(taskId: string, event: TaskEvent, task: Task, project: Project): void {
+    // Skip duplicate USER_STOPPED when already in a settled state
+    if (event.type === 'USER_STOPPED') {
+      const currentState = this.getCurrentState(taskId);
+      if (currentState === 'human_review' || currentState === 'done' || currentState === 'backlog') {
+        console.debug(`[TaskStateManager] Skipping duplicate USER_STOPPED — already in ${currentState}`);
+        return;
+      }
+    }
     console.debug(`[TaskStateManager] handleUiEvent: ${event.type} for task ${taskId}`);
     this.setTaskContext(taskId, task, project);
     const actor = this.getOrCreateActor(taskId);
@@ -123,8 +131,12 @@ export class TaskStateManager {
         } else if (!currentState && task.reviewReason === 'plan_review') {
           // Fallback: No actor exists (e.g., after app restart), use task data
           this.handleUiEvent(taskId, { type: 'PLAN_APPROVED' }, task, project);
-        } else {
+        } else if (!currentState && (task.status === 'human_review' || task.status === 'error')) {
+          // No XState actor but task data says human_review/error — resume
           this.handleUiEvent(taskId, { type: 'USER_RESUMED' }, task, project);
+        } else {
+          // Fresh start from backlog — PLANNING_STARTED transitions backlog → planning
+          this.handleUiEvent(taskId, { type: 'PLANNING_STARTED' }, task, project);
         }
         return true;
       }
@@ -350,7 +362,13 @@ export class TaskStateManager {
 
     const phase = XSTATE_TO_PHASE[xstateState] || 'idle';
 
-    // Emit execution progress with the phase derived from XState
+    // Emit execution progress with the phase derived from XState.
+    // sequenceNumber: 0 bypasses the out-of-order guard in the renderer store
+    // (guard requires both incoming > 0 AND current > 0). Using 0 also resets the
+    // stored sequence so subsequent agent-process updates (which use a sequential
+    // counter starting at 1) won't be incorrectly dropped.
+    // BUG FIX: Previously used Date.now() which set the stored sequence to ~1.7 trillion,
+    // causing ALL agent-process sequential updates (1,2,3...) to be dropped as "out-of-order".
     safeSendToRenderer(
       this.getMainWindow,
       IPC_CHANNELS.TASK_EXECUTION_PROGRESS,
@@ -360,7 +378,7 @@ export class TaskStateManager {
         phaseProgress: phase === 'complete' ? 100 : 50,
         overallProgress: phase === 'complete' ? 100 : 50,
         message: `State: ${xstateState}`,
-        sequenceNumber: Date.now()  // Use timestamp as sequence to ensure it's newer
+        sequenceNumber: 0
       },
       projectId
     );

@@ -24,6 +24,7 @@ export class AgentManager extends EventEmitter {
   private events: AgentEvents;
   private processManager: AgentProcessManager;
   private queueManager: AgentQueueManager;
+  private pendingStarts = new Set<string>();
   private taskExecutionContext: Map<string, {
     projectPath: string;
     specId: string;
@@ -155,6 +156,27 @@ export class AgentManager extends EventEmitter {
     baseBranch?: string,
     projectId?: string
   ): Promise<void> {
+    if (this.pendingStarts.has(taskId) || this.state.hasProcess(taskId)) {
+      console.warn('[AgentManager] Task already starting/running, skipping duplicate spawn:', taskId);
+      return;
+    }
+    this.pendingStarts.add(taskId);
+    try {
+      await this._startSpecCreation(taskId, projectPath, taskDescription, specDir, metadata, baseBranch, projectId);
+    } finally {
+      this.pendingStarts.delete(taskId);
+    }
+  }
+
+  private async _startSpecCreation(
+    taskId: string,
+    projectPath: string,
+    taskDescription: string,
+    specDir?: string,
+    metadata?: SpecCreationMetadata,
+    baseBranch?: string,
+    projectId?: string
+  ): Promise<void> {
     // Pre-flight auth check: Verify active profile has valid authentication
     // Ensure profile manager is initialized to prevent race condition
     let profileManager: ClaudeProfileManager;
@@ -246,6 +268,25 @@ export class AgentManager extends EventEmitter {
    * Start task execution (run.py)
    */
   async startTaskExecution(
+    taskId: string,
+    projectPath: string,
+    specId: string,
+    options: TaskExecutionOptions = {},
+    projectId?: string
+  ): Promise<void> {
+    if (this.pendingStarts.has(taskId) || this.state.hasProcess(taskId)) {
+      console.warn('[AgentManager] Task already starting/running, skipping duplicate spawn:', taskId);
+      return;
+    }
+    this.pendingStarts.add(taskId);
+    try {
+      await this._startTaskExecution(taskId, projectPath, specId, options, projectId);
+    } finally {
+      this.pendingStarts.delete(taskId);
+    }
+  }
+
+  private async _startTaskExecution(
     taskId: string,
     projectPath: string,
     specId: string,
@@ -433,14 +474,22 @@ export class AgentManager extends EventEmitter {
    * Check if a task is running
    */
   isRunning(taskId: string): boolean {
-    return this.state.hasProcess(taskId);
+    return this.state.hasProcess(taskId) || this.pendingStarts.has(taskId);
   }
 
   /**
    * Get all running task IDs
    */
   getRunningTasks(): string[] {
-    return this.state.getRunningTaskIds();
+    const running = this.state.getRunningTaskIds();
+    // Include tasks in the async startup phase (pendingStarts) that aren't yet
+    // tracked in AgentState to prevent concurrency over-subscription
+    for (const taskId of this.pendingStarts) {
+      if (!running.includes(taskId)) {
+        running.push(taskId);
+      }
+    }
+    return running;
   }
 
   /**

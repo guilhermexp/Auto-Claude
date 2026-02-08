@@ -181,6 +181,11 @@ class ClaudeOperationRegistry extends EventEmitter {
       metadata?: Record<string, unknown>;
     }
   ): void {
+    if (this.operations.has(id)) {
+      console.warn('[OperationRegistry] Duplicate registration skipped for:', id);
+      return;
+    }
+
     const operation: RegisteredOperation = {
       id,
       type,

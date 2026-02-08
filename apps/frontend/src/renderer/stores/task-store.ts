@@ -84,7 +84,20 @@ export function hasRecentActivity(taskId: string): boolean {
  */
 export function clearTaskActivity(taskId: string): void {
   taskLastActivity.delete(taskId);
+  progressThrottleLastUpdate.delete(taskId);
+  progressThrottleLastPhase.delete(taskId);
 }
+
+/**
+ * Throttle tracking for progress-only updates (no phase change).
+ * Phase changes and completedPhases changes are never throttled.
+ * Progress-only ticks are throttled to max 1 per PROGRESS_THROTTLE_MS per task.
+ * This dramatically reduces React re-renders since each store update creates a new
+ * tasks[] array reference, triggering App.tsx → KanbanBoard reconciliation (~130ms each).
+ */
+const progressThrottleLastUpdate = new Map<string, number>();
+const progressThrottleLastPhase = new Map<string, string>();
+const PROGRESS_THROTTLE_MS = 500;
 
 /**
  * Notify all registered listeners when a task status changes
@@ -121,13 +134,50 @@ function updateTaskAtIndex(tasks: Task[], index: number, updater: (task: Task) =
 }
 
 /**
+ * Normalizes an implementation plan to ensure it has the expected `phases[]` structure.
+ * Some agents write plans with subtasks at the top level (no phases wrapper) or
+ * with empty phases. This function wraps flat subtasks into a single phase.
+ * Returns the plan (possibly mutated) or null if it cannot be normalized.
+ */
+function normalizePlanData(plan: ImplementationPlan): ImplementationPlan | null {
+  // Already has valid phases — nothing to do
+  if (plan.phases && Array.isArray(plan.phases) && plan.phases.length > 0) {
+    return plan;
+  }
+
+  // Check for flat subtasks at top level (some agents/spec-quick generate this)
+  const planAny = plan as Record<string, unknown>;
+  if (Array.isArray(planAny.subtasks) && planAny.subtasks.length > 0) {
+    debugWarn('[normalizePlanData] Wrapping top-level subtasks into a single phase');
+    plan.phases = [{
+      phase: 1,
+      id: 'phase-1',
+      name: plan.feature || 'Implementation',
+      type: 'implementation',
+      subtasks: planAny.subtasks as ImplementationPlan['phases'][0]['subtasks'],
+      depends_on: []
+    }] as ImplementationPlan['phases'];
+    return plan;
+  }
+
+  // No phases and no subtasks — plan is not ready yet (e.g., spec creation in progress)
+  return null;
+}
+
+/**
  * Validates implementation plan data structure before processing.
  * Returns true if valid, false if invalid/incomplete.
  */
 function validatePlanData(plan: ImplementationPlan): boolean {
   // Validate plan has phases array
   if (!plan.phases || !Array.isArray(plan.phases)) {
-    console.warn('[validatePlanData] Invalid plan: missing or invalid phases array');
+    debugWarn('[validatePlanData] Plan has no phases array (plan may not be ready yet)');
+    return false;
+  }
+
+  // Empty phases array — plan skeleton exists but no subtasks yet
+  if (plan.phases.length === 0) {
+    debugWarn('[validatePlanData] Plan has empty phases array');
     return false;
   }
 
@@ -135,7 +185,7 @@ function validatePlanData(plan: ImplementationPlan): boolean {
   for (let i = 0; i < plan.phases.length; i++) {
     const phase = plan.phases[i];
     if (!phase || !phase.subtasks || !Array.isArray(phase.subtasks)) {
-      console.warn(`[validatePlanData] Invalid phase ${i}: missing or invalid subtasks array`);
+      debugWarn(`[validatePlanData] Invalid phase ${i}: missing or invalid subtasks array`);
       return false;
     }
 
@@ -143,13 +193,13 @@ function validatePlanData(plan: ImplementationPlan): boolean {
     for (let j = 0; j < phase.subtasks.length; j++) {
       const subtask = phase.subtasks[j];
       if (!subtask || typeof subtask !== 'object') {
-        console.warn(`[validatePlanData] Invalid subtask at phase ${i}, index ${j}: not an object`);
+        debugWarn(`[validatePlanData] Invalid subtask at phase ${i}, index ${j}: not an object`);
         return false;
       }
 
       // Description is critical - we can't show a subtask without it
       if (!subtask.description || typeof subtask.description !== 'string' || subtask.description.trim() === '') {
-        console.warn(`[validatePlanData] Invalid subtask at phase ${i}, index ${j}: missing or empty description`);
+        debugWarn(`[validatePlanData] Invalid subtask at phase ${i}, index ${j}: missing or empty description`);
         return false;
       }
     }
@@ -327,29 +377,33 @@ export const useTaskStore = create<TaskState>((set, get) => ({
 
   updateTaskFromPlan: (taskId, plan) =>
     set((state) => {
-      // FIX (PR Review): Gate debug logging to prevent production console clutter
-      debugLog('[updateTaskFromPlan] called with plan:', {
+      const index = findTaskIndex(state.tasks, taskId);
+      if (index === -1) {
+        debugLog('[updateTaskFromPlan] Task not found:', taskId);
+        return state;
+      }
+
+      // Normalize plan format (e.g., wrap flat subtasks into phases)
+      const normalizedPlan = normalizePlanData(plan);
+      if (!normalizedPlan) {
+        // Plan is not ready yet — silently skip (common during spec creation)
+        debugLog('[updateTaskFromPlan] Plan not ready yet, skipping:', taskId);
+        return state;
+      }
+      plan = normalizedPlan;
+
+      // Validate normalized plan data before processing
+      if (!validatePlanData(plan)) {
+        debugWarn('[updateTaskFromPlan] Invalid plan data after normalization, skipping:', taskId);
+        return state;
+      }
+
+      debugLog('[updateTaskFromPlan] Processing plan:', {
         taskId,
         feature: plan.feature,
         phases: plan.phases?.length || 0,
         totalSubtasks: plan.phases?.reduce((acc, p) => acc + (p.subtasks?.length || 0), 0) || 0
-        // Note: planData removed to avoid verbose output in logs
       });
-
-      const index = findTaskIndex(state.tasks, taskId);
-      if (index === -1) {
-        console.log('[updateTaskFromPlan] Task not found:', taskId);
-        return state;
-      }
-
-      // Validate plan data before processing
-      if (!validatePlanData(plan)) {
-        console.error('[updateTaskFromPlan] Invalid plan data, skipping update:', {
-          taskId,
-          plan
-        });
-        return state;
-      }
 
       return {
         tasks: updateTaskAtIndex(state.tasks, index, (t) => {
@@ -406,6 +460,24 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     // Record activity for stuck detection (outside of set() to avoid triggering extra renders)
     recordTaskActivity(taskId);
 
+    // Throttle progress-only ticks BEFORE entering set() to avoid any store overhead.
+    // Phase changes always go through immediately.
+    const currentPhase = progressThrottleLastPhase.get(taskId);
+    const isPhaseChange = progress.phase != null && progress.phase !== currentPhase;
+
+    if (isPhaseChange) {
+      progressThrottleLastPhase.set(taskId, progress.phase!);
+      progressThrottleLastUpdate.set(taskId, Date.now());
+    } else {
+      // Progress-only tick — throttle to max 1 per PROGRESS_THROTTLE_MS
+      const now = Date.now();
+      const lastUpdate = progressThrottleLastUpdate.get(taskId) ?? 0;
+      if (now - lastUpdate < PROGRESS_THROTTLE_MS) {
+        return; // Skip this progress tick entirely — no store update, no re-render
+      }
+      progressThrottleLastUpdate.set(taskId, now);
+    }
+
     set((state) => {
       const index = findTaskIndex(state.tasks, taskId);
       if (index === -1) return state;
@@ -422,8 +494,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
           const incomingSeq = progress.sequenceNumber ?? 0;
           const currentSeq = existingProgress.sequenceNumber ?? 0;
           if (incomingSeq > 0 && currentSeq > 0 && incomingSeq < currentSeq) {
-            // FIX (ACS-55): Log when updates are dropped due to sequence numbers
-            // This helps debug phase transition issues
             console.warn('[updateExecutionProgress] Dropping out-of-order update:', {
               taskId,
               incomingSeq,
@@ -434,10 +504,6 @@ export const useTaskStore = create<TaskState>((set, get) => ({
             return t; // Skip out-of-order update
           }
 
-          // Only update updatedAt on phase transitions (not on every progress tick)
-          // This prevents unnecessary re-renders from the memo comparator
-          const phaseChanged = progress.phase && progress.phase !== existingProgress.phase;
-
           return {
             ...t,
             executionProgress: {
@@ -445,7 +511,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
               ...progress
             },
             // Only set updatedAt on phase changes to reduce re-renders
-            ...(phaseChanged ? { updatedAt: new Date() } : {})
+            ...(isPhaseChange ? { updatedAt: new Date() } : {})
           };
         })
       };

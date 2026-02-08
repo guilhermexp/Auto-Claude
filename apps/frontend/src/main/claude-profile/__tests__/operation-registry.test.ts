@@ -595,7 +595,7 @@ describe('OperationRegistry', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle registering operation with same id (overwrites)', () => {
+    it('should skip duplicate registration with same id', () => {
       const registry = getOperationRegistry();
       const mockRestart1 = vi.fn().mockReturnValue(true);
       const mockRestart2 = vi.fn().mockReturnValue(true);
@@ -604,8 +604,9 @@ describe('OperationRegistry', () => {
       registry.registerOperation('op1', 'task-execution', 'profile2', 'Profile 2', mockRestart2);
 
       const operation = registry.getOperation('op1');
-      expect(operation?.type).toBe('task-execution');
-      expect(operation?.profileId).toBe('profile2');
+      // Duplicate registration is skipped — original operation is preserved
+      expect(operation?.type).toBe('spec-creation');
+      expect(operation?.profileId).toBe('profile1');
       expect(registry.getOperationCount()).toBe(1);
     });
 

@@ -372,6 +372,16 @@ describe('taskMachine', () => {
   });
 
   describe('fallback transitions', () => {
+    it('should allow USER_RESUMED from backlog (defense-in-depth)', () => {
+      const events: TaskEvent[] = [
+        { type: 'USER_RESUMED' }
+      ];
+
+      const snapshot = runEvents(events);
+      expect(snapshot.value).toBe('coding');
+      expect(snapshot.context.reviewReason).toBeUndefined();
+    });
+
     it('should allow CODING_STARTED from backlog (resumed task)', () => {
       const events: TaskEvent[] = [
         { type: 'CODING_STARTED', subtaskId: 'sub1', subtaskDescription: 'Test' }
