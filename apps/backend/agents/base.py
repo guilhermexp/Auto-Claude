@@ -20,6 +20,9 @@ MAX_SUBTASK_RETRIES = 5  # Maximum attempts before marking subtask as stuck
 
 # Retry configuration for 400 tool concurrency errors
 MAX_CONCURRENCY_RETRIES = 5  # Maximum number of retries for tool concurrency errors
+
+# Retry configuration for unclassified errors (safety net against infinite loops)
+MAX_OTHER_ERROR_RETRIES = 5  # Maximum consecutive unclassified errors before failing
 INITIAL_RETRY_DELAY_SECONDS = (
     2  # Initial retry delay (doubles each retry: 2s, 4s, 8s, 16s, 32s)
 )

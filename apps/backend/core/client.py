@@ -19,7 +19,7 @@ import os
 import threading
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from core.platform import (
     is_windows,
@@ -449,6 +449,7 @@ def create_client(
     max_thinking_tokens: int | None = None,
     output_format: dict | None = None,
     agents: dict | None = None,
+    stderr: Callable[[str], None] | None = None,
 ) -> ClaudeSDKClient:
     """
     Create a Claude Agent SDK client with multi-layered security.
@@ -475,6 +476,8 @@ def create_client(
                Format: {"agent-name": {"description": "...", "prompt": "...",
                         "tools": [...], "model": "inherit"}}
                See: https://platform.claude.com/docs/en/agent-sdk/subagents
+        stderr: Optional callback invoked with each line of stderr from the CLI subprocess.
+               Useful for capturing auth errors that the SDK wraps in generic ProcessError.
 
     Returns:
         Configured ClaudeSDKClient
@@ -816,6 +819,10 @@ def create_client(
         # This prevents "File has not been read yet" errors in recovery sessions
         "enable_file_checkpointing": True,
     }
+
+    # Add stderr callback if provided (captures CLI stderr for auth error detection)
+    if stderr:
+        options_kwargs["stderr"] = stderr
 
     # Optional: Allow CLI path override via environment variable
     # The SDK bundles its own CLI, but users can override if needed

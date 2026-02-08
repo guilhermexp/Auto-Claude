@@ -67,6 +67,7 @@ from .base import (
     HUMAN_INTERVENTION_FILE,
     INITIAL_RETRY_DELAY_SECONDS,
     MAX_CONCURRENCY_RETRIES,
+    MAX_OTHER_ERROR_RETRIES,
     MAX_RATE_LIMIT_WAIT_SECONDS,
     MAX_RETRY_DELAY_SECONDS,
     MAX_SUBTASK_RETRIES,
@@ -76,7 +77,7 @@ from .base import (
     sanitize_error_message,
 )
 from .memory_manager import debug_memory_system_status, get_graphiti_context
-from .session import post_session_processing, run_agent_session
+from .session import is_authentication_error, post_session_processing, run_agent_session
 from .utils import (
     find_phase_for_subtask,
     get_commit_count,
@@ -507,10 +508,12 @@ async def run_autonomous_agent(
     # Main loop
     iteration = 0
     consecutive_concurrency_errors = 0  # Track consecutive 400 tool concurrency errors
+    consecutive_other_errors = 0  # Track consecutive unclassified errors (safety net)
     current_retry_delay = INITIAL_RETRY_DELAY_SECONDS  # Exponential backoff delay
     concurrency_error_context: str | None = (
         None  # Context to pass to agent after concurrency error
     )
+    stderr_lines: list[str] = []  # Capture CLI stderr for auth error detection
 
     def _reset_concurrency_state() -> None:
         """Reset concurrency error tracking state after a successful session or non-concurrency error."""
@@ -590,12 +593,14 @@ async def run_autonomous_agent(
         # Generate appropriate prompt
         if first_run:
             # Create client for planning phase
+            stderr_lines.clear()
             client = create_client(
                 project_dir,
                 spec_dir,
                 phase_model,
                 agent_type="planner",
                 max_thinking_tokens=phase_thinking_budget,
+                stderr=lambda line: stderr_lines.append(line),
             )
             prompt = generate_planner_prompt(spec_dir, project_dir)
             if planning_retry_context:
@@ -728,12 +733,14 @@ async def run_autonomous_agent(
                 continue  # Skip to next iteration
 
             # Create client for coding phase (after file validation passes)
+            stderr_lines.clear()
             client = create_client(
                 project_dir,
                 spec_dir,
                 phase_model,
                 agent_type="coder",
                 max_thinking_tokens=phase_thinking_budget,
+                stderr=lambda line: stderr_lines.append(line),
             )
 
             # Get attempt count for recovery context
@@ -888,6 +895,7 @@ async def run_autonomous_agent(
 
             # Reset error tracking on success
             _reset_concurrency_state()
+            consecutive_other_errors = 0
 
             if task_logger:
                 task_logger.end_phase(
@@ -905,6 +913,7 @@ async def run_autonomous_agent(
         elif status == "continue":
             # Reset error tracking on successful session
             _reset_concurrency_state()
+            consecutive_other_errors = 0
 
             print(
                 muted(
@@ -1030,6 +1039,7 @@ async def run_autonomous_agent(
             elif error_info and error_info.get("type") == "rate_limit":
                 # Rate limit error - intelligent wait for reset
                 _reset_concurrency_state()
+                consecutive_other_errors = 0
 
                 reset_timestamp = parse_rate_limit_reset_time(error_info)
                 if reset_timestamp:
@@ -1114,6 +1124,7 @@ async def run_autonomous_agent(
             elif error_info and error_info.get("type") == "authentication":
                 # Authentication error - pause for user re-authentication
                 _reset_concurrency_state()
+                consecutive_other_errors = 0
 
                 emit_phase(
                     ExecutionPhase.AUTH_FAILURE_PAUSED,
@@ -1157,7 +1168,108 @@ async def run_autonomous_agent(
                 continue  # Resume the loop
 
             else:
-                # Other errors - use standard retry logic
+                # Check stderr for auth errors that the SDK missed
+                # The CLI prints auth details to stderr but the SDK wraps them
+                # in a generic ProcessError, losing the auth signal
+                stderr_text = "\n".join(stderr_lines)
+                if stderr_text and is_authentication_error(
+                    Exception(stderr_text)
+                ):
+                    logger.info(
+                        "Reclassified 'other' error as authentication based on stderr"
+                    )
+                    # Re-enter the authentication handler path
+                    error_info["type"] = "authentication"
+                    _reset_concurrency_state()
+                    consecutive_other_errors = 0
+
+                    emit_phase(
+                        ExecutionPhase.AUTH_FAILURE_PAUSED,
+                        "Re-authentication required",
+                    )
+
+                    raw_error = error_info.get("message", "Authentication failed")
+                    sanitized_error = (
+                        sanitize_error_message(raw_error, max_length=500)
+                        or "Authentication failed"
+                    )
+                    pause_data = {
+                        "paused_at": datetime.now().isoformat(),
+                        "error": sanitized_error,
+                        "requires_action": "re-authenticate",
+                    }
+                    pause_file = spec_dir / AUTH_FAILURE_PAUSE_FILE
+                    pause_file.write_text(
+                        json.dumps(pause_data), encoding="utf-8"
+                    )
+
+                    print()
+                    print("=" * 70)
+                    print("  AUTHENTICATION REQUIRED")
+                    print("=" * 70)
+                    print()
+                    print(
+                        "OAuth token is invalid or expired (detected from CLI stderr)."
+                    )
+                    print(
+                        "Please re-authenticate in the Auto Claude settings."
+                    )
+                    print()
+                    print(
+                        "The task will automatically resume once you re-authenticate."
+                    )
+                    print()
+
+                    status_manager.update(state=BuildState.PAUSED)
+                    await wait_for_auth_resume(spec_dir, source_spec_dir)
+
+                    print_status(
+                        "Authentication restored - resuming", "success"
+                    )
+                    emit_phase(
+                        ExecutionPhase.CODING,
+                        "Resuming after re-authentication",
+                    )
+                    status_manager.update(state=BuildState.BUILDING)
+                    continue
+
+                # Other errors - use standard retry logic with safety limit
+                consecutive_other_errors += 1
+
+                if consecutive_other_errors > MAX_OTHER_ERROR_RETRIES:
+                    print_status(
+                        f"Unclassified errors hit {consecutive_other_errors} times consecutively",
+                        "error",
+                    )
+                    print()
+                    print("=" * 70)
+                    print("  CRITICAL: Agent stuck in error retry loop")
+                    print("=" * 70)
+                    print()
+                    print(
+                        "The agent is repeatedly hitting unclassified errors."
+                    )
+                    print(
+                        f"Last error: {error_info.get('message', 'Unknown error')[:200]}"
+                    )
+                    print()
+
+                    if subtask_id:
+                        recovery_manager.mark_subtask_stuck(
+                            subtask_id,
+                            f"Unclassified errors after {consecutive_other_errors} retries",
+                        )
+                        print_status(
+                            f"Subtask {subtask_id} marked as STUCK", "error"
+                        )
+
+                    emit_phase(
+                        ExecutionPhase.FAILED,
+                        "Too many consecutive unclassified errors",
+                    )
+                    status_manager.update(state=BuildState.ERROR)
+                    break
+
                 print_status("Session encountered an error", "error")
                 print(muted("Will retry with a fresh session..."))
                 status_manager.update(state=BuildState.ERROR)
