@@ -44,6 +44,8 @@ AUTH_TOKEN_ENV_VARS = [
 # Environment variables to pass through to SDK subprocess
 # NOTE: ANTHROPIC_API_KEY is intentionally excluded to prevent silent API billing
 SDK_ENV_VARS = [
+    # OAuth token for Claude Code CLI authentication
+    "CLAUDE_CODE_OAUTH_TOKEN",
     # API endpoint configuration
     "ANTHROPIC_BASE_URL",
     "ANTHROPIC_AUTH_TOKEN",
@@ -983,20 +985,52 @@ def configure_sdk_authentication(config_dir: str | None = None) -> None:
         os.environ.pop("CLAUDE_CODE_OAUTH_TOKEN", None)
         logger.info("Using API profile authentication")
     else:
-        # OAuth mode: require and validate OAuth token
-        # Get OAuth token - uses profile-specific Keychain lookup when config_dir is set
-        # This correctly reads from "Claude Code-credentials-{hash}" for non-default profiles
-        oauth_token = require_auth_token(config_dir)
+        # OAuth mode: resolve OAuth token and pass to SDK
+        #
+        # The Claude Agent SDK spawns the `claude` CLI as a subprocess.
+        # The CLI handles its own authentication natively, including:
+        # - Reading from Keychain using CLAUDE_CONFIG_DIR
+        # - Decrypting encrypted (enc:) tokens
+        # - Token refresh and OAuth token exchange
+        #
+        # IMPORTANT: OAuth tokens (sk-ant-oat01-*) cannot be used as direct
+        # API Bearer tokens. The CLI must handle the OAuth flow internally.
+        # When CLAUDE_CONFIG_DIR is set (by the Electron frontend), the CLI
+        # reads credentials from the profile's Keychain entry and handles
+        # token refresh. We must NOT override this by setting
+        # CLAUDE_CODE_OAUTH_TOKEN — doing so causes the CLI to skip its
+        # native auth flow and use the token as a Bearer token, which fails.
+        config_dir_env = os.environ.get("CLAUDE_CONFIG_DIR", "").strip()
+        existing_oauth = os.environ.get("CLAUDE_CODE_OAUTH_TOKEN", "").strip()
 
-        # Validate token is not encrypted before passing to SDK
-        # Encrypted tokens (enc:...) should have been decrypted by require_auth_token()
-        # If we still have an encrypted token here, it means decryption failed or was skipped
-        validate_token_not_encrypted(oauth_token)
+        if config_dir_env and not existing_oauth:
+            # CLAUDE_CONFIG_DIR is set and CLAUDE_CODE_OAUTH_TOKEN was
+            # intentionally cleared (by the frontend's ensureCleanProfileEnv).
+            # Let the CLI handle auth natively via the profile's Keychain entry.
+            # We only validate that credentials exist to fail early with a clear error.
+            oauth_token = get_auth_token(config_dir)
+            if not oauth_token:
+                require_auth_token(config_dir)  # raises ValueError
+            logger.info(
+                "Using OAuth authentication via CLI "
+                "(CLAUDE_CONFIG_DIR set, CLI will read from profile Keychain)"
+            )
+        else:
+            # No CLAUDE_CONFIG_DIR, or CLAUDE_CODE_OAUTH_TOKEN already set
+            # by the caller — resolve token and pass it explicitly.
+            oauth_token = get_auth_token(config_dir)
 
-        # Ensure SDK can access it via its expected env var
-        # This is required because the SDK doesn't know about per-profile Keychain naming
-        os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = oauth_token
-        logger.info("Using OAuth authentication")
+            if oauth_token and not is_encrypted_token(oauth_token):
+                os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = oauth_token
+                logger.info("Using OAuth authentication (plaintext token)")
+            elif oauth_token and is_encrypted_token(oauth_token):
+                # Token exists but is encrypted — let CLI handle decryption
+                logger.info(
+                    "Using OAuth authentication via CLI "
+                    "(encrypted token in Keychain, CLI will decrypt)"
+                )
+            else:
+                require_auth_token(config_dir)  # raises ValueError
 
 
 def ensure_claude_code_oauth_token() -> None:
