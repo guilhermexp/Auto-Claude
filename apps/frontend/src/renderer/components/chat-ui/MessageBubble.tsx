@@ -30,7 +30,7 @@ export function MessageBubble({
       <div className="flex justify-end gap-3">
         <div className="max-w-[75%]">
           <div className="insights-user-message-bubble text-foreground rounded-2xl rounded-tr-sm px-4 py-3">
-            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-td:text-foreground prose-th:text-foreground">
+            <div className="prose prose-sm max-w-none dark:prose-invert">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                 {message.content}
               </ReactMarkdown>
@@ -58,7 +58,7 @@ export function MessageBubble({
           {t('chat.assistant', 'Assistant')}
         </span>
         <div className="insights-message-bubble text-foreground rounded-2xl rounded-tl-sm px-4 py-3">
-          <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-td:text-foreground prose-th:text-foreground">
+          <div className="prose prose-sm max-w-none dark:prose-invert">
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
               {message.content}
             </ReactMarkdown>

@@ -31,7 +31,7 @@ def _short_model_name(model: str | None) -> str:
 
     Examples:
         claude-sonnet-4-5-20250929 -> sonnet-4.5
-        claude-opus-4-6-20251101 -> opus-4.6
+        claude-opus-4-6 -> opus-4.6
         claude-3-5-sonnet-20241022 -> sonnet-3.5
     """
     if not model:

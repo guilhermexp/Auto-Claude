@@ -3762,6 +3762,18 @@ body {
   border-radius: 1rem;
 }
 
+/* Fix prose text colors globally (Tailwind v4 --color-* resolves to raw HSL numbers without hsl() wrapper) */
+.prose {
+  --tw-prose-body: hsl(var(--foreground));
+  --tw-prose-headings: hsl(var(--foreground));
+  --tw-prose-bold: hsl(var(--foreground));
+  --tw-prose-counters: hsl(var(--muted-foreground));
+  --tw-prose-bullets: hsl(var(--muted-foreground));
+  --tw-prose-links: hsl(var(--primary));
+  --tw-prose-code: hsl(var(--foreground));
+  color: hsl(var(--foreground));
+}
+
 .insights-user-message-bubble {
   background-color: hsl(var(--muted) / 0.4);
   border: 1px solid hsl(var(--border) / 0.66);

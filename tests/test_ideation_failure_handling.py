@@ -88,7 +88,7 @@ async def test_run_agent_retries_with_sonnet_when_opus_unavailable(tmp_path, mon
         attempted_models.append(model)
         if len(attempted_models) == 1:
             return _FailingClient(
-                "There's an issue with the selected model (claude-opus-4-6-20251101). "
+                "There's an issue with the selected model (claude-opus-4-6). "
                 "It may not exist or you may not have access to it."
             )
         return _FailingClient("generic failure")
@@ -99,5 +99,5 @@ async def test_run_agent_retries_with_sonnet_when_opus_unavailable(tmp_path, mon
 
     assert success is False
     assert error == "generic failure"
-    assert attempted_models[0] == "claude-opus-4-6-20251101"
+    assert attempted_models[0] == "claude-opus-4-6"
     assert attempted_models[1] == "claude-sonnet-4-5-20250929"

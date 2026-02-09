@@ -576,7 +576,7 @@ describe('profile-service', () => {
               default: 'claude-sonnet-4-5-20250929',
               haiku: 'claude-haiku-4-5-20251001',
               sonnet: 'claude-sonnet-4-5-20250929',
-              opus: 'claude-opus-4-6-20251101'
+              opus: 'claude-opus-4-6'
             },
             createdAt: Date.now(),
             updatedAt: Date.now()
@@ -597,7 +597,7 @@ describe('profile-service', () => {
         ANTHROPIC_MODEL: 'claude-sonnet-4-5-20250929',
         ANTHROPIC_DEFAULT_HAIKU_MODEL: 'claude-haiku-4-5-20251001',
         ANTHROPIC_DEFAULT_SONNET_MODEL: 'claude-sonnet-4-5-20250929',
-        ANTHROPIC_DEFAULT_OPUS_MODEL: 'claude-opus-4-6-20251101'
+        ANTHROPIC_DEFAULT_OPUS_MODEL: 'claude-opus-4-6'
       });
     });
 
