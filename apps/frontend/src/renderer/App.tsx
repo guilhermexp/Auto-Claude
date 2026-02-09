@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, RefreshCw, AlertCircle } from 'lucide-react';
-import { debugLog } from '../shared/utils/debug-logger';
 import {
   DndContext,
   DragOverlay,
@@ -66,7 +65,14 @@ import { GlobalDownloadIndicator } from './components/GlobalDownloadIndicator';
 import { useIpcListeners } from './hooks/useIpc';
 import { useGlobalTerminalListeners } from './hooks/useGlobalTerminalListeners';
 import { useTerminalProfileChange } from './hooks/useTerminalProfileChange';
-import { BUILTIN_THEME_IDS, UI_SCALE_MIN, UI_SCALE_MAX, UI_SCALE_DEFAULT } from '../shared/constants';
+import {
+  BUILTIN_THEME_COLOR_SCHEMES,
+  BUILTIN_THEME_IDS,
+  DEFAULT_THEME_ID,
+  UI_SCALE_MIN,
+  UI_SCALE_MAX,
+  UI_SCALE_DEFAULT
+} from '../shared/constants';
 import type { Task, Project, BuiltinThemeId } from '../shared/types';
 import { generateCSSVariables } from './lib/themes/vscode-to-css-mapping';
 import { applyThemeVariables, removeThemeVariables } from './lib/themes/theme-apply';
@@ -684,27 +690,25 @@ export function App() {
       // When mode is `system`, use dedicated light/dark theme IDs if configured.
       const rawThemeId = settings.theme === 'system'
         ? (isSystemDark
-          ? (settings.systemDarkThemeId ?? settings.themeId ?? settings.colorTheme ?? 'default')
-          : (settings.systemLightThemeId ?? settings.themeId ?? settings.colorTheme ?? 'default'))
-        : (settings.themeId ?? settings.colorTheme ?? 'default');
+          ? (settings.systemDarkThemeId ?? settings.themeId ?? settings.colorTheme ?? DEFAULT_THEME_ID)
+          : (settings.systemLightThemeId ?? settings.themeId ?? settings.colorTheme ?? DEFAULT_THEME_ID))
+        : (settings.themeId ?? settings.colorTheme ?? DEFAULT_THEME_ID);
 
       const themeId: BuiltinThemeId = BUILTIN_THEME_IDS.includes(rawThemeId as BuiltinThemeId)
         ? (rawThemeId as BuiltinThemeId)
-        : 'default';
+        : DEFAULT_THEME_ID;
 
-      if (themeId === 'default') {
-        root.removeAttribute('data-theme');
-      } else {
-        root.setAttribute('data-theme', themeId);
-      }
+      root.setAttribute('data-theme', themeId);
 
-      // Apply imported/custom theme variables on top of built-in theme tokens.
-      // This keeps built-in fallbacks while allowing runtime overrides.
+      const builtinTheme = BUILTIN_THEME_COLOR_SCHEMES[themeId];
+      const builtinVariables = generateCSSVariables(builtinTheme.colors);
+      removeThemeVariables(root);
+      applyThemeVariables(builtinVariables, root);
+
+      // Apply imported/custom theme variables on top of selected built-in tokens.
       if (settings.customThemeColors && Object.keys(settings.customThemeColors).length > 0) {
         const customVariables = generateCSSVariables(settings.customThemeColors);
         applyThemeVariables(customVariables, root);
-      } else {
-        removeThemeVariables(root);
       }
     };
 
@@ -1010,7 +1014,7 @@ export function App() {
     <ViewStateProvider>
       <TooltipProvider>
         <ProactiveSwapListener />
-      <div className="flex h-screen bg-background">
+      <div className="flex h-screen bg-background app-shell">
         {/* Sidebar */}
         <Sidebar
           onSettingsClick={() => setIsSettingsDialogOpen(true)}
@@ -1020,7 +1024,7 @@ export function App() {
         />
 
         {/* Main content */}
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden app-main-shell">
           {/* Project Tabs */}
           {projectTabs.length > 0 && (
             <DndContext

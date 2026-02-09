@@ -6,8 +6,20 @@ import type { NotificationSettings, GraphitiEmbeddingProvider } from './project'
 import type { ChangelogFormat, ChangelogAudience, ChangelogEmojiLevel } from './changelog';
 import type { SupportedLanguage } from '../constants/i18n';
 
-// Built-in theme identifiers for multi-theme support
-export type BuiltinThemeId = 'default' | 'dusk' | 'lime' | 'ocean' | 'retro' | 'neo' | 'forest';
+// Built-in theme identifiers aligned with NEW-UI/theme.md
+export type BuiltinThemeId =
+  | '21st-dark'
+  | '21st-light'
+  | 'cursor-dark'
+  | 'cursor-light'
+  | 'cursor-midnight'
+  | 'claude-dark'
+  | 'claude-light'
+  | 'vesper-dark'
+  | 'vitesse-dark'
+  | 'vitesse-light'
+  | 'min-dark'
+  | 'min-light';
 /** @deprecated Use BuiltinThemeId instead. */
 export type ColorTheme = BuiltinThemeId;
 
@@ -155,6 +167,7 @@ export interface ThemePreviewColors {
 export interface ColorThemeDefinition {
   id: BuiltinThemeId;
   name: string;
+  type: 'light' | 'dark';
   description: string;
   previewColors: ThemePreviewColors;
 }

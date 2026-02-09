@@ -6,7 +6,11 @@ import {
   AlertCircle,
   Languages,
   PanelLeftClose,
-  PanelLeft
+  PanelLeft,
+  FolderKanban,
+  GitBranch,
+  MessageSquare,
+  Activity
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -37,6 +41,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import { cn } from '../lib/utils';
 import { useTextTranslation } from '../hooks/useTextTranslation';
 import { toast } from '../hooks/use-toast';
+import { useProjectStore } from '../stores/project-store';
+import type { GitStatus } from '../../shared/types';
 
 // createSafeLink - factory function that creates a SafeLink component with i18n support
 const createSafeLink = (opensInNewWindowText: string) => {
@@ -108,6 +114,11 @@ export function Insights({ projectId }: InsightsProps) {
   const [isUserAtBottom, setIsUserAtBottom] = useState(true);
   const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [gitStatus, setGitStatus] = useState<GitStatus | null>(null);
+
+  const project = useProjectStore((state) =>
+    state.projects.find((item) => item.id === projectId)
+  );
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
@@ -144,6 +155,28 @@ export function Insights({ projectId }: InsightsProps) {
     const cleanup = setupInsightsListeners();
     return cleanup;
   }, [projectId]);
+
+  useEffect(() => {
+    const loadGitStatus = async () => {
+      if (!project?.path) {
+        setGitStatus(null);
+        return;
+      }
+
+      try {
+        const result = await window.electronAPI.checkGitStatus(project.path);
+        if (result.success && result.data) {
+          setGitStatus(result.data);
+        } else {
+          setGitStatus(null);
+        }
+      } catch {
+        setGitStatus(null);
+      }
+    };
+
+    loadGitStatus();
+  }, [project?.path]);
 
   // Smart auto-scroll: only scroll if user is already at bottom
   // This allows users to scroll up to read previous messages without being
@@ -312,8 +345,16 @@ export function Insights({ projectId }: InsightsProps) {
     });
   }, [isTranslationEnabled, messages, getTranslatedText]);
 
+  const chatStatusText = status.phase === 'idle'
+    ? t('insights:chat.ready', 'Ready')
+    : status.phase === 'thinking'
+      ? t('insights:chat.thinking', 'Thinking...')
+      : status.phase === 'streaming'
+        ? t('insights:chat.streaming', 'Streaming...')
+        : t('insights:chat.error', 'Error');
+
   return (
-    <div className="flex h-full bg-background">
+    <div className="flex h-full bg-background insights-layout">
       {/* Left Panel: Chat History Sidebar - Collapsible */}
       <nav
         className={cn(
@@ -339,9 +380,9 @@ export function Insights({ projectId }: InsightsProps) {
 
       {/* Right Panel: Chat Area */}
       <div className={cn(
-        'flex-1 min-w-0 h-full overflow-hidden p-0'
+        'flex-1 min-w-0 h-full overflow-hidden p-0 insights-main-pane'
       )}>
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col h-full overflow-hidden insights-main-inner">
           {/* Header with sidebar toggle and translation button */}
           <div className="shrink-0 flex items-center justify-between px-4 pt-4 pb-1">
             <Tooltip>
@@ -474,6 +515,76 @@ export function Insights({ projectId }: InsightsProps) {
           />
         </div>
       </div>
+
+      <aside className="hidden xl:flex xl:w-[320px] shrink-0 insights-details-panel">
+        <div className="w-full h-full overflow-y-auto px-4 py-5 space-y-3">
+          <h3 className="text-sm font-semibold tracking-wide text-foreground/90">
+            {t('insights:details.title', 'Details')}
+          </h3>
+
+          <section className="insights-details-card">
+            <header className="insights-details-card-title">
+              <FolderKanban className="h-4 w-4" />
+              <span>{t('insights:details.workspace', 'Workspace')}</span>
+            </header>
+            <div className="insights-details-list">
+              <div className="insights-details-row">
+                <span>{t('insights:details.project', 'Project')}</span>
+                <strong>{project?.name ?? '-'}</strong>
+              </div>
+              <div className="insights-details-row">
+                <span>{t('insights:details.branch', 'Branch')}</span>
+                <strong>{gitStatus?.currentBranch ?? '-'}</strong>
+              </div>
+              <div className="insights-details-row">
+                <span>{t('insights:details.path', 'Path')}</span>
+                <strong className="truncate">{project?.path ?? '-'}</strong>
+              </div>
+            </div>
+          </section>
+
+          <section className="insights-details-card">
+            <header className="insights-details-card-title">
+              <MessageSquare className="h-4 w-4" />
+              <span>{t('insights:details.session', 'Session')}</span>
+            </header>
+            <div className="insights-details-list">
+              <div className="insights-details-row">
+                <span>{t('insights:details.messages', 'Messages')}</span>
+                <strong>{messages.length}</strong>
+              </div>
+              <div className="insights-details-row">
+                <span>{t('insights:details.sessions', 'Conversations')}</span>
+                <strong>{sessions.length}</strong>
+              </div>
+            </div>
+          </section>
+
+          <section className="insights-details-card">
+            <header className="insights-details-card-title">
+              <Activity className="h-4 w-4" />
+              <span>{t('insights:details.status', 'Status')}</span>
+            </header>
+            <div className="insights-details-list">
+              <div className="insights-details-row">
+                <span>{t('insights:details.chatStatus', 'Chat')}</span>
+                <strong>{chatStatusText}</strong>
+              </div>
+              <div className="insights-details-row">
+                <span>{t('insights:details.translation', 'Translation')}</span>
+                <strong>{isTranslationEnabled ? t('common:labels.enabled', 'Enabled') : t('common:labels.disabled', 'Disabled')}</strong>
+              </div>
+              <div className="insights-details-row">
+                <span>{t('insights:details.repository', 'Repository')}</span>
+                <strong className="inline-flex items-center gap-1.5">
+                  <GitBranch className="h-3.5 w-3.5" />
+                  {gitStatus?.isGitRepo ? t('common:labels.detected', 'Detected') : t('common:labels.notAvailable', 'N/A')}
+                </strong>
+              </div>
+            </div>
+          </section>
+        </div>
+      </aside>
     </div>
   );
 }

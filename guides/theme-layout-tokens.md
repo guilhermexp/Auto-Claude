@@ -1,235 +1,145 @@
-# Documentação Completa: Layout, Tokens e Tema (Light/Dark + Color Themes)
+# Documentação Completa: Layout, Tokens e Temas (Light/Dark/System)
 
-Este documento mapeia **como o sistema de aparência funciona hoje** no Auto-Claude (frontend), e **quais arquivos precisam ser alterados** em cada tipo de mudança.
+Este documento mapeia o sistema atual de aparência do Auto-Claude e mostra exatamente quais arquivos alterar para manter a base de UI/UX/tokens e alternância de temas.
 
 ## 1) Visão geral da arquitetura
 
 O sistema de aparência tem 4 camadas:
 
-1. **Modelo e defaults de settings**
-- Define tipos (`theme`, `themeId`) e valores padrão.
+1. Modelo e defaults de settings
+- Define `theme` (`light|dark|system`) e IDs de tema (`themeId`, `systemLightThemeId`, `systemDarkThemeId`).
 
-2. **Persistência**
-- Salva/carrega as escolhas em `settings.json` (Electron `userData`).
+2. Persistência
+- Salva/carrega preferências em `settings.json` (Electron `userData`).
 
-3. **Aplicação de tema em runtime**
-- Aplica `class="dark"` no `<html>` para modo escuro.
-- Aplica `data-theme="..."` no `<html>` para paleta de cores.
+3. Aplicação de tema em runtime
+- `App.tsx` define classe `dark` no `<html>`.
+- `App.tsx` resolve o tema builtin ativo e aplica CSS vars dinamicamente a partir do catálogo de temas.
+- Se houver tema externo importado, ele sobrepõe as variáveis do builtin.
 
-4. **Tokens/CSS e componentes**
-- Tokens globais (cores, spacing, tipografia etc.) em CSS variables.
+4. Tokens/CSS e componentes
+- `globals.css` define base de tokens semânticos (`--background`, `--primary`, etc.) e estilo global.
 - Componentes usam classes semânticas (`bg-background`, `text-foreground`, etc.).
 
----
+## 2) Temas builtin implementados (NEW-UI/theme.md)
 
-## 2) Arquivos fonte principais
+Temas ativos no app:
+- `21st-dark`
+- `21st-light`
+- `cursor-dark`
+- `cursor-light`
+- `cursor-midnight`
+- `claude-dark`
+- `claude-light`
+- `vesper-dark`
+- `vitesse-dark`
+- `vitesse-light`
+- `min-dark`
+- `min-light`
 
-### 2.1 Tipos e catálogo de temas
+Defaults atuais:
+- `DEFAULT_DARK_THEME_ID = 21st-dark`
+- `DEFAULT_LIGHT_THEME_ID = 21st-light`
+- `DEFAULT_THEME_ID = 21st-dark`
+
+## 3) Arquivos principais
+
+### 3.1 Tipos e catálogo de temas
 - `apps/frontend/src/shared/types/settings.ts`
-  - Define `theme: 'light' | 'dark' | 'system'`
-  - Define `BuiltinThemeId` (`'default' | 'dusk' | 'lime' | 'ocean' | 'retro' | 'neo' | 'forest'`)
-  - Define `AppSettings.themeId` (canônico), `systemLightThemeId`, `systemDarkThemeId` e `colorTheme` (legado)
+  - `BuiltinThemeId` com os 11 IDs.
+  - `ColorThemeDefinition` com `type: 'light' | 'dark'`.
 
 - `apps/frontend/src/shared/constants/themes.ts`
-  - Catálogo `COLOR_THEMES` (id, nome, descrição e cores de preview).
-  - Controla o que aparece no seletor de tema.
+  - Catálogo completo (`BUILTIN_THEME_PALETTES`) com `colors` (VS Code keys) por tema.
+  - Exposição de `COLOR_THEMES`, `BUILTIN_THEME_COLOR_SCHEMES`, `BUILTIN_THEME_IDS`.
+  - Defaults (`DEFAULT_THEME_ID`, `DEFAULT_LIGHT_THEME_ID`, `DEFAULT_DARK_THEME_ID`).
 
 - `apps/frontend/src/shared/constants/config.ts`
-  - `DEFAULT_APP_SETTINGS.theme`, `themeId` e `colorTheme`.
-  - Hoje: `theme: 'dark'`, `themeId: 'default'`, `colorTheme: 'default'`.
+  - Defaults de settings:
+    - `themeId: '21st-dark'`
+    - `systemLightThemeId: '21st-light'`
+    - `systemDarkThemeId: '21st-dark'`
 
-### 2.2 Persistência (settings.json)
+### 3.2 Persistência e migração
+- `apps/frontend/src/renderer/stores/settings-store.ts`
+  - Migração `migrateThemeId`:
+    - normaliza IDs inválidos para defaults.
+    - converte legados (`21st` -> `21st-dark`, `claude` -> `claude-dark`).
+
 - `apps/frontend/src/main/settings-utils.ts`
-  - Caminho do arquivo: `app.getPath('userData')/settings.json`
-  - Helpers de leitura/escrita.
-
 - `apps/frontend/src/main/ipc-handlers/settings-handlers.ts`
-  - IPC `SETTINGS_GET` e `SETTINGS_SAVE`.
-  - Faz merge com defaults e persiste mudanças.
-
 - `apps/frontend/src/preload/api/settings-api.ts`
-  - Ponte renderer -> main (`getSettings`, `saveSettings`).
 
-- `apps/frontend/src/renderer/stores/settings-store.ts`
-  - Estado global (`zustand`) de settings.
-  - `loadSettings()` e `saveSettings()` no renderer.
-  - Migração para dark por padrão (`migrateToDarkMode`).
-
-### 2.3 Aplicação prática do tema
+### 3.3 Aplicação de tema em runtime
 - `apps/frontend/src/renderer/App.tsx`
-  - Efeito que aplica:
-    - `document.documentElement.classList.add/remove('dark')`
-    - `document.documentElement.setAttribute('data-theme', ...)`
-  - Resolve tema por `themeId` com fallback em `colorTheme` (legado), depois `default`.
-  - Quando `theme === 'system'`, usa `systemLightThemeId` / `systemDarkThemeId`.
-  - Aplica overrides opcionais de tema importado via `customThemeColors`.
-  - Escuta `prefers-color-scheme` quando `theme === 'system'`.
+  - resolve tema efetivo considerando `theme`, `themeId`, `systemLightThemeId`, `systemDarkThemeId`.
+  - aplica `dark` class.
+  - aplica CSS vars do builtin via:
+    - `generateCSSVariables()`
+    - `applyThemeVariables()`
+  - se houver `customThemeColors`, sobrepõe variáveis.
 
 - `apps/frontend/src/renderer/lib/themes/vscode-to-css-mapping.ts`
-  - Mapeia chaves de cor estilo VS Code para CSS variables do app.
-  - Converte `hex -> hsl triplet`.
+  - converte mapa de cores VS Code para tokens CSS do app.
 
 - `apps/frontend/src/renderer/lib/themes/theme-apply.ts`
-  - Aplica/remove variáveis CSS inline no `document.documentElement`.
+  - aplica/remove variáveis CSS inline no root.
 
-- `apps/frontend/src/renderer/components/settings/hooks/useSettings.ts`
-  - Fluxo de preview/reversão no modal:
-    - Preview imediato de tema/escala.
-    - `revertTheme()` ao fechar sem salvar.
-    - `commitTheme()` após salvar.
-
-- `apps/frontend/src/renderer/components/settings/AppSettings.tsx`
-  - Integra `useSettings` no modal.
-  - Fecha modal sem salvar -> reverte preview.
-
-### 2.4 UI do seletor de aparência
-- `apps/frontend/src/renderer/components/settings/ThemeSettings.tsx`
-  - Card da seção de aparência.
-
+### 3.4 UI de seleção
 - `apps/frontend/src/renderer/components/settings/ThemeSelector.tsx`
-  - Componente do toggle (`system/light/dark`) e grade de paletas.
-  - Atualiza `settings` local + store para preview imediato.
+  - toggle `system|light|dark`.
+  - lista temas builtin por tipo (light/dark).
+  - mapeamento separado para `systemLightThemeId` e `systemDarkThemeId`.
+  - suporta importação de temas externos (VS Code/Cursor/Windsurf).
 
+### 3.5 CSS base e tokens
 - `apps/frontend/src/renderer/styles/globals.css`
-  - **Base light** em `:root`
-  - **Base dark** em `.dark`
-  - Overrides por paleta com `:root[data-theme="..."]` e `:root.dark[data-theme="..."]`
-  - Tokens semânticos e utilitários (`--background`, `--primary`, etc.)
-  - Estilos visuais do seletor (`.settings-mode-button`, `.settings-theme-card`)
+  - define base `:root` e `.dark`.
+  - não mantém blocos estáticos por tema builtin; os 11 temas são aplicados em runtime.
 
-### 2.5 Traduções (texto da UI)
-- `apps/frontend/src/shared/i18n/locales/pt/settings.json`
-- `apps/frontend/src/shared/i18n/locales/en/settings.json`
-- `apps/frontend/src/shared/i18n/locales/fr/settings.json`
+## 4) Fluxo fim a fim
 
----
+1. Usuário muda modo/tema em `ThemeSelector`.
+2. Store atualiza imediatamente (preview).
+3. `App.tsx` recalcula tema efetivo e reaplica variáveis.
+4. Se salvar: persiste em `settings.json`.
+5. Se cancelar modal: `useSettings` reverte preview.
 
-## 3) Como o fluxo funciona (fim a fim)
+## 5) Mapa de alteração (o que mexer)
 
-1. Usuário muda modo/paleta em `ThemeSelector`.
-2. `ThemeSelector` atualiza store imediatamente para preview.
-3. `App.tsx` reage ao estado e aplica `dark`/`data-theme` no `<html>`.
-4. `globals.css` recalcula CSS variables e a UI troca visual.
-5. Se salvar: `saveSettings` persiste no `settings.json`.
-6. Se fechar sem salvar: `revertTheme()` restaura valores originais.
-
----
-
-## 4) Mapa de alteração: “o que quero mudar” -> “arquivos que mexem”
-
-## 4.1 Mudar cores do tema padrão (default)
-- Obrigatórios:
-  - `apps/frontend/src/renderer/styles/globals.css`
-    - bloco `:root` (light)
-    - bloco `.dark` (dark)
-- Recomendado:
-  - `apps/frontend/src/shared/constants/themes.ts`
-    - `previewColors` do `default`
-
-## 4.2 Mudar só o modo claro ou só o escuro (global)
-- `apps/frontend/src/renderer/styles/globals.css`
-  - `:root` (claro)
-  - `.dark` (escuro)
-
-## 4.3 Criar uma nova paleta de cor
-- Obrigatórios:
-  - `apps/frontend/src/shared/types/settings.ts`
-    - adicionar novo valor em `BuiltinThemeId`
-  - `apps/frontend/src/shared/constants/themes.ts`
-    - adicionar tema em `COLOR_THEMES`
-  - `apps/frontend/src/renderer/styles/globals.css`
-    - criar 2 blocos:
-      - `:root[data-theme="novo"]`
-      - `:root.dark[data-theme="novo"]`
-- Opcional:
-  - ajustes de copy/descrição (se necessário) nos arquivos i18n
-
-## 4.4 Remover/renomear uma paleta existente
-- Obrigatórios:
-  - `apps/frontend/src/shared/types/settings.ts`
-  - `apps/frontend/src/shared/constants/themes.ts`
-  - `apps/frontend/src/renderer/styles/globals.css`
-- Atenção:
-  - usuários podem ter valor antigo salvo; hoje `App.tsx` já faz fallback para `default` quando inválido.
-
-## 4.5 Mudar comportamento do toggle light/dark/system
-- `apps/frontend/src/renderer/components/settings/ThemeSelector.tsx`
-  - UI e ações dos botões
-- `apps/frontend/src/renderer/App.tsx`
-  - regra de aplicação no `<html>` + listener de `prefers-color-scheme`
-- `apps/frontend/src/renderer/components/settings/hooks/useSettings.ts`
-  - preview/revert no modal
-
-## 4.6 Mudar padrão inicial da aplicação
-- `apps/frontend/src/shared/constants/config.ts`
-  - `DEFAULT_APP_SETTINGS.theme` / `themeId` (`colorTheme` legado opcional)
-- `apps/frontend/src/renderer/stores/settings-store.ts`
-  - revisar migração `migrateToDarkMode` (pode sobrescrever `system`/undefined para `dark`)
-
-## 4.7 Mudar tokens de design (tipografia, espaçamento, radius, animações)
-- `apps/frontend/src/renderer/styles/globals.css`
-  - bloco `@theme` (tokens)
-
-## 4.8 Mudar estilo visual do componente de seleção (cards/botões)
-- `apps/frontend/src/renderer/components/settings/ThemeSelector.tsx`
-- `apps/frontend/src/renderer/styles/globals.css`
-  - classes:
-    - `.settings-mode-button*`
-    - `.settings-theme-card*`
-
-## 4.9 Mudar textos da seção de aparência
-- `apps/frontend/src/shared/i18n/locales/pt/settings.json`
-- `apps/frontend/src/shared/i18n/locales/en/settings.json`
-- `apps/frontend/src/shared/i18n/locales/fr/settings.json`
-
-## 4.10 Aplicar tema importado/custom (runtime)
+### 5.1 Trocar/adicionar temas builtin
 - `apps/frontend/src/shared/types/settings.ts`
-  - campo `customThemeColors`
-- `apps/frontend/src/renderer/lib/themes/vscode-to-css-mapping.ts`
-- `apps/frontend/src/renderer/lib/themes/theme-apply.ts`
+- `apps/frontend/src/shared/constants/themes.ts`
+- `apps/frontend/src/shared/constants/config.ts` (se mudar defaults)
+- `apps/frontend/src/renderer/stores/settings-store.ts` (migração legada)
+
+### 5.2 Alterar lógica de alternância light/dark/system
+- `apps/frontend/src/renderer/components/settings/ThemeSelector.tsx`
 - `apps/frontend/src/renderer/App.tsx`
+- `apps/frontend/src/renderer/components/settings/hooks/useSettings.ts`
 
----
-
-## 5) Tokens principais usados pela UI
-
-Os componentes consomem tokens semânticos via classes Tailwind utilitárias ligadas a CSS vars:
-- `--background`, `--foreground`
-- `--card`, `--card-foreground`
-- `--popover`, `--popover-foreground`
-- `--primary`, `--primary-foreground`
-- `--secondary`, `--secondary-foreground`
-- `--muted`, `--muted-foreground`
-- `--accent`, `--accent-foreground`
-- `--border`, `--input`, `--ring`
-- `--success`, `--warning`, `--info`
-
-Arquivo fonte desses tokens:
+### 5.3 Alterar tokens de design global (tipografia/spacing/radius/estilos base)
 - `apps/frontend/src/renderer/styles/globals.css`
 
----
+### 5.4 Ajustar mapeamento de cores VS Code -> tokens do app
+- `apps/frontend/src/renderer/lib/themes/vscode-to-css-mapping.ts`
 
-## 6) Checklist rápido para alteração segura
+### 5.5 Ajustar temas externos/importados
+- `apps/frontend/src/main/themes/vscode-theme-loader.ts`
+- `apps/frontend/src/main/ipc-handlers/theme-handlers.ts`
+- `apps/frontend/src/preload/api/settings-api.ts`
+- `apps/frontend/src/renderer/components/settings/ThemeSelector.tsx`
 
-1. Definir se a mudança é:
-- comportamento (`ThemeSelector/App.tsx/useSettings`)
-- catálogo de temas (`types + constants + css`)
-- tokens globais (`globals.css`)
+## 6) Checklist de validação
 
-2. Atualizar arquivos obrigatórios do cenário (seção 4).
+1. Testar modos: `light`, `dark`, `system`.
+2. Testar os 11 temas builtin no seletor.
+3. Em `system`, validar troca automática do SO entre tema light/dark mapeados.
+4. Validar importar tema externo e voltar para builtin.
+5. Fechar modal sem salvar e confirmar revert.
+6. Reabrir app e confirmar persistência.
 
-3. Validar no app:
-- modo `light`, `dark`, `system`
-- cada paleta no seletor
-- fechar modal sem salvar (deve reverter)
-- salvar e reabrir app (deve persistir)
+## 7) Observações
 
-4. Se houver mudança de texto, sincronizar i18n (`pt/en/fr`).
-
----
-
-## 7) Observações importantes
-
-- Não há suíte de testes dedicada ao `ThemeSelector`/`App.tsx` para tema no estado atual.
-- O fallback para `themeId`/`colorTheme` inválido é tratado em `App.tsx` (retorna para `default`).
-- Existe migração no store forçando dark em casos legados (`migrateToDarkMode`), então mudanças de default devem considerar essa função.
+- O `data-theme` permanece para rastreabilidade/debug, mas os tokens dos builtins são definidos por runtime em `App.tsx`.
+- O catálogo foi alinhado com `NEW-UI/theme.md`.

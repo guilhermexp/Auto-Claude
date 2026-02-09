@@ -5,7 +5,7 @@ import {
   Settings,
   LayoutGrid,
   Terminal,
-  Map,
+  Map as MapIcon,
   BookOpen,
   Lightbulb,
   AlertCircle,
@@ -19,9 +19,7 @@ import {
   Sparkles,
   GitBranch,
   HelpCircle,
-  Wrench,
-  PanelLeft,
-  PanelLeftClose
+  Wrench
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
@@ -79,7 +77,7 @@ const baseNavItems: NavItem[] = [
   { id: 'kanban', labelKey: 'navigation:items.kanban', icon: LayoutGrid, shortcut: 'K' },
   { id: 'terminals', labelKey: 'navigation:items.terminals', icon: Terminal, shortcut: 'A' },
   { id: 'insights', labelKey: 'navigation:items.insights', icon: Sparkles, shortcut: 'N' },
-  { id: 'roadmap', labelKey: 'navigation:items.roadmap', icon: Map, shortcut: 'D' },
+  { id: 'roadmap', labelKey: 'navigation:items.roadmap', icon: MapIcon, shortcut: 'D' },
   { id: 'ideation', labelKey: 'navigation:items.ideation', icon: Lightbulb, shortcut: 'I' },
   { id: 'changelog', labelKey: 'navigation:items.changelog', icon: FileText, shortcut: 'L' },
   { id: 'context', labelKey: 'navigation:items.context', icon: BookOpen, shortcut: 'C' },
@@ -122,7 +120,7 @@ export function Sidebar({
   // Sidebar collapsed state from settings
   const isCollapsed = settings.sidebarCollapsed ?? false;
 
-  const toggleSidebar = () => {
+  const _toggleSidebar = () => {
     saveSettings({ sidebarCollapsed: !isCollapsed });
   };
 
@@ -294,17 +292,18 @@ export function Sidebar({
 
     const button = (
       <button
+        type="button"
         key={item.id}
         onClick={() => handleNavClick(item.id)}
         disabled={!selectedProjectId}
         aria-keyshortcuts={item.shortcut}
         className={cn(
-          'w-full text-left py-2 cursor-pointer group relative transition-colors duration-75',
+          'w-full text-left py-2 cursor-pointer group relative transition-colors duration-75 app-sidebar-nav-item',
           'outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70',
           'pl-2 pr-2 rounded-md',
           'disabled:pointer-events-none disabled:opacity-50',
           isActive
-            ? 'bg-foreground/5 text-foreground'
+            ? 'bg-foreground/5 text-foreground app-sidebar-nav-item-active'
             : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
         )}
       >
@@ -350,7 +349,7 @@ export function Sidebar({
   return (
     <TooltipProvider>
       <div
-        className="flex h-full w-64 flex-col bg-sidebar border-r"
+        className="flex h-full w-64 flex-col bg-sidebar border-r app-sidebar-shell"
         style={{ borderRightColor: 'hsl(var(--border) / 0.32)' }}
       >
         {/* Header with drag area - extra top padding for macOS traffic lights */}
@@ -406,9 +405,10 @@ export function Sidebar({
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
+                  type="button"
                   onClick={onSettingsClick}
                   className={cn(
-                    'flex-1 flex items-center gap-2.5 py-1.5 pl-2 pr-2 text-sm rounded-md transition-colors duration-75',
+                    'flex-1 flex items-center gap-2.5 py-1.5 pl-2 pr-2 text-sm rounded-md transition-colors duration-75 app-sidebar-footer-btn',
                     'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
                   )}
                 >
@@ -421,10 +421,11 @@ export function Sidebar({
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
+                  type="button"
                   onClick={() => window.open('https://github.com/AndyMik90/Auto-Claude/issues', '_blank')}
                   aria-label={t('tooltips.help')}
                   className={cn(
-                    'flex items-center justify-center w-7 h-7 rounded-md transition-colors duration-75',
+                    'flex items-center justify-center w-7 h-7 rounded-md transition-colors duration-75 app-sidebar-footer-btn',
                     'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
                   )}
                 >

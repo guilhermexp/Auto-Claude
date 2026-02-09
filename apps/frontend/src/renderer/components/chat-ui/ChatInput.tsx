@@ -32,14 +32,14 @@ export const ChatInput = forwardRef<HTMLTextAreaElement, ChatInputProps>(
             onChange={(e) => onChange(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={t('chat.placeholder', 'Ask about your codebase...')}
-            className="border-0 bg-transparent focus-visible:ring-0 resize-none min-h-[60px] max-h-[200px] pr-14 py-3"
+            className="border-0 bg-transparent focus-visible:ring-0 resize-none min-h-[60px] max-h-[200px] pr-14 py-3 text-[13px]"
             disabled={disabled || isLoading}
           />
           <Button
             onClick={onSend}
             disabled={!value.trim() || disabled || isLoading}
             size="icon"
-            className="absolute right-2 bottom-2 h-9 w-9 rounded-full shadow-sm"
+            className="absolute right-2 bottom-2 h-8 w-8 rounded-full shadow-sm insights-send-button"
           >
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Check, Sun, Moon, Monitor } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Label } from '../ui/label';
-import { COLOR_THEMES } from '../../../shared/constants';
+import { COLOR_THEMES, DEFAULT_THEME_ID } from '../../../shared/constants';
 import { useSettingsStore } from '../../stores/settings-store';
 import type { BuiltinThemeId, AppSettings, ExternalThemeInfo } from '../../../shared/types';
 
@@ -25,7 +25,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
   const [applyingExternalThemeId, setApplyingExternalThemeId] = useState<string | null>(null);
   const [externalThemeError, setExternalThemeError] = useState<string | null>(null);
 
-  const currentColorTheme = settings.themeId || settings.colorTheme || 'default';
+  const currentColorTheme = settings.themeId || settings.colorTheme || DEFAULT_THEME_ID;
   const systemLightThemeId = settings.systemLightThemeId || currentColorTheme;
   const systemDarkThemeId = settings.systemDarkThemeId || currentColorTheme;
   const currentMode = settings.theme;
@@ -105,6 +105,11 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
 
   const lightExternalThemes = externalThemes.filter((theme) => theme.type === 'light');
   const darkExternalThemes = externalThemes.filter((theme) => theme.type !== 'light');
+  const lightBuiltinThemes = COLOR_THEMES.filter((theme) => theme.type === 'light');
+  const darkBuiltinThemes = COLOR_THEMES.filter((theme) => theme.type === 'dark');
+  const visibleBuiltinThemes = currentMode === 'system'
+    ? COLOR_THEMES
+    : (currentMode === 'light' ? lightBuiltinThemes : darkBuiltinThemes);
 
   useEffect(() => {
     loadExternalThemes();
@@ -159,10 +164,14 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
       <div className="space-y-2">
         <div className="space-y-1">
           <Label className="text-sm font-medium text-foreground">Color Theme</Label>
-          <p className="text-sm text-muted-foreground">Select a color palette for the interface</p>
+          <p className="text-sm text-muted-foreground">
+            {currentMode === 'system'
+              ? 'Select a color palette for the interface'
+              : `Showing ${currentMode} themes for current appearance mode`}
+          </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {COLOR_THEMES.map((theme) => {
+          {visibleBuiltinThemes.map((theme) => {
             const isSelected = activeThemeId === theme.id;
             const bgColor = isDark ? theme.previewColors.darkBg : theme.previewColors.bg;
             const accentColor = isDark
@@ -207,6 +216,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
                 <div className="space-y-1">
                   <p className="font-medium text-sm text-foreground">{theme.name}</p>
                   <p className="text-xs text-muted-foreground line-clamp-2">{theme.description}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{theme.type}</p>
                 </div>
               </button>
             );
@@ -226,7 +236,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Light Appearance</p>
             <div className="flex flex-wrap gap-2">
-              {COLOR_THEMES.map((theme) => (
+              {lightBuiltinThemes.map((theme) => (
                 <button
                   type="button"
                   key={`system-light-${theme.id}`}
@@ -245,7 +255,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
           <div className="space-y-2">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Dark Appearance</p>
             <div className="flex flex-wrap gap-2">
-              {COLOR_THEMES.map((theme) => (
+              {darkBuiltinThemes.map((theme) => (
                 <button
                   type="button"
                   key={`system-dark-${theme.id}`}

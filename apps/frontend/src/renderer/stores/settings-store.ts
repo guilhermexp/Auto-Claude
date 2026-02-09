@@ -1,7 +1,13 @@
 import { create } from 'zustand';
 import type { AppSettings } from '../../shared/types';
 import type { APIProfile, ProfileFormData, TestConnectionResult, ModelInfo } from '@shared/types/profile';
-import { DEFAULT_APP_SETTINGS } from '../../shared/constants';
+import {
+  BUILTIN_THEME_COLOR_SCHEMES,
+  BUILTIN_THEME_IDS,
+  DEFAULT_APP_SETTINGS,
+  DEFAULT_DARK_THEME_ID,
+  DEFAULT_LIGHT_THEME_ID
+} from '../../shared/constants';
 import { toast } from '../hooks/use-toast';
 import { markSettingsLoaded } from '../lib/sentry';
 
@@ -358,15 +364,40 @@ function migrateToDarkMode(settings: AppSettings): AppSettings {
  * Keeps both fields synchronized for backwards compatibility.
  */
 function migrateThemeId(settings: AppSettings): AppSettings {
-  const themeId = settings.themeId ?? settings.colorTheme ?? DEFAULT_APP_SETTINGS.themeId;
-  const systemLightThemeId = settings.systemLightThemeId ?? themeId;
-  const systemDarkThemeId = settings.systemDarkThemeId ?? themeId;
+  const legacyThemeMap: Record<string, typeof BUILTIN_THEME_IDS[number]> = {
+    '21st': '21st-dark',
+    'claude': 'claude-dark'
+  };
+
+  const normalizeThemeId = (
+    rawId: string | undefined,
+    fallback: typeof BUILTIN_THEME_IDS[number]
+  ): typeof BUILTIN_THEME_IDS[number] => {
+    if (!rawId) return fallback;
+
+    const mappedId = legacyThemeMap[rawId] ?? rawId;
+    return BUILTIN_THEME_IDS.includes(mappedId as typeof BUILTIN_THEME_IDS[number])
+      ? (mappedId as typeof BUILTIN_THEME_IDS[number])
+      : fallback;
+  };
+
+  const fallbackThemeId = settings.theme === 'light' ? DEFAULT_LIGHT_THEME_ID : DEFAULT_DARK_THEME_ID;
+  const normalizedThemeId = normalizeThemeId(settings.themeId ?? settings.colorTheme, fallbackThemeId);
+  const normalizedThemeType = BUILTIN_THEME_COLOR_SCHEMES[normalizedThemeId]?.type;
+  const themeId = settings.theme === 'light' && normalizedThemeType === 'dark'
+    ? DEFAULT_LIGHT_THEME_ID
+    : (settings.theme === 'dark' && normalizedThemeType === 'light'
+      ? DEFAULT_DARK_THEME_ID
+      : normalizedThemeId);
+  const normalizedSystemLightThemeId = normalizeThemeId(settings.systemLightThemeId, DEFAULT_LIGHT_THEME_ID);
+  const normalizedSystemDarkThemeId = normalizeThemeId(settings.systemDarkThemeId, DEFAULT_DARK_THEME_ID);
+
   return {
     ...settings,
     themeId,
-    systemLightThemeId,
-    systemDarkThemeId,
-    colorTheme: settings.colorTheme ?? themeId
+    systemLightThemeId: normalizedSystemLightThemeId,
+    systemDarkThemeId: normalizedSystemDarkThemeId,
+    colorTheme: themeId
   };
 }
 
