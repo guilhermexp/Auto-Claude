@@ -337,7 +337,7 @@ AGENT_CONFIGS = {
         "thinking_default": "high",
     },
     "ideation": {
-        "tools": BASE_READ_TOOLS + WEB_TOOLS,
+        "tools": BASE_READ_TOOLS + ["Write"] + WEB_TOOLS,
         "mcp_servers": [],
         "auto_claude_tools": [],
         "thinking_default": "high",
