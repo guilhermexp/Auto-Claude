@@ -28,6 +28,9 @@ export const UI_SCALE_STEP = 5;
 
 export const DEFAULT_APP_SETTINGS = {
   theme: 'dark' as const,
+  themeId: 'default' as const,
+  systemLightThemeId: 'default' as const,
+  systemDarkThemeId: 'default' as const,
   colorTheme: 'default' as const,
   defaultModel: 'opus',
   agentFramework: 'auto-claude',

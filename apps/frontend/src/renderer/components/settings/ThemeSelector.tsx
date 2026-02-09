@@ -1,9 +1,10 @@
+import { useCallback, useEffect, useState } from 'react';
 import { Check, Sun, Moon, Monitor } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Label } from '../ui/label';
 import { COLOR_THEMES } from '../../../shared/constants';
 import { useSettingsStore } from '../../stores/settings-store';
-import type { ColorTheme, AppSettings } from '../../../shared/types';
+import type { BuiltinThemeId, AppSettings, ExternalThemeInfo } from '../../../shared/types';
 
 interface ThemeSelectorProps {
   settings: AppSettings;
@@ -19,18 +20,95 @@ interface ThemeSelectorProps {
  */
 export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps) {
   const updateStoreSettings = useSettingsStore((state) => state.updateSettings);
+  const [externalThemes, setExternalThemes] = useState<ExternalThemeInfo[]>([]);
+  const [loadingExternalThemes, setLoadingExternalThemes] = useState(false);
+  const [applyingExternalThemeId, setApplyingExternalThemeId] = useState<string | null>(null);
+  const [externalThemeError, setExternalThemeError] = useState<string | null>(null);
 
-  const currentColorTheme = settings.colorTheme || 'default';
+  const currentColorTheme = settings.themeId || settings.colorTheme || 'default';
+  const systemLightThemeId = settings.systemLightThemeId || currentColorTheme;
+  const systemDarkThemeId = settings.systemDarkThemeId || currentColorTheme;
   const currentMode = settings.theme;
   const isDark = currentMode === 'dark' ||
     (currentMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const activeThemeId = currentMode === 'system'
+    ? (isDark ? systemDarkThemeId : systemLightThemeId)
+    : currentColorTheme;
 
-  const handleColorThemeChange = (themeId: ColorTheme) => {
+  const handleColorThemeChange = (themeId: BuiltinThemeId) => {
+    const updates: Partial<AppSettings> = currentMode === 'system'
+      ? (isDark
+        ? { themeId, colorTheme: themeId, systemDarkThemeId: themeId }
+        : { themeId, colorTheme: themeId, systemLightThemeId: themeId })
+      : { themeId, colorTheme: themeId };
+
     // Update local draft state
-    onSettingsChange({ ...settings, colorTheme: themeId });
+    onSettingsChange({ ...settings, ...updates });
     // Apply immediately to store for live preview (triggers App.tsx useEffect)
-    updateStoreSettings({ colorTheme: themeId });
+    updateStoreSettings(updates);
   };
+
+  const handleSystemThemeChange = (target: 'light' | 'dark', themeId: BuiltinThemeId) => {
+    const updates: Partial<AppSettings> = target === 'light'
+      ? { systemLightThemeId: themeId }
+      : { systemDarkThemeId: themeId };
+    onSettingsChange({ ...settings, ...updates });
+    updateStoreSettings(updates);
+  };
+
+  const loadExternalThemes = useCallback(async () => {
+    setLoadingExternalThemes(true);
+    setExternalThemeError(null);
+    try {
+      const result = await window.electronAPI.scanExternalThemes();
+      if (result.success && result.data) {
+        setExternalThemes(result.data);
+      } else {
+        setExternalThemeError(result.error || 'Failed to scan external themes');
+      }
+    } catch (error) {
+      setExternalThemeError(error instanceof Error ? error.message : 'Failed to scan external themes');
+    } finally {
+      setLoadingExternalThemes(false);
+    }
+  }, []);
+
+  const handleApplyExternalTheme = async (theme: ExternalThemeInfo) => {
+    setApplyingExternalThemeId(theme.id);
+    setExternalThemeError(null);
+    const result = await window.electronAPI.loadExternalTheme(theme);
+    if (!result.success || !result.data) {
+      setApplyingExternalThemeId(null);
+      setExternalThemeError(result.error || `Failed to load "${theme.name}"`);
+      return;
+    }
+
+    const updates: Partial<AppSettings> = {
+      customThemeColors: result.data.colors,
+      customThemeName: result.data.name,
+      customThemeSource: result.data.source
+    };
+    onSettingsChange({ ...settings, ...updates });
+    updateStoreSettings(updates);
+    setApplyingExternalThemeId(null);
+  };
+
+  const handleClearExternalTheme = () => {
+    const updates: Partial<AppSettings> = {
+      customThemeColors: undefined,
+      customThemeName: undefined,
+      customThemeSource: undefined
+    };
+    onSettingsChange({ ...settings, ...updates });
+    updateStoreSettings(updates);
+  };
+
+  const lightExternalThemes = externalThemes.filter((theme) => theme.type === 'light');
+  const darkExternalThemes = externalThemes.filter((theme) => theme.type !== 'light');
+
+  useEffect(() => {
+    loadExternalThemes();
+  }, [loadExternalThemes]);
 
   const handleModeChange = (mode: 'light' | 'dark' | 'system') => {
     // Update local draft state
@@ -61,6 +139,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
         <div className="grid grid-cols-3 gap-2.5 max-w-md">
           {(['system', 'light', 'dark'] as const).map((mode) => (
             <button
+              type="button"
               key={mode}
               onClick={() => handleModeChange(mode)}
               className={cn(
@@ -84,7 +163,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {COLOR_THEMES.map((theme) => {
-            const isSelected = currentColorTheme === theme.id;
+            const isSelected = activeThemeId === theme.id;
             const bgColor = isDark ? theme.previewColors.darkBg : theme.previewColors.bg;
             const accentColor = isDark
               ? (theme.previewColors.darkAccent || theme.previewColors.accent)
@@ -92,6 +171,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
 
             return (
               <button
+                type="button"
                 key={theme.id}
                 onClick={() => handleColorThemeChange(theme.id)}
                 className={cn(
@@ -131,6 +211,161 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {currentMode === 'system' && (
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label className="text-sm font-medium text-foreground">System Theme Mapping</Label>
+            <p className="text-sm text-muted-foreground">
+              Choose different themes for light and dark system appearance
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Light Appearance</p>
+            <div className="flex flex-wrap gap-2">
+              {COLOR_THEMES.map((theme) => (
+                <button
+                  type="button"
+                  key={`system-light-${theme.id}`}
+                  onClick={() => handleSystemThemeChange('light', theme.id)}
+                  className={cn(
+                    'px-2.5 py-1.5 rounded-md text-xs transition-colors settings-preset-button',
+                    systemLightThemeId === theme.id && 'settings-preset-button-selected'
+                  )}
+                >
+                  {theme.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Dark Appearance</p>
+            <div className="flex flex-wrap gap-2">
+              {COLOR_THEMES.map((theme) => (
+                <button
+                  type="button"
+                  key={`system-dark-${theme.id}`}
+                  onClick={() => handleSystemThemeChange('dark', theme.id)}
+                  className={cn(
+                    'px-2.5 py-1.5 rounded-md text-xs transition-colors settings-preset-button',
+                    systemDarkThemeId === theme.id && 'settings-preset-button-selected'
+                  )}
+                >
+                  {theme.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <Label className="text-sm font-medium text-foreground">External Themes</Label>
+          <p className="text-sm text-muted-foreground">
+            Import and apply themes discovered from VS Code, Cursor, and Windsurf
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={loadExternalThemes}
+            className="px-2.5 py-1.5 rounded-md text-xs transition-colors settings-preset-button"
+            disabled={loadingExternalThemes}
+          >
+            {loadingExternalThemes ? 'Scanning...' : 'Rescan'}
+          </button>
+          <button
+            type="button"
+            onClick={handleClearExternalTheme}
+            className="px-2.5 py-1.5 rounded-md text-xs transition-colors settings-preset-button"
+          >
+            Use Built-in Only
+          </button>
+          <span className="text-xs text-muted-foreground">
+            {externalThemes.length} themes found
+          </span>
+        </div>
+
+        {externalThemeError && (
+          <p className="text-xs text-destructive">{externalThemeError}</p>
+        )}
+
+        {settings.customThemeName && (
+          <p className="text-xs text-muted-foreground">
+            Active external theme:
+            {' '}
+            <span className="font-medium text-foreground">{settings.customThemeName}</span>
+            {settings.customThemeSource && (
+              <>
+                {' '}
+                <span className="uppercase">{settings.customThemeSource}</span>
+              </>
+            )}
+          </p>
+        )}
+
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Light External Themes</p>
+          <div className="flex flex-wrap gap-2">
+            {lightExternalThemes.map((theme) => {
+              const isActive = settings.customThemeName === theme.name && settings.customThemeSource === theme.source;
+              const isApplying = applyingExternalThemeId === theme.id;
+              return (
+                <button
+                  type="button"
+                  key={theme.id}
+                  onClick={() => handleApplyExternalTheme(theme)}
+                  className={cn(
+                    'px-2.5 py-1.5 rounded-md text-xs transition-colors settings-preset-button',
+                    isActive && 'settings-preset-button-selected'
+                  )}
+                  disabled={isApplying}
+                  title={theme.path}
+                >
+                  {isApplying ? 'Applying...' : theme.name}
+                  <span className="ml-1 uppercase text-[10px] opacity-70">{theme.source}</span>
+                </button>
+              );
+            })}
+            {lightExternalThemes.length === 0 && (
+              <p className="text-xs text-muted-foreground">No light external themes found</p>
+            )}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Dark External Themes</p>
+          <div className="flex flex-wrap gap-2">
+            {darkExternalThemes.map((theme) => {
+              const isActive = settings.customThemeName === theme.name && settings.customThemeSource === theme.source;
+              const isApplying = applyingExternalThemeId === theme.id;
+              return (
+                <button
+                  type="button"
+                  key={theme.id}
+                  onClick={() => handleApplyExternalTheme(theme)}
+                  className={cn(
+                    'px-2.5 py-1.5 rounded-md text-xs transition-colors settings-preset-button',
+                    isActive && 'settings-preset-button-selected'
+                  )}
+                  disabled={isApplying}
+                  title={theme.path}
+                >
+                  {isApplying ? 'Applying...' : theme.name}
+                  <span className="ml-1 uppercase text-[10px] opacity-70">{theme.source}</span>
+                </button>
+              );
+            })}
+            {darkExternalThemes.length === 0 && (
+              <p className="text-xs text-muted-foreground">No dark external themes found</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

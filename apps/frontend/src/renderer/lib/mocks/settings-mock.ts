@@ -40,6 +40,16 @@ export const settingsMock = {
     data: { hasCompletedOnboarding: false }
   }),
 
+  // External themes (mock - none available in browser mode)
+  scanExternalThemes: async () => ({
+    success: true,
+    data: []
+  }),
+  loadExternalTheme: async () => ({
+    success: false,
+    error: 'External theme loading is not available in browser mode'
+  }),
+
   // App Info
   getAppVersion: async () => '0.1.0-browser',
 

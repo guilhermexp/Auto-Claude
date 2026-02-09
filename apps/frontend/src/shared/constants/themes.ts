@@ -3,7 +3,7 @@
  * Color themes for multi-theme support with light/dark mode variants
  */
 
-import type { ColorThemeDefinition } from '../types/settings';
+import type { BuiltinThemeId, ColorThemeDefinition } from '../types/settings';
 
 // ============================================
 // Color Themes
@@ -57,3 +57,11 @@ export const COLOR_THEMES: ColorThemeDefinition[] = [
     previewColors: { bg: '#DCFCE7', accent: '#16A34A', darkBg: '#052E16' }
   }
 ];
+
+/**
+ * Canonical built-in theme catalog used by settings/app theme resolution.
+ * `COLOR_THEMES` is kept as a backwards-compatible alias.
+ */
+export const BUILTIN_THEMES = COLOR_THEMES;
+
+export const BUILTIN_THEME_IDS: BuiltinThemeId[] = BUILTIN_THEMES.map((theme) => theme.id);

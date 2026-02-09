@@ -21,10 +21,22 @@ export function useSettings() {
   // This allows us to revert if the user cancels
   const originalThemeRef = useRef<{
     theme: AppSettings['theme'];
+    themeId: AppSettings['themeId'];
+    systemLightThemeId: AppSettings['systemLightThemeId'];
+    systemDarkThemeId: AppSettings['systemDarkThemeId'];
+    customThemeColors: AppSettings['customThemeColors'];
+    customThemeName: AppSettings['customThemeName'];
+    customThemeSource: AppSettings['customThemeSource'];
     colorTheme: AppSettings['colorTheme'];
     uiScale: number;
   }>({
     theme: currentSettings.theme,
+    themeId: currentSettings.themeId,
+    systemLightThemeId: currentSettings.systemLightThemeId,
+    systemDarkThemeId: currentSettings.systemDarkThemeId,
+    customThemeColors: currentSettings.customThemeColors,
+    customThemeName: currentSettings.customThemeName,
+    customThemeSource: currentSettings.customThemeSource,
     colorTheme: currentSettings.colorTheme,
     uiScale: currentSettings.uiScale ?? UI_SCALE_DEFAULT
   });
@@ -43,10 +55,16 @@ export function useSettings() {
   useEffect(() => {
     originalThemeRef.current = {
       theme: currentSettings.theme,
+      themeId: currentSettings.themeId,
+      systemLightThemeId: currentSettings.systemLightThemeId,
+      systemDarkThemeId: currentSettings.systemDarkThemeId,
+      customThemeColors: currentSettings.customThemeColors,
+      customThemeName: currentSettings.customThemeName,
+      customThemeSource: currentSettings.customThemeSource,
       colorTheme: currentSettings.colorTheme,
       uiScale: currentSettings.uiScale ?? UI_SCALE_DEFAULT
     };
-  }, [currentSettings.colorTheme, currentSettings.theme, currentSettings.uiScale]);
+  }, [currentSettings.themeId, currentSettings.systemLightThemeId, currentSettings.systemDarkThemeId, currentSettings.customThemeColors, currentSettings.customThemeName, currentSettings.customThemeSource, currentSettings.colorTheme, currentSettings.theme, currentSettings.uiScale]);
 
   const saveSettings = async () => {
     setIsSaving(true);
@@ -97,6 +115,12 @@ export function useSettings() {
     const original = originalThemeRef.current;
     updateStoreSettings({
       theme: original.theme,
+      themeId: original.themeId,
+      systemLightThemeId: original.systemLightThemeId,
+      systemDarkThemeId: original.systemDarkThemeId,
+      customThemeColors: original.customThemeColors,
+      customThemeName: original.customThemeName,
+      customThemeSource: original.customThemeSource,
       colorTheme: original.colorTheme,
       uiScale: original.uiScale
     });
@@ -109,10 +133,16 @@ export function useSettings() {
   const commitTheme = useCallback(() => {
     originalThemeRef.current = {
       theme: settings.theme,
+      themeId: settings.themeId,
+      systemLightThemeId: settings.systemLightThemeId,
+      systemDarkThemeId: settings.systemDarkThemeId,
+      customThemeColors: settings.customThemeColors,
+      customThemeName: settings.customThemeName,
+      customThemeSource: settings.customThemeSource,
       colorTheme: settings.colorTheme,
       uiScale: settings.uiScale ?? UI_SCALE_DEFAULT
     };
-  }, [settings.theme, settings.colorTheme, settings.uiScale]);
+  }, [settings.theme, settings.themeId, settings.systemLightThemeId, settings.systemDarkThemeId, settings.customThemeColors, settings.customThemeName, settings.customThemeSource, settings.colorTheme, settings.uiScale]);
 
   return {
     settings,

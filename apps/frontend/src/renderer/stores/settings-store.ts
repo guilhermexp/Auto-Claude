@@ -341,17 +341,33 @@ async function migrateOnboardingCompleted(settings: AppSettings): Promise<AppSet
 
 /**
  * Migrate theme to dark mode as default.
- * Users with 'system' theme (or undefined) will be migrated to 'dark'.
- * Users who explicitly chose 'light' will keep their preference.
+ * Only users with undefined theme are migrated to 'dark'.
+ * Explicit choices ('light', 'dark', 'system') are preserved.
  */
 function migrateToDarkMode(settings: AppSettings): AppSettings {
-  // Migrate 'system' or undefined theme to 'dark'
-  // Users who explicitly chose 'light' should keep their preference
-  if (!settings.theme || settings.theme === 'system') {
+  // Preserve explicit theme choices; only fill missing value.
+  if (!settings.theme) {
     return { ...settings, theme: 'dark' };
   }
 
   return settings;
+}
+
+/**
+ * Migrate legacy colorTheme field to canonical themeId field.
+ * Keeps both fields synchronized for backwards compatibility.
+ */
+function migrateThemeId(settings: AppSettings): AppSettings {
+  const themeId = settings.themeId ?? settings.colorTheme ?? DEFAULT_APP_SETTINGS.themeId;
+  const systemLightThemeId = settings.systemLightThemeId ?? themeId;
+  const systemDarkThemeId = settings.systemDarkThemeId ?? themeId;
+  return {
+    ...settings,
+    themeId,
+    systemLightThemeId,
+    systemDarkThemeId,
+    colorTheme: settings.colorTheme ?? themeId
+  };
 }
 
 /**
@@ -368,6 +384,7 @@ export async function loadSettings(): Promise<void> {
       // Apply migrations
       let migratedSettings = await migrateOnboardingCompleted(result.data);
       migratedSettings = migrateToDarkMode(migratedSettings);
+      migratedSettings = migrateThemeId(migratedSettings);
 
       // Normalize settings to ensure all required nested keys exist for legacy files.
       const normalizedSettings: AppSettings = {
@@ -390,6 +407,22 @@ export async function loadSettings(): Promise<void> {
 
       if (normalizedSettings.theme !== result.data.theme) {
         settingsToSave.theme = normalizedSettings.theme;
+      }
+
+      if (normalizedSettings.themeId !== result.data.themeId) {
+        settingsToSave.themeId = normalizedSettings.themeId;
+      }
+
+      if (normalizedSettings.systemLightThemeId !== result.data.systemLightThemeId) {
+        settingsToSave.systemLightThemeId = normalizedSettings.systemLightThemeId;
+      }
+
+      if (normalizedSettings.systemDarkThemeId !== result.data.systemDarkThemeId) {
+        settingsToSave.systemDarkThemeId = normalizedSettings.systemDarkThemeId;
+      }
+
+      if (normalizedSettings.colorTheme !== result.data.colorTheme) {
+        settingsToSave.colorTheme = normalizedSettings.colorTheme;
       }
 
       if (JSON.stringify(normalizedSettings.notifications) !== JSON.stringify(result.data.notifications ?? {})) {

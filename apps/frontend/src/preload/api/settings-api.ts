@@ -2,6 +2,8 @@ import { ipcRenderer } from 'electron';
 import { IPC_CHANNELS } from '../../shared/constants';
 import type {
   AppSettings,
+  ExternalThemeData,
+  ExternalThemeInfo,
   IPCResult,
   SourceEnvConfig,
   SourceEnvCheckResult,
@@ -23,6 +25,10 @@ export interface SettingsAPI {
 
   // Claude Code onboarding status
   getClaudeCodeOnboardingStatus: () => Promise<IPCResult<{ hasCompletedOnboarding: boolean }>>;
+
+  // External themes (VS Code / Cursor / Windsurf)
+  scanExternalThemes: () => Promise<IPCResult<ExternalThemeInfo[]>>;
+  loadExternalTheme: (theme: ExternalThemeInfo) => Promise<IPCResult<ExternalThemeData>>;
 
   // App Info
   getAppVersion: () => Promise<string>;
@@ -64,6 +70,13 @@ export const createSettingsAPI = (): SettingsAPI => ({
   // Claude Code onboarding status
   getClaudeCodeOnboardingStatus: (): Promise<IPCResult<{ hasCompletedOnboarding: boolean }>> =>
     ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_CLAUDE_CODE_GET_ONBOARDING_STATUS),
+
+  // External themes
+  scanExternalThemes: (): Promise<IPCResult<ExternalThemeInfo[]>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.THEMES_SCAN_EXTERNAL),
+
+  loadExternalTheme: (theme: ExternalThemeInfo): Promise<IPCResult<ExternalThemeData>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.THEMES_LOAD_EXTERNAL, theme),
 
   // App Info
   getAppVersion: (): Promise<string> =>

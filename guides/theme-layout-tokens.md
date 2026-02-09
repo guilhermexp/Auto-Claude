@@ -7,7 +7,7 @@ Este documento mapeia **como o sistema de aparência funciona hoje** no Auto-Cla
 O sistema de aparência tem 4 camadas:
 
 1. **Modelo e defaults de settings**
-- Define tipos (`theme`, `colorTheme`) e valores padrão.
+- Define tipos (`theme`, `themeId`) e valores padrão.
 
 2. **Persistência**
 - Salva/carrega as escolhas em `settings.json` (Electron `userData`).
@@ -27,16 +27,16 @@ O sistema de aparência tem 4 camadas:
 ### 2.1 Tipos e catálogo de temas
 - `apps/frontend/src/shared/types/settings.ts`
   - Define `theme: 'light' | 'dark' | 'system'`
-  - Define `ColorTheme` (`'default' | 'dusk' | 'lime' | 'ocean' | 'retro' | 'neo' | 'forest'`)
-  - Define `AppSettings.colorTheme`
+  - Define `BuiltinThemeId` (`'default' | 'dusk' | 'lime' | 'ocean' | 'retro' | 'neo' | 'forest'`)
+  - Define `AppSettings.themeId` (canônico), `systemLightThemeId`, `systemDarkThemeId` e `colorTheme` (legado)
 
 - `apps/frontend/src/shared/constants/themes.ts`
   - Catálogo `COLOR_THEMES` (id, nome, descrição e cores de preview).
   - Controla o que aparece no seletor de tema.
 
 - `apps/frontend/src/shared/constants/config.ts`
-  - `DEFAULT_APP_SETTINGS.theme` e `DEFAULT_APP_SETTINGS.colorTheme`.
-  - Hoje: `theme: 'dark'`, `colorTheme: 'default'`.
+  - `DEFAULT_APP_SETTINGS.theme`, `themeId` e `colorTheme`.
+  - Hoje: `theme: 'dark'`, `themeId: 'default'`, `colorTheme: 'default'`.
 
 ### 2.2 Persistência (settings.json)
 - `apps/frontend/src/main/settings-utils.ts`
@@ -60,8 +60,17 @@ O sistema de aparência tem 4 camadas:
   - Efeito que aplica:
     - `document.documentElement.classList.add/remove('dark')`
     - `document.documentElement.setAttribute('data-theme', ...)`
-  - Fallback para tema inválido -> `default`.
+  - Resolve tema por `themeId` com fallback em `colorTheme` (legado), depois `default`.
+  - Quando `theme === 'system'`, usa `systemLightThemeId` / `systemDarkThemeId`.
+  - Aplica overrides opcionais de tema importado via `customThemeColors`.
   - Escuta `prefers-color-scheme` quando `theme === 'system'`.
+
+- `apps/frontend/src/renderer/lib/themes/vscode-to-css-mapping.ts`
+  - Mapeia chaves de cor estilo VS Code para CSS variables do app.
+  - Converte `hex -> hsl triplet`.
+
+- `apps/frontend/src/renderer/lib/themes/theme-apply.ts`
+  - Aplica/remove variáveis CSS inline no `document.documentElement`.
 
 - `apps/frontend/src/renderer/components/settings/hooks/useSettings.ts`
   - Fluxo de preview/reversão no modal:
@@ -125,7 +134,7 @@ O sistema de aparência tem 4 camadas:
 ## 4.3 Criar uma nova paleta de cor
 - Obrigatórios:
   - `apps/frontend/src/shared/types/settings.ts`
-    - adicionar novo valor em `ColorTheme`
+    - adicionar novo valor em `BuiltinThemeId`
   - `apps/frontend/src/shared/constants/themes.ts`
     - adicionar tema em `COLOR_THEMES`
   - `apps/frontend/src/renderer/styles/globals.css`
@@ -153,7 +162,7 @@ O sistema de aparência tem 4 camadas:
 
 ## 4.6 Mudar padrão inicial da aplicação
 - `apps/frontend/src/shared/constants/config.ts`
-  - `DEFAULT_APP_SETTINGS.theme` / `colorTheme`
+  - `DEFAULT_APP_SETTINGS.theme` / `themeId` (`colorTheme` legado opcional)
 - `apps/frontend/src/renderer/stores/settings-store.ts`
   - revisar migração `migrateToDarkMode` (pode sobrescrever `system`/undefined para `dark`)
 
@@ -172,6 +181,13 @@ O sistema de aparência tem 4 camadas:
 - `apps/frontend/src/shared/i18n/locales/pt/settings.json`
 - `apps/frontend/src/shared/i18n/locales/en/settings.json`
 - `apps/frontend/src/shared/i18n/locales/fr/settings.json`
+
+## 4.10 Aplicar tema importado/custom (runtime)
+- `apps/frontend/src/shared/types/settings.ts`
+  - campo `customThemeColors`
+- `apps/frontend/src/renderer/lib/themes/vscode-to-css-mapping.ts`
+- `apps/frontend/src/renderer/lib/themes/theme-apply.ts`
+- `apps/frontend/src/renderer/App.tsx`
 
 ---
 
@@ -215,5 +231,5 @@ Arquivo fonte desses tokens:
 ## 7) Observações importantes
 
 - Não há suíte de testes dedicada ao `ThemeSelector`/`App.tsx` para tema no estado atual.
-- O fallback para `colorTheme` inválido é tratado em `App.tsx` (retorna para `default`).
+- O fallback para `themeId`/`colorTheme` inválido é tratado em `App.tsx` (retorna para `default`).
 - Existe migração no store forçando dark em casos legados (`migrateToDarkMode`), então mudanças de default devem considerar essa função.

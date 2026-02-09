@@ -6,8 +6,10 @@ import type { NotificationSettings, GraphitiEmbeddingProvider } from './project'
 import type { ChangelogFormat, ChangelogAudience, ChangelogEmojiLevel } from './changelog';
 import type { SupportedLanguage } from '../constants/i18n';
 
-// Color theme types for multi-theme support
-export type ColorTheme = 'default' | 'dusk' | 'lime' | 'ocean' | 'retro' | 'neo' | 'forest';
+// Built-in theme identifiers for multi-theme support
+export type BuiltinThemeId = 'default' | 'dusk' | 'lime' | 'ocean' | 'retro' | 'neo' | 'forest';
+/** @deprecated Use BuiltinThemeId instead. */
+export type ColorTheme = BuiltinThemeId;
 
 // Developer tools preferences - IDE and terminal selection
 // Comprehensive list based on Stack Overflow Developer Survey 2024, JetBrains Survey, and market research
@@ -151,10 +153,28 @@ export interface ThemePreviewColors {
 }
 
 export interface ColorThemeDefinition {
-  id: ColorTheme;
+  id: BuiltinThemeId;
   name: string;
   description: string;
   previewColors: ThemePreviewColors;
+}
+
+export type ExternalThemeSource = 'vscode' | 'cursor' | 'windsurf';
+
+export interface ExternalThemeInfo {
+  id: string;
+  name: string;
+  path: string;
+  source: ExternalThemeSource;
+  type?: 'light' | 'dark';
+}
+
+export interface ExternalThemeData {
+  id: string;
+  name: string;
+  source: ExternalThemeSource;
+  type: 'light' | 'dark';
+  colors: Record<string, string>;
 }
 
 // Thinking level for Claude model (budget token allocation)
@@ -218,6 +238,17 @@ export interface AgentProfile {
 
 export interface AppSettings {
   theme: 'light' | 'dark' | 'system';
+  // Canonical selected built-in theme ID.
+  themeId?: BuiltinThemeId;
+  // Built-in theme IDs used specifically when `theme === "system"`.
+  systemLightThemeId?: BuiltinThemeId;
+  systemDarkThemeId?: BuiltinThemeId;
+  // Optional imported/custom theme palette (VS Code-like color keys).
+  // When provided, renderer maps these colors to app CSS variables at runtime.
+  customThemeColors?: Record<string, string>;
+  customThemeName?: string;
+  customThemeSource?: ExternalThemeSource;
+  /** @deprecated Use themeId. Kept for backward compatibility with legacy settings files. */
   colorTheme?: ColorTheme;
   defaultModel: string;
   agentFramework: string;

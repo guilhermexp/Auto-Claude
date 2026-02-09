@@ -73,7 +73,7 @@ import type {
   AllProfilesUsage,
   TerminalProfileChangedEvent
 } from './agent';
-import type { AppSettings, SourceEnvConfig, SourceEnvCheckResult } from './settings';
+import type { AppSettings, SourceEnvConfig, SourceEnvCheckResult, ExternalThemeInfo, ExternalThemeData } from './settings';
 import type { AppUpdateInfo, AppUpdateProgress, AppUpdateAvailableEvent, AppUpdateDownloadedEvent, AppUpdateErrorEvent } from './app-update';
 import type {
   ChangelogTask,
@@ -394,6 +394,10 @@ export interface ElectronAPI {
   }>>;
   /** Check if Claude Code onboarding is complete (reads ~/.claude.json) */
   getClaudeCodeOnboardingStatus: () => Promise<IPCResult<{ hasCompletedOnboarding: boolean }>>;
+  /** Scan locally installed external themes (VS Code/Cursor/Windsurf). */
+  scanExternalThemes: () => Promise<IPCResult<ExternalThemeInfo[]>>;
+  /** Load a discovered external theme file and return normalized theme data. */
+  loadExternalTheme: (theme: ExternalThemeInfo) => Promise<IPCResult<ExternalThemeData>>;
 
   // API Profile management (custom Anthropic-compatible endpoints)
   getAPIProfiles: () => Promise<IPCResult<ProfilesFile>>;

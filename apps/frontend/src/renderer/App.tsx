@@ -66,8 +66,10 @@ import { GlobalDownloadIndicator } from './components/GlobalDownloadIndicator';
 import { useIpcListeners } from './hooks/useIpc';
 import { useGlobalTerminalListeners } from './hooks/useGlobalTerminalListeners';
 import { useTerminalProfileChange } from './hooks/useTerminalProfileChange';
-import { COLOR_THEMES, UI_SCALE_MIN, UI_SCALE_MAX, UI_SCALE_DEFAULT } from '../shared/constants';
-import type { Task, Project, ColorTheme } from '../shared/types';
+import { BUILTIN_THEME_IDS, UI_SCALE_MIN, UI_SCALE_MAX, UI_SCALE_DEFAULT } from '../shared/constants';
+import type { Task, Project, BuiltinThemeId } from '../shared/types';
+import { generateCSSVariables } from './lib/themes/vscode-to-css-mapping';
+import { applyThemeVariables, removeThemeVariables } from './lib/themes/theme-apply';
 import { ProjectTabBar, type ProjectTabActivityState } from './components/ProjectTabBar';
 import { AddProjectModal } from './components/AddProjectModal';
 import { ViewStateProvider } from './contexts/ViewStateContext';
@@ -670,41 +672,44 @@ export function App() {
   // Apply theme on load
   useEffect(() => {
     const root = document.documentElement;
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const applyTheme = () => {
-      // Apply light/dark mode
-      if (settings.theme === 'dark') {
-        root.classList.add('dark');
-      } else if (settings.theme === 'light') {
-        root.classList.remove('dark');
+      const isSystemDark = mediaQuery.matches;
+      const isDarkMode = settings.theme === 'dark' || (settings.theme === 'system' && isSystemDark);
+
+      root.classList.toggle('dark', isDarkMode);
+
+      // Resolve applied built-in theme ID.
+      // When mode is `system`, use dedicated light/dark theme IDs if configured.
+      const rawThemeId = settings.theme === 'system'
+        ? (isSystemDark
+          ? (settings.systemDarkThemeId ?? settings.themeId ?? settings.colorTheme ?? 'default')
+          : (settings.systemLightThemeId ?? settings.themeId ?? settings.colorTheme ?? 'default'))
+        : (settings.themeId ?? settings.colorTheme ?? 'default');
+
+      const themeId: BuiltinThemeId = BUILTIN_THEME_IDS.includes(rawThemeId as BuiltinThemeId)
+        ? (rawThemeId as BuiltinThemeId)
+        : 'default';
+
+      if (themeId === 'default') {
+        root.removeAttribute('data-theme');
       } else {
-        // System preference
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          root.classList.add('dark');
-        } else {
-          root.classList.remove('dark');
-        }
+        root.setAttribute('data-theme', themeId);
+      }
+
+      // Apply imported/custom theme variables on top of built-in theme tokens.
+      // This keeps built-in fallbacks while allowing runtime overrides.
+      if (settings.customThemeColors && Object.keys(settings.customThemeColors).length > 0) {
+        const customVariables = generateCSSVariables(settings.customThemeColors);
+        applyThemeVariables(customVariables, root);
+      } else {
+        removeThemeVariables(root);
       }
     };
 
-    // Apply color theme via data-theme attribute
-    // Validate colorTheme against known themes, fallback to 'default' if invalid
-    const validThemeIds = COLOR_THEMES.map((t) => t.id);
-    const rawColorTheme = settings.colorTheme ?? 'default';
-    const colorTheme: ColorTheme = validThemeIds.includes(rawColorTheme as ColorTheme)
-      ? (rawColorTheme as ColorTheme)
-      : 'default';
-
-    if (colorTheme === 'default') {
-      root.removeAttribute('data-theme');
-    } else {
-      root.setAttribute('data-theme', colorTheme);
-    }
-
     applyTheme();
 
-    // Listen for system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
       if (settings.theme === 'system') {
         applyTheme();
@@ -715,7 +720,7 @@ export function App() {
     return () => {
       mediaQuery.removeEventListener('change', handleChange);
     };
-  }, [settings.theme, settings.colorTheme]);
+  }, [settings.theme, settings.themeId, settings.systemLightThemeId, settings.systemDarkThemeId, settings.colorTheme, settings.customThemeColors]);
 
   // Apply UI scale
   useEffect(() => {
