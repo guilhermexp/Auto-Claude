@@ -62,7 +62,7 @@ export function TaskModalLayout({
         {/* Semi-transparent overlay */}
         <DialogPrimitive.Overlay
           className={cn(
-            'fixed inset-0 z-50 bg-black/60',
+            'fixed inset-0 z-50 bg-black/58 backdrop-blur-[1px]',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0'
           )}
@@ -73,9 +73,8 @@ export function TaskModalLayout({
           className={cn(
             'fixed left-[50%] top-4 z-50',
             'translate-x-[-50%]',
-            'w-[95vw] max-w-5xl h-[calc(100vh-32px)]',
-            'bg-card border border-border rounded-xl',
-            'shadow-2xl overflow-hidden flex flex-col',
+            'w-[95vw] max-w-[1200px] h-[calc(100vh-40px)]',
+            'task-detail-modal-surface overflow-hidden flex flex-col',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
             'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
@@ -86,7 +85,7 @@ export function TaskModalLayout({
             {/* Main content area */}
             <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
               {/* Header */}
-              <div className="px-6 py-5 border-b border-border shrink-0">
+              <div className="task-detail-modal-header px-6 py-5 shrink-0">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <DialogPrimitive.Title className="text-xl font-semibold leading-tight text-foreground">
@@ -102,7 +101,7 @@ export function TaskModalLayout({
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="hover:bg-muted transition-colors shrink-0"
+                      className="h-10 w-10 rounded-xl hover:bg-muted transition-colors shrink-0"
                       disabled={disabled}
                     >
                       <X className="h-5 w-5" />
@@ -120,7 +119,7 @@ export function TaskModalLayout({
               </ScrollArea>
 
               {/* Footer */}
-              <div className="px-6 py-4 border-t border-border shrink-0 bg-muted/30">
+              <div className="task-detail-modal-footer px-6 py-4 shrink-0">
                 {footer}
               </div>
             </div>

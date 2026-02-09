@@ -3006,6 +3006,34 @@ body {
   background: hsl(var(--success) / 0.1);
 }
 
+/* Task detail modal polish */
+.task-detail-modal-surface {
+  background-color: hsl(var(--card) / 0.96);
+  border: 1px solid hsl(var(--border) / 0.72);
+  border-radius: 1rem;
+  box-shadow:
+    0 28px 72px rgba(0, 0, 0, 0.45),
+    0 1px 0 hsl(var(--border) / 0.22) inset;
+}
+
+.task-detail-modal-header {
+  border-bottom: 1px solid hsl(var(--border) / 0.7);
+  background-color: hsl(var(--card) / 0.72);
+}
+
+.task-detail-modal-tabs {
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--card) / 0.5),
+    transparent
+  );
+}
+
+.task-detail-modal-footer {
+  background-color: hsl(var(--card) / 0.84);
+  border-top-color: hsl(var(--border) / 0.72);
+}
+
 /* Section divider with gradient */
 .section-divider-gradient {
   height: 1px;

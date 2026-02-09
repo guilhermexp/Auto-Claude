@@ -340,7 +340,7 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
           {/* Semi-transparent overlay - can see background content */}
           <DialogPrimitive.Overlay
             className={cn(
-              'fixed inset-0 z-50 bg-black/60',
+              'fixed inset-0 z-50 bg-black/58 backdrop-blur-[1px]',
               'data-[state=open]:animate-in data-[state=closed]:animate-out',
               'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0'
             )}
@@ -351,9 +351,8 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
             className={cn(
               'fixed left-[50%] top-4 z-50',
               'translate-x-[-50%]',
-              'w-[95vw] max-w-5xl h-[calc(100vh-32px)]',
-              'bg-card border border-border rounded-xl',
-              'shadow-2xl overflow-hidden flex flex-col',
+              'w-[95vw] max-w-[1200px] h-[calc(100vh-40px)]',
+              'task-detail-modal-surface overflow-hidden flex flex-col',
               'data-[state=open]:animate-in data-[state=closed]:animate-out',
               'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
               'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
@@ -361,24 +360,24 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
             )}
           >
             {/* Header */}
-            <div className="p-5 pb-4 border-b border-border shrink-0">
+            <div className="task-detail-modal-header p-6 pb-5 shrink-0">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1 min-w-0 overflow-hidden">
-                  <DialogPrimitive.Title className="text-xl font-semibold leading-tight text-foreground truncate">
+                  <DialogPrimitive.Title className="text-2xl font-semibold leading-tight text-foreground truncate">
                     {task.title}
                   </DialogPrimitive.Title>
                   <DialogPrimitive.Description asChild>
-                    <div className="mt-2.5 flex items-center gap-2 flex-wrap">
-                      <Badge variant="outline" className="text-xs font-mono">
+                    <div className="task-detail-modal-badges mt-3 flex items-center gap-2 flex-wrap">
+                      <Badge variant="outline" className="text-xs font-mono h-7 px-2.5 rounded-md">
                         {task.specId}
                       </Badge>
                       {state.isStuck ? (
-                        <Badge variant="warning" className="text-xs flex items-center gap-1 animate-pulse">
+                        <Badge variant="warning" className="text-xs h-7 px-2.5 rounded-md flex items-center gap-1 animate-pulse">
                           <AlertTriangle className="h-3 w-3" />
                           Stuck
                         </Badge>
                       ) : state.isIncomplete ? (
-                        <Badge variant="warning" className="text-xs flex items-center gap-1">
+                        <Badge variant="warning" className="text-xs h-7 px-2.5 rounded-md flex items-center gap-1">
                             <AlertTriangle className="h-3 w-3" />
                             Incomplete
                           </Badge>
@@ -386,14 +385,14 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
                         <>
                            <Badge
                              variant={getStatusBadgeVariant(task.status, state.isStuck)}
-                             className={cn('text-xs', (task.status === 'in_progress' && !state.isStuck) && 'status-running')}
+                             className={cn('text-xs h-7 px-2.5 rounded-md', (task.status === 'in_progress' && !state.isStuck) && 'status-running')}
                            >
                              {t(TASK_STATUS_LABELS[task.status])}
                            </Badge>
                           {task.status === 'human_review' && task.reviewReason && (
                             <Badge
                               variant={task.reviewReason === 'completed' ? 'success' : task.reviewReason === 'errors' ? 'destructive' : 'warning'}
-                              className="text-xs"
+                              className="text-xs h-7 px-2.5 rounded-md"
                             >
                               {task.reviewReason === 'completed' ? 'Completed' :
                                task.reviewReason === 'errors' ? 'Has Errors' :
@@ -405,7 +404,7 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
                       )}
                       {/* Compact progress indicator */}
                       {totalSubtasks > 0 && (
-                        <span className="text-xs text-muted-foreground ml-1">
+                        <span className="text-xs text-muted-foreground ml-1 whitespace-nowrap">
                           {completedSubtasks}/{totalSubtasks} subtasks
                         </span>
                       )}
@@ -419,11 +418,11 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
                     </div>
                   )}
                 </div>
-                <div className="flex items-center gap-1 shrink-0 electron-no-drag">
+                <div className="flex items-center gap-2 shrink-0 electron-no-drag">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="hover:bg-primary/10 hover:text-primary transition-colors"
+                    className="h-10 w-10 rounded-xl hover:bg-primary/10 hover:text-primary transition-colors"
                     onClick={() => state.setIsEditDialogOpen(true)}
                     disabled={state.isRunning && !state.isStuck}
                   >
@@ -433,7 +432,7 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="hover:bg-muted transition-colors"
+                      className="h-10 w-10 rounded-xl hover:bg-muted transition-colors"
                     >
                       <X className="h-5 w-5" />
                       <span className="sr-only">Close</span>
@@ -444,9 +443,9 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
 
               {/* Progress bar - only show when running or has progress */}
               {(state.isRunning || completedSubtasks > 0) && totalSubtasks > 0 && (
-                <div className="mt-3 flex items-center gap-3">
+                <div className="mt-4 flex items-center gap-3">
                   <Progress value={progressPercent} className="h-1.5 flex-1" />
-                  <span className="text-xs text-muted-foreground tabular-nums w-10 text-right">{progressPercent}%</span>
+                  <span className="text-xs text-muted-foreground tabular-nums w-12 text-right">{progressPercent}%</span>
                 </div>
               )}
 
@@ -468,29 +467,29 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
             {/* Body - Single Column with Tabs */}
             <div className="flex-1 min-h-0 overflow-hidden">
               <Tabs value={state.activeTab} onValueChange={state.setActiveTab} className="flex flex-col h-full">
-                <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-5 h-auto shrink-0">
+                <TabsList className="task-detail-modal-tabs w-full justify-start rounded-none border-b border-border bg-transparent px-6 h-auto shrink-0">
                   <TabsTrigger
                     value="overview"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm font-medium"
                   >
                     Overview
                   </TabsTrigger>
                   <TabsTrigger
                     value="subtasks"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm font-medium"
                   >
                     Subtasks ({task.subtasks.length})
                   </TabsTrigger>
                   <TabsTrigger
                     value="logs"
-                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm"
+                    className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm font-medium"
                   >
                     Logs
                   </TabsTrigger>
                   {showFilesTab && (
                     <TabsTrigger
                       value="files"
-                      className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2.5 text-sm"
+                      className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-3 text-sm font-medium"
                     >
                       {t('tasks:files.tab')}
                     </TabsTrigger>
@@ -500,7 +499,7 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
                 {/* Overview Tab */}
                 <TabsContent value="overview" className="flex-1 min-h-0 overflow-hidden mt-0">
                   <ScrollArea className="h-full">
-                    <div className="p-5 space-y-5 overflow-x-hidden max-w-full">
+                    <div className="p-6 space-y-6 overflow-x-hidden max-w-full">
                       {/* Metadata */}
                       <TaskMetadata task={task} />
 
@@ -583,7 +582,7 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
             </div>
 
             {/* Footer - Actions */}
-            <div className="flex items-center gap-3 px-5 py-3 border-t border-border shrink-0">
+            <div className="task-detail-modal-footer flex items-center gap-3 px-6 py-4 border-t border-border shrink-0">
               <Button
                 variant="ghost"
                 size="sm"
@@ -596,7 +595,7 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
               </Button>
               <div className="flex-1" />
               {renderPrimaryAction()}
-              <Button variant="outline" onClick={handleClose}>
+              <Button variant="outline" className="min-w-24" onClick={handleClose}>
                 Close
               </Button>
             </div>
