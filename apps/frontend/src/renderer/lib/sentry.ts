@@ -27,6 +27,7 @@ import {
   processEvent,
   type SentryErrorEvent
 } from '../../shared/utils/sentry-privacy';
+import { debugError, debugLog, debugWarn } from '../../shared/utils/debug-logger';
 
 // Track whether settings have been loaded from disk
 // This prevents sending events before we know user's preference
@@ -42,7 +43,7 @@ let sentryInitialized = false;
 export function markSettingsLoaded(): void {
   if (settingsLoaded) return;
   settingsLoaded = true;
-  console.log('[Sentry] Settings loaded, error reporting ready');
+  debugLog('[Sentry] Settings loaded, error reporting ready');
 }
 
 /**
@@ -63,7 +64,7 @@ export async function initSentryRenderer(): Promise<void> {
   const isElectron = typeof window !== 'undefined' && !!window.electronAPI;
 
   if (!isElectron) {
-    console.log('[Sentry] Not in Electron environment, skipping initialization');
+    debugLog('[Sentry] Not in Electron environment, skipping initialization');
     return;
   }
 
@@ -72,12 +73,12 @@ export async function initSentryRenderer(): Promise<void> {
   try {
     config = await window.electronAPI.getSentryConfig();
   } catch (error) {
-    console.warn('[Sentry] Failed to get config from main process:', error);
+    debugWarn('[Sentry] Failed to get config from main process:', error);
   }
 
   const hasDsn = config.dsn.length > 0;
   if (!hasDsn) {
-    console.log('[Sentry] No DSN configured - error reporting disabled in renderer');
+    debugLog('[Sentry] No DSN configured - error reporting disabled in renderer');
     return;
   }
 
@@ -88,7 +89,7 @@ export async function initSentryRenderer(): Promise<void> {
       // Don't send events until settings are loaded
       // This prevents sending events if user had disabled Sentry
       if (!settingsLoaded) {
-        console.log('[Sentry] Settings not loaded yet, dropping event');
+        debugLog('[Sentry] Settings not loaded yet, dropping event');
         return null;
       }
 
@@ -102,7 +103,7 @@ export async function initSentryRenderer(): Promise<void> {
         }
       } catch (error) {
         // If settings store fails, don't send event (be conservative)
-        console.error('[Sentry] Failed to read settings, dropping event:', error);
+        debugError('[Sentry] Failed to read settings, dropping event:', error);
         return null;
       }
 
@@ -119,7 +120,7 @@ export async function initSentryRenderer(): Promise<void> {
   });
 
   sentryInitialized = true;
-  console.log(`[Sentry] Renderer initialized (traces: ${config.tracesSampleRate}, profiles: ${config.profilesSampleRate})`);
+  debugLog(`[Sentry] Renderer initialized (traces: ${config.tracesSampleRate}, profiles: ${config.profilesSampleRate})`);
 }
 
 /**
@@ -134,11 +135,11 @@ export function isSentryInitialized(): boolean {
  * Call this whenever the user toggles the setting in the UI
  */
 export function notifySentryStateChanged(enabled: boolean): void {
-  console.log(`[Sentry] Notifying main process: ${enabled ? 'enabled' : 'disabled'}`);
+  debugLog(`[Sentry] Notifying main process: ${enabled ? 'enabled' : 'disabled'}`);
   try {
     window.electronAPI?.notifySentryStateChanged?.(enabled);
   } catch (error) {
-    console.error('[Sentry] Failed to notify main process:', error);
+    debugError('[Sentry] Failed to notify main process:', error);
   }
 }
 
@@ -149,7 +150,7 @@ export function notifySentryStateChanged(enabled: boolean): void {
 export function captureException(error: Error, context?: Record<string, unknown>): void {
   if (!sentryInitialized) {
     // Sentry not initialized (no DSN configured), just log
-    console.error('[Sentry] Not initialized, error not captured:', error);
+    debugError('[Sentry] Not initialized, error not captured:', error);
     return;
   }
 

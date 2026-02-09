@@ -198,10 +198,10 @@ export function AuthStatusIndicator() {
               </span>
             </button>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="text-xs max-w-xs p-0">
+          <TooltipContent side="bottom" className="auth-details-popover text-xs max-w-xs p-0 border-border/20 shadow-sm">
             <div className="p-3 space-y-3">
               {/* Header section */}
-              <div className="flex items-center justify-between pb-2 border-b">
+              <div className="flex items-center justify-between pb-2 border-b border-border/30">
                 <div className="flex items-center gap-1.5">
                   <Shield className="h-3.5 w-3.5" />
                   <span className="font-semibold text-xs">{t('common:usage.authenticationDetails')}</span>
@@ -222,7 +222,7 @@ export function AuthStatusIndicator() {
 
               {/* Claude Code subscription label for OAuth */}
               {isOAuth && (
-                <div className="flex items-center justify-between pt-2 border-t">
+                <div className="flex items-center justify-between pt-2 border-t border-border/30">
                   <div className="flex items-center gap-1.5 text-muted-foreground">
                     <Lock className="h-3 w-3" />
                     <span className="text-[10px]">{t('common:usage.subscription')}</span>
@@ -233,7 +233,7 @@ export function AuthStatusIndicator() {
 
               {/* Profile details for API profiles */}
               {!isOAuth && (
-                <div className="pt-2 border-t space-y-2">
+                <div className="pt-2 border-t border-border/30 space-y-2">
                     {/* Profile name with icon */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -261,7 +261,7 @@ export function AuthStatusIndicator() {
                           <ExternalLink className="h-3 w-3" />
                           <span>{t('common:usage.apiEndpoint')}</span>
                         </div>
-                        <div className="text-[10px] font-mono bg-muted px-2 py-1.5 rounded break-all border">
+                        <div className="text-[10px] font-mono bg-muted px-2 py-1.5 rounded break-all border border-border/30">
                           {authStatus.baseUrl}
                         </div>
                       </div>

@@ -8,12 +8,15 @@ import { UsageIndicator } from './UsageIndicator';
 import { AuthStatusIndicator } from './AuthStatusIndicator';
 import type { Project } from '../../shared/types';
 
+export type ProjectTabActivityState = 'idle' | 'running' | 'ready';
+
 interface ProjectTabBarProps {
   projects: Project[];
   activeProjectId: string | null;
   onProjectSelect: (projectId: string) => void;
   onProjectClose: (projectId: string) => void;
   onAddProject: () => void;
+  activityByProjectId?: Record<string, ProjectTabActivityState>;
   className?: string;
   // Control props for active tab
   onSettingsClick?: () => void;
@@ -25,6 +28,7 @@ export function ProjectTabBar({
   onProjectSelect,
   onProjectClose,
   onAddProject,
+  activityByProjectId,
   className,
   onSettingsClick
 }: ProjectTabBarProps) {
@@ -105,6 +109,7 @@ export function ProjectTabBar({
                 e.stopPropagation();
                 onProjectClose(project.id);
               }}
+              activityState={activityByProjectId?.[project.id] ?? 'idle'}
               // Pass control props only for active tab
               onSettingsClick={isActiveTab ? onSettingsClick : undefined}
             />

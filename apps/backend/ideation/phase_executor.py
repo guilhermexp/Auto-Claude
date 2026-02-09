@@ -307,6 +307,22 @@ Output your ideas to {output_file.name}.
             additional_context=context,
         )
 
+        if not success:
+            error_message = output.strip() if output else "Ideation agent failed"
+            print_status(
+                f"{self.generator.get_type_label(ideation_type)} agent failed: {error_message}",
+                "error",
+            )
+            return IdeationPhaseResult(
+                phase="ideation",
+                ideation_type=ideation_type,
+                success=False,
+                output_files=[],
+                ideas_count=0,
+                errors=[error_message],
+                retries=0,
+            )
+
         # Validate the output
         validation_result = self.prioritizer.validate_ideation_output(
             output_file, ideation_type

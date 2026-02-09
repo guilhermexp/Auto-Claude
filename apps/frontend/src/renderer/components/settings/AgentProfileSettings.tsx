@@ -245,7 +245,7 @@ export function AgentProfileSettings({ onSave, isSaving, error }: AgentProfileSe
 
           {/* Phase Configuration Content */}
           {showPhaseConfig && (
-            <div className="border-t border-border p-4 space-y-4">
+            <div className="border-t border-border/30 p-4 space-y-4">
               {/* Reset button - shown when customized */}
               {hasCustomConfig && (
                 <div className="flex justify-end">
@@ -318,7 +318,7 @@ export function AgentProfileSettings({ onSave, isSaving, error }: AgentProfileSe
               </div>
 
               {/* Info note */}
-              <p className="text-[10px] text-muted-foreground mt-4 pt-3 border-t border-border">
+              <p className="text-[10px] text-muted-foreground mt-4 pt-3 border-t border-border/30">
                 {t('agentProfile.phaseConfigNote')}
               </p>
             </div>

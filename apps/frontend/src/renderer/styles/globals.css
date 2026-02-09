@@ -283,6 +283,80 @@
   height: 0;
 }
 
+/* Hide Radix custom scrollbars in settings modal to avoid hard vertical lines */
+.settings-scroll-area [data-radix-scroll-area-scrollbar],
+.settings-scroll-area [data-radix-scroll-area-corner] {
+  display: none !important;
+}
+
+/* Settings modal border consistency (prevents legacy dark/strong borders) */
+.settings-modal nav {
+  border-right-color: hsl(var(--border) / 0.3) !important;
+}
+
+.settings-modal .settings-divider {
+  border-color: hsl(var(--border) / 0.3) !important;
+}
+
+.settings-modal .settings-card,
+.settings-modal .settings-card-footer,
+.settings-modal .settings-section-container,
+.settings-modal .settings-toggle-row,
+.settings-modal .settings-info-card,
+.settings-modal .settings-profile-card,
+.settings-modal .settings-preset-button,
+.settings-modal .settings-mode-button,
+.settings-modal .settings-theme-card,
+.settings-modal [data-radix-select-trigger],
+.settings-modal button[role="combobox"] {
+  border-color: hsl(var(--border) / 0.3) !important;
+}
+
+/* Settings modal hard reset for legacy heavy borders (inputs/cards/lists/dropdowns) */
+.settings-modal .border,
+.settings-modal .border-t,
+.settings-modal .border-r,
+.settings-modal .border-b,
+.settings-modal .border-l,
+.settings-modal [class*="border-border"],
+.settings-modal [class*="border-input"],
+.settings-modal [class*="border-black"],
+.settings-modal [data-radix-select-trigger],
+.settings-modal [data-radix-select-content],
+.settings-modal [role="listbox"],
+.settings-modal [role="option"],
+.settings-modal input,
+.settings-modal textarea,
+.settings-modal select {
+  border-color: hsl(var(--border) / 0.2) !important;
+}
+
+.settings-modal [class*="border-2"] {
+  border-width: 1px !important;
+}
+
+/* Header popovers: force same soft border language as the rest of the app */
+.usage-popover,
+.auth-details-popover,
+.claude-cli-popover {
+  border-color: hsl(var(--border) / 0.2) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.usage-popover .border-b,
+.usage-popover .border-t,
+.auth-details-popover .border-b,
+.auth-details-popover .border-t,
+.claude-cli-popover .border-b,
+.claude-cli-popover .border-t {
+  border-color: hsl(var(--border) / 0.2) !important;
+}
+
+.claude-cli-popover [data-radix-select-trigger],
+.claude-cli-popover button[role="combobox"] {
+  border-color: hsl(var(--border) / 0.2) !important;
+}
+
 /* CSS variables for light mode */
 :root {
   /* Layout Base */
@@ -612,7 +686,7 @@
 
 /* Global theme transitions for smooth dark mode switching */
 * {
-  border-color: var(--border);
+  border-color: hsl(var(--border));
   transition-property: background-color, border-color, color, fill, stroke;
   transition-timing-function: var(--ease-out);
   transition-duration: var(--duration-normal);
@@ -661,8 +735,8 @@ body {
 
 /* Card styles - following design system card-based modularity */
 .card-surface {
-  background-color: var(--card);
-  border: 1px solid var(--border);
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
   border-radius: var(--radius-xl);
 }
 
@@ -682,7 +756,7 @@ body {
 }
 
 .card-interactive:hover {
-  border-color: var(--primary);
+  border-color: hsl(var(--primary));
 }
 
 .dark .card-interactive:hover {
@@ -691,8 +765,8 @@ body {
 
 /* Surface elevated - for dropdowns, popovers */
 .surface-elevated {
-  background-color: var(--card);
-  border: 1px solid var(--border);
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
   border-radius: var(--radius-lg);
 }
 
@@ -1250,7 +1324,7 @@ body {
 
 .roadmap-feature-card {
   background-color: hsl(var(--card) / 0.95);
-  border-color: hsl(var(--border) / 0.8);
+  border-color: hsl(var(--border) / 0.3);
 }
 
 .roadmap-action-button {
@@ -1266,7 +1340,7 @@ body {
 
 .dark .roadmap-action-button {
   background-color: #1a1a1a !important;
-  border-color: #2a2a2a !important;
+  border-color: hsl(var(--border) / 0.3) !important;
 }
 
 .dark .roadmap-action-button:hover {
@@ -1371,7 +1445,7 @@ body {
 
 .dark .roadmap-chip-neutral {
   background-color: #2a2a2a;
-  border-color: #3b3b3b;
+  border-color: hsl(var(--border) / 0.3);
   color: #b6b6b6;
 }
 
@@ -1395,7 +1469,7 @@ body {
 
 .dark .roadmap-chip-wont {
   background-color: #2b2b2b;
-  border-color: #3e3e3e;
+  border-color: hsl(var(--border) / 0.3);
   color: #9f9f9f;
 }
 
@@ -1420,7 +1494,7 @@ body {
 
 .dark .roadmap-chip-impact-low {
   background-color: #2a2a2a;
-  border-color: #3b3b3b;
+  border-color: hsl(var(--border) / 0.3);
   color: #b6b6b6;
 }
 
@@ -1440,12 +1514,11 @@ body {
 
 .roadmap-kanban-column {
   background-color: hsl(var(--card) / 0.85);
-  border: 1px solid hsl(var(--border) / 0.8);
-  border-top-width: 2px;
+  border: 1px solid hsl(var(--border) / 0.3);
 }
 
 .roadmap-kanban-column-header {
-  border-bottom: 1px solid hsl(var(--border) / 0.6);
+  border-bottom: 1px solid hsl(var(--border) / 0.3);
 }
 
 .roadmap-kanban-column-icon {
@@ -1483,19 +1556,19 @@ body {
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
   background-color: hsl(var(--muted) / 0.72);
-  border: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.3);
   color: hsl(var(--muted-foreground));
 }
 
 .dark .column-count-badge {
   background-color: #2a2a2a;
-  border-color: #3b3b3b;
+  border-color: hsl(var(--border) / 0.3);
   color: #b6b6b6;
 }
 
 .roadmap-kanban-card {
   background-color: hsl(var(--card) / 0.96);
-  border: 1px solid hsl(var(--border) / 0.8);
+  border: 1px solid hsl(var(--border) / 0.3);
 }
 
 .roadmap-kanban-card:hover {
@@ -1504,7 +1577,7 @@ body {
 
 .dark .roadmap-kanban-card {
   background-color: #171717;
-  border-color: #2f2f2f;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 .dark .roadmap-kanban-card:hover {
@@ -1514,25 +1587,25 @@ body {
 /* Roadmap Phase Card - main card container for phases */
 .roadmap-phase-card {
   background-color: hsl(var(--card) / 0.96);
-  border: 1px solid hsl(var(--border) / 0.8);
+  border: 1px solid hsl(var(--border) / 0.3);
   box-shadow: var(--shadow-sm);
 }
 
 .dark .roadmap-phase-card {
   background-color: #171717;
-  border-color: #2f2f2f;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 /* Roadmap Section Card - for priority grouping sections */
 .roadmap-section-card {
   background-color: hsl(var(--card) / 0.96);
-  border: 1px solid hsl(var(--border) / 0.8);
+  border: 1px solid hsl(var(--border) / 0.3);
   box-shadow: var(--shadow-sm);
 }
 
 .dark .roadmap-section-card {
   background-color: #171717;
-  border-color: #2f2f2f;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 .empty-column-dropzone {
@@ -1574,11 +1647,11 @@ body {
 
 .dark .roadmap-kanban-column {
   background-color: #151515;
-  border-color: #2a2a2a;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 .dark .roadmap-kanban-column-header {
-  border-color: #2a2a2a;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 /* Roadmap kanban scrollbar - subtle and only visible on hover */
@@ -1607,7 +1680,7 @@ body {
 }
 
 .dark .empty-column-dropzone {
-  border-color: #3a3a3a;
+  border-color: hsl(var(--border) / 0.3);
   background-color: #1a1a1a;
 }
 
@@ -3220,30 +3293,30 @@ body {
 /* Settings card container */
 .settings-card {
   background-color: hsl(var(--background));
-  border: 1px solid hsl(var(--border) / 0.8);
+  border: 1px solid hsl(var(--border) / 0.3);
   box-shadow: var(--shadow-sm);
 }
 
 .dark .settings-card {
   background-color: #171717;
-  border-color: #2f2f2f;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 /* Settings card footer */
 .settings-card-footer {
   background-color: hsl(var(--muted) / 0.5);
-  border-top: 1px solid hsl(var(--border));
+  border-top: 1px solid hsl(var(--border) / 0.3);
 }
 
 .dark .settings-card-footer {
   background-color: #1a1a1a;
-  border-top-color: #2f2f2f;
+  border-top-color: hsl(var(--border) / 0.3);
 }
 
 /* Settings mode selector buttons (Light/Dark/System) */
 .settings-mode-button {
   background-color: transparent;
-  border: 2px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.3);
 }
 
 .settings-mode-button:hover {
@@ -3257,7 +3330,7 @@ body {
 }
 
 .dark .settings-mode-button {
-  border-color: #3a3a3a;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 .dark .settings-mode-button:hover {
@@ -3273,7 +3346,7 @@ body {
 /* Settings theme cards */
 .settings-theme-card {
   background-color: transparent;
-  border: 2px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.3);
 }
 
 .settings-theme-card:hover {
@@ -3289,7 +3362,7 @@ body {
 }
 
 .dark .settings-theme-card {
-  border-color: #3a3a3a;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 .dark .settings-theme-card:hover {
@@ -3305,7 +3378,7 @@ body {
 /* Settings account profile cards */
 .settings-profile-card {
   background-color: hsl(var(--background));
-  border: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.3);
 }
 
 .settings-profile-card:hover {
@@ -3324,7 +3397,7 @@ body {
 
 .dark .settings-profile-card {
   background-color: #171717;
-  border-color: #2f2f2f;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 .dark .settings-profile-card:hover {
@@ -3344,30 +3417,30 @@ body {
 /* Settings section container */
 .settings-section-container {
   background-color: hsl(var(--muted) / 0.3);
-  border: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.3);
 }
 
 .dark .settings-section-container {
   background-color: #1a1a1a;
-  border-color: #2f2f2f;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 /* Settings toggle row (Switch toggles with labels) */
 .settings-toggle-row {
   background-color: transparent;
-  border: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.3);
   border-radius: 0.5rem;
   padding: 1rem;
 }
 
 .dark .settings-toggle-row {
-  border-color: #2f2f2f;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 /* Settings preset buttons (Display scale, Language) */
 .settings-preset-button {
   background-color: transparent;
-  border: 2px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.3);
 }
 
 .settings-preset-button:hover {
@@ -3381,7 +3454,7 @@ body {
 }
 
 .dark .settings-preset-button {
-  border-color: #3a3a3a;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 .dark .settings-preset-button:hover {
@@ -3397,14 +3470,14 @@ body {
 /* Settings info card (Debug info, version info) */
 .settings-info-card {
   background-color: hsl(var(--muted) / 0.5);
-  border: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.3);
   border-radius: 0.5rem;
   padding: 1rem;
 }
 
 .dark .settings-info-card {
   background-color: #1a1a1a;
-  border-color: #2f2f2f;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 /* Settings warning card (YOLO mode) */
@@ -3423,7 +3496,7 @@ body {
 /* Settings update available card */
 .settings-update-card {
   background-color: hsl(var(--info) / 0.05);
-  border: 2px solid hsl(var(--info) / 0.5);
+  border: 1px solid hsl(var(--info) / 0.4);
   border-radius: 0.5rem;
   padding: 1.25rem;
 }
@@ -3436,7 +3509,7 @@ body {
 /* Settings downgrade card */
 .settings-downgrade-card {
   background-color: hsl(var(--warning) / 0.05);
-  border: 2px solid hsl(var(--warning) / 0.5);
+  border: 1px solid hsl(var(--warning) / 0.4);
   border-radius: 0.5rem;
   padding: 1.25rem;
 }
@@ -3452,21 +3525,19 @@ body {
 
 /* Onboarding feature cards */
 .onboarding-feature-card {
-  background-color: hsl(var(--card) / 0.5);
-  border: 1px solid hsl(var(--border) / 0.8);
-  backdrop-filter: blur(8px);
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / 0.3);
 }
 
 .dark .onboarding-feature-card {
   background-color: #171717;
-  border-color: #2f2f2f;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 /* Onboarding option cards (selectable) */
 .onboarding-option-card {
-  background-color: hsl(var(--card) / 0.5);
-  border: 1px solid hsl(var(--border) / 0.8);
-  backdrop-filter: blur(8px);
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / 0.3);
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -3483,7 +3554,7 @@ body {
 
 .dark .onboarding-option-card {
   background-color: #171717;
-  border-color: #2f2f2f;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 .dark .onboarding-option-card:hover {
@@ -3498,26 +3569,26 @@ body {
 /* Onboarding info cards */
 .onboarding-info-card {
   background-color: hsl(var(--muted) / 0.3);
-  border: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.3);
   border-radius: 0.5rem;
 }
 
 .dark .onboarding-info-card {
   background-color: #1a1a1a;
-  border-color: #2f2f2f;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 /* Onboarding section container */
 .onboarding-section-container {
   background-color: hsl(var(--muted) / 0.3);
-  border: 1px solid hsl(var(--border));
+  border: 1px solid hsl(var(--border) / 0.3);
   border-radius: 0.5rem;
   padding: 1rem;
 }
 
 .dark .onboarding-section-container {
   background-color: #1a1a1a;
-  border-color: #2f2f2f;
+  border-color: hsl(var(--border) / 0.3);
 }
 
 /* ============================================
@@ -3755,7 +3826,7 @@ body {
 /* Auth status badge (Claude Code / API Key) */
 .header-badge-auth {
   background-color: hsl(var(--muted) / 0.5);
-  border: 1px solid hsl(var(--border) / 0.4);
+  border: 1px solid hsl(var(--border) / 0.22);
   border-radius: 0.375rem;
   color: hsl(var(--foreground));
   transition: all 0.15s;
@@ -3767,7 +3838,7 @@ body {
 
 .dark .header-badge-auth {
   background-color: #1a1a1a;
-  border-color: #2a2a2a;
+  border-color: hsl(var(--border) / 0.22);
 }
 
 .dark .header-badge-auth:hover {
@@ -3777,7 +3848,7 @@ body {
 /* Usage badge (normal state) */
 .header-badge-usage {
   background-color: hsl(var(--muted) / 0.5);
-  border: 1px solid hsl(var(--border) / 0.4);
+  border: 1px solid hsl(var(--border) / 0.22);
   border-radius: 0.375rem;
   transition: all 0.15s;
 }
@@ -3788,7 +3859,7 @@ body {
 
 .dark .header-badge-usage {
   background-color: #1a1a1a;
-  border-color: #2a2a2a;
+  border-color: hsl(var(--border) / 0.22);
 }
 
 .dark .header-badge-usage:hover {

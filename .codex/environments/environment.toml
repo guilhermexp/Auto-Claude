@@ -9,3 +9,8 @@ script = ""
 name = "Run"
 icon = "run"
 command = "npm run package:mac"
+
+[[actions]]
+name = "dev"
+icon = "tool"
+command = "bun dev"

@@ -11,18 +11,7 @@ import { GitHubOAuthFlow } from '../../project-settings/GitHubOAuthFlow';
 import { PasswordInput } from '../../project-settings/PasswordInput';
 import { buildBranchOptions } from '../../../lib/branch-utils';
 import type { ProjectEnvConfig, GitHubSyncStatus, ProjectSettings, GitBranchDetail } from '../../../../shared/types';
-
-// Debug logging
-const DEBUG = process.env.NODE_ENV === 'development' || process.env.DEBUG === 'true';
-function debugLog(message: string, data?: unknown) {
-  if (DEBUG) {
-    if (data !== undefined) {
-      console.warn(`[GitHubIntegration] ${message}`, data);
-    } else {
-      console.warn(`[GitHubIntegration] ${message}`);
-    }
-  }
-}
+import { debugLog } from '../../../../shared/utils/debug-logger';
 
 interface GitHubRepo {
   fullName: string;
@@ -662,4 +651,3 @@ function AutoSyncToggle({ enabled, onToggle }: AutoSyncToggleProps) {
     </div>
   );
 }
-

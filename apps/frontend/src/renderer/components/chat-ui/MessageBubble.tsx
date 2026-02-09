@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next';
 import { User, Bot } from 'lucide-react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { cn } from '../../lib/utils';
 import type { InsightsChatMessage } from '../../../shared/types';
 import { ToolUsageHistory } from './ToolIndicator';
 import { SuggestedTaskCard } from './SuggestedTaskCard';
@@ -30,8 +29,8 @@ export function MessageBubble({
     return (
       <div className="flex justify-end gap-3">
         <div className="max-w-[75%]">
-          <div className="bg-primary/10 rounded-2xl rounded-tr-sm px-4 py-3">
-            <div className="prose prose-sm dark:prose-invert max-w-none">
+          <div className="bg-primary/10 text-foreground rounded-2xl rounded-tr-sm px-4 py-3">
+            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-td:text-foreground prose-th:text-foreground">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                 {message.content}
               </ReactMarkdown>
@@ -58,8 +57,8 @@ export function MessageBubble({
         <span className="text-[10px] text-muted-foreground block">
           {t('chat.assistant', 'Assistant')}
         </span>
-        <div className="insights-message-bubble rounded-2xl rounded-tl-sm px-4 py-3">
-          <div className="prose prose-sm dark:prose-invert max-w-none">
+        <div className="insights-message-bubble text-foreground rounded-2xl rounded-tl-sm px-4 py-3">
+          <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-td:text-foreground prose-th:text-foreground">
             <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
               {message.content}
             </ReactMarkdown>

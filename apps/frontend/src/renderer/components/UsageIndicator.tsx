@@ -497,13 +497,13 @@ export function UsageIndicator() {
       <PopoverContent
         side="bottom"
         align="end"
-        className="text-xs w-72 p-0"
+        className="usage-popover text-xs w-72 p-0 border-border/20 shadow-sm"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
         <div className="p-3 space-y-3">
           {/* Header with overall status */}
-          <div className="flex items-center gap-1.5 pb-2 border-b">
+          <div className="flex items-center gap-1.5 pb-2 border-b border-border/30">
             <Icon className="h-3.5 w-3.5" />
             <span className="font-semibold text-xs">{t('common:usage.usageBreakdown')}</span>
           </div>
@@ -605,7 +605,7 @@ export function UsageIndicator() {
           <button
             type="button"
             onClick={handleOpenAccounts}
-            className={`w-full pt-3 border-t flex items-center gap-2.5 hover:bg-muted/50 -mx-3 px-3 ${otherProfiles.length === 0 ? '-mb-3 pb-3 rounded-b-md' : 'pb-2'} transition-colors cursor-pointer group`}
+            className={`w-full pt-3 border-t border-border/30 flex items-center gap-2.5 hover:bg-muted/50 -mx-3 px-3 ${otherProfiles.length === 0 ? '-mb-3 pb-3 rounded-b-md' : 'pb-2'} transition-colors cursor-pointer group`}
           >
             {/* Initials Avatar with warning indicator for re-auth needed */}
             <div className="relative">

@@ -440,7 +440,7 @@ export function RoadmapGenerationProgress({
       };
 
   return (
-    <div className={cn('space-y-4 p-6 rounded-xl bg-card border', className)}>
+    <div className={cn('space-y-4 p-6 rounded-xl bg-card border border-border/30', className)}>
       {/* Header with Stop button */}
       {isActivePhase && onStop && (
         <div className="flex justify-end mb-2">

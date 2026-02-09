@@ -172,7 +172,7 @@ export function GeneralSettings({ settings, onSettingsChange, section, onSave, i
             </div>
 
             {/* Feature Model Configuration */}
-            <div className="space-y-4 pt-4 border-t border-border">
+            <div className="space-y-4 pt-4 border-t border-border/30">
               <div className="space-y-1">
                 <Label className="text-sm font-medium text-foreground">{t('general.featureModelSettings')}</Label>
                 <p className="text-sm text-muted-foreground">

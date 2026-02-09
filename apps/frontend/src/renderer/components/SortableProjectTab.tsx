@@ -5,6 +5,7 @@ import { Settings2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import type { Project } from '../../shared/types';
+import type { ProjectTabActivityState } from './ProjectTabBar';
 
 interface SortableProjectTabProps {
   project: Project;
@@ -13,6 +14,7 @@ interface SortableProjectTabProps {
   tabIndex: number;
   onSelect: () => void;
   onClose: (e: React.MouseEvent) => void;
+  activityState?: ProjectTabActivityState;
   // Optional control props for active tab
   onSettingsClick?: () => void;
 }
@@ -28,6 +30,7 @@ export function SortableProjectTab({
   tabIndex,
   onSelect,
   onClose,
+  activityState = 'idle',
   onSettingsClick
 }: SortableProjectTabProps) {
   const { t } = useTranslation('common');
@@ -103,6 +106,20 @@ export function SortableProjectTab({
             )}>
               {project.name}
             </span>
+            {activityState === 'running' && (
+              <span
+                className="h-2.5 w-2.5 rounded-full border border-primary/70 border-t-transparent animate-spin opacity-80"
+                title={t('projectTab.activityRunning', 'Activity in progress')}
+                aria-hidden="true"
+              />
+            )}
+            {activityState === 'ready' && (
+              <span
+                className="h-2 w-2 rounded-full bg-primary/85 shadow-[0_0_0_1px_hsl(var(--background))]"
+                title={t('projectTab.activityReady', 'New completed activity')}
+                aria-hidden="true"
+              />
+            )}
           </div>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="flex items-center gap-2">

@@ -90,41 +90,65 @@ class IdeationGenerator:
         if additional_context:
             prompt += f"\n{additional_context}\n"
 
-        # Create client with thinking budget
-        # Use agent_type="ideation" to avoid loading unnecessary MCP servers
-        # which can cause 60-second timeout delays
-        client = create_client(
-            self.project_dir,
-            self.output_dir,
-            resolve_model_id(self.model),
-            max_thinking_tokens=self.thinking_budget,
-            agent_type="ideation",
-        )
+        # Fallback to sonnet when opus is unavailable for this account/profile.
+        attempted_models = [self.model]
+        if self.model == "opus":
+            attempted_models.append("sonnet")
 
-        try:
-            async with client:
-                await client.query(prompt)
+        last_error = "Unknown ideation error"
+        for model_name in attempted_models:
+            # Use agent_type="ideation" to avoid loading unnecessary MCP servers
+            # which can cause timeout delays.
+            client = create_client(
+                self.project_dir,
+                self.output_dir,
+                resolve_model_id(model_name),
+                max_thinking_tokens=self.thinking_budget,
+                agent_type="ideation",
+            )
 
-                response_text = ""
-                async for msg in client.receive_response():
-                    msg_type = type(msg).__name__
+            try:
+                async with client:
+                    await client.query(prompt)
 
-                    if msg_type == "AssistantMessage" and hasattr(msg, "content"):
-                        for block in msg.content:
-                            block_type = type(block).__name__
-                            if block_type == "TextBlock" and hasattr(block, "text"):
-                                response_text += block.text
-                                print(block.text, end="", flush=True)
-                            elif block_type == "ToolUseBlock" and hasattr(
-                                block, "name"
-                            ):
-                                print(f"\n[Tool: {block.name}]", flush=True)
+                    response_text = ""
+                    async for msg in client.receive_response():
+                        msg_type = type(msg).__name__
 
-                print()
-                return True, response_text
+                        if msg_type == "AssistantMessage" and hasattr(msg, "content"):
+                            for block in msg.content:
+                                block_type = type(block).__name__
+                                if block_type == "TextBlock" and hasattr(block, "text"):
+                                    response_text += block.text
+                                    print(block.text, end="", flush=True)
+                                elif block_type == "ToolUseBlock" and hasattr(
+                                    block, "name"
+                                ):
+                                    print(f"\n[Tool: {block.name}]", flush=True)
 
-        except Exception as e:
-            return False, str(e)
+                    print()
+                    return True, response_text
+
+            except Exception as e:
+                error_text = str(e)
+                last_error = error_text
+                is_opus_fallback_case = (
+                    model_name == "opus"
+                    and self.model == "opus"
+                    and (
+                        "issue with the selected model" in error_text.lower()
+                        or "may not exist or you may not have access" in error_text.lower()
+                    )
+                )
+                if is_opus_fallback_case:
+                    print_status(
+                        "Opus model unavailable for this profile, retrying ideation with Sonnet...",
+                        "warning",
+                    )
+                    continue
+                return False, error_text
+
+        return False, last_error
 
     async def run_recovery_agent(
         self,

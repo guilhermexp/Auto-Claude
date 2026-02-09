@@ -238,8 +238,8 @@ export function OnboardingWizard({
 
   return (
     <FullScreenDialog open={open} onOpenChange={handleOpenChange}>
-      <FullScreenDialogContent>
-        <FullScreenDialogHeader>
+      <FullScreenDialogContent className="onboarding-modal w-[95vw] max-w-[1200px] h-[88vh] max-h-[920px] bg-background">
+        <FullScreenDialogHeader className="border-border/30 bg-background">
           <FullScreenDialogTitle className="flex items-center gap-3">
             <Wand2 className="h-6 w-6" />
             {t('wizard.title')}
@@ -256,8 +256,8 @@ export function OnboardingWizard({
           )}
         </FullScreenDialogHeader>
 
-        <FullScreenDialogBody>
-          <ScrollArea className="h-full">
+        <FullScreenDialogBody className="bg-background">
+          <ScrollArea className="h-full bg-background">
             {renderStepContent()}
           </ScrollArea>
         </FullScreenDialogBody>

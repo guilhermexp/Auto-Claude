@@ -2,7 +2,7 @@ import { Card } from '../ui/card';
 
 export function IdeaSkeletonCard() {
   return (
-    <Card className="p-4 animate-pulse">
+    <Card className="p-4 animate-pulse ideation-card">
       <div className="flex items-start justify-between">
         <div className="flex-1 space-y-2">
           <div className="flex items-center gap-2">

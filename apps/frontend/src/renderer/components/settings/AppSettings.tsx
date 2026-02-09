@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { startTransition } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Palette,
@@ -101,9 +102,16 @@ interface NavItemProps {
 }
 
 function NavItem({ icon: Icon, label, isActive, isDisabled, onClick }: NavItemProps) {
+  const handleClick = useCallback(() => {
+    // Keep navigation click handlers snappy while large settings trees rerender.
+    startTransition(() => {
+      onClick();
+    });
+  }, [onClick]);
+
   return (
     <button
-      onClick={onClick}
+      onClick={handleClick}
       disabled={isDisabled}
       className={cn(
         'w-full flex items-center gap-2 px-2.5 py-1.5 text-sm h-8 rounded-md font-medium transition-colors',
@@ -268,15 +276,15 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
           </FullScreenDialogDescription>
         </FullScreenDialogHeader>
         <FullScreenDialogBody className="p-0">
-          <div className="flex h-full min-h-0 bg-background dark:bg-[hsl(0_0%_5%)]">
+          <div className="settings-modal flex h-full min-h-0 bg-background dark:bg-[hsl(0_0%_5%)]">
             {/* Navigation sidebar - 1Code style: narrow, darker background */}
-            <nav className="w-[360px] min-w-0 max-w-[360px] flex-[0_0_360px] py-4 flex flex-col bg-sidebar border-r border-border/60 dark:bg-[hsl(0_0%_7%)] overflow-hidden box-border min-h-0">
+            <nav className="w-[360px] min-w-0 max-w-[360px] flex-[0_0_360px] py-4 flex flex-col bg-sidebar border-r border-border/30 dark:bg-[hsl(0_0%_7%)] overflow-hidden box-border min-h-0">
               {/* Title */}
               <h2 className="text-lg font-semibold px-3 pb-4 text-foreground">
                 {t('title')}
               </h2>
 
-              <ScrollArea className="flex-1 min-h-0 w-full max-w-full px-3 box-border">
+              <ScrollArea className="settings-scroll-area flex-1 min-h-0 w-full max-w-full px-3 box-border">
                 <div className="space-y-4 w-full max-w-full box-border overflow-hidden">
                   {/* APPLICATION Section */}
                   <div>
@@ -317,7 +325,7 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
                   </div>
 
                   {/* Separator */}
-                  <div className="border-t border-border/40 mx-2" />
+                  <div className="settings-divider border-t border-border/30 mx-2" />
 
                   {/* PROJECT Section */}
                   <div>
@@ -355,7 +363,7 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
 
               {/* Version at bottom */}
               {version && (
-                <div className="mt-auto pt-4 border-t border-border/50 mx-1">
+                <div className="settings-divider mt-auto pt-4 border-t border-border/30 mx-1">
                   <p className="text-xs text-muted-foreground text-center">
                     {t('updates.version')} {version}
                   </p>
@@ -365,7 +373,7 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
 
             {/* Main content - 1Code style: card-based with rounded corners */}
             <div className="flex-1 min-w-0 min-h-0 h-full overflow-hidden py-5 px-5 md:py-6 md:px-6 flex flex-col">
-              <ScrollArea className="flex-1 min-h-0 px-1 py-1 md:px-2" viewportClassName="settings-scroll-viewport">
+              <ScrollArea className="settings-scroll-area flex-1 min-h-0 px-1 py-1 md:px-2" viewportClassName="settings-scroll-viewport">
                 <div className="mx-auto w-full max-w-[1080px]">
                   {renderContent()}
                 </div>

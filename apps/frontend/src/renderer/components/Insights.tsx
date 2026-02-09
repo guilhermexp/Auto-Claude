@@ -423,8 +423,8 @@ export function Insights({ projectId }: InsightsProps) {
                           {t('insights:chat.assistant', 'Assistant')}
                         </span>
                         {streamingContent && (
-                          <div className="insights-message-bubble rounded-2xl rounded-tl-sm px-4 py-3">
-                            <div className="prose prose-sm dark:prose-invert max-w-none">
+                          <div className="insights-message-bubble text-foreground rounded-2xl rounded-tl-sm px-4 py-3">
+                            <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-td:text-foreground prose-th:text-foreground">
                               <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                 {streamingContent}
                               </ReactMarkdown>

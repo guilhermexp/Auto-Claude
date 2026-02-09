@@ -7,6 +7,7 @@ import type {
   RoadmapGenerationStatus,
   FeatureSource
 } from '../../shared/types';
+import { debugError, debugLog } from '../../shared/utils/debug-logger';
 
 /**
  * Migrate roadmap data to latest schema
@@ -35,7 +36,7 @@ function migrateRoadmapIfNeeded(roadmap: Roadmap): Roadmap {
   });
 
   if (needsMigration) {
-    console.log('[Roadmap] Migrated roadmap data to latest schema');
+    debugLog('[Roadmap] Migrated roadmap data to latest schema');
     return {
       ...roadmap,
       features: migratedFeatures,
@@ -321,7 +322,7 @@ export async function loadRoadmap(projectId: string): Promise<void> {
     // Save migrated roadmap if changes were made
     if (migratedRoadmap !== result.data) {
       window.electronAPI.saveRoadmap(projectId, migratedRoadmap).catch((err) => {
-        console.error('[Roadmap] Failed to save migrated roadmap:', err);
+        debugError('[Roadmap] Failed to save migrated roadmap:', err);
       });
     }
 
@@ -398,7 +399,7 @@ export async function stopRoadmap(projectId: string): Promise<boolean> {
 
   if (!result.success) {
     // Backend couldn't find/stop the process (likely already finished/crashed)
-    console.log('[Roadmap] Process already stopped');
+    debugLog('[Roadmap] Process already stopped');
   }
 
   return result.success;

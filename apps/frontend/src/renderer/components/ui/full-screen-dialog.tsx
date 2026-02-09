@@ -41,7 +41,7 @@ const FullScreenDialogContent = React.forwardRef<
         'fixed left-[50%] top-[50%] z-50 flex flex-col',
         'translate-x-[-50%] translate-y-[-50%]',
         'w-[92vw] max-w-6xl h-[85vh] max-h-[800px]',
-        'bg-card border border-border rounded-2xl',
+        'bg-card border border-border/30 rounded-2xl',
         'dark:border-white/5 dark:bg-[radial-gradient(120%_120%_at_50%_0%,hsl(0_0%_10%)_0%,hsl(0_0%_6%)_45%,hsl(0_0%_4%)_100%)]',
         'shadow-2xl dark:shadow-[0_28px_80px_rgba(0,0,0,0.7)] overflow-hidden',
         'data-[state=open]:animate-in data-[state=closed]:animate-out',

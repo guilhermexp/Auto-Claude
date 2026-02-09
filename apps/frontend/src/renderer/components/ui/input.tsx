@@ -12,7 +12,7 @@ const inputVariants = cva(
         lg: 'h-11 px-4 py-3 text-base file:text-base',
       },
       validation: {
-        none: 'border-border/50',
+        none: 'border-black/20 dark:border-white/15',
         error: 'border-destructive focus-visible:border-destructive',
         success: 'border-[var(--success)] focus-visible:border-[var(--success)]',
         warning: 'border-warning focus-visible:border-warning',

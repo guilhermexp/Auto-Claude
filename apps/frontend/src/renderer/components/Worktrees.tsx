@@ -49,6 +49,7 @@ import { useTaskStore } from '../stores/task-store';
 import { useToast } from '../hooks/use-toast';
 import type { WorktreeListItem, WorktreeMergeResult, TerminalWorktreeConfig, WorktreeStatus, Task, WorktreeCreatePROptions, WorktreeCreatePRResult } from '../../shared/types';
 import { CreatePRDialog } from './task-detail/task-review/CreatePRDialog';
+import { debugError, debugLog, debugWarn } from '../../shared/utils/debug-logger';
 
 // Prefix constants for worktree ID parsing
 const TASK_PREFIX = 'task:';
@@ -172,8 +173,8 @@ export function Worktrees({ projectId }: WorktreesProps) {
         window.electronAPI.listTerminalWorktrees(selectedProject.path)
       ]);
 
-      console.log('[Worktrees] Task worktrees result:', taskResult);
-      console.log('[Worktrees] Terminal worktrees result:', terminalResult);
+      debugLog('[Worktrees] Task worktrees result:', taskResult);
+      debugLog('[Worktrees] Terminal worktrees result:', terminalResult);
 
       if (taskResult.success && taskResult.data) {
         setWorktrees(taskResult.data.worktrees);
@@ -182,13 +183,13 @@ export function Worktrees({ projectId }: WorktreesProps) {
       }
 
       if (terminalResult.success && terminalResult.data) {
-        console.log('[Worktrees] Setting terminal worktrees:', terminalResult.data);
+        debugLog('[Worktrees] Setting terminal worktrees:', terminalResult.data);
         setTerminalWorktrees(terminalResult.data);
       } else {
-        console.warn('[Worktrees] Terminal worktrees fetch failed or empty:', terminalResult);
+        debugWarn('[Worktrees] Terminal worktrees fetch failed or empty:', terminalResult);
       }
     } catch (err) {
-      console.error('[Worktrees] Error loading worktrees:', err);
+      debugError('[Worktrees] Error loading worktrees:', err);
       setError(err instanceof Error ? err.message : t('common:errors.failedToLoadWorktrees'));
     } finally {
       setIsLoading(false);

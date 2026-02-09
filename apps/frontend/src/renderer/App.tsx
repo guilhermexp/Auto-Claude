@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, RefreshCw, AlertCircle } from 'lucide-react';
 import { debugLog } from '../shared/utils/debug-logger';
@@ -68,7 +68,7 @@ import { useGlobalTerminalListeners } from './hooks/useGlobalTerminalListeners';
 import { useTerminalProfileChange } from './hooks/useTerminalProfileChange';
 import { COLOR_THEMES, UI_SCALE_MIN, UI_SCALE_MAX, UI_SCALE_DEFAULT } from '../shared/constants';
 import type { Task, Project, ColorTheme } from '../shared/types';
-import { ProjectTabBar } from './components/ProjectTabBar';
+import { ProjectTabBar, type ProjectTabActivityState } from './components/ProjectTabBar';
 import { AddProjectModal } from './components/AddProjectModal';
 import { ViewStateProvider } from './contexts/ViewStateContext';
 
@@ -82,6 +82,7 @@ interface ProjectTabBarWithContextProps {
   onProjectSelect: (projectId: string) => void;
   onProjectClose: (projectId: string) => void;
   onAddProject: () => void;
+  activityByProjectId: Record<string, ProjectTabActivityState>;
   onSettingsClick: () => void;
 }
 
@@ -91,6 +92,7 @@ function ProjectTabBarWithContext({
   onProjectSelect,
   onProjectClose,
   onAddProject,
+  activityByProjectId,
   onSettingsClick
 }: ProjectTabBarWithContextProps) {
   return (
@@ -100,6 +102,7 @@ function ProjectTabBarWithContext({
       onProjectSelect={onProjectSelect}
       onProjectClose={onProjectClose}
       onAddProject={onAddProject}
+      activityByProjectId={activityByProjectId}
       onSettingsClick={onSettingsClick}
     />
   );
@@ -149,6 +152,13 @@ export function App() {
   const [isOnboardingWizardOpen, setIsOnboardingWizardOpen] = useState(false);
   const [isVersionWarningModalOpen, setIsVersionWarningModalOpen] = useState(false);
   const [isRefreshingTasks, setIsRefreshingTasks] = useState(false);
+  const [projectTabActivity, setProjectTabActivity] = useState<Record<string, ProjectTabActivityState>>({});
+
+  // Per-project activity tracking for tab indicators
+  const activeProjectRef = useRef<string | null>(null);
+  const runningTaskCountsRef = useRef<Record<string, number>>({});
+  const runningTaskStatesRef = useRef<Map<string, { projectId: string; running: boolean }>>(new Map());
+  const roadmapRunningRef = useRef<Record<string, boolean>>({});
 
   // Initialize dialog state
   const [showInitDialog, setShowInitDialog] = useState(false);
@@ -184,6 +194,38 @@ export function App() {
   const projectTabs = getProjectTabs();
   const selectedProject = projects.find((p) => p.id === (activeProjectId || selectedProjectId));
   const activeProjectKey = activeProjectId || selectedProjectId || null;
+
+  useEffect(() => {
+    activeProjectRef.current = activeProjectKey;
+  }, [activeProjectKey]);
+
+  const getProjectRunningState = useCallback((projectId: string): boolean => {
+    return (runningTaskCountsRef.current[projectId] || 0) > 0 || Boolean(roadmapRunningRef.current[projectId]);
+  }, []);
+
+  const reconcileProjectTabState = useCallback((projectId: string, options?: { forceClearReady?: boolean }) => {
+    setProjectTabActivity((prev) => {
+      const current = prev[projectId] ?? 'idle';
+      const isRunning = getProjectRunningState(projectId);
+
+      let next: ProjectTabActivityState = current;
+      if (isRunning) {
+        next = 'running';
+      } else if (options?.forceClearReady || activeProjectRef.current === projectId) {
+        next = 'idle';
+      } else if (current === 'running') {
+        next = 'ready';
+      }
+
+      if (next === current) {
+        return prev;
+      }
+      return {
+        ...prev,
+        [projectId]: next
+      };
+    });
+  }, [getProjectRunningState]);
 
   // Initial load
   useEffect(() => {
@@ -462,6 +504,150 @@ export function App() {
     }
   }, [activeProjectId, selectedProjectId, selectedProject?.path]);
 
+  // Initialize project activity indicators for open tabs and keep state clean when tabs close
+  useEffect(() => {
+    let isCancelled = false;
+
+    const loadActivityState = async () => {
+      const openIds = [...openProjectIds];
+      if (openIds.length === 0) {
+        if (!isCancelled) {
+          runningTaskCountsRef.current = {};
+          roadmapRunningRef.current = {};
+          runningTaskStatesRef.current.clear();
+          setProjectTabActivity({});
+        }
+        return;
+      }
+
+      const taskCounts: Record<string, number> = {};
+      const roadmapRunning: Record<string, boolean> = {};
+
+      await Promise.all(openIds.map(async (projectId) => {
+        try {
+          const [tasksResult, roadmapStatusResult] = await Promise.all([
+            window.electronAPI.getTasks(projectId),
+            window.electronAPI.getRoadmapStatus(projectId)
+          ]);
+
+          taskCounts[projectId] = tasksResult.success && tasksResult.data
+            ? tasksResult.data.filter((task) =>
+                task.status === 'in_progress' || task.status === 'ai_review'
+              ).length
+            : 0;
+          roadmapRunning[projectId] = Boolean(roadmapStatusResult.success && roadmapStatusResult.data?.isRunning);
+        } catch {
+          taskCounts[projectId] = 0;
+          roadmapRunning[projectId] = false;
+        }
+      }));
+
+      if (isCancelled) return;
+
+      runningTaskCountsRef.current = taskCounts;
+      roadmapRunningRef.current = roadmapRunning;
+
+      // Keep running-task map only for still-open projects
+      const openSet = new Set(openIds);
+      runningTaskStatesRef.current.forEach((value, taskId) => {
+        if (!openSet.has(value.projectId)) {
+          runningTaskStatesRef.current.delete(taskId);
+        }
+      });
+
+      setProjectTabActivity((prev) => {
+        const next: Record<string, ProjectTabActivityState> = {};
+        for (const projectId of openIds) {
+          const previous = prev[projectId] ?? 'idle';
+          next[projectId] = getProjectRunningState(projectId)
+            ? 'running'
+            : previous === 'ready'
+              ? 'ready'
+              : 'idle';
+        }
+        return next;
+      });
+    };
+
+    void loadActivityState();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [openProjectIds, getProjectRunningState]);
+
+  // Global activity listeners to drive per-tab status indicators
+  useEffect(() => {
+    const runningStatuses = new Set(['in_progress', 'ai_review']);
+
+    const cleanupTaskStatus = window.electronAPI.onTaskStatusChange((taskId, status, projectId) => {
+      if (!projectId) return;
+
+      const was = runningTaskStatesRef.current.get(taskId);
+      const isRunningNow = runningStatuses.has(status);
+
+      // If task changed project or stopped running, decrement old project count
+      if (was?.running && was.projectId !== projectId) {
+        runningTaskCountsRef.current[was.projectId] = Math.max(
+          0,
+          (runningTaskCountsRef.current[was.projectId] || 0) - 1
+        );
+        reconcileProjectTabState(was.projectId);
+      } else if (was?.running && !isRunningNow) {
+        runningTaskCountsRef.current[projectId] = Math.max(
+          0,
+          (runningTaskCountsRef.current[projectId] || 0) - 1
+        );
+      }
+
+      // If task started running, increment current project count
+      if (isRunningNow && (!was?.running || was.projectId !== projectId)) {
+        runningTaskCountsRef.current[projectId] = (runningTaskCountsRef.current[projectId] || 0) + 1;
+      }
+
+      if (isRunningNow) {
+        runningTaskStatesRef.current.set(taskId, { projectId, running: true });
+      } else {
+        runningTaskStatesRef.current.delete(taskId);
+      }
+
+      reconcileProjectTabState(projectId);
+    });
+
+    const cleanupRoadmapProgress = window.electronAPI.onRoadmapProgress((projectId, status) => {
+      const isRunning = status.phase !== 'idle' && status.phase !== 'complete' && status.phase !== 'error';
+      if (roadmapRunningRef.current[projectId] !== isRunning) {
+        roadmapRunningRef.current[projectId] = isRunning;
+        reconcileProjectTabState(projectId);
+      }
+    });
+
+    const stopRoadmapForProject = (projectId: string) => {
+      if (roadmapRunningRef.current[projectId]) {
+        roadmapRunningRef.current[projectId] = false;
+        reconcileProjectTabState(projectId);
+      }
+    };
+
+    const cleanupRoadmapComplete = window.electronAPI.onRoadmapComplete((projectId) => {
+      stopRoadmapForProject(projectId);
+    });
+    const cleanupRoadmapError = window.electronAPI.onRoadmapError((projectId) => {
+      stopRoadmapForProject(projectId);
+    });
+    const cleanupRoadmapStopped = window.electronAPI.onRoadmapStopped((projectId) => {
+      stopRoadmapForProject(projectId);
+    });
+
+    return () => {
+      cleanupTaskStatus();
+      cleanupRoadmapProgress();
+      cleanupRoadmapComplete();
+      cleanupRoadmapError();
+      cleanupRoadmapStopped();
+    };
+  }, [reconcileProjectTabState]);
+
   // Apply theme on load
   useEffect(() => {
     const root = document.documentElement;
@@ -619,6 +805,7 @@ export function App() {
 
   const handleProjectTabSelect = (projectId: string) => {
     setActiveProject(projectId);
+    reconcileProjectTabState(projectId, { forceClearReady: true });
   };
 
   const handleProjectTabClose = (projectId: string) => {
@@ -825,6 +1012,7 @@ export function App() {
                   onProjectSelect={handleProjectTabSelect}
                   onProjectClose={handleProjectTabClose}
                   onAddProject={handleAddProject}
+                  activityByProjectId={projectTabActivity}
                   onSettingsClick={() => setIsSettingsDialogOpen(true)}
                 />
               </SortableContext>

@@ -401,7 +401,7 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
         <TooltipContent side="right">{getTooltipText()}</TooltipContent>
       </Tooltip>
 
-      <PopoverContent side="right" align="end" className="w-72">
+      <PopoverContent side="right" align="end" className="claude-cli-popover w-72 border-border/20 shadow-sm">
         <div className="space-y-3">
           {/* Header */}
           <div className="flex items-center gap-2">
@@ -423,7 +423,7 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
 
           {/* Version info */}
           {versionInfo && status !== "loading" && (
-            <div className="text-xs space-y-1 p-2 bg-muted rounded-md">
+            <div className="text-xs space-y-1 p-2 bg-muted rounded-md border border-border/20">
               {versionInfo.installed && (
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">
@@ -513,7 +513,7 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
                 onValueChange={handleVersionSelect}
                 disabled={isLoadingVersions || isInstalling}
               >
-                <SelectTrigger className="h-8 text-xs">
+                <SelectTrigger className="h-8 text-xs border-border/30">
                   <SelectValue
                     placeholder={
                       isLoadingVersions
@@ -559,7 +559,7 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
                 onValueChange={handleInstallationSelect}
                 disabled={isLoadingInstallations || isInstalling}
               >
-                <SelectTrigger className="h-8 text-xs">
+                <SelectTrigger className="h-8 text-xs border-border/30">
                   <SelectValue
                     placeholder={
                       isLoadingInstallations
