@@ -350,7 +350,7 @@ export function Sidebar({
   return (
     <TooltipProvider>
       <div
-        className="flex h-full w-64 flex-col bg-sidebar border-r dark:bg-[hsl(0_0%_7%)]"
+        className="flex h-full w-64 flex-col bg-sidebar border-r"
         style={{ borderRightColor: 'hsl(var(--border) / 0.32)' }}
       >
         {/* Header with drag area - extra top padding for macOS traffic lights */}

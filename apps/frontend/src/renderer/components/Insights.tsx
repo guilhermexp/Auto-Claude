@@ -319,7 +319,7 @@ export function Insights({ projectId }: InsightsProps) {
         className={cn(
           'shrink-0 flex flex-col insights-sidebar',
           isSidebarCollapsed
-            ? 'w-0 px-0 py-0 opacity-0 overflow-hidden'
+            ? 'insights-sidebar-collapsed'
             : 'w-80 px-3 py-4'
         )}
       >
@@ -339,8 +339,7 @@ export function Insights({ projectId }: InsightsProps) {
 
       {/* Right Panel: Chat Area */}
       <div className={cn(
-        'flex-1 min-w-0 h-full overflow-hidden py-4 pr-4',
-        isSidebarCollapsed ? 'pl-4' : ''
+        'flex-1 min-w-0 h-full overflow-hidden p-4'
       )}>
         <div className="flex flex-col h-full insights-chat-card overflow-hidden">
           {/* Header with sidebar toggle and translation button */}
@@ -423,7 +422,7 @@ export function Insights({ projectId }: InsightsProps) {
                           {t('insights:chat.assistant', 'Assistant')}
                         </span>
                         {streamingContent && (
-                          <div className="insights-message-bubble text-foreground rounded-2xl rounded-tl-sm px-4 py-3">
+                        <div className="insights-message-bubble text-foreground rounded-2xl rounded-tl-sm px-4 py-3">
                             <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-td:text-foreground prose-th:text-foreground">
                               <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                 {streamingContent}

@@ -107,15 +107,14 @@ export function SortableProjectTab({
               {project.name}
             </span>
             {activityState === 'running' && (
-              <span
-                className="h-2.5 w-2.5 rounded-full border border-primary/70 border-t-transparent animate-spin opacity-80"
-                title={t('projectTab.activityRunning', 'Activity in progress')}
-                aria-hidden="true"
-              />
+              <span className="relative inline-flex h-2.5 w-2.5" title={t('projectTab.activityRunning', 'Activity in progress')} aria-hidden="true">
+                <span className="absolute inset-0 rounded-full bg-sky-500/35 animate-pulse" />
+                <span className="absolute inset-0 rounded-full border border-sky-500 border-t-transparent animate-spin" />
+              </span>
             )}
             {activityState === 'ready' && (
               <span
-                className="h-2 w-2 rounded-full bg-primary/85 shadow-[0_0_0_1px_hsl(var(--background))]"
+                className="h-2 w-2 rounded-full bg-sky-500 shadow-[0_0_0_1px_hsl(var(--background))]"
                 title={t('projectTab.activityReady', 'New completed activity')}
                 aria-hidden="true"
               />

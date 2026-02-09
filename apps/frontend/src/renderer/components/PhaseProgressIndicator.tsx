@@ -117,11 +117,11 @@ export const PhaseProgressIndicator = memo(function PhaseProgressIndicator({
   const activeEntries = getActivePhaseEntries();
 
   return (
-    <div ref={containerRef} className={cn('space-y-1.5', className)}>
+    <div ref={containerRef} className={cn('task-phase-progress space-y-2', className)}>
       {/* Progress label row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">
+          <span className="text-[11px] font-medium text-muted-foreground">
             {isStuck ? t('execution.labels.interrupted') : showSubtaskProgress ? t('execution.labels.progress') : phaseLabel}
           </span>
           {/* Activity indicator dot for non-coding phases - only animate when visible */}
@@ -140,7 +140,7 @@ export const PhaseProgressIndicator = memo(function PhaseProgressIndicator({
             />
           )}
         </div>
-        <span className="text-xs font-medium text-foreground">
+        <span className="text-[11px] font-semibold text-foreground">
           {showSubtaskProgress ? (
             `${subtaskProgress}%`
           ) : activeEntries > 0 ? (
@@ -158,7 +158,7 @@ export const PhaseProgressIndicator = memo(function PhaseProgressIndicator({
       {/* Progress bar */}
       <div
         className={cn(
-          'relative h-1.5 w-full overflow-hidden rounded-full',
+          'relative h-2 w-full overflow-hidden rounded-full',
           isStuck ? 'bg-warning/20' : 'bg-border'
         )}
       >
@@ -185,7 +185,7 @@ export const PhaseProgressIndicator = memo(function PhaseProgressIndicator({
             // Indeterminate animated progress for planning/validation (only when visible)
             <motion.div
               key="indeterminate"
-              className={cn('absolute h-full w-1/3 rounded-full', colors.color)}
+              className={cn('absolute h-full w-1/3 rounded-full task-indeterminate-progress', colors.color)}
               animate={{
                 x: ['-100%', '400%'],
               }}
@@ -216,7 +216,7 @@ export const PhaseProgressIndicator = memo(function PhaseProgressIndicator({
               <motion.div
                 key={subtask.id || `subtask-${index}`}
                 className={cn(
-                  'h-2 w-2 rounded-full',
+                  'h-1.5 w-1.5 rounded-full',
                   subtask.status === 'completed' && 'bg-success',
                   isInProgress && 'bg-info',
                   subtask.status === 'failed' && 'bg-destructive',
@@ -229,8 +229,8 @@ export const PhaseProgressIndicator = memo(function PhaseProgressIndicator({
                   // Only animate boxShadow when visible to save GPU cycles
                   ...(shouldPulse && {
                     boxShadow: [
-                      '0 0 0 0 rgba(var(--info), 0.4)',
-                      '0 0 0 4px rgba(var(--info), 0)',
+                      '0 0 0 0 hsl(var(--info) / 0.35)',
+                      '0 0 0 4px hsl(var(--info) / 0)',
                     ],
                   }),
                 }}
@@ -297,7 +297,7 @@ const PhaseStepsIndicator = memo(function PhaseStepsIndicator({
   };
 
   return (
-    <div className="flex items-center gap-1 mt-2">
+    <div className="task-phase-steps flex items-center gap-1 mt-2">
       {phases.map((phase, index) => {
         const state = getPhaseState(phase.key);
         const shouldAnimate = state === 'active' && !isStuck && isVisible;
@@ -306,7 +306,7 @@ const PhaseStepsIndicator = memo(function PhaseStepsIndicator({
           <div key={phase.key} className="flex items-center">
             <motion.div
               className={cn(
-                'flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-medium',
+                'flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium tracking-[0.01em]',
                 state === 'complete' && 'bg-success/10 text-success',
                 state === 'active' && 'bg-primary/10 text-primary',
                 state === 'stuck' && 'bg-warning/10 text-warning',

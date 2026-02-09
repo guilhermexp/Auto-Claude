@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, RefreshCw, AlertCircle } from 'lucide-react';
 import { debugLog } from '../shared/utils/debug-logger';
@@ -132,6 +132,7 @@ export function App() {
   const reorderTabs = useProjectStore((state) => state.reorderTabs);
   const tasks = useTaskStore((state) => state.tasks);
   const settings = useSettingsStore((state) => state.settings);
+  const terminals = useTerminalStore((state) => state.terminals);
   const settingsLoading = useSettingsStore((state) => state.isLoading);
 
   // API Profile state
@@ -194,14 +195,31 @@ export function App() {
   const projectTabs = getProjectTabs();
   const selectedProject = projects.find((p) => p.id === (activeProjectId || selectedProjectId));
   const activeProjectKey = activeProjectId || selectedProjectId || null;
+  const projectPathToId = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const project of projects) {
+      map.set(project.path, project.id);
+    }
+    return map;
+  }, [projects]);
 
   useEffect(() => {
     activeProjectRef.current = activeProjectKey;
   }, [activeProjectKey]);
 
   const getProjectRunningState = useCallback((projectId: string): boolean => {
-    return (runningTaskCountsRef.current[projectId] || 0) > 0 || Boolean(roadmapRunningRef.current[projectId]);
-  }, []);
+    const taskOrRoadmapRunning =
+      (runningTaskCountsRef.current[projectId] || 0) > 0 || Boolean(roadmapRunningRef.current[projectId]);
+
+    const terminalRunning = terminals.some((terminal) => {
+      if (!terminal.projectPath) return false;
+      const terminalProjectId = projectPathToId.get(terminal.projectPath);
+      if (terminalProjectId !== projectId) return false;
+      return terminal.status === 'running' || terminal.status === 'claude-active';
+    });
+
+    return taskOrRoadmapRunning || terminalRunning;
+  }, [projectPathToId, terminals]);
 
   const reconcileProjectTabState = useCallback((projectId: string, options?: { forceClearReady?: boolean }) => {
     setProjectTabActivity((prev) => {
@@ -581,37 +599,38 @@ export function App() {
     const runningStatuses = new Set(['in_progress', 'ai_review']);
 
     const cleanupTaskStatus = window.electronAPI.onTaskStatusChange((taskId, status, projectId) => {
-      if (!projectId) return;
+      const resolvedProjectId = projectId || activeProjectRef.current;
+      if (!resolvedProjectId) return;
 
       const was = runningTaskStatesRef.current.get(taskId);
       const isRunningNow = runningStatuses.has(status);
 
       // If task changed project or stopped running, decrement old project count
-      if (was?.running && was.projectId !== projectId) {
+      if (was?.running && was.projectId !== resolvedProjectId) {
         runningTaskCountsRef.current[was.projectId] = Math.max(
           0,
           (runningTaskCountsRef.current[was.projectId] || 0) - 1
         );
         reconcileProjectTabState(was.projectId);
       } else if (was?.running && !isRunningNow) {
-        runningTaskCountsRef.current[projectId] = Math.max(
+        runningTaskCountsRef.current[resolvedProjectId] = Math.max(
           0,
-          (runningTaskCountsRef.current[projectId] || 0) - 1
+          (runningTaskCountsRef.current[resolvedProjectId] || 0) - 1
         );
       }
 
       // If task started running, increment current project count
-      if (isRunningNow && (!was?.running || was.projectId !== projectId)) {
-        runningTaskCountsRef.current[projectId] = (runningTaskCountsRef.current[projectId] || 0) + 1;
+      if (isRunningNow && (!was?.running || was.projectId !== resolvedProjectId)) {
+        runningTaskCountsRef.current[resolvedProjectId] = (runningTaskCountsRef.current[resolvedProjectId] || 0) + 1;
       }
 
       if (isRunningNow) {
-        runningTaskStatesRef.current.set(taskId, { projectId, running: true });
+        runningTaskStatesRef.current.set(taskId, { projectId: resolvedProjectId, running: true });
       } else {
         runningTaskStatesRef.current.delete(taskId);
       }
 
-      reconcileProjectTabState(projectId);
+      reconcileProjectTabState(resolvedProjectId);
     });
 
     const cleanupRoadmapProgress = window.electronAPI.onRoadmapProgress((projectId, status) => {

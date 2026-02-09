@@ -276,9 +276,9 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
           </FullScreenDialogDescription>
         </FullScreenDialogHeader>
         <FullScreenDialogBody className="p-0">
-          <div className="settings-modal flex h-full min-h-0 bg-background dark:bg-[hsl(0_0%_5%)]">
+          <div className="settings-modal flex h-full min-h-0 bg-background">
             {/* Navigation sidebar - 1Code style: narrow, darker background */}
-            <nav className="w-[360px] min-w-0 max-w-[360px] flex-[0_0_360px] py-4 flex flex-col bg-sidebar border-r border-border/30 dark:bg-[hsl(0_0%_7%)] overflow-hidden box-border min-h-0">
+            <nav className="w-[360px] min-w-0 max-w-[360px] flex-[0_0_360px] py-4 flex flex-col bg-sidebar border-r border-border/30 overflow-hidden box-border min-h-0">
               {/* Title */}
               <h2 className="text-lg font-semibold px-3 pb-4 text-foreground">
                 {t('title')}

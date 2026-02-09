@@ -424,52 +424,52 @@
 
 /* Dark Mode - 1Code inspired */
 .dark {
-  /* Layout Base - almost pure black like 1Code */
-  --background: 0 0% 4%;
-  --foreground: 0 0% 98%;
+  /* Layout Base - ChatIA PT dark profile */
+  --background: 0 0% 7%;
+  --foreground: 0 0% 92%;
 
-  /* Cards - same as background for flat design like Settings */
-  --card: 0 0% 4%;
-  --card-foreground: 0 0% 98%;
+  /* Cards - slightly elevated from background */
+  --card: 0 0% 10%;
+  --card-foreground: 0 0% 92%;
 
   /* Popovers */
-  --popover: 0 0% 9%;
-  --popover-foreground: 0 0% 98%;
+  --popover: 0 0% 11%;
+  --popover-foreground: 0 0% 92%;
 
-  /* Primary Brand Color - dark gray, keeping it subtle */
-  --primary: 240 4% 16%;
+  /* Primary Brand Color - neutral dark gray */
+  --primary: 0 0% 22%;
   --primary-foreground: 0 0% 98%;
 
-  /* Secondary - dark gray like reference image */
-  --secondary: 0 0% 28%;
-  --secondary-foreground: 0 0% 98%;
+  /* Secondary */
+  --secondary: 0 0% 14%;
+  --secondary-foreground: 0 0% 92%;
 
-  /* Muted - very dark for disabled/subtle elements */
-  --muted: 0 0% 15%;
+  /* Muted - subtle contrast for chips, placeholders and dividers */
+  --muted: 0 0% 12%;
   --muted-foreground: 0 0% 60%;
 
   /* Accent - slightly lighter for hover states */
-  --accent: 0 0% 15%;
+  --accent: 0 0% 12%;
   --accent-foreground: 0 0% 98%;
 
   /* Destructive/Error */
   --destructive: 0 62.8% 30.6%;
   --destructive-foreground: 0 0% 98%;
 
-  /* Borders and Inputs - very subtle like 1Code */
-  --border: 0 0% 12%;
-  --input: 0 0% 14%;
-  --input-background: 0 0% 10%;
+  /* Borders and Inputs - subtle but readable */
+  --border: 0 0% 19%;
+  --input: 0 0% 16%;
+  --input-background: 0 0% 12%;
 
   /* Focus ring */
-  --ring: 240 5% 30%;
+  --ring: 0 0% 32%;
 
   /* Border radius - more rounded */
   --radius: 0.75rem;
 
-  /* Sidebar - slightly lighter than main background */
-  --sidebar: 0 0% 9%;
-  --sidebar-foreground: 0 0% 98%;
+  /* Sidebar - almost same depth as content area */
+  --sidebar: 0 0% 8%;
+  --sidebar-foreground: 0 0% 90%;
 
   /* Semantic colors */
   --success: 142 71% 45%;
@@ -484,7 +484,7 @@
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.7);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.8);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.9);
-  --shadow-focus: 0 0 0 2px rgba(59, 130, 246, 0.3);
+  --shadow-focus: 0 0 0 2px rgba(255, 255, 255, 0.16);
 }
 
 /* ============================================
@@ -875,12 +875,12 @@ body {
 }
 
 .dark .kanban-column {
-  background-color: #151515;
-  border-color: #2a2a2a;
+  background-color: hsl(var(--card) / 0.9);
+  border-color: hsl(var(--border) / 0.72);
 }
 
 .dark .kanban-column-header {
-  border-color: #2a2a2a;
+  border-color: hsl(var(--border) / 0.72);
 }
 
 /* Kanban scrollbar - minimal, only appears on scroll */
@@ -1116,14 +1116,14 @@ body {
 }
 
 .dark .kanban-task-card {
-  background-color: #2b2b2b;
-  border-color: #353535;
+  background-color: hsl(var(--card) / 0.95);
+  border-color: hsl(var(--border) / 0.82);
 }
 
 .dark .kanban-task-card:hover {
-  border-color: #464646;
+  border-color: hsl(var(--border) / 0.95);
   box-shadow:
-    0 0 0 1px rgba(90, 90, 90, 0.22),
+    0 0 0 1px hsl(var(--border) / 0.25),
     0 8px 18px rgba(0, 0, 0, 0.34);
 }
 
@@ -1261,13 +1261,18 @@ body {
 }
 
 .dark .column-count-badge {
-  background: #1f2530;
-  color: #b8c0cd;
-  border: 1px solid #313948;
+  background: hsl(var(--muted) / 0.8);
+  color: hsl(var(--muted-foreground));
+  border: 1px solid hsl(var(--border) / 0.76);
 }
 
 .kanban-task-chip {
   border-radius: 9999px;
+  border-width: 1px;
+  border-style: solid;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
 }
 
 .kanban-task-chip-neutral {
@@ -1277,9 +1282,9 @@ body {
 }
 
 .dark .kanban-task-chip-neutral {
-  background-color: #2a2a2a;
-  border-color: #3b3b3b;
-  color: #b6b6b6;
+  background-color: hsl(var(--muted) / 0.8);
+  border-color: hsl(var(--border) / 0.75);
+  color: hsl(var(--muted-foreground));
 }
 
 .kanban-task-chip-info {
@@ -1316,6 +1321,56 @@ body {
   background-color: hsl(0 78% 60% / 0.14);
   border-color: hsl(0 78% 60% / 0.38);
   color: hsl(0 100% 79%);
+}
+
+/* Task card internals - professional polish */
+.task-card-metadata {
+  row-gap: 0.4rem;
+}
+
+.task-card-footer {
+  border-top: 1px solid hsl(var(--border) / 0.52);
+  padding-top: 0.6rem;
+}
+
+.task-time-pill {
+  border: 1px solid hsl(var(--border) / 0.58);
+  background-color: hsl(var(--muted) / 0.38);
+  border-radius: 9999px;
+  padding: 0.15rem 0.45rem;
+}
+
+.task-action-btn {
+  border-radius: 0.62rem;
+}
+
+.task-menu-btn {
+  border: 1px solid hsl(var(--border) / 0.72) !important;
+  background-color: hsl(var(--muted) / 0.36) !important;
+  border-radius: 0.62rem !important;
+}
+
+.task-menu-btn:hover {
+  background-color: hsl(var(--muted) / 0.55) !important;
+  border-color: hsl(var(--border) / 0.92) !important;
+}
+
+.task-phase-progress .task-indeterminate-progress {
+  filter: saturate(0.85) brightness(0.95);
+}
+
+.task-phase-steps > div > div {
+  border: 1px solid hsl(var(--border) / 0.35);
+}
+
+.dark .task-card-footer {
+  border-top-color: hsl(var(--border) / 0.72);
+}
+
+.dark .task-time-pill {
+  border-color: hsl(var(--border) / 0.76);
+  background-color: hsl(var(--muted) / 0.44);
+  color: hsl(var(--muted-foreground) / 0.96);
 }
 
 /* ============================================
@@ -1561,9 +1616,9 @@ body {
 }
 
 .dark .column-count-badge {
-  background-color: #2a2a2a;
-  border-color: hsl(var(--border) / 0.3);
-  color: #b6b6b6;
+  background-color: hsl(var(--muted) / 0.82);
+  border-color: hsl(var(--border) / 0.55);
+  color: hsl(var(--muted-foreground));
 }
 
 .roadmap-kanban-card {
@@ -1576,12 +1631,12 @@ body {
 }
 
 .dark .roadmap-kanban-card {
-  background-color: #171717;
-  border-color: hsl(var(--border) / 0.3);
+  background-color: hsl(var(--card) / 0.95);
+  border-color: hsl(var(--border) / 0.72);
 }
 
 .dark .roadmap-kanban-card:hover {
-  background-color: #1f1f1f;
+  background-color: hsl(var(--card) / 0.99);
 }
 
 /* Roadmap Phase Card - main card container for phases */
@@ -1592,8 +1647,8 @@ body {
 }
 
 .dark .roadmap-phase-card {
-  background-color: #171717;
-  border-color: hsl(var(--border) / 0.3);
+  background-color: hsl(var(--card) / 0.95);
+  border-color: hsl(var(--border) / 0.72);
 }
 
 /* Roadmap Section Card - for priority grouping sections */
@@ -1604,8 +1659,8 @@ body {
 }
 
 .dark .roadmap-section-card {
-  background-color: #171717;
-  border-color: hsl(var(--border) / 0.3);
+  background-color: hsl(var(--card) / 0.95);
+  border-color: hsl(var(--border) / 0.72);
 }
 
 .empty-column-dropzone {
@@ -1646,12 +1701,12 @@ body {
 }
 
 .dark .roadmap-kanban-column {
-  background-color: #151515;
-  border-color: hsl(var(--border) / 0.3);
+  background-color: hsl(var(--card) / 0.9);
+  border-color: hsl(var(--border) / 0.72);
 }
 
 .dark .roadmap-kanban-column-header {
-  border-color: hsl(var(--border) / 0.3);
+  border-color: hsl(var(--border) / 0.72);
 }
 
 /* Roadmap kanban scrollbar - subtle and only visible on hover */
@@ -1680,8 +1735,8 @@ body {
 }
 
 .dark .empty-column-dropzone {
-  border-color: hsl(var(--border) / 0.3);
-  background-color: #1a1a1a;
+  border-color: hsl(var(--border) / 0.58);
+  background-color: hsl(var(--card) / 0.8);
 }
 
 .dark .empty-column-dropzone.active {
@@ -3598,12 +3653,8 @@ body {
 /* Insights sidebar container */
 .insights-sidebar {
   background-color: transparent;
-  border-right: 1px solid hsl(var(--border) / 0.5);
-  transition: width 0.2s ease, opacity 0.2s ease;
-}
-
-.dark .insights-sidebar {
-  border-color: #2f2f2f;
+  border-right: 1px solid hsl(var(--border) / 0.72);
+  transition: width 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
 }
 
 /* Insights sidebar collapsed state */
@@ -3612,41 +3663,32 @@ body {
   overflow: hidden;
   opacity: 0;
   padding: 0;
+  border-right-color: transparent;
 }
 
 /* Insights sidebar toggle button */
 .insights-sidebar-toggle {
-  background-color: hsl(var(--muted) / 0.5);
-  border: 1px solid hsl(var(--border) / 0.8);
+  background-color: hsl(var(--muted) / 0.42);
+  border: 1px solid hsl(var(--border) / 0.76);
   border-radius: 0.375rem;
   color: hsl(var(--muted-foreground));
   transition: all 0.2s;
 }
 
 .insights-sidebar-toggle:hover {
-  background-color: hsl(var(--muted) / 0.8);
+  background-color: hsl(var(--muted) / 0.6);
   color: hsl(var(--foreground));
-}
-
-.dark .insights-sidebar-toggle {
-  background-color: #1a1a1a;
-  border-color: #2f2f2f;
-}
-
-.dark .insights-sidebar-toggle:hover {
-  background-color: #252525;
+  border-color: hsl(var(--border) / 0.9);
 }
 
 /* Insights chat card container */
 .insights-chat-card {
-  background-color: hsl(var(--card));
-  border: 1px solid hsl(var(--border) / 0.8);
-  border-radius: 0.75rem;
-}
-
-.dark .insights-chat-card {
-  background-color: #171717;
-  border-color: #2f2f2f;
+  background-color: hsl(var(--card) / 0.9);
+  border: none;
+  border-radius: 0.9rem;
+  box-shadow:
+    0 18px 44px rgba(0, 0, 0, 0.34),
+    0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Insights session item */
@@ -3675,39 +3717,34 @@ body {
 /* Insights new chat button */
 .insights-new-chat-button {
   background-color: transparent;
-  border: 1px dashed hsl(var(--muted-foreground) / 0.3);
+  border: 1px dashed hsl(var(--border) / 0.82);
   border-radius: 0.375rem;
   color: hsl(var(--muted-foreground));
   transition: all 0.15s;
 }
 
 .insights-new-chat-button:hover {
-  background-color: hsl(var(--foreground) / 0.05);
+  background-color: hsl(var(--muted) / 0.52);
   color: hsl(var(--foreground));
-}
-
-.dark .insights-new-chat-button {
-  border-color: hsl(var(--muted-foreground) / 0.25);
-}
-
-.dark .insights-new-chat-button:hover {
-  background-color: hsl(var(--foreground) / 0.05);
+  border-color: hsl(var(--border) / 0.92);
 }
 
 /* Insights message bubble */
 .insights-message-bubble {
-  background-color: hsl(var(--muted) / 0.5);
+  background-color: hsl(var(--muted) / 0.48);
+  border: 1px solid hsl(var(--border) / 0.66);
   border-radius: 1rem;
 }
 
-.dark .insights-message-bubble {
-  background-color: #1f1f1f;
+.insights-user-message-bubble {
+  background-color: hsl(var(--muted) / 0.4);
+  border: 1px solid hsl(var(--border) / 0.66);
 }
 
 /* Insights suggestion card */
 .insights-suggestion-card {
-  background-color: hsl(var(--card) / 0.5);
-  border: 1px solid hsl(var(--border) / 0.4);
+  background-color: hsl(var(--card) / 0.68);
+  border: 1px solid hsl(var(--border) / 0.68);
   border-radius: 0.5rem;
   color: hsl(var(--muted-foreground));
   transition: all 0.15s;
@@ -3715,108 +3752,59 @@ body {
 
 .insights-suggestion-card:hover {
   background-color: hsl(var(--muted) / 0.5);
-  border-color: hsl(var(--border) / 0.6);
+  border-color: hsl(var(--border) / 0.9);
   color: hsl(var(--foreground));
-}
-
-.dark .insights-suggestion-card {
-  background-color: #1a1a1a;
-  border-color: #2a2a2a;
-}
-
-.dark .insights-suggestion-card:hover {
-  background-color: #1f1f1f;
-  border-color: #333;
 }
 
 /* Insights chat input container */
 .insights-input-container {
-  background-color: hsl(var(--card));
-  border-top: 1px solid hsl(var(--border) / 0.3);
-}
-
-.dark .insights-input-container {
-  background-color: #171717;
-  border-color: #2a2a2a;
+  background-color: hsl(var(--card) / 0.86);
+  border-top: 1px solid hsl(var(--border) / 0.26);
 }
 
 /* Insights chat input field */
 .insights-input-field {
-  background-color: hsl(var(--background));
-  border: 1px solid hsl(var(--border) / 0.3);
+  background-color: hsl(var(--muted) / 0.28);
+  border: 1px solid hsl(var(--border) / 0.74);
   border-radius: 0.75rem;
   transition: all 0.15s;
 }
 
 .insights-input-field:focus-within {
-  border-color: hsl(var(--primary) / 0.4);
-  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.2);
-}
-
-.dark .insights-input-field {
-  background-color: #1a1a1a;
-  border-color: #2a2a2a;
-}
-
-.dark .insights-input-field:focus-within {
-  border-color: hsl(var(--primary) / 0.4);
+  border-color: hsl(var(--border) / 0.95);
+  box-shadow: 0 0 0 1px hsl(var(--border) / 0.35);
 }
 
 /* Insights suggested task card */
 .insights-task-card {
-  background-color: hsl(var(--background));
-  border: 1px solid hsl(var(--border) / 0.4);
+  background-color: hsl(var(--card) / 0.88);
+  border: 1px solid hsl(var(--border) / 0.7);
   border-radius: 0.5rem;
-}
-
-.dark .insights-task-card {
-  background-color: #171717;
-  border-color: #2a2a2a;
 }
 
 /* Insights suggested task card header */
 .insights-task-card-header {
   background-color: hsl(var(--muted) / 0.3);
-  border-bottom: 1px solid hsl(var(--border) / 0.3);
-}
-
-.dark .insights-task-card-header {
-  background-color: #1a1a1a;
-  border-color: #2a2a2a;
+  border-bottom: 1px solid hsl(var(--border) / 0.7);
 }
 
 /* Insights suggested task card footer */
 .insights-task-card-footer {
   background-color: hsl(var(--muted) / 0.3);
-  border-top: 1px solid hsl(var(--border) / 0.3);
-}
-
-.dark .insights-task-card-footer {
-  background-color: #1a1a1a;
-  border-color: #2a2a2a;
+  border-top: 1px solid hsl(var(--border) / 0.7);
 }
 
 /* Insights tool usage card */
 .insights-tool-card {
-  background-color: hsl(var(--background));
-  border: 1px solid hsl(var(--border) / 0.4);
+  background-color: hsl(var(--card) / 0.88);
+  border: 1px solid hsl(var(--border) / 0.7);
   border-radius: 0.5rem;
-}
-
-.dark .insights-tool-card {
-  background-color: #171717;
-  border-color: #2a2a2a;
 }
 
 /* Insights tool usage expanded content */
 .insights-tool-card-content {
   background-color: hsl(var(--muted) / 0.3);
-  border-top: 1px solid hsl(var(--border) / 0.3);
-}
-
-.dark .insights-tool-card-content {
-  background-color: #1a1a1a;
-  border-color: #2a2a2a;
+  border-top: 1px solid hsl(var(--border) / 0.7);
 }
 
 /* ============================================

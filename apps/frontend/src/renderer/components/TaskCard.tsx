@@ -377,12 +377,12 @@ export const TaskCard = memo(function TaskCard({
 
         {/* Metadata badges */}
         {(task.metadata || isStuck || isIncomplete || hasActiveExecution || reviewReasonInfo) && (
-          <div className="mt-2.5 flex flex-wrap gap-1.5">
+          <div className="task-card-metadata mt-2.5 flex flex-wrap gap-1.5">
             {/* Stuck indicator - highest priority */}
             {isStuck && (
               <Badge
                 variant="outline"
-                className="text-[10px] px-1.5 py-0.5 flex items-center gap-1 bg-warning/10 text-warning border-warning/30 badge-priority-urgent"
+                className="kanban-task-chip text-[10px] px-1.5 py-0.5 flex items-center gap-1 bg-warning/10 text-warning border-warning/30 badge-priority-urgent"
               >
                 <AlertTriangle className="h-2.5 w-2.5" />
                 {t('labels.stuck')}
@@ -392,7 +392,7 @@ export const TaskCard = memo(function TaskCard({
             {isIncomplete && !isStuck && (
               <Badge
                 variant="outline"
-                className="text-[10px] px-1.5 py-0.5 flex items-center gap-1 bg-orange-500/10 text-orange-400 border-orange-500/30"
+                className="kanban-task-chip text-[10px] px-1.5 py-0.5 flex items-center gap-1 bg-orange-500/10 text-orange-400 border-orange-500/30"
               >
                 <AlertTriangle className="h-2.5 w-2.5" />
                 {t('labels.incomplete')}
@@ -402,7 +402,7 @@ export const TaskCard = memo(function TaskCard({
             {task.metadata?.archivedAt && (
               <Badge
                 variant="outline"
-                className="text-[10px] px-1.5 py-0.5 flex items-center gap-1 bg-muted text-muted-foreground border-border"
+                className="kanban-task-chip text-[10px] px-1.5 py-0.5 flex items-center gap-1 bg-muted text-muted-foreground border-border"
               >
                 <Archive className="h-2.5 w-2.5" />
                 {t('status.archived')}
@@ -413,7 +413,7 @@ export const TaskCard = memo(function TaskCard({
               <Badge
                 variant="outline"
                 className={cn(
-                  'text-[10px] px-1.5 py-0.5 flex items-center gap-1',
+                  'kanban-task-chip text-[10px] px-1.5 py-0.5 flex items-center gap-1',
                   EXECUTION_PHASE_BADGE_COLORS[executionPhase]
                 )}
               >
@@ -426,14 +426,14 @@ export const TaskCard = memo(function TaskCard({
                task.status === 'done' ? (
                     <Badge
                       variant={getStatusBadgeVariant(task.status)}
-                      className="text-[10px] px-1.5 py-0.5"
+                      className="kanban-task-chip text-[10px] px-1.5 py-0.5"
                     >
                       {getStatusLabel(task.status)}
                     </Badge>
                   ) : (
                    <Badge
                      variant={isStuck ? 'warning' : isIncomplete ? 'warning' : getStatusBadgeVariant(task.status)}
-                     className="text-[10px] px-1.5 py-0.5"
+                     className="kanban-task-chip text-[10px] px-1.5 py-0.5"
                    >
                      {isStuck ? t('labels.needsRecovery') : isIncomplete ? t('labels.needsResume') : getStatusLabel(task.status)}
                    </Badge>
@@ -443,7 +443,7 @@ export const TaskCard = memo(function TaskCard({
             {reviewReasonInfo && !isStuck && !isIncomplete && (
               <Badge
                 variant={reviewReasonInfo.variant}
-                className="text-[10px] px-1.5 py-0.5"
+                className="kanban-task-chip text-[10px] px-1.5 py-0.5"
               >
                 {reviewReasonInfo.label}
               </Badge>
@@ -519,8 +519,8 @@ export const TaskCard = memo(function TaskCard({
         )}
 
         {/* Footer */}
-        <div className="mt-4 flex items-center justify-between">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <div className="task-card-footer mt-4 flex items-center justify-between">
+          <div className="task-time-pill flex items-center gap-1.5 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
             <span>{relativeTime}</span>
           </div>
@@ -531,7 +531,7 @@ export const TaskCard = memo(function TaskCard({
               <Button
                 variant="warning"
                 size="sm"
-                className="h-7 px-2.5"
+                className="task-action-btn h-7 px-2.5"
                 onClick={handleRecover}
                 disabled={isRecovering}
               >
@@ -551,7 +551,7 @@ export const TaskCard = memo(function TaskCard({
               <Button
                 variant="default"
                 size="sm"
-                className="h-7 px-2.5"
+                className="task-action-btn h-7 px-2.5"
                 onClick={handleStartStop}
               >
                 <Play className="mr-1.5 h-3 w-3" />
@@ -563,7 +563,7 @@ export const TaskCard = memo(function TaskCard({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 cursor-pointer"
+                    className="task-action-btn h-7 px-2 cursor-pointer"
                     onClick={handleViewPR}
                     title={t('tooltips.viewPR')}
                   >
@@ -574,7 +574,7 @@ export const TaskCard = memo(function TaskCard({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 cursor-pointer"
+                    className="task-action-btn h-7 px-2 cursor-pointer"
                     onClick={handleArchive}
                     title={t('tooltips.archiveTask')}
                   >
@@ -586,7 +586,7 @@ export const TaskCard = memo(function TaskCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 px-2.5 hover:bg-muted-foreground/10"
+                className="task-action-btn h-7 px-2.5 hover:bg-muted-foreground/10"
                 onClick={handleArchive}
                 title={t('tooltips.archiveTask')}
               >
@@ -597,7 +597,7 @@ export const TaskCard = memo(function TaskCard({
               <Button
                 variant={isRunning ? 'destructive' : 'default'}
                 size="sm"
-                className="h-7 px-2.5"
+                className="task-action-btn h-7 px-2.5"
                 onClick={handleStartStop}
               >
                 {isRunning ? (
@@ -621,7 +621,7 @@ export const TaskCard = memo(function TaskCard({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 w-7 p-0"
+                    className="task-menu-btn h-7 w-7 p-0"
                     onClick={(e) => e.stopPropagation()}
                     aria-label={t('actions.taskActions')}
                   >

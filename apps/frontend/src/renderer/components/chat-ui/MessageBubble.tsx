@@ -29,7 +29,7 @@ export function MessageBubble({
     return (
       <div className="flex justify-end gap-3">
         <div className="max-w-[75%]">
-          <div className="bg-primary/10 text-foreground rounded-2xl rounded-tr-sm px-4 py-3">
+          <div className="insights-user-message-bubble text-foreground rounded-2xl rounded-tr-sm px-4 py-3">
             <div className="prose prose-sm max-w-none dark:prose-invert prose-headings:text-foreground prose-p:text-foreground prose-strong:text-foreground prose-li:text-foreground prose-td:text-foreground prose-th:text-foreground">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                 {message.content}
