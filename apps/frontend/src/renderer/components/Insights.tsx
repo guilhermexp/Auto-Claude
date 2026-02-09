@@ -339,9 +339,9 @@ export function Insights({ projectId }: InsightsProps) {
 
       {/* Right Panel: Chat Area */}
       <div className={cn(
-        'flex-1 min-w-0 h-full overflow-hidden p-4'
+        'flex-1 min-w-0 h-full overflow-hidden p-0'
       )}>
-        <div className="flex flex-col h-full insights-chat-card overflow-hidden">
+        <div className="flex flex-col h-full overflow-hidden">
           {/* Header with sidebar toggle and translation button */}
           <div className="shrink-0 flex items-center justify-between px-4 pt-4 pb-1">
             <Tooltip>

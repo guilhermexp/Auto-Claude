@@ -3683,12 +3683,10 @@ body {
 
 /* Insights chat card container */
 .insights-chat-card {
-  background-color: hsl(var(--card) / 0.9);
+  background-color: transparent;
   border: none;
-  border-radius: 0.9rem;
-  box-shadow:
-    0 18px 44px rgba(0, 0, 0, 0.34),
-    0 2px 10px rgba(0, 0, 0, 0.2);
+  border-radius: 0;
+  box-shadow: none;
 }
 
 /* Insights session item */
@@ -3758,8 +3756,8 @@ body {
 
 /* Insights chat input container */
 .insights-input-container {
-  background-color: hsl(var(--card) / 0.86);
-  border-top: 1px solid hsl(var(--border) / 0.26);
+  background-color: transparent;
+  border-top: none;
 }
 
 /* Insights chat input field */
