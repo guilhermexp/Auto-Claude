@@ -9,7 +9,10 @@ export function applyThemeVariables(
   element: HTMLElement = document.documentElement
 ): void {
   for (const [name, value] of Object.entries(variables)) {
-    element.style.setProperty(name, value);
+    const current = element.style.getPropertyValue(name).trim();
+    if (current !== value) {
+      element.style.setProperty(name, value);
+    }
   }
 }
 
@@ -23,4 +26,3 @@ export function removeThemeVariables(
     element.style.removeProperty(variableName);
   }
 }
-

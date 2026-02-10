@@ -522,6 +522,13 @@
   transition-property: revert;
 }
 
+/* Disable transitions only during runtime theme variable swaps to avoid perceived lag. */
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));

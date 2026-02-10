@@ -732,34 +732,43 @@ export function App() {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
     const applyTheme = () => {
-      const isSystemDark = mediaQuery.matches;
-      const isDarkMode = settings.theme === 'dark' || (settings.theme === 'system' && isSystemDark);
+      // Prevent mass transition repaints while CSS vars are being swapped.
+      root.classList.add('theme-switching');
+      try {
+        const isSystemDark = mediaQuery.matches;
+        const isDarkMode = settings.theme === 'dark' || (settings.theme === 'system' && isSystemDark);
 
-      root.classList.toggle('dark', isDarkMode);
+        root.classList.toggle('dark', isDarkMode);
 
-      // Resolve applied built-in theme ID.
-      // When mode is `system`, use dedicated light/dark theme IDs if configured.
-      const rawThemeId = settings.theme === 'system'
-        ? (isSystemDark
-          ? (settings.systemDarkThemeId ?? settings.themeId ?? settings.colorTheme ?? DEFAULT_THEME_ID)
-          : (settings.systemLightThemeId ?? settings.themeId ?? settings.colorTheme ?? DEFAULT_THEME_ID))
-        : (settings.themeId ?? settings.colorTheme ?? DEFAULT_THEME_ID);
+        // Resolve applied built-in theme ID.
+        // When mode is `system`, use dedicated light/dark theme IDs if configured.
+        const rawThemeId = settings.theme === 'system'
+          ? (isSystemDark
+            ? (settings.systemDarkThemeId ?? settings.themeId ?? settings.colorTheme ?? DEFAULT_THEME_ID)
+            : (settings.systemLightThemeId ?? settings.themeId ?? settings.colorTheme ?? DEFAULT_THEME_ID))
+          : (settings.themeId ?? settings.colorTheme ?? DEFAULT_THEME_ID);
 
-      const themeId: BuiltinThemeId = BUILTIN_THEME_IDS.includes(rawThemeId as BuiltinThemeId)
-        ? (rawThemeId as BuiltinThemeId)
-        : DEFAULT_THEME_ID;
+        const themeId: BuiltinThemeId = BUILTIN_THEME_IDS.includes(rawThemeId as BuiltinThemeId)
+          ? (rawThemeId as BuiltinThemeId)
+          : DEFAULT_THEME_ID;
 
-      root.setAttribute('data-theme', themeId);
+        root.setAttribute('data-theme', themeId);
 
-      const builtinTheme = BUILTIN_THEME_COLOR_SCHEMES[themeId];
-      const builtinVariables = generateCSSVariables(builtinTheme.colors);
-      removeThemeVariables(root);
-      applyThemeVariables(builtinVariables, root);
+        const builtinTheme = BUILTIN_THEME_COLOR_SCHEMES[themeId];
+        const builtinVariables = generateCSSVariables(builtinTheme.colors);
+        removeThemeVariables(root);
+        applyThemeVariables(builtinVariables, root);
 
-      // Apply imported/custom theme variables on top of selected built-in tokens.
-      if (settings.customThemeColors && Object.keys(settings.customThemeColors).length > 0) {
-        const customVariables = generateCSSVariables(settings.customThemeColors);
-        applyThemeVariables(customVariables, root);
+        // Apply imported/custom theme variables on top of selected built-in tokens.
+        if (settings.customThemeColors && Object.keys(settings.customThemeColors).length > 0) {
+          const customVariables = generateCSSVariables(settings.customThemeColors);
+          applyThemeVariables(customVariables, root);
+        }
+      } finally {
+        // Re-enable transitions after paint.
+        requestAnimationFrame(() => {
+          root.classList.remove('theme-switching');
+        });
       }
     };
 
