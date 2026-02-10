@@ -28,10 +28,10 @@ const buttonVariants = cva(
           'bg-info text-info-foreground hover:bg-info/90 active:scale-[0.98]',
       },
       size: {
-        default: 'h-10 px-4 py-2 text-sm rounded-lg',
+        default: 'h-9 px-4 py-2 text-sm rounded-md',
         sm: 'h-8 px-3 text-xs rounded-md',
-        lg: 'h-12 px-6 text-base rounded-lg',
-        icon: 'h-10 w-10 rounded-lg',
+        lg: 'h-10 px-5 text-sm rounded-md',
+        icon: 'h-9 w-9 rounded-md',
       },
     },
     defaultVariants: {

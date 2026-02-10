@@ -188,7 +188,7 @@ export function GitHubPRs({ onOpenSettings, isActive = false }: GitHubPRsProps) 
   return (
     <div className="flex-1 flex flex-col h-full github-prs-page">
       {/* Header */}
-      <div className="mx-3 mt-3 mb-2 rounded-xl px-4 py-3 flex items-center justify-between github-prs-header">
+      <div className="mx-3 mt-3 mb-2 rounded-lg px-4 py-3 flex items-center justify-between github-prs-header">
         <div className="flex items-center gap-3">
           <h2 className="text-sm font-medium flex items-center gap-2">
             <GitPullRequest className="h-4 w-4" />

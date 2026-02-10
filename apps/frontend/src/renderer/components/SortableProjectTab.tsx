@@ -71,23 +71,22 @@ export function SortableProjectTab({
     >
       <Tooltip delayDuration={200}>
       <TooltipTrigger asChild>
-        <Button
+        <button
           type="button"
-          variant="ghost"
           className={cn(
             'flex-1 flex items-center gap-1.5 sm:gap-2',
-            // Responsive padding: tighter on mobile, normal on desktop
-            'px-3 sm:px-3.5 md:px-4 py-2.5',
-            'text-sm rounded-xl',
-            'min-w-0 truncate transition-colors cursor-pointer',
-            'border',
+            'px-3 sm:px-3.5 md:px-4 py-2',
+            'text-sm rounded-none',
+            'min-w-0 truncate cursor-pointer',
+            'border-b-2 transition-colors duration-150',
+            'bg-transparent',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
             isActive && [
-              'text-foreground border-border/70',
-              'bg-card/85 shadow-[inset_0_1px_0_hsl(var(--background)/0.45)]'
+              'text-foreground border-primary'
             ],
             !isActive && [
-              'text-muted-foreground/88 border-transparent',
-              'hover:text-foreground hover:bg-muted/28 hover:border-border/45'
+              'text-muted-foreground/70 border-transparent',
+              'hover:text-foreground hover:bg-muted/20'
             ]
           )}
           onClick={onSelect}
@@ -121,7 +120,7 @@ export function SortableProjectTab({
                 aria-hidden="true"
               />
             )}
-        </Button>
+        </button>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="flex items-center gap-2">
           <span>{project.name}</span>
@@ -145,10 +144,10 @@ export function SortableProjectTab({
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    'h-7 w-7 p-0 rounded-lg',
+                    'h-6 w-6 p-0 rounded-sm',
                     'flex items-center justify-center',
-                    'text-muted-foreground hover:text-foreground',
-                    'bg-muted/20 hover:bg-muted/45 transition-colors border border-transparent hover:border-border/40',
+                    'text-muted-foreground/60 hover:text-foreground',
+                    'bg-transparent hover:bg-muted/30 transition-colors border-none',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1'
                   )}
                   onClick={(e) => {
@@ -176,13 +175,13 @@ export function SortableProjectTab({
               variant="ghost"
               size="icon"
               className={cn(
-                'h-7 w-7 p-0 mr-1.5',
+                'h-6 w-6 p-0 mr-1',
                 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
-                'transition-opacity duration-200 rounded-md flex-shrink-0',
-                'hover:bg-destructive hover:text-destructive-foreground',
+                'transition-opacity duration-150 rounded-sm flex-shrink-0',
+                'text-muted-foreground/50 hover:bg-muted/30 hover:text-foreground',
                 'flex items-center justify-center',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
-                isActive && 'opacity-100'
+                isActive && 'opacity-80'
               )}
               onClick={onClose}
               aria-label={t('projectTab.closeTabAriaLabel')}

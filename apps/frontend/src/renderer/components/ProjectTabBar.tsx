@@ -90,12 +90,12 @@ export function ProjectTabBar({
 
   return (
     <div className={cn(
-      'flex items-center h-16 border-b border-border/45 bg-background/95 project-tabbar-shell',
+      'flex items-center h-12 border-b border-border/30 bg-background project-tabbar-shell',
       'overflow-visible',
       className
     )}>
-      <div className="min-w-0 flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent px-2">
-        <div className="flex items-center min-w-max gap-2 px-1 py-2">
+      <div className="min-w-0 flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent px-1">
+        <div className="flex items-end min-w-max gap-0 h-full">
           {projects.map((project, index) => {
             const isActiveTab = activeProjectId === project.id;
             return (
@@ -119,18 +119,17 @@ export function ProjectTabBar({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 px-3 py-2 project-tabbar-actions">
+      <div className="flex items-center gap-1.5 px-3 border-l border-border/20">
         <AuthStatusIndicator />
         <UsageIndicator />
-        <Button
-          variant="secondary"
-          size="icon"
-          className="h-8 w-8 rounded-xl border border-border/50 bg-card/70 hover:bg-card"
+        <button
+          type="button"
+          className="h-7 w-7 flex items-center justify-center rounded-sm text-muted-foreground/60 hover:text-foreground hover:bg-muted/25 transition-colors"
           onClick={onAddProject}
           aria-label={t('projectTab.addProjectAriaLabel')}
         >
-          <Plus className="h-4 w-4" />
-        </Button>
+          <Plus className="h-3.5 w-3.5" />
+        </button>
       </div>
     </div>
   );

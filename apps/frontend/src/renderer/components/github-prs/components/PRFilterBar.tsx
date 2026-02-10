@@ -448,7 +448,7 @@ export function PRFilterBar({
     STATUS_OPTIONS.find((opt) => opt.value === value);
 
   return (
-    <div className="mx-3 mb-2 rounded-xl px-3 py-2 github-pr-filterbar">
+    <div className="mx-3 mb-2 px-1 py-2">
       <div className="flex items-center gap-2">
         {/* Search Input */}
         <div className="relative flex-shrink-0">
@@ -457,7 +457,7 @@ export function PRFilterBar({
             placeholder={t('prReview.searchPlaceholder')}
             value={filters.searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="h-8 w-10 pl-8 pr-2 transition-colors github-pr-search-input"
+            className="h-8 w-10 pl-8 pr-2 rounded-md transition-colors github-pr-search-input"
           />
           {filters.searchQuery && (
             <Button
