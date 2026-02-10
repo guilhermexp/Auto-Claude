@@ -33,10 +33,10 @@ export interface TerminalFontSettings {
 function getOSDefaults(): TerminalFontSettings {
   if (isWindows()) {
     return {
-      fontFamily: ['Cascadia Code', 'Consolas', 'Courier New', 'monospace'],
-      fontSize: 14,
+      fontFamily: ['Geist Mono', 'CaskaydiaCove Nerd Font', 'Cascadia Code', 'Consolas', 'Courier New', 'monospace'],
+      fontSize: 13,
       fontWeight: 400,
-      lineHeight: 1.2,
+      lineHeight: 1.4,
       letterSpacing: 0,
       cursorStyle: 'block',
       cursorBlink: true,
@@ -47,10 +47,10 @@ function getOSDefaults(): TerminalFontSettings {
 
   if (isMacOS()) {
     return {
-      fontFamily: ['SF Mono', 'Menlo', 'Monaco', 'monospace'],
+      fontFamily: ['Geist Mono', 'Liga SFMono Nerd Font', 'SF Mono', 'Menlo', 'Monaco', 'monospace'],
       fontSize: 13,
       fontWeight: 400,
-      lineHeight: 1.2,
+      lineHeight: 1.4,
       letterSpacing: 0,
       cursorStyle: 'block',
       cursorBlink: true,
@@ -61,10 +61,10 @@ function getOSDefaults(): TerminalFontSettings {
 
   if (isLinux()) {
     return {
-      fontFamily: ['Ubuntu Mono', 'Source Code Pro', 'Liberation Mono', 'DejaVu Sans Mono', 'monospace'],
+      fontFamily: ['Geist Mono', 'SauceCodePro Nerd Font', 'Ubuntu Mono', 'Source Code Pro', 'Liberation Mono', 'DejaVu Sans Mono', 'monospace'],
       fontSize: 13,
       fontWeight: 400,
-      lineHeight: 1.2,
+      lineHeight: 1.4,
       letterSpacing: 0,
       cursorStyle: 'block',
       cursorBlink: true,
@@ -75,10 +75,10 @@ function getOSDefaults(): TerminalFontSettings {
 
   // Fallback for unknown platforms
   return {
-    fontFamily: ['monospace'],
-    fontSize: 14,
+    fontFamily: ['Geist Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+    fontSize: 13,
     fontWeight: 400,
-    lineHeight: 1.2,
+    lineHeight: 1.4,
     letterSpacing: 0,
     cursorStyle: 'block',
     cursorBlink: true,
@@ -92,10 +92,10 @@ function getOSDefaults(): TerminalFontSettings {
  */
 export const TERMINAL_PRESETS: Record<string, TerminalFontSettings> = {
   'vscode': {
-    fontFamily: ['Consolas', 'Courier New', 'monospace'],
-    fontSize: 14,
+    fontFamily: ['Geist Mono', 'CaskaydiaCove Nerd Font', 'Consolas', 'Courier New', 'monospace'],
+    fontSize: 13,
     fontWeight: 400,
-    lineHeight: 1.2,
+    lineHeight: 1.4,
     letterSpacing: 0,
     cursorStyle: 'block',
     cursorBlink: true,
@@ -103,10 +103,10 @@ export const TERMINAL_PRESETS: Record<string, TerminalFontSettings> = {
     scrollback: 10000,
   },
   'intellij': {
-    fontFamily: ['JetBrains Mono', 'Consolas', 'monospace'],
+    fontFamily: ['Geist Mono', 'JetBrains Mono', 'Consolas', 'monospace'],
     fontSize: 13,
     fontWeight: 400,
-    lineHeight: 1.2,
+    lineHeight: 1.4,
     letterSpacing: 0,
     cursorStyle: 'block',
     cursorBlink: true,
@@ -114,10 +114,10 @@ export const TERMINAL_PRESETS: Record<string, TerminalFontSettings> = {
     scrollback: 10000,
   },
   'macos': {
-    fontFamily: ['SF Mono', 'Menlo', 'Monaco', 'monospace'],
+    fontFamily: ['Geist Mono', 'Liga SFMono Nerd Font', 'SF Mono', 'Menlo', 'Monaco', 'monospace'],
     fontSize: 13,
     fontWeight: 400,
-    lineHeight: 1.2,
+    lineHeight: 1.4,
     letterSpacing: 0,
     cursorStyle: 'block',
     cursorBlink: true,
@@ -125,10 +125,10 @@ export const TERMINAL_PRESETS: Record<string, TerminalFontSettings> = {
     scrollback: 10000,
   },
   'ubuntu': {
-    fontFamily: ['Ubuntu Mono', 'monospace'],
+    fontFamily: ['Geist Mono', 'SauceCodePro Nerd Font', 'Ubuntu Mono', 'monospace'],
     fontSize: 13,
     fontWeight: 400,
-    lineHeight: 1.2,
+    lineHeight: 1.4,
     letterSpacing: 0,
     cursorStyle: 'block',
     cursorBlink: true,

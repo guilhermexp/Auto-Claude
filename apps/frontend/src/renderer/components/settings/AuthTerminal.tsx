@@ -72,7 +72,7 @@ export function AuthTerminal({
     const xterm = new XTerminal({
       cursorBlink: true,
       fontSize: 13,
-      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+      fontFamily: '"Geist Mono", "Liga SFMono Nerd Font", "SauceCodePro Nerd Font", Menlo, Monaco, Consolas, monospace',
       theme: {
         background: 'hsl(var(--card))',
         foreground: 'hsl(var(--card-foreground))',

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Check, Sun, Moon, Monitor } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Label } from '../ui/label';
+import { Button } from '../ui/button';
 import { COLOR_THEMES, DEFAULT_THEME_ID } from '../../../shared/constants';
 import { useSettingsStore } from '../../stores/settings-store';
 import type { BuiltinThemeId, AppSettings, ExternalThemeInfo } from '../../../shared/types';
@@ -143,19 +144,20 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
         </div>
         <div className="grid grid-cols-3 gap-2.5 max-w-md">
           {(['system', 'light', 'dark'] as const).map((mode) => (
-            <button
+            <Button
               type="button"
+              variant="secondary"
               key={mode}
               onClick={() => handleModeChange(mode)}
               className={cn(
-                'flex flex-col items-center gap-1.5 p-3.5 rounded-lg transition-all settings-mode-button',
+                'h-auto flex flex-col items-center gap-1.5 p-3.5 rounded-lg transition-all settings-mode-button',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                 currentMode === mode && 'settings-mode-button-selected'
               )}
             >
               {getModeIcon(mode)}
               <span className="text-sm font-medium capitalize">{mode}</span>
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -179,12 +181,13 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
               : theme.previewColors.accent;
 
             return (
-              <button
+              <Button
                 type="button"
+                variant="secondary"
                 key={theme.id}
                 onClick={() => handleColorThemeChange(theme.id)}
                 className={cn(
-                  'relative flex flex-col p-3.5 rounded-lg text-left transition-all settings-theme-card',
+                  'h-auto relative flex flex-col p-3.5 rounded-lg text-left transition-all settings-theme-card',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   isSelected && 'settings-theme-card-selected'
                 )}
@@ -218,7 +221,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
                   <p className="text-xs text-muted-foreground line-clamp-2">{theme.description}</p>
                   <p className="text-[10px] uppercase tracking-wide text-muted-foreground">{theme.type}</p>
                 </div>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -237,8 +240,10 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Light Appearance</p>
             <div className="flex flex-wrap gap-2">
               {lightBuiltinThemes.map((theme) => (
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="sm"
                   key={`system-light-${theme.id}`}
                   onClick={() => handleSystemThemeChange('light', theme.id)}
                   className={cn(
@@ -247,7 +252,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
                   )}
                 >
                   {theme.name}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -256,8 +261,10 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Dark Appearance</p>
             <div className="flex flex-wrap gap-2">
               {darkBuiltinThemes.map((theme) => (
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="sm"
                   key={`system-dark-${theme.id}`}
                   onClick={() => handleSystemThemeChange('dark', theme.id)}
                   className={cn(
@@ -266,7 +273,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
                   )}
                 >
                   {theme.name}
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -282,21 +289,25 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
         </div>
 
         <div className="flex items-center gap-2">
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={loadExternalThemes}
             className="px-2.5 py-1.5 rounded-md text-xs transition-colors settings-preset-button"
             disabled={loadingExternalThemes}
           >
             {loadingExternalThemes ? 'Scanning...' : 'Rescan'}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={handleClearExternalTheme}
             className="px-2.5 py-1.5 rounded-md text-xs transition-colors settings-preset-button"
           >
             Use Built-in Only
-          </button>
+          </Button>
           <span className="text-xs text-muted-foreground">
             {externalThemes.length} themes found
           </span>
@@ -327,8 +338,10 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
               const isActive = settings.customThemeName === theme.name && settings.customThemeSource === theme.source;
               const isApplying = applyingExternalThemeId === theme.id;
               return (
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="sm"
                   key={theme.id}
                   onClick={() => handleApplyExternalTheme(theme)}
                   className={cn(
@@ -340,7 +353,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
                 >
                   {isApplying ? 'Applying...' : theme.name}
                   <span className="ml-1 uppercase text-[10px] opacity-70">{theme.source}</span>
-                </button>
+                </Button>
               );
             })}
             {lightExternalThemes.length === 0 && (
@@ -356,8 +369,10 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
               const isActive = settings.customThemeName === theme.name && settings.customThemeSource === theme.source;
               const isApplying = applyingExternalThemeId === theme.id;
               return (
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="sm"
                   key={theme.id}
                   onClick={() => handleApplyExternalTheme(theme)}
                   className={cn(
@@ -369,7 +384,7 @@ export function ThemeSelector({ settings, onSettingsChange }: ThemeSelectorProps
                 >
                   {isApplying ? 'Applying...' : theme.name}
                   <span className="ml-1 uppercase text-[10px] opacity-70">{theme.source}</span>
-                </button>
+                </Button>
               );
             })}
             {darkExternalThemes.length === 0 && (

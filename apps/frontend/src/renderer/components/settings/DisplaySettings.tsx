@@ -3,6 +3,7 @@ import { Monitor, ZoomIn, ZoomOut, RotateCcw, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import { Label } from '../ui/label';
+import { Button } from '../ui/button';
 import { SettingsCard } from './SettingsCard';
 import { useSettingsStore } from '../../stores/settings-store';
 import { UI_SCALE_MIN, UI_SCALE_MAX, UI_SCALE_DEFAULT, UI_SCALE_STEP } from '../../../shared/constants';
@@ -113,12 +114,13 @@ export function DisplaySettings({ settings, onSettingsChange, onSave, isSaving, 
             {SCALE_PRESETS.map((preset) => {
               const isSelected = currentScale === preset.value;
               return (
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
                   key={preset.value}
                   onClick={() => handlePresetChange(preset.value)}
                   className={cn(
-                    'flex flex-col items-center gap-2 p-4 rounded-lg transition-all settings-preset-button',
+                    'h-auto flex flex-col items-center gap-2 p-4 rounded-lg transition-all settings-preset-button',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                     isSelected && 'settings-preset-button-selected'
                   )}
@@ -128,7 +130,7 @@ export function DisplaySettings({ settings, onSettingsChange, onSave, isSaving, 
                     <div className="text-sm font-medium">{preset.label}</div>
                     <div className="text-xs text-muted-foreground">{t(preset.descriptionKey)}</div>
                   </div>
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -143,18 +145,20 @@ export function DisplaySettings({ settings, onSettingsChange, onSave, isSaving, 
                 {displayScale}%
               </span>
               {displayScale !== UI_SCALE_DEFAULT && (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={handleReset}
                   className={cn(
-                    'p-1.5 rounded-md transition-colors',
+                    'h-7 w-7 rounded-md transition-colors',
                     'hover:bg-accent text-muted-foreground hover:text-foreground',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                   )}
                   title="Reset to default (100%)"
                 >
                   <RotateCcw className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -164,12 +168,14 @@ export function DisplaySettings({ settings, onSettingsChange, onSave, isSaving, 
 
           {/* Slider with zoom buttons and apply button */}
           <div className="flex items-center gap-3 pt-1">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={handleZoomOut}
               disabled={displayScale <= UI_SCALE_MIN}
               className={cn(
-                'p-1 rounded-md transition-colors shrink-0',
+                'h-7 w-7 rounded-md transition-colors shrink-0',
                 'hover:bg-accent text-muted-foreground hover:text-foreground',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent'
@@ -177,7 +183,7 @@ export function DisplaySettings({ settings, onSettingsChange, onSave, isSaving, 
               title={`Decrease scale by ${UI_SCALE_STEP}%`}
             >
               <ZoomOut className="h-4 w-4" />
-            </button>
+            </Button>
             <input
               type="range"
               min={UI_SCALE_MIN}
@@ -208,12 +214,14 @@ export function DisplaySettings({ settings, onSettingsChange, onSave, isSaving, 
                 '[&::-moz-range-thumb]:hover:scale-110'
               )}
             />
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={handleZoomIn}
               disabled={displayScale >= UI_SCALE_MAX}
               className={cn(
-                'p-1 rounded-md transition-colors shrink-0',
+                'h-7 w-7 rounded-md transition-colors shrink-0',
                 'hover:bg-accent text-muted-foreground hover:text-foreground',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent'
@@ -221,14 +229,15 @@ export function DisplaySettings({ settings, onSettingsChange, onSave, isSaving, 
               title={`Increase scale by ${UI_SCALE_STEP}%`}
             >
               <ZoomIn className="h-4 w-4" />
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="default"
+              size="sm"
               onClick={handleApplyChanges}
               disabled={!hasPendingChanges}
               className={cn(
                 'px-2 py-1 rounded-md transition-colors shrink-0 flex items-center gap-1',
-                'bg-primary text-primary-foreground hover:bg-primary/90',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                 'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary'
               )}
@@ -236,7 +245,7 @@ export function DisplaySettings({ settings, onSettingsChange, onSave, isSaving, 
             >
               <Check className="h-4 w-4" />
               <span className="text-sm font-medium">Apply</span>
-            </button>
+            </Button>
           </div>
 
           {/* Scale markers */}

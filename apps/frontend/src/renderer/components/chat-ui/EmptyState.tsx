@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { MessageSquare, Code, Shield, Lightbulb, Layers } from 'lucide-react';
+import { Button } from '../ui/button';
 
 interface EmptyStateProps {
   onSuggestionClick: (suggestion: string) => void;
@@ -45,7 +46,10 @@ export function EmptyState({ onSuggestionClick }: EmptyStateProps) {
           {suggestions.map((suggestion, index) => {
             const IconComponent = SUGGESTION_ICONS[index]?.icon || MessageSquare;
             return (
-              <button
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
                 key={suggestion.key}
                 className="h-auto flex items-start gap-3 p-4 text-left insights-suggestion-card group"
                 onClick={() => onSuggestionClick(suggestion.text)}
@@ -54,7 +58,7 @@ export function EmptyState({ onSuggestionClick }: EmptyStateProps) {
                 <span className="text-xs leading-tight line-clamp-2">
                   {suggestion.text}
                 </span>
-              </button>
+              </Button>
             );
           })}
         </div>

@@ -208,15 +208,15 @@ describe('AuthStatusIndicator', () => {
       expect(screen.getByRole('button')).toHaveAttribute('aria-label', 'Authentication: API Key');
     });
 
-    it('should apply semantic token class for all providers', () => {
-      // All providers now use the same semantic token for consistent styling
+    it('should use the same shadcn button styling for all providers', () => {
       vi.mocked(useSettingsStore).mockReturnValue(
         createUseSettingsStoreMock({ activeProfileId: 'profile-1' })
       );
 
       const { rerender } = render(<AuthStatusIndicator />);
       const anthropicButton = screen.getByRole('button');
-      expect(anthropicButton.className).toContain('header-badge-auth');
+      expect(anthropicButton.className).toContain('h-8');
+      expect(anthropicButton.className).toContain('bg-muted');
 
       // Test z.ai
       vi.mocked(useSettingsStore).mockReturnValue(
@@ -225,7 +225,8 @@ describe('AuthStatusIndicator', () => {
 
       rerender(<AuthStatusIndicator />);
       const zaiButton = screen.getByRole('button');
-      expect(zaiButton.className).toContain('header-badge-auth');
+      expect(zaiButton.className).toContain('h-8');
+      expect(zaiButton.className).toContain('bg-muted');
 
       // Test ZHIPU
       vi.mocked(useSettingsStore).mockReturnValue(
@@ -234,7 +235,8 @@ describe('AuthStatusIndicator', () => {
 
       rerender(<AuthStatusIndicator />);
       const zhipuButton = screen.getByRole('button');
-      expect(zhipuButton.className).toContain('header-badge-auth');
+      expect(zhipuButton.className).toContain('h-8');
+      expect(zhipuButton.className).toContain('bg-muted');
     });
   });
 

@@ -58,12 +58,11 @@ export function SortableProjectTab({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group relative flex items-center min-w-0',
+        'group relative flex items-center min-w-0 project-tab-item',
         // Responsive max-widths: smaller on mobile, larger on desktop
         isActive
-          ? 'max-w-[180px] sm:max-w-[220px] md:max-w-[280px]'
-          : 'max-w-[120px] sm:max-w-[160px] md:max-w-[200px]',
-        'border-r border-border last:border-r-0',
+          ? 'max-w-[190px] sm:max-w-[240px] md:max-w-[310px]'
+          : 'max-w-[130px] sm:max-w-[180px] md:max-w-[230px]',
         'touch-none transition-all duration-200',
         isDragging && 'opacity-60 scale-[0.98] shadow-lg'
       )}
@@ -71,38 +70,39 @@ export function SortableProjectTab({
     >
       <Tooltip delayDuration={200}>
       <TooltipTrigger asChild>
-        <div
+        <button
+          type="button"
           className={cn(
-            'flex-1 flex items-center gap-1 sm:gap-2',
+            'flex-1 flex items-center gap-1.5 sm:gap-2',
             // Responsive padding: tighter on mobile, normal on desktop
-            'px-2 sm:px-2.5 md:px-3 py-1.5',
-            'text-xs',
-            'min-w-0 truncate hover:bg-muted/50 transition-colors',
-            'border-b-2 border-transparent cursor-pointer',
+            'px-2.5 sm:px-3 md:px-3.5 py-2',
+            'text-xs rounded-none',
+            'min-w-0 truncate transition-colors cursor-pointer',
+            'border-b-2 border-transparent',
             isActive && [
-              'bg-background border-b-primary text-foreground shadow-[0_6px_14px_rgba(0,0,0,0.25)]',
-              'hover:bg-background'
+              'text-foreground border-b-border/80',
+              'bg-transparent'
             ],
             !isActive && [
-              'text-[11px] text-muted-foreground/50 opacity-75',
-              'hover:text-foreground hover:opacity-100'
+              'text-[11px] text-muted-foreground/72',
+              'hover:text-foreground hover:bg-muted/20'
             ]
           )}
-            onClick={onSelect}
-          >
+          onClick={onSelect}
+        >
             {/* Drag handle - visible on hover, hidden on mobile */}
             <div
               {...listeners}
               className={cn(
                 'hidden sm:block',
-                'opacity-0 group-hover:opacity-60 transition-opacity',
+                'opacity-0 group-hover:opacity-70 transition-opacity',
                 'cursor-grab active:cursor-grabbing',
-                'w-1 h-3 bg-muted-foreground rounded-full flex-shrink-0'
+                'w-1 h-3 bg-muted-foreground/80 rounded-full flex-shrink-0'
               )}
             />
             <span className={cn(
               'truncate',
-              isActive ? 'font-semibold text-foreground' : 'font-normal text-muted-foreground/50'
+              isActive ? 'font-semibold text-foreground' : 'font-normal text-muted-foreground/78'
             )}>
               {project.name}
             </span>
@@ -119,7 +119,7 @@ export function SortableProjectTab({
                 aria-hidden="true"
               />
             )}
-          </div>
+        </button>
         </TooltipTrigger>
         <TooltipContent side="bottom" className="flex items-center gap-2">
           <span>{project.name}</span>
@@ -133,7 +133,7 @@ export function SortableProjectTab({
 
       {/* Active tab controls - settings and archive, always accessible */}
       {isActive && (
-        <div className="flex items-center gap-0.5 mr-0.5 flex-shrink-0">
+        <div className="flex items-center gap-1 mr-1 flex-shrink-0">
           {/* Settings icon - responsive sizing */}
           {onSettingsClick && (
             <Tooltip delayDuration={200}>
@@ -141,10 +141,10 @@ export function SortableProjectTab({
                 <button
                   type="button"
                   className={cn(
-                    'h-5 w-5 p-0 rounded',
+                    'h-6 w-6 p-0 rounded-md',
                     'flex items-center justify-center',
                     'text-muted-foreground hover:text-foreground',
-                    'hover:bg-muted/50 transition-colors',
+                    'hover:bg-muted/45 transition-colors border border-transparent hover:border-border/40',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1'
                   )}
                   onClick={(e) => {
@@ -170,9 +170,9 @@ export function SortableProjectTab({
             <button
               type="button"
               className={cn(
-                'h-5 w-5 p-0 mr-0.5',
+                'h-6 w-6 p-0 mr-1',
                 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
-                'transition-opacity duration-200 rounded flex-shrink-0',
+                'transition-opacity duration-200 rounded-md flex-shrink-0',
                 'hover:bg-destructive hover:text-destructive-foreground',
                 'flex items-center justify-center',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
@@ -181,7 +181,7 @@ export function SortableProjectTab({
               onClick={onClose}
               aria-label={t('projectTab.closeTabAriaLabel')}
             >
-              <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg aria-hidden="true" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>

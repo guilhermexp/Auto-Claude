@@ -11,6 +11,9 @@ import {
 import { toast } from '../hooks/use-toast';
 import { markSettingsLoaded } from '../lib/sentry';
 
+const SIDEBAR_WIDTH_MIN = 220;
+const SIDEBAR_WIDTH_MAX = 420;
+
 interface SettingsState {
   settings: AppSettings;
   isLoading: boolean;
@@ -401,6 +404,19 @@ function migrateThemeId(settings: AppSettings): AppSettings {
   };
 }
 
+function migrateSidebarWidth(settings: AppSettings): AppSettings {
+  const rawWidth = settings.sidebarWidth ?? DEFAULT_APP_SETTINGS.sidebarWidth;
+  const width = Number.isFinite(rawWidth)
+    ? Math.max(SIDEBAR_WIDTH_MIN, Math.min(SIDEBAR_WIDTH_MAX, Number(rawWidth)))
+    : DEFAULT_APP_SETTINGS.sidebarWidth;
+
+  return {
+    ...settings,
+    sidebarCollapsed: settings.sidebarCollapsed ?? false,
+    sidebarWidth: width
+  };
+}
+
 /**
  * Load settings from main process
  */
@@ -416,6 +432,7 @@ export async function loadSettings(): Promise<void> {
       let migratedSettings = await migrateOnboardingCompleted(result.data);
       migratedSettings = migrateToDarkMode(migratedSettings);
       migratedSettings = migrateThemeId(migratedSettings);
+      migratedSettings = migrateSidebarWidth(migratedSettings);
 
       // Normalize settings to ensure all required nested keys exist for legacy files.
       const normalizedSettings: AppSettings = {
@@ -454,6 +471,14 @@ export async function loadSettings(): Promise<void> {
 
       if (normalizedSettings.colorTheme !== result.data.colorTheme) {
         settingsToSave.colorTheme = normalizedSettings.colorTheme;
+      }
+
+      if (normalizedSettings.sidebarCollapsed !== result.data.sidebarCollapsed) {
+        settingsToSave.sidebarCollapsed = normalizedSettings.sidebarCollapsed;
+      }
+
+      if (normalizedSettings.sidebarWidth !== result.data.sidebarWidth) {
+        settingsToSave.sidebarWidth = normalizedSettings.sidebarWidth;
       }
 
       if (JSON.stringify(normalizedSettings.notifications) !== JSON.stringify(result.data.notifications ?? {})) {

@@ -7,6 +7,7 @@ import {
   ChevronUp,
   Globe
 } from 'lucide-react';
+import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Switch } from '../ui/switch';
@@ -119,14 +120,16 @@ export function SecuritySettings({
               onChange={(e) => updateEnvConfig({ openaiApiKey: e.target.value || undefined })}
               className="pr-10"
             />
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={() => toggleShowApiKey('openai')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2 border-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"
               aria-label={showApiKey['openai'] ? 'Hide OpenAI API key' : 'Show OpenAI API key'}
             >
               {showApiKey['openai'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
+            </Button>
           </div>
           <p className="text-xs text-muted-foreground">
             Get your key from{' '}
@@ -160,14 +163,16 @@ export function SecuritySettings({
               placeholder="pa-xxxxxxxx"
               className="pr-10"
             />
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={() => toggleShowApiKey('voyage')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2 border-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"
               aria-label={showApiKey['voyage'] ? 'Hide Voyage AI API key' : 'Show Voyage AI API key'}
             >
               {showApiKey['voyage'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
+            </Button>
           </div>
           <p className="text-xs text-muted-foreground">
             Get your key from{' '}
@@ -215,14 +220,16 @@ export function SecuritySettings({
               placeholder="AIzaSy..."
               className="pr-10"
             />
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={() => toggleShowApiKey('google')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2 border-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"
               aria-label={showApiKey['google'] ? 'Hide Google API key' : 'Show Google API key'}
             >
               {showApiKey['google'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
+            </Button>
           </div>
           <p className="text-xs text-muted-foreground">
             Get your key from{' '}
@@ -255,14 +262,16 @@ export function SecuritySettings({
                 placeholder="Azure API Key"
                 className="pr-10"
               />
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => toggleShowApiKey('azure')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2 border-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"
                 aria-label={showApiKey['azure'] ? 'Hide Azure OpenAI API key' : 'Show Azure OpenAI API key'}
               >
                 {showApiKey['azure'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              </Button>
             </div>
           </div>
           <div className="space-y-1">
@@ -333,9 +342,11 @@ export function SecuritySettings({
 
   return (
     <section className="space-y-3">
-      <button
+      <Button
+        type="button"
+        variant="ghost"
         onClick={onToggle}
-        className="w-full flex items-center justify-between text-sm font-semibold text-foreground hover:text-foreground/80"
+        className="w-full justify-between border-0 bg-transparent px-0 text-sm font-semibold text-foreground hover:bg-transparent hover:text-foreground/80"
       >
         <div className="flex items-center gap-2">
           <Database className="h-4 w-4" />
@@ -353,7 +364,7 @@ export function SecuritySettings({
         ) : (
           <ChevronDown className="h-4 w-4" />
         )}
-      </button>
+      </Button>
 
       {expanded && (
         <div className="space-y-4 pl-6 pt-2">

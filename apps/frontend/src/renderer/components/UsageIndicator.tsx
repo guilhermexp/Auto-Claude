@@ -19,6 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from './ui/tooltip';
+import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 import { formatTimeRemaining, localizeUsageWindowLabel, hasHardcodedText } from '../../shared/utils/format-time';
 import type { ClaudeUsageSnapshot, ProfileUsageSummary } from '../../shared/types/agent';
@@ -46,9 +47,9 @@ const getColorClass = (percent: number): string => {
  * Get background/border color classes for badges based on usage percentage
  */
 const getBadgeColorClasses = (percent: number): string => {
-  if (percent >= THRESHOLD_CRITICAL) return 'header-badge-usage-critical';
-  if (percent >= THRESHOLD_WARNING) return 'header-badge-usage-warning';
-  return 'header-badge-usage';
+  if (percent >= THRESHOLD_CRITICAL) return 'border-destructive/60 text-destructive bg-destructive/10';
+  if (percent >= THRESHOLD_WARNING) return 'border-yellow-500/60 text-yellow-400 bg-yellow-500/10';
+  return 'border-border/40 bg-muted/40 text-foreground';
 };
 
 /**
@@ -440,7 +441,7 @@ export function UsageIndicator() {
   // Badge color based on the limiting (higher) percentage
   // Override to red/destructive when re-auth is needed
   const badgeColorClasses = usage.needsReauthentication
-    ? 'text-red-500 bg-red-500/10 border-red-500/20'
+    ? 'border-destructive/60 text-destructive bg-destructive/10'
     : getBadgeColorClasses(limitingPercent);
 
   // Individual colors for session and weekly in the badge
@@ -468,8 +469,11 @@ export function UsageIndicator() {
   return (
     <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <button
-          className={`flex items-center gap-1 px-2 py-1.5 rounded-md border transition-all hover:opacity-80 ${badgeColorClasses}`}
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          className={`h-8 gap-1.5 px-3 ${badgeColorClasses}`}
           aria-label={t('common:usage.usageStatusAriaLabel')}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
@@ -492,7 +496,7 @@ export function UsageIndicator() {
               </span>
             </div>
           )}
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent
         side="bottom"

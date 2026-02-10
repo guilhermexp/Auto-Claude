@@ -2,6 +2,7 @@ import { Globe } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../lib/utils';
 import { Label } from '../ui/label';
+import { Button } from '../ui/button';
 import { SettingsCard } from './SettingsCard';
 import { useSettingsStore } from '../../stores/settings-store';
 import { AVAILABLE_LANGUAGES, type SupportedLanguage } from '../../../shared/constants/i18n';
@@ -56,11 +57,13 @@ export function LanguageSettings({ settings, onSettingsChange, onSave, isSaving,
             {AVAILABLE_LANGUAGES.map((lang) => {
               const isSelected = currentLanguage === lang.value;
               return (
-                <button
+                <Button
+                  type="button"
+                  variant="secondary"
                   key={lang.value}
                   onClick={() => handleLanguageChange(lang.value)}
                   className={cn(
-                    'flex items-center gap-3 p-4 rounded-lg transition-all settings-preset-button',
+                    'h-auto flex items-center justify-start gap-3 p-4 rounded-lg transition-all settings-preset-button',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                     isSelected && 'settings-preset-button-selected'
                   )}
@@ -70,7 +73,7 @@ export function LanguageSettings({ settings, onSettingsChange, onSave, isSaving,
                     <div className="text-sm font-medium">{lang.nativeLabel}</div>
                     <div className="text-xs text-muted-foreground">{lang.label}</div>
                   </div>
-                </button>
+                </Button>
               );
             })}
           </div>

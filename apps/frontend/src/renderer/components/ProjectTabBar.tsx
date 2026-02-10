@@ -90,40 +90,42 @@ export function ProjectTabBar({
 
   return (
     <div className={cn(
-      'flex items-center h-10 border-b border-border bg-background',
-      'overflow-x-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent',
+      'flex items-center h-14 border-b border-border/45 bg-background/95 project-tabbar-shell',
+      'overflow-visible',
       className
     )}>
-      <div className="flex items-center flex-1 min-w-0">
-        {projects.map((project, index) => {
-          const isActiveTab = activeProjectId === project.id;
-          return (
-            <SortableProjectTab
-              key={project.id}
-              project={project}
-              isActive={isActiveTab}
-              canClose={projects.length > 1}
-              tabIndex={index}
-              onSelect={() => onProjectSelect(project.id)}
-              onClose={(e) => {
-                e.stopPropagation();
-                onProjectClose(project.id);
-              }}
-              activityState={activityByProjectId?.[project.id] ?? 'idle'}
-              // Pass control props only for active tab
-              onSettingsClick={isActiveTab ? onSettingsClick : undefined}
-            />
-          );
-        })}
+      <div className="min-w-0 flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent">
+        <div className="flex items-center min-w-max gap-1.5 px-2 py-1">
+          {projects.map((project, index) => {
+            const isActiveTab = activeProjectId === project.id;
+            return (
+              <SortableProjectTab
+                key={project.id}
+                project={project}
+                isActive={isActiveTab}
+                canClose={projects.length > 1}
+                tabIndex={index}
+                onSelect={() => onProjectSelect(project.id)}
+                onClose={(e) => {
+                  e.stopPropagation();
+                  onProjectClose(project.id);
+                }}
+                activityState={activityByProjectId?.[project.id] ?? 'idle'}
+                // Pass control props only for active tab
+                onSettingsClick={isActiveTab ? onSettingsClick : undefined}
+              />
+            );
+          })}
+        </div>
       </div>
 
-      <div className="flex items-center gap-1.5 px-1.5 py-0.5">
+      <div className="flex items-center gap-2 px-2.5 py-1 project-tabbar-actions">
         <AuthStatusIndicator />
         <UsageIndicator />
         <Button
-          variant="ghost"
+          variant="secondary"
           size="icon"
-          className="h-7 w-7"
+          className="h-8 w-8 rounded-full"
           onClick={onAddProject}
           aria-label={t('projectTab.addProjectAriaLabel')}
         >

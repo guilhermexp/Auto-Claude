@@ -21,9 +21,10 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from './ui/tooltip';
+import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '../stores/settings-store';
-import { detectProvider, getProviderLabel, getProviderBadgeColor, type ApiProvider } from '../../shared/utils/provider-detection';
+import { detectProvider, getProviderLabel, type ApiProvider } from '../../shared/utils/provider-detection';
 import { formatTimeRemaining, localizeUsageWindowLabel, hasHardcodedText } from '../../shared/utils/format-time';
 import type { ClaudeUsageSnapshot } from '../../shared/types/agent';
 
@@ -44,8 +45,7 @@ const OAUTH_FALLBACK = {
   type: 'oauth' as const,
   name: 'OAuth',
   provider: 'anthropic' as const,
-  providerLabel: 'Anthropic',
-  badgeColor: 'header-badge-auth'
+  providerLabel: 'Anthropic'
 } as const;
 
 export function AuthStatusIndicator() {
@@ -116,7 +116,6 @@ export function AuthStatusIndicator() {
           createdAt: activeProfile.createdAt,
           provider,
           providerLabel,
-          badgeColor: getProviderBadgeColor(provider)
         };
       }
       // Profile ID set but profile not found - fallback to OAuth
@@ -163,9 +162,9 @@ export function AuthStatusIndicator() {
         <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 header-badge-usage-critical text-destructive">
+              <Button variant="destructive" size="icon" className="h-8 w-8">
                 <AlertTriangle className="h-3.5 w-3.5 motion-safe:animate-pulse" />
-              </div>
+              </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs max-w-xs">
               <div className="space-y-1">
@@ -187,16 +186,18 @@ export function AuthStatusIndicator() {
       <TooltipProvider delayDuration={200}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
+            <Button
               type="button"
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 ${authStatus.badgeColor}`}
+              variant="secondary"
+              size="sm"
+              className="h-8 gap-1.5 px-3 text-sm font-medium"
               aria-label={t('common:usage.authenticationAriaLabel', { provider: badgeLabel })}
             >
               <Icon className="h-3.5 w-3.5" />
               <span className="text-xs font-semibold">
                 {badgeLabel}
               </span>
-            </button>
+            </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="auth-details-popover text-xs max-w-xs p-0 border-border/20 shadow-sm">
             <div className="p-3 space-y-3">
@@ -278,9 +279,9 @@ export function AuthStatusIndicator() {
         <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 header-badge-usage-critical text-destructive text-xs font-semibold">
+              <Button variant="destructive" size="sm" className="h-8 px-2.5 text-xs font-semibold">
                 {Math.round(usage.sessionPercent)}%
-              </div>
+              </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs max-w-xs">
               <div className="space-y-1">

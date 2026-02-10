@@ -62,7 +62,6 @@ export function IdeaDetailPanel({ idea, onClose, onConvert, onGoToTask, onDismis
           <Button
             variant="secondary"
             size="icon"
-            className="ideation-action-button"
             onClick={onClose}
             aria-label={t('accessibility.closePanelAriaLabel')}
           >
@@ -100,7 +99,7 @@ export function IdeaDetailPanel({ idea, onClose, onConvert, onGoToTask, onDismis
       {/* Actions */}
       {!isDismissed && !isConverted && (
         <div className="shrink-0 p-4 border-t border-border space-y-2">
-          <Button className="w-full ideation-action-button-primary" onClick={() => onConvert(idea)} disabled={isConverting}>
+          <Button className="w-full" onClick={() => onConvert(idea)} disabled={isConverting}>
             {isConverting ? (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             ) : (
@@ -109,8 +108,8 @@ export function IdeaDetailPanel({ idea, onClose, onConvert, onGoToTask, onDismis
             {isConverting ? t('common:ideation.converting') : t('common:ideation.convertToTask')}
           </Button>
           <Button
-            variant="secondary"
-            className="w-full ideation-action-button-danger"
+            variant="destructive"
+            className="w-full"
             onClick={() => {
               onDismiss(idea);
               onClose();
@@ -123,7 +122,7 @@ export function IdeaDetailPanel({ idea, onClose, onConvert, onGoToTask, onDismis
       )}
       {isConverted && idea.taskId && onGoToTask && (
         <div className="shrink-0 p-4 border-t border-border">
-          <Button className="w-full ideation-action-button-primary" onClick={() => onGoToTask(idea.taskId!)}>
+          <Button className="w-full" onClick={() => onGoToTask(idea.taskId!)}>
             <ExternalLink className="h-4 w-4 mr-2" />
             {t('common:ideation.goToTask')}
           </Button>

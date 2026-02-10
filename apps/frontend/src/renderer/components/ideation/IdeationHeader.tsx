@@ -3,7 +3,6 @@ import { Lightbulb, Eye, EyeOff, Settings2, Plus, Trash2, RefreshCw, CheckSquare
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip';
-import { cn } from '../../lib/utils';
 import { IDEATION_TYPE_COLORS } from '../../../shared/constants';
 import type { IdeationType } from '../../../shared/types';
 import { TypeIcon } from './TypeIcon';
@@ -74,9 +73,8 @@ export function IdeationHeader({
                 {t('ideation:header.selectedCount', { count: selectedCount })}
               </Badge>
               <Button
-                variant="secondary"
+                variant="destructive"
                 size="sm"
-                className="ideation-action-button-danger"
                 onClick={onDeleteSelected}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
@@ -87,7 +85,6 @@ export function IdeationHeader({
                   <Button
                     variant="secondary"
                     size="icon"
-                    className="ideation-action-button"
                     onClick={onClearSelection}
                     aria-label={t('accessibility.clearSelectionAriaLabel')}
                   >
@@ -105,7 +102,6 @@ export function IdeationHeader({
                   <Button
                     variant="secondary"
                     size="icon"
-                    className="ideation-action-button"
                     onClick={onSelectAll}
                     aria-label={t('accessibility.selectAllAriaLabel')}
                   >
@@ -122,9 +118,8 @@ export function IdeationHeader({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="secondary"
+                  variant={isTranslateEnabled ? 'default' : 'secondary'}
                   size="icon"
-                  className={cn('ideation-action-button', isTranslateEnabled && 'ideation-action-button-active')}
                   onClick={onToggleTranslate}
                   aria-label={
                     isTranslateEnabled
@@ -151,9 +146,8 @@ export function IdeationHeader({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="secondary"
+                variant={showDismissed ? 'default' : 'secondary'}
                 size="icon"
-                className={cn('ideation-action-button', showDismissed && 'ideation-action-button-active')}
                 onClick={onToggleShowDismissed}
                 aria-label={showDismissed ? t('accessibility.hideDismissedAriaLabel') : t('accessibility.showDismissedAriaLabel')}
               >
@@ -169,7 +163,6 @@ export function IdeationHeader({
               <Button
                 variant="secondary"
                 size="icon"
-                className="ideation-action-button"
                 onClick={onOpenConfig}
                 aria-label={t('accessibility.configureAriaLabel')}
               >
@@ -183,7 +176,6 @@ export function IdeationHeader({
               <TooltipTrigger asChild>
                 <Button
                   variant="secondary"
-                  className="ideation-action-button"
                   onClick={onOpenAddMore}
                   aria-label={t('accessibility.addMoreAriaLabel')}
                 >
@@ -198,9 +190,8 @@ export function IdeationHeader({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant="secondary"
+                  variant="destructive"
                   size="icon"
-                  className="ideation-action-button-danger"
                   onClick={onDismissAll}
                   aria-label={t('accessibility.dismissAllAriaLabel')}
                 >
@@ -215,7 +206,6 @@ export function IdeationHeader({
               <Button
                 variant="secondary"
                 size="icon"
-                className="ideation-action-button"
                 onClick={onRefresh}
                 aria-label={t('accessibility.regenerateIdeasAriaLabel')}
               >

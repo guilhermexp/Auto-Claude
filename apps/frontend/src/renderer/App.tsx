@@ -82,6 +82,9 @@ import { ViewStateProvider } from './contexts/ViewStateContext';
 
 // Version constant for version-specific warnings (e.g., reauthentication notices)
 const VERSION_WARNING_275 = '2.7.5';
+const SIDEBAR_WIDTH_MIN = 220;
+const SIDEBAR_WIDTH_MAX = 420;
+const SIDEBAR_COLLAPSED_WIDTH = 72;
 
 // Wrapper component for ProjectTabBar
 interface ProjectTabBarWithContextProps {
@@ -140,6 +143,7 @@ export function App() {
   const reorderTabs = useProjectStore((state) => state.reorderTabs);
   const tasks = useTaskStore((state) => state.tasks);
   const settings = useSettingsStore((state) => state.settings);
+  const updateStoreSettings = useSettingsStore((state) => state.updateSettings);
   const terminals = useTerminalStore((state) => state.terminals);
   const settingsLoading = useSettingsStore((state) => state.isLoading);
 
@@ -162,6 +166,9 @@ export function App() {
   const [isVersionWarningModalOpen, setIsVersionWarningModalOpen] = useState(false);
   const [isRefreshingTasks, setIsRefreshingTasks] = useState(false);
   const [projectTabActivity, setProjectTabActivity] = useState<Record<string, ProjectTabActivityState>>({});
+  const [sidebarWidth, setSidebarWidth] = useState<number>(settings.sidebarWidth ?? 256);
+  const isSidebarCollapsed = settings.sidebarCollapsed ?? false;
+  const sidebarWidthRef = useRef<number>(settings.sidebarWidth ?? 256);
 
   // Per-project activity tracking for tab indicators
   const activeProjectRef = useRef<string | null>(null);
@@ -198,6 +205,50 @@ export function App() {
 
   // Track dragging state for overlay
   const [activeDragProject, setActiveDragProject] = useState<Project | null>(null);
+
+  useEffect(() => {
+    const nextWidth = settings.sidebarWidth ?? 256;
+    sidebarWidthRef.current = nextWidth;
+    setSidebarWidth(nextWidth);
+  }, [settings.sidebarWidth]);
+
+  const handleSidebarResizeStart = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    event.preventDefault();
+
+    const startX = event.clientX;
+    const startWidth = sidebarWidthRef.current;
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const delta = moveEvent.clientX - startX;
+      const nextWidth = Math.max(SIDEBAR_WIDTH_MIN, Math.min(SIDEBAR_WIDTH_MAX, startWidth + delta));
+      sidebarWidthRef.current = nextWidth;
+      setSidebarWidth(nextWidth);
+    };
+
+    const handleMouseUp = () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+
+      const normalizedWidth = Math.round(sidebarWidthRef.current);
+      updateStoreSettings({ sidebarWidth: normalizedWidth });
+      void saveSettings({ sidebarWidth: normalizedWidth });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  }, [updateStoreSettings]);
+
+  const handleSidebarResizeStep = useCallback((delta: number) => {
+    const nextWidth = Math.max(
+      SIDEBAR_WIDTH_MIN,
+      Math.min(SIDEBAR_WIDTH_MAX, sidebarWidthRef.current + delta)
+    );
+    const normalizedWidth = Math.round(nextWidth);
+    sidebarWidthRef.current = normalizedWidth;
+    setSidebarWidth(normalizedWidth);
+    updateStoreSettings({ sidebarWidth: normalizedWidth });
+    void saveSettings({ sidebarWidth: normalizedWidth });
+  }, [updateStoreSettings]);
 
   // Get tabs and selected project
   const projectTabs = getProjectTabs();
@@ -1016,12 +1067,34 @@ export function App() {
         <ProactiveSwapListener />
       <div className="flex h-screen bg-background app-shell">
         {/* Sidebar */}
-        <Sidebar
-          onSettingsClick={() => setIsSettingsDialogOpen(true)}
-          onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
-          activeView={activeView}
-          onViewChange={setActiveView}
-        />
+        <div
+          className="relative flex-shrink-0 app-sidebar-resizable"
+          style={{ width: isSidebarCollapsed ? SIDEBAR_COLLAPSED_WIDTH : sidebarWidth }}
+        >
+          <Sidebar
+            onSettingsClick={() => setIsSettingsDialogOpen(true)}
+            onNewTaskClick={() => setIsNewTaskDialogOpen(true)}
+            activeView={activeView}
+            onViewChange={setActiveView}
+          />
+          {!isSidebarCollapsed && (
+            <button
+              type="button"
+              className="app-sidebar-resize-handle"
+              onMouseDown={handleSidebarResizeStart}
+              onKeyDown={(event) => {
+                if (event.key === 'ArrowLeft') {
+                  event.preventDefault();
+                  handleSidebarResizeStep(-12);
+                } else if (event.key === 'ArrowRight') {
+                  event.preventDefault();
+                  handleSidebarResizeStep(12);
+                }
+              }}
+              aria-label="Resize sidebar"
+            />
+          )}
+        </div>
 
         {/* Main content */}
         <div className="flex flex-1 flex-col overflow-hidden app-main-shell">

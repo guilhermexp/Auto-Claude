@@ -337,6 +337,8 @@ export interface AppSettings {
   seenVersionWarnings?: string[];
   // Sidebar collapsed state (icons only when true)
   sidebarCollapsed?: boolean;
+  // Sidebar expanded width in pixels
+  sidebarWidth?: number;
 }
 
 // Auto-Claude Source Environment Configuration (for auto-claude repo .env)

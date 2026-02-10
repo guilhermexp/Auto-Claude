@@ -88,81 +88,92 @@ export function GenerationProgressScreen({
   // Count how many types are still generating
   const _generatingCount = enabledTypes.filter((t) => typeStates[t] === 'generating').length;
   const completedCount = enabledTypes.filter((t) => typeStates[t] === 'completed').length;
+  const roundedProgress = Math.max(0, Math.min(100, Math.round(generationStatus.progress || 0)));
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="shrink-0 border-b border-border p-4 bg-card/50">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Sparkles className="h-5 w-5 text-primary animate-pulse" />
-              <h2 className="text-lg font-semibold">{t('ideation:generationProgress.title')}</h2>
-              <Badge variant="outline">
-                {t('ideation:generationProgress.complete', { completed: completedCount, total: enabledTypes.length })}
-              </Badge>
+      <div className="shrink-0 border-b border-border/60 p-4 bg-card/40">
+        <div className="rounded-2xl border border-border/45 bg-card/60 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <Badge variant="outline" className="text-xs">
+              {t('ideation:generationProgress.complete', { completed: completedCount, total: enabledTypes.length })}
+            </Badge>
+            <div className="flex items-center gap-2">
+              <Button
+                variant={showLogs ? 'secondary' : 'outline'}
+                size="sm"
+                onClick={() => setShowLogs(!showLogs)}
+              >
+                <FileCode className="h-4 w-4 mr-1.5" />
+                {showLogs ? t('ideation:generationProgress.hideButton') : t('ideation:generationProgress.showButton')} {t('ideation:generationProgress.logsButton')}
+              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleStopClick}
+                    disabled={isStopping}
+                  >
+                    <Square className="h-4 w-4 mr-1.5" />
+                    {isStopping ? t('ideation:generationProgress.stopping') : t('ideation:generationProgress.stop')}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>{t('ideation:generationProgress.stopGenerationTooltip')}</TooltipContent>
+              </Tooltip>
             </div>
-            <p className="text-sm text-muted-foreground">{generationStatus.message}</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowLogs(!showLogs)}
-            >
-              <FileCode className="h-4 w-4 mr-1" />
-              {showLogs ? t('ideation:generationProgress.hideButton') : t('ideation:generationProgress.showButton')} {t('ideation:generationProgress.logsButton')}
-            </Button>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={handleStopClick}
-                  disabled={isStopping}
-                >
-                  <Square className="h-4 w-4 mr-1" />
-                  {isStopping ? t('ideation:generationProgress.stopping') : t('ideation:generationProgress.stop')}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t('ideation:generationProgress.stopGenerationTooltip')}</TooltipContent>
-            </Tooltip>
-          </div>
-        </div>
-        <Progress value={generationStatus.progress} className="mt-3" />
 
-        {/* Type Status Indicators */}
-        <div className="mt-3 flex flex-wrap gap-2">
-          {enabledTypes.map((type) => (
-            <div
-              key={type}
-              className={`flex items-center gap-1.5 px-2 py-1 rounded-md text-xs ${
-                typeStates[type] === 'completed'
-                  ? 'bg-success/10 text-success'
-                  : typeStates[type] === 'failed'
-                    ? 'bg-destructive/10 text-destructive'
-                    : typeStates[type] === 'generating'
-                      ? 'bg-primary/10 text-primary'
-                      : 'bg-muted text-muted-foreground'
-              }`}
-            >
-              <TypeStateIcon state={typeStates[type]} />
-              <TypeIcon type={type} />
-              <span>{t(`ideation:typeLabels.${type}`, { defaultValue: IDEATION_TYPE_LABELS[type] })}</span>
-              {typeStates[type] === 'completed' && session && (
-                <span className="ml-1 font-medium">
-                  ({getStreamingIdeasByType(type).length})
-                </span>
-              )}
+          <div className="mt-6 text-center">
+            <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full border border-primary/30 bg-primary/10">
+              <Sparkles className="h-5 w-5 text-primary animate-pulse" />
             </div>
-          ))}
+            <h2 className="text-2xl font-semibold tracking-tight">{t('ideation:generationProgress.title')}</h2>
+            <p className="mt-1 text-base text-muted-foreground">{generationStatus.message}</p>
+          </div>
+
+          <div className="mt-6">
+            <div className="mb-2 flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">{t('common:labels.progress', { defaultValue: 'Progresso' })}</span>
+              <span className="font-medium tabular-nums">{roundedProgress}%</span>
+            </div>
+            <Progress value={roundedProgress} size="lg" className="h-2.5" />
+          </div>
+
+          {/* Type Status Indicators */}
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {enabledTypes.map((type) => (
+              <div
+                key={type}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs border ${
+                  typeStates[type] === 'completed'
+                    ? 'bg-success/10 text-success border-success/30'
+                    : typeStates[type] === 'failed'
+                      ? 'bg-destructive/10 text-destructive border-destructive/30'
+                      : typeStates[type] === 'generating'
+                        ? 'bg-primary/10 text-primary border-primary/30'
+                        : 'bg-muted/35 text-muted-foreground border-border/40'
+                }`}
+              >
+                <TypeStateIcon state={typeStates[type]} />
+                <TypeIcon type={type} />
+                <span>{t(`ideation:typeLabels.${type}`, { defaultValue: IDEATION_TYPE_LABELS[type] })}</span>
+                {typeStates[type] === 'completed' && session && (
+                  <span className="ml-1 font-medium tabular-nums">
+                    {getStreamingIdeasByType(type).length}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Logs Panel (collapsible) */}
       {showLogs && logs.length > 0 && (
-        <div className="shrink-0 border-b border-border p-4 bg-muted/20">
-          <ScrollArea className="h-32 rounded-md border border-border bg-muted/30">
+        <div className="shrink-0 border-b border-border/60 p-4 bg-muted/15">
+          <ScrollArea className="h-36 rounded-lg border border-border/50 bg-muted/25">
             <div className="p-3 space-y-1 font-mono text-xs">
               {logs.map((log, index) => (
                 <div key={index} className="text-muted-foreground leading-relaxed">
@@ -179,9 +190,9 @@ export function GenerationProgressScreen({
       )}
 
       {/* Streaming Ideas View */}
-      <div className="flex-1 overflow-auto p-4">
+      <div className="flex-1 overflow-auto p-4 md:p-5">
         {generationStatus.error && (
-          <div className="mb-4 p-3 bg-destructive/10 rounded-md text-destructive text-sm">
+          <div className="mb-4 p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-sm">
             {generationStatus.error}
           </div>
         )}
@@ -192,7 +203,7 @@ export function GenerationProgressScreen({
             const state = typeStates[type];
 
             return (
-              <div key={type}>
+              <div key={type} className="rounded-xl border border-border/45 bg-card/35 p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <div className={`p-1.5 rounded-md ${IDEATION_TYPE_COLORS[type]}`}>
                     <TypeIcon type={type} />

@@ -70,7 +70,7 @@ export function IdeationEmptyState({
           </div>
         </div>
 
-        <Button onClick={onGenerate} size="lg" variant="secondary" disabled={isCheckingToken}>
+        <Button onClick={onGenerate} size="lg" variant="default" disabled={isCheckingToken}>
           <Sparkles className="h-4 w-4 mr-2" />
           {t('emptyState.generateButton')}
         </Button>

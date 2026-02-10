@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText, FolderSearch, Search, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { Button } from '../ui/button';
 
 // Tool indicator component for showing what the AI is currently doing
 interface ToolIndicatorProps {
@@ -117,9 +118,12 @@ export function ToolUsageHistory({ tools }: ToolUsageHistoryProps) {
 
   return (
     <div className="overflow-hidden insights-tool-card">
-      <button
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
         onClick={() => setExpanded(!expanded)}
-        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+        className="flex h-auto w-full items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:bg-muted/30 hover:text-foreground"
       >
         <span className="flex items-center gap-1.5">
           {Object.entries(toolCounts).map(([name, count]) => {
@@ -138,7 +142,7 @@ export function ToolUsageHistory({ tools }: ToolUsageHistoryProps) {
         ) : (
           <ChevronDown className="h-3 w-3" />
         )}
-      </button>
+      </Button>
 
       {expanded && (
         <div className="p-2 space-y-1 insights-tool-card-content">

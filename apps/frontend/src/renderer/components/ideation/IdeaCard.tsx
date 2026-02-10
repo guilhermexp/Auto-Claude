@@ -152,7 +152,7 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="h-8 w-8 p-0 ideation-icon-button"
+                    className="h-8 w-8 p-0"
                     onClick={(e) => {
                       e.stopPropagation();
                       onConvert(idea);
@@ -167,9 +167,9 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="secondary"
+                    variant="destructive"
                     size="sm"
-                    className="h-8 w-8 p-0 ideation-icon-button-danger"
+                    className="h-8 w-8 p-0"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDismiss(idea);
@@ -191,7 +191,7 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="h-8 w-8 p-0 ideation-icon-button"
+                    className="h-8 w-8 p-0"
                     onClick={(e) => {
                       e.stopPropagation();
                       onGoToTask(idea.taskId!);
@@ -213,7 +213,7 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="h-8 w-8 p-0 ideation-icon-button"
+                    className="h-8 w-8 p-0"
                     onClick={(e) => {
                       e.stopPropagation();
                       onGoToTask(idea.taskId!);
