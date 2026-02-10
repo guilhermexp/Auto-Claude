@@ -184,9 +184,10 @@ export function ScreenshotCapture({ open, onOpenChange, onCapture }: ScreenshotC
                 const isScreen = isScreenSource(source);
 
                 return (
-                  <button
+                  <Button
                     key={source.id}
                     type="button"
+                    variant="ghost"
                     onClick={() => setSelectedSource(source.id)}
                     className={`
                       relative group rounded-lg border-2 overflow-hidden
@@ -258,7 +259,7 @@ export function ScreenshotCapture({ open, onOpenChange, onCapture }: ScreenshotC
                         {source.name}
                       </p>
                     </div>
-                  </button>
+                  </Button>
                 );
               })}
             </div>

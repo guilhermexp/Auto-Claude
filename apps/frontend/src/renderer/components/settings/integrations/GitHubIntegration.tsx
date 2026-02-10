@@ -471,8 +471,9 @@ function RepositoryDropdown({
       )}
 
       <div className="relative">
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={() => setIsOpen(!isOpen)}
           disabled={isLoading}
           className="w-full flex items-center justify-between px-3 py-2 text-sm border border-input rounded-md bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
@@ -495,7 +496,7 @@ function RepositoryDropdown({
             <span className="text-muted-foreground">Select a repository...</span>
           )}
           <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
+        </Button>
 
         {isOpen && !isLoading && (
           <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-64 overflow-hidden">
@@ -518,9 +519,10 @@ function RepositoryDropdown({
                 </div>
               ) : (
                 filteredRepos.map((repo) => (
-                  <button
+                  <Button
                     key={repo.fullName}
                     type="button"
+                    variant="ghost"
                     onClick={() => {
                       onSelect(repo.fullName);
                       setIsOpen(false);
@@ -541,7 +543,7 @@ function RepositoryDropdown({
                         <p className="text-xs text-muted-foreground truncate">{repo.description}</p>
                       )}
                     </div>
-                  </button>
+                  </Button>
                 ))
               )}
             </div>

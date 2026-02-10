@@ -15,6 +15,7 @@ import {
   Activity
 } from 'lucide-react';
 import { Badge } from '../../ui/badge';
+import { Button } from '../../ui/button';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../../ui/collapsible';
 import { cn } from '../../../lib/utils';
 import type {
@@ -292,7 +293,9 @@ function PhaseLogSection({ phase, phaseLog, isExpanded, onToggle, isStreaming = 
   return (
     <Collapsible open={isExpanded} onOpenChange={onToggle}>
       <CollapsibleTrigger asChild>
-        <button
+        <Button
+          type="button"
+          variant="ghost"
           className={cn(
             'w-full flex items-center justify-between p-3 rounded-lg border transition-colors',
             'hover:bg-secondary/50',
@@ -319,7 +322,7 @@ function PhaseLogSection({ phase, phaseLog, isExpanded, onToggle, isStreaming = 
           <div className="flex items-center gap-2">
             {getStatusBadge()}
           </div>
-        </button>
+        </Button>
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="mt-1 ml-6 border-l-2 border-border pl-4 py-2 space-y-2">
@@ -410,7 +413,9 @@ function OrchestratorActivitySection({ entries, isExpanded, onToggle }: Orchestr
 
   return (
     <div className="rounded-md border border-border/50 bg-secondary/10 overflow-hidden">
-      <button
+      <Button
+        type="button"
+        variant="ghost"
         onClick={onToggle}
         className={cn(
           'w-full flex items-center justify-between p-2 transition-colors',
@@ -430,7 +435,7 @@ function OrchestratorActivitySection({ entries, isExpanded, onToggle }: Orchestr
         <Badge variant="outline" className="text-[9px] px-1.5 py-0 bg-orange-500/10 text-orange-400 border-orange-500/30">
           {summary}
         </Badge>
-      </button>
+      </Button>
 
       {isExpanded && (
         <div className="border-t border-border/30 p-2 space-y-0.5 max-h-[300px] overflow-y-auto">
@@ -534,7 +539,9 @@ function AgentLogGroup({ group, isExpanded, onToggle }: AgentLogGroupProps) {
             {displayName}
           </Badge>
           {hasMoreEntries && (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
               onClick={onToggle}
               className={cn(
                 'flex items-center gap-1 text-[10px] px-2 py-0.5 rounded transition-colors',
@@ -553,7 +560,7 @@ function AgentLogGroup({ group, isExpanded, onToggle }: AgentLogGroupProps) {
                   <span>{t('common:prReview.logs.showMore', { count: otherEntries.length })}</span>
                 </>
               )}
-            </button>
+            </Button>
           )}
         </div>
 
@@ -605,7 +612,9 @@ function LogEntry({ entry }: LogEntryProps) {
           <XCircle className="h-3 w-3 mt-0.5 shrink-0" />
           <span className="break-words flex-1">{entry.content}</span>
           {hasDetail && (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
               onClick={() => setIsExpanded(!isExpanded)}
               className={cn(
                 'flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded shrink-0',
@@ -614,7 +623,7 @@ function LogEntry({ entry }: LogEntryProps) {
               )}
             >
               {isExpanded ? <ChevronDown className="h-2.5 w-2.5" /> : <ChevronRight className="h-2.5 w-2.5" />}
-            </button>
+            </Button>
           )}
         </div>
         {hasDetail && isExpanded && (
@@ -660,7 +669,9 @@ function LogEntry({ entry }: LogEntryProps) {
         )}
         <span className="break-words whitespace-pre-wrap flex-1">{entry.content}</span>
         {hasDetail && (
-          <button
+          <Button
+            type="button"
+            variant="ghost"
             onClick={() => setIsExpanded(!isExpanded)}
             className={cn(
               'flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded shrink-0',
@@ -679,7 +690,7 @@ function LogEntry({ entry }: LogEntryProps) {
                 <span>More</span>
               </>
             )}
-          </button>
+          </Button>
         )}
       </div>
       {hasDetail && isExpanded && (

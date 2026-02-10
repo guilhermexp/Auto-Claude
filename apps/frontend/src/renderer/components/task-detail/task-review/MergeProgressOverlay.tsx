@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, FileCode, AlertTriangle, Loader2, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import { Progress } from '../../ui/progress';
+import { Button } from '../../ui/button';
 import { cn } from '../../../lib/utils';
 import type { MergeProgress, MergeLogEntry, MergeLogEntryType } from '../../../../shared/types';
 
@@ -185,8 +186,9 @@ export function MergeProgressOverlay({ mergeProgress, logEntries }: MergeProgres
       {/* Expandable log viewer */}
       {logEntries.length > 0 && (
         <div>
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={() => setLogsExpanded(!logsExpanded)}
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
@@ -198,7 +200,7 @@ export function MergeProgressOverlay({ mergeProgress, logEntries }: MergeProgres
             {logsExpanded
               ? t('taskReview:mergeProgress.hideLogs')
               : t('taskReview:mergeProgress.viewLogs')}
-          </button>
+          </Button>
 
           {logsExpanded && (
             <div

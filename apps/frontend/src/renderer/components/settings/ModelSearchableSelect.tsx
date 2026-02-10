@@ -285,9 +285,10 @@ export function ModelSearchableSelect({
               </div>
             ) : (
               filteredModels.map((model) => (
-                <button
+                <Button
                   key={model.id}
                   type="button"
+                  variant="ghost"
                   onClick={() => handleSelectModel(model.id)}
                   className={cn(
                     'w-full px-3 py-2 text-left text-sm hover:bg-accent flex items-start gap-2',
@@ -301,7 +302,7 @@ export function ModelSearchableSelect({
                   {value === model.id && (
                     <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                   )}
-                </button>
+                </Button>
               ))
             )}
           </div>

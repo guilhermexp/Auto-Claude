@@ -1,6 +1,7 @@
 import { Zap, Minus, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../../lib/utils';
+import { Button } from '../../ui/button';
 import { Label } from '../../ui/label';
 import type { TerminalFontSettings } from '../../../stores/terminal-font-settings-store';
 import { SCROLLBACK_MIN, SCROLLBACK_MAX, SCROLLBACK_STEP, SLIDER_INPUT_CLASSES } from '../../../lib/terminal-font-constants';
@@ -90,8 +91,9 @@ export function PerformanceConfigPanel({ settings, onSettingChange }: Performanc
           {scrollbackPresets.map((preset) => {
             const isSelected = settings.scrollback === preset.value;
             return (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 key={preset.value}
                 onClick={() => handlePresetChange(preset.value)}
                 aria-pressed={isSelected}
@@ -108,7 +110,7 @@ export function PerformanceConfigPanel({ settings, onSettingChange }: Performanc
                   <div className="text-sm font-medium">{preset.label}</div>
                   <div className="text-xs text-muted-foreground">{preset.description}</div>
                 </div>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -125,8 +127,10 @@ export function PerformanceConfigPanel({ settings, onSettingChange }: Performanc
               {formatScrollback(settings.scrollback)}
             </span>
             <div className="flex items-center gap-1">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => handleScrollbackChange(settings.scrollback - SCROLLBACK_STEP)}
                 disabled={settings.scrollback <= SCROLLBACK_MIN}
                 className={cn(
@@ -139,9 +143,11 @@ export function PerformanceConfigPanel({ settings, onSettingChange }: Performanc
                 aria-label={t('terminalFonts.performanceConfig.decreaseScrollback', { step: formatScrollback(SCROLLBACK_STEP) })}
               >
                 <Minus className="h-3.5 w-3.5" />
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => handleScrollbackChange(settings.scrollback + SCROLLBACK_STEP)}
                 disabled={settings.scrollback >= SCROLLBACK_MAX}
                 className={cn(
@@ -154,7 +160,7 @@ export function PerformanceConfigPanel({ settings, onSettingChange }: Performanc
                 aria-label={t('terminalFonts.performanceConfig.increaseScrollback', { step: formatScrollback(SCROLLBACK_STEP) })}
               >
                 <Plus className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
           </div>
         </div>

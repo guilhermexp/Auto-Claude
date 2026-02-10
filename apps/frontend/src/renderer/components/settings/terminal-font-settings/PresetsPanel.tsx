@@ -3,6 +3,7 @@ import { Monitor, RotateCcw, Save, Trash2, FolderOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useToast } from '../../../hooks/use-toast';
 import { cn } from '../../../lib/utils';
+import { Button } from '../../ui/button';
 import { Label } from '../../ui/label';
 import type { TerminalFontSettings } from '../../../stores/terminal-font-settings-store';
 import { useTerminalFontSettingsStore } from '../../../stores/terminal-font-settings-store';
@@ -267,10 +268,10 @@ export function PresetsPanel({ currentSettings, onPresetApply, onReset }: Preset
             {BUILTIN_PRESETS.map((preset) => {
               const Icon = preset.icon;
               return (
-                <button
-                  type="button"
+                <Button
                   key={preset.id}
                   onClick={() => handleApplyBuiltInPreset(preset.id)}
+                  variant="ghost"
                   className={cn(
                     'flex flex-col items-center gap-2 p-4 rounded-lg transition-all settings-preset-button',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
@@ -282,7 +283,7 @@ export function PresetsPanel({ currentSettings, onPresetApply, onReset }: Preset
                     <div className="text-sm font-medium">{t(preset.nameKey)}</div>
                     <div className="text-xs text-muted-foreground">{t(preset.description)}</div>
                   </div>
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -299,9 +300,9 @@ export function PresetsPanel({ currentSettings, onPresetApply, onReset }: Preset
             })}
           </p>
           <div className="pt-1">
-            <button
-              type="button"
+            <Button
               onClick={handleResetToDefaults}
+              variant="ghost"
               className={cn(
                 'inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm font-medium settings-preset-button',
                 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
@@ -317,7 +318,7 @@ export function PresetsPanel({ currentSettings, onPresetApply, onReset }: Preset
                   defaultValue: 'Reset to OS Default',
                 })}
               </span>
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -359,10 +360,10 @@ export function PresetsPanel({ currentSettings, onPresetApply, onReset }: Preset
                 'transition-colors duration-200'
               )}
             />
-            <button
-              type="button"
+            <Button
               onClick={handleSaveCustomPreset}
               disabled={!newPresetName.trim()}
+              size="sm"
               className={cn(
                 'inline-flex items-center gap-2 px-4 py-2 rounded-lg transition-colors',
                 'bg-primary text-primary-foreground hover:bg-primary/90',
@@ -378,7 +379,7 @@ export function PresetsPanel({ currentSettings, onPresetApply, onReset }: Preset
               <span>
                 {t('common:buttons.save', { defaultValue: 'Save' })}
               </span>
-            </button>
+            </Button>
           </div>
 
           {/* List of Custom Presets */}
@@ -405,9 +406,9 @@ export function PresetsPanel({ currentSettings, onPresetApply, onReset }: Preset
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
+                    <Button
                       onClick={() => handleApplyCustomPreset(preset)}
+                      size="sm"
                       className={cn(
                         'inline-flex items-center gap-1 px-3 py-1.5 rounded-md transition-colors',
                         'bg-primary text-primary-foreground hover:bg-primary/90',
@@ -420,10 +421,11 @@ export function PresetsPanel({ currentSettings, onPresetApply, onReset }: Preset
                     >
                       <FolderOpen className="h-3 w-3" />
                       <span>{t('common:buttons.apply', { defaultValue: 'Apply' })}</span>
-                    </button>
-                    <button
-                      type="button"
+                    </Button>
+                    <Button
                       onClick={() => handleDeleteCustomPreset(preset.id)}
+                      variant="ghost"
+                      size="sm"
                       className={cn(
                         'inline-flex items-center gap-1 px-3 py-1.5 rounded-md transition-colors',
                         'hover:bg-destructive/10 text-destructive hover:text-destructive',
@@ -436,7 +438,7 @@ export function PresetsPanel({ currentSettings, onPresetApply, onReset }: Preset
                     >
                       <Trash2 className="h-3 w-3" />
                       <span>{t('common:buttons.delete', { defaultValue: 'Delete' })}</span>
-                    </button>
+                    </Button>
                   </div>
                 </div>
                 );

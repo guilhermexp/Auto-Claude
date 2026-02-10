@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { File, Folder, ChevronRight } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { Button } from './ui/button';
 import { useFileExplorerStore } from '../stores/file-explorer-store';
 import type { FileNode } from '../../shared/types';
 
@@ -202,8 +203,10 @@ export function FileAutocomplete({
         className="overflow-y-auto max-h-[240px]"
       >
         {filteredFiles.map((file, index) => (
-          <button
+          <Button
             key={file.path}
+            type="button"
+            variant="ghost"
             className={cn(
               'w-full flex items-center gap-2 px-3 py-2 text-left text-sm',
               'hover:bg-accent hover:text-accent-foreground',
@@ -225,7 +228,7 @@ export function FileAutocomplete({
                 {getRelativePath(file.path)}
               </div>
             </div>
-          </button>
+          </Button>
         ))}
       </div>
       <div className="border-t border-border px-3 py-1.5 text-[10px] text-muted-foreground bg-muted/30">

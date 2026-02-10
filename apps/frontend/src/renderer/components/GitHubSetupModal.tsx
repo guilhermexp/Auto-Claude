@@ -486,9 +486,12 @@ export function GitHubSetupModal({
               {/* Action selection */}
               {!repoAction && (
                 <div className="grid grid-cols-2 gap-3">
-                  <button
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={() => setRepoAction('create')}
-                    className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-dashed hover:border-primary hover:bg-primary/5 transition-colors"
+                    className="h-auto flex-col gap-2 p-4 border-2 border-dashed hover:border-primary hover:bg-primary/5"
                     aria-label={t('githubSetup.createRepoAriaLabel')}
                   >
                     <Plus className="h-8 w-8 text-muted-foreground" />
@@ -496,10 +499,13 @@ export function GitHubSetupModal({
                     <span className="text-xs text-muted-foreground text-center">
                       Create a new repository on GitHub
                     </span>
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
                     onClick={() => setRepoAction('link')}
-                    className="flex flex-col items-center gap-2 p-4 rounded-lg border-2 border-dashed hover:border-primary hover:bg-primary/5 transition-colors"
+                    className="h-auto flex-col gap-2 p-4 border-2 border-dashed hover:border-primary hover:bg-primary/5"
                     aria-label={t('githubSetup.linkRepoAriaLabel')}
                   >
                     <Link className="h-8 w-8 text-muted-foreground" />
@@ -507,7 +513,7 @@ export function GitHubSetupModal({
                     <span className="text-xs text-muted-foreground text-center">
                       Connect to an existing repository
                     </span>
-                  </button>
+                  </Button>
                 </div>
               )}
 
@@ -515,13 +521,16 @@ export function GitHubSetupModal({
               {repoAction === 'create' && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <button
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
                       onClick={() => setRepoAction(null)}
-                      className="text-primary hover:underline"
+                      className="h-auto p-0 text-primary hover:underline"
                       aria-label={t('githubSetup.goBackAriaLabel')}
                     >
                       ← Back
-                    </button>
+                    </Button>
                     <span>Create a new repository</span>
                   </div>
 
@@ -537,7 +546,10 @@ export function GitHubSetupModal({
                       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t('common:accessibility.repositoryOwnerAriaLabel')}>
                         {/* Personal account */}
                         {githubUsername && (
-                          <button
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
                             onClick={() => setSelectedOwner(githubUsername)}
                             className={`flex items-center gap-2 px-3 py-2 rounded-md border ${
                               selectedOwner === githubUsername
@@ -551,11 +563,14 @@ export function GitHubSetupModal({
                           >
                             <User className="h-4 w-4" />
                             <span className="text-sm">{githubUsername}</span>
-                          </button>
+                          </Button>
                         )}
                         {/* Organizations */}
                         {organizations.map((org) => (
-                          <button
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
                             key={org.login}
                             onClick={() => setSelectedOwner(org.login)}
                             className={`flex items-center gap-2 px-3 py-2 rounded-md border ${
@@ -570,7 +585,7 @@ export function GitHubSetupModal({
                           >
                             <Building className="h-4 w-4" />
                             <span className="text-sm">{org.login}</span>
-                          </button>
+                          </Button>
                         ))}
                       </div>
                     )}
@@ -601,7 +616,10 @@ export function GitHubSetupModal({
                   <div className="space-y-2">
                     <Label>Visibility</Label>
                     <div className="flex gap-2" role="radiogroup" aria-label={t('common:accessibility.repositoryVisibilityAriaLabel')}>
-                      <button
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() => setIsPrivateRepo(true)}
                         className={`flex items-center gap-2 px-3 py-2 rounded-md border ${
                           isPrivateRepo
@@ -615,8 +633,11 @@ export function GitHubSetupModal({
                       >
                         <Lock className="h-4 w-4" />
                         <span className="text-sm">Private</span>
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
                         onClick={() => setIsPrivateRepo(false)}
                         className={`flex items-center gap-2 px-3 py-2 rounded-md border ${
                           !isPrivateRepo
@@ -630,7 +651,7 @@ export function GitHubSetupModal({
                       >
                         <Globe className="h-4 w-4" />
                         <span className="text-sm">Public</span>
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -640,13 +661,16 @@ export function GitHubSetupModal({
               {repoAction === 'link' && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <button
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
                       onClick={() => setRepoAction(null)}
-                      className="text-primary hover:underline"
+                      className="h-auto p-0 text-primary hover:underline"
                       aria-label={t('githubSetup.goBackAriaLabel')}
                     >
                       ← Back
-                    </button>
+                    </Button>
                     <span>Link to existing repository</span>
                   </div>
 

@@ -51,25 +51,27 @@ export function IdeationHeader({
   const { t } = useTranslation(['common', 'ideation']);
   const hasSelection = selectedCount > 0;
   return (
-    <div className="shrink-0 border-b border-border p-4 bg-card/50">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Lightbulb className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">{t('ideation:header.title')}</h2>
-            <Badge variant="outline" className="ideation-chip ideation-tone-neutral">
+    <div className="shrink-0 border-b border-border/60 px-5 py-4 bg-card/65 backdrop-blur-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2.5 mb-1.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/12 border border-primary/25">
+              <Lightbulb className="h-4 w-4 text-primary" />
+            </div>
+            <h2 className="text-xl font-semibold tracking-tight">{t('ideation:header.title')}</h2>
+            <Badge variant="outline" className="ideation-chip ideation-tone-neutral px-2.5 py-1 text-xs font-medium">
               {t('ideation:header.ideasCount', { count: totalIdeas })}
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground/90 leading-relaxed">
             {t('ideation:header.description')}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5 flex-wrap justify-end">
           {/* Selection controls */}
           {hasSelection ? (
             <>
-              <Badge variant="secondary" className="mr-1 ideation-chip ideation-tone-selected">
+              <Badge variant="secondary" className="mr-1 ideation-chip ideation-tone-selected px-2.5 py-1">
                 {t('ideation:header.selectedCount', { count: selectedCount })}
               </Badge>
               <Button

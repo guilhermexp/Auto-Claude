@@ -1,5 +1,6 @@
 import { GitMerge, GitPullRequest, Lock, ExternalLink } from 'lucide-react';
 import { cn } from '../../../lib/utils';
+import { Button } from '../../ui/button';
 import type { GitLabMergeRequest } from '../../../../shared/types';
 
 interface MergeRequestItemProps {
@@ -31,8 +32,9 @@ export function MergeRequestItem({ mr, isSelected, onClick }: MergeRequestItemPr
   };
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
       onClick={onClick}
       className={cn(
         'w-full text-left p-3 rounded-lg border transition-colors',
@@ -84,6 +86,6 @@ export function MergeRequestItem({ mr, isSelected, onClick }: MergeRequestItemPr
           <ExternalLink className="h-4 w-4" />
         </a>
       </div>
-    </button>
+    </Button>
   );
 }

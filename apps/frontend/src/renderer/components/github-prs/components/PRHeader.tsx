@@ -94,8 +94,10 @@ export function PRHeader({ pr, isLoadingFiles = false }: PRHeaderProps) {
 
           <div className="flex items-center gap-4 ml-auto">
           {/* Clickable files indicator */}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={() => setShowFiles(!showFiles)}
             className={cn(
               "flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors",
@@ -114,7 +116,7 @@ export function PRHeader({ pr, isLoadingFiles = false }: PRHeaderProps) {
             {hasFiles && (
               showFiles ? <ChevronUp className="h-3 w-3 ml-1" /> : <ChevronDown className="h-3 w-3 ml-1" />
             )}
-          </button>
+          </Button>
           <div className="flex items-center gap-2 text-xs font-mono">
             <span className="github-pr-inline-stat github-pr-inline-stat-success">
               +{pr.additions}

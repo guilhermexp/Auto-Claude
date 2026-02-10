@@ -124,13 +124,16 @@ export function ChatHistorySidebar({
 
       <ScrollArea className="flex-1">
         {/* New Chat Button */}
-        <button
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
           onClick={onNewSession}
-          className="w-full flex items-center gap-2 px-3 py-1.5 text-sm h-8 font-medium mb-2 insights-new-chat-button"
+          className="w-full justify-start gap-2 px-3 py-1.5 text-sm h-8 font-medium mb-2 insights-new-chat-button"
         >
           <Plus className="h-4 w-4 opacity-50" />
           <span className="truncate">{t('insights:chat.newConversation', 'New Conversation')}</span>
-        </button>
+        </Button>
 
         {/* Separator */}
         <div className="border-t border-border/30 mx-1 my-3" />

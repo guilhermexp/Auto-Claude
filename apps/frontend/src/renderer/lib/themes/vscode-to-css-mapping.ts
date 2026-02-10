@@ -41,36 +41,86 @@ export const VSCODE_TO_CSS_MAP: Record<string, string[]> = {
   '--sidebar-foreground': ['sideBar.foreground', 'foreground']
 };
 
-function normalizeHex(input: string): string | null {
+interface ParsedHexColor {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
+function parseHexColor(input: string): ParsedHexColor | null {
   const hex = input.trim().replace(/^#/, '');
   if (!/^[0-9a-fA-F]{3,8}$/.test(hex)) {
     return null;
   }
 
-  if (hex.length === 3 || hex.length === 4) {
+  if (hex.length === 3) {
     const [r, g, b] = hex;
-    return `${r}${r}${g}${g}${b}${b}`;
+    return {
+      r: Number.parseInt(`${r}${r}`, 16),
+      g: Number.parseInt(`${g}${g}`, 16),
+      b: Number.parseInt(`${b}${b}`, 16),
+      a: 1
+    };
   }
 
-  if (hex.length === 6 || hex.length === 8) {
-    return hex.slice(0, 6);
+  if (hex.length === 4) {
+    const [r, g, b, a] = hex;
+    return {
+      r: Number.parseInt(`${r}${r}`, 16),
+      g: Number.parseInt(`${g}${g}`, 16),
+      b: Number.parseInt(`${b}${b}`, 16),
+      a: Number.parseInt(`${a}${a}`, 16) / 255
+    };
+  }
+
+  if (hex.length === 6) {
+    return {
+      r: Number.parseInt(hex.slice(0, 2), 16),
+      g: Number.parseInt(hex.slice(2, 4), 16),
+      b: Number.parseInt(hex.slice(4, 6), 16),
+      a: 1
+    };
+  }
+
+  if (hex.length === 8) {
+    return {
+      r: Number.parseInt(hex.slice(0, 2), 16),
+      g: Number.parseInt(hex.slice(2, 4), 16),
+      b: Number.parseInt(hex.slice(4, 6), 16),
+      a: Number.parseInt(hex.slice(6, 8), 16) / 255
+    };
   }
 
   return null;
 }
 
+function compositeOverBase(fg: ParsedHexColor, base: ParsedHexColor): ParsedHexColor {
+  const alpha = Math.max(0, Math.min(1, fg.a));
+  return {
+    r: Math.round(fg.r * alpha + base.r * (1 - alpha)),
+    g: Math.round(fg.g * alpha + base.g * (1 - alpha)),
+    b: Math.round(fg.b * alpha + base.b * (1 - alpha)),
+    a: 1
+  };
+}
+
 /**
  * Convert hex to HSL triplet string used by CSS vars, e.g. "240 10% 4%".
  */
-export function hexToHslTriplet(hexColor: string): string {
-  const normalized = normalizeHex(hexColor);
-  if (!normalized) {
+export function hexToHslTriplet(hexColor: string, baseHexColor?: string): string {
+  const parsed = parseHexColor(hexColor);
+  if (!parsed) {
     return '0 0% 50%';
   }
 
-  const r = Number.parseInt(normalized.slice(0, 2), 16) / 255;
-  const g = Number.parseInt(normalized.slice(2, 4), 16) / 255;
-  const b = Number.parseInt(normalized.slice(4, 6), 16) / 255;
+  const color = parsed.a < 1
+    ? compositeOverBase(parsed, parseHexColor(baseHexColor || '#111111') || { r: 17, g: 17, b: 17, a: 1 })
+    : parsed;
+
+  const r = color.r / 255;
+  const g = color.g / 255;
+  const b = color.b / 255;
 
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
@@ -95,14 +145,18 @@ export function hexToHslTriplet(hexColor: string): string {
 }
 
 export function isLightColor(hexColor: string): boolean {
-  const normalized = normalizeHex(hexColor);
-  if (!normalized) {
+  const parsed = parseHexColor(hexColor);
+  if (!parsed) {
     return false;
   }
 
-  const r = Number.parseInt(normalized.slice(0, 2), 16);
-  const g = Number.parseInt(normalized.slice(2, 4), 16);
-  const b = Number.parseInt(normalized.slice(4, 6), 16);
+  const color = parsed.a < 1
+    ? compositeOverBase(parsed, { r: 255, g: 255, b: 255, a: 1 })
+    : parsed;
+
+  const r = color.r;
+  const g = color.g;
+  const b = color.b;
 
   // Perceived luminance
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
@@ -114,12 +168,17 @@ export function isLightColor(hexColor: string): boolean {
  */
 export function generateCSSVariables(themeColors: Record<string, string>): Record<string, string> {
   const cssVariables: Record<string, string> = {};
+  const baseBackground =
+    themeColors['editor.background'] ??
+    themeColors['editorPane.background'] ??
+    themeColors['sideBar.background'] ??
+    '#111111';
 
   for (const [cssVar, priorityKeys] of Object.entries(VSCODE_TO_CSS_MAP)) {
     const chosenKey = priorityKeys.find((key) => themeColors[key]);
     if (!chosenKey) continue;
 
-    cssVariables[cssVar] = hexToHslTriplet(themeColors[chosenKey]);
+    cssVariables[cssVar] = hexToHslTriplet(themeColors[chosenKey], baseBackground);
   }
 
   return cssVariables;
@@ -134,4 +193,3 @@ export function getThemeTypeFromColors(colors: Record<string, string>): 'light' 
 
   return isLightColor(bg) ? 'light' : 'dark';
 }
-

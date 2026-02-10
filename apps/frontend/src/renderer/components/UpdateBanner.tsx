@@ -198,14 +198,16 @@ export function UpdateBanner({ className }: UpdateBannerProps) {
             {t("navigation:updateBanner.title")}
           </span>
         </div>
-        <button
+        <Button
           type="button"
           onClick={handleDismiss}
-          className="text-muted-foreground hover:text-foreground transition-colors"
+          size="icon"
+          variant="ghost"
+          className="h-6 w-6 text-muted-foreground hover:text-foreground transition-colors"
           aria-label={t("navigation:updateBanner.dismiss")}
         >
           <X className="h-3.5 w-3.5" />
-        </button>
+        </Button>
       </div>
 
       {/* Version info */}

@@ -382,7 +382,10 @@ export function UsageIndicator() {
       <TooltipProvider delayDuration={200}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border cursor-help ${
                 needsReauth
                   ? 'bg-red-500/10 border-red-500/20 text-red-500'
@@ -401,7 +404,7 @@ export function UsageIndicator() {
                   <span className="text-xs font-semibold">{t('common:usage.notAvailable')}</span>
                 </>
               )}
-            </button>
+            </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom" className="text-xs w-64">
             <div className="space-y-1">
@@ -411,12 +414,15 @@ export function UsageIndicator() {
                   <p className="text-muted-foreground text-[10px]">
                     {t('common:usage.reauthRequiredDescription')}
                   </p>
-                  <button
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
                     onClick={handleOpenAccounts}
-                    className="text-[10px] text-primary mt-1 font-medium underline hover:text-primary/80 cursor-pointer"
+                    className="mt-1 h-auto p-0 text-[10px] font-medium"
                   >
                     {t('common:usage.clickToOpenSettings')}
-                  </button>
+                  </Button>
                 </>
               ) : (
                 <>
@@ -526,14 +532,16 @@ export function UsageIndicator() {
                   </p>
                 </div>
               </div>
-              <button
+              <Button
                 type="button"
+                variant="destructive"
+                size="sm"
                 onClick={handleOpenAccounts}
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-md bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors text-xs font-medium"
+                className="w-full justify-center gap-1.5 px-3 py-2 text-xs font-medium"
               >
                 <LogIn className="h-3.5 w-3.5" />
                 {t('common:usage.reauthButton')}
-              </button>
+              </Button>
             </div>
           ) : (
             <>
@@ -606,10 +614,12 @@ export function UsageIndicator() {
           )}
 
           {/* Active account footer - clickable to go to settings */}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={handleOpenAccounts}
-            className={`w-full pt-3 border-t border-border/30 flex items-center gap-2.5 hover:bg-muted/50 -mx-3 px-3 ${otherProfiles.length === 0 ? '-mb-3 pb-3 rounded-b-md' : 'pb-2'} transition-colors cursor-pointer group`}
+            className={`h-auto w-full justify-start pt-3 border-t border-border/30 gap-2.5 hover:bg-muted/50 -mx-3 px-3 ${otherProfiles.length === 0 ? '-mb-3 pb-3 rounded-b-md' : 'pb-2'} transition-colors cursor-pointer group`}
           >
             {/* Initials Avatar with warning indicator for re-auth needed */}
             <div className="relative">
@@ -649,7 +659,7 @@ export function UsageIndicator() {
 
             {/* Chevron */}
             <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
-          </button>
+          </Button>
 
           {/* Other profiles section - sorted by availability */}
           {otherProfiles.length > 0 && (
@@ -700,12 +710,15 @@ export function UsageIndicator() {
                       )}
                       {/* Swap button - only show for authenticated profiles */}
                       {profile.isAuthenticated && (
-                        <button
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
                           onClick={(e) => handleSwapProfile(e, profile.profileId)}
-                          className="text-[9px] px-1.5 py-0.5 bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground rounded transition-colors ml-auto"
+                          className="ml-auto h-auto px-1.5 py-0.5 text-[9px]"
                         >
                           {t('common:usage.swap')}
-                        </button>
+                        </Button>
                       )}
                     </div>
                     {/* Usage bars or status - show both session and weekly */}

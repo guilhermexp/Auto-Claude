@@ -38,6 +38,7 @@ import {
   FullScreenDialogDescription
 } from '../ui/full-screen-dialog';
 import { ScrollArea } from '../ui/scroll-area';
+import { Button } from '../ui/button';
 import { cn } from '../../lib/utils';
 import { useSettings } from './hooks/useSettings';
 import { ThemeSettings } from './ThemeSettings';
@@ -110,21 +111,25 @@ function NavItem({ icon: Icon, label, isActive, isDisabled, onClick }: NavItemPr
   }, [onClick]);
 
   return (
-    <button
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
       onClick={handleClick}
       disabled={isDisabled}
       className={cn(
-        'w-full flex items-center gap-2 px-2.5 py-1.5 text-sm h-8 rounded-md font-medium transition-colors',
+        'w-full h-9 justify-start gap-2.5 px-2.5 py-1.5 text-sm rounded-md font-normal transition-colors',
+        'border-l-2 border-transparent bg-transparent shadow-none',
         isActive
-          ? 'bg-foreground/10 text-foreground'
+          ? 'border-l-foreground/70 text-foreground'
           : isDisabled
             ? 'opacity-50 cursor-not-allowed text-muted-foreground'
-            : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground dark:hover:bg-white/5'
+            : 'text-muted-foreground hover:text-foreground hover:bg-transparent'
       )}
     >
-      <Icon className={cn('h-4 w-4', isActive ? 'opacity-100' : 'opacity-50')} />
+      <Icon className={cn('h-4 w-4', isActive ? 'opacity-90' : 'opacity-60')} />
       <span className="truncate">{label}</span>
-    </button>
+    </Button>
   );
 }
 
@@ -288,7 +293,7 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
                 <div className="space-y-4 w-full max-w-full box-border overflow-hidden">
                   {/* APPLICATION Section */}
                   <div>
-                    <h3 className="mb-1.5 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <h3 className="mb-2 px-2 text-sm font-medium text-muted-foreground">
                       {t('tabs.app')}
                     </h3>
                     <div className="space-y-0.5">
@@ -307,19 +312,22 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
 
                       {/* Re-run Wizard button */}
                       {onRerunWizard && (
-                        <button
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => {
                             onOpenChange(false);
                             onRerunWizard();
                           }}
                           className={cn(
-                            'w-full flex items-center gap-2 px-2.5 py-1.5 text-sm h-8 rounded-md font-medium transition-colors mt-1',
-                            'text-muted-foreground hover:bg-foreground/5 hover:text-foreground dark:hover:bg-white/5'
+                            'w-full h-9 justify-start gap-2.5 px-2.5 py-1.5 text-sm rounded-md font-normal transition-colors mt-1',
+                            'border-l-2 border-transparent bg-transparent text-muted-foreground hover:text-foreground hover:bg-transparent'
                           )}
                         >
-                          <Sparkles className="h-4 w-4 opacity-50" />
+                          <Sparkles className="h-4 w-4 opacity-60" />
                           <span className="truncate">{t('actions.rerunWizard')}</span>
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
@@ -329,7 +337,7 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
 
                   {/* PROJECT Section */}
                   <div>
-                    <h3 className="mb-1.5 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <h3 className="mb-2 px-2 text-sm font-medium text-muted-foreground">
                       {t('tabs.project')}
                     </h3>
 

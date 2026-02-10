@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, type DragEvent, type KeyboardEvent } from 
 import { useTranslation } from 'react-i18next';
 import { ChevronRight, ChevronDown, Folder, File, FileCode, FileJson, FileText, FileImage, Loader2 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { Button } from './ui/button';
 import type { FileNode } from '../../shared/types';
 
 interface FileTreeItemProps {
@@ -179,8 +180,10 @@ export function FileTreeItem({
     >
       {/* Expand/collapse chevron for directories */}
       {node.isDirectory ? (
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           className="flex items-center justify-center w-4 h-4 hover:bg-accent rounded"
           onClick={(e) => {
             e.stopPropagation();
@@ -197,7 +200,7 @@ export function FileTreeItem({
           ) : (
             <ChevronRight className="h-3 w-3 text-muted-foreground" aria-hidden="true" />
           )}
-        </button>
+        </Button>
       ) : (
         <span className="w-4" aria-hidden="true" />
       )}

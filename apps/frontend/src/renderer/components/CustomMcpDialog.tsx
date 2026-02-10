@@ -393,14 +393,15 @@ export function CustomMcpDialog({
 
               {/* Advanced Headers (collapsible) */}
               <div className="space-y-2">
-                <button
+                <Button
                   type="button"
                   onClick={() => setShowAdvancedHeaders(!showAdvancedHeaders)}
+                  variant="ghost"
                   className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   <span className={`transition-transform ${showAdvancedHeaders ? 'rotate-90' : ''}`}>▶</span>
                   {t('mcp.advancedHeaders')}
-                </button>
+                </Button>
 
                 {showAdvancedHeaders && (
                   <div className="pl-4 space-y-2">
@@ -441,12 +442,14 @@ export function CustomMcpDialog({
                                   {value.length > 20 ? `${value.substring(0, 20)}...` : value}
                                 </span>
                               </span>
-                              <button
+                              <Button
+                                type="button"
+                                variant="ghost"
                                 onClick={() => removeHeader(key)}
                                 className="text-muted-foreground hover:text-destructive transition-colors"
                               >
                                 <X className="h-3 w-3" />
-                              </button>
+                              </Button>
                             </div>
                           ))}
                       </div>

@@ -339,8 +339,10 @@ export function QAFeedbackSection({
               )}
               {/* Remove button */}
               {!isSubmitting && (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   className="absolute top-0.5 right-0.5 h-4 w-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -349,7 +351,7 @@ export function QAFeedbackSection({
                   aria-label={t('feedback.removeImage', 'Remove image')}
                 >
                   <X className="h-3 w-3" />
-                </button>
+                </Button>
               )}
             </div>
           ))}

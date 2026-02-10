@@ -10,6 +10,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Brain, Scale, Zap, Sliders, Sparkles, ChevronDown, ChevronUp, Pencil } from 'lucide-react';
+import { Button } from './ui/button';
 import { Label } from './ui/label';
 import {
   Select,
@@ -217,9 +218,10 @@ export function AgentProfileSelector({
       {!isCustom && (
         <div className="rounded-lg overflow-hidden settings-info-card">
           {/* Clickable Header */}
-          <button
+          <Button
             type="button"
             onClick={() => setShowPhaseDetails(!showPhaseDetails)}
+            variant="ghost"
             className={cn(
               'flex w-full items-center justify-between p-4 text-left',
               'hover:bg-muted/50 transition-colors',
@@ -241,7 +243,7 @@ export function AgentProfileSelector({
             ) : (
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
             )}
-          </button>
+          </Button>
 
           {/* Compact summary when collapsed */}
           {!showPhaseDetails && (

@@ -1,6 +1,7 @@
 import { MousePointer2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../../lib/utils';
+import { Button } from '../../ui/button';
 import { Label } from '../../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import { Switch } from '../../ui/switch';
@@ -167,8 +168,9 @@ export function CursorConfigPanel({ settings, onSettingChange }: CursorConfigPan
               >
                 {settings.cursorAccentColor.toUpperCase()}
               </code>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={() => onSettingChange('cursorAccentColor', '#000000')}
                 className={cn(
                   'px-3 py-2 rounded-lg text-sm font-medium',
@@ -179,7 +181,7 @@ export function CursorConfigPanel({ settings, onSettingChange }: CursorConfigPan
                 title={t('terminalFonts.cursorConfig.resetColor', { defaultValue: 'Reset to black' })}
               >
                 {t('terminalFonts.cursorConfig.reset', { defaultValue: 'Reset' })}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

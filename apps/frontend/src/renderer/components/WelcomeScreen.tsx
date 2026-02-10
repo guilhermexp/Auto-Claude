@@ -87,10 +87,11 @@ export function WelcomeScreen({
             <ScrollArea className="max-h-[320px]">
               <div className="p-2">
                 {recentProjects.map((project, _index) => (
-                  <button
+                  <Button
                     key={project.id}
                     onClick={() => onSelectProject(project.id)}
-                    className="w-full flex items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-accent/50 group"
+                    variant="ghost"
+                    className="w-full h-auto justify-start flex items-center gap-3 rounded-lg px-3 py-3 text-left transition-colors hover:bg-accent/50 group"
                     aria-label={t('welcome:recentProjects.openProjectAriaLabel', { name: project.name })}
                   >
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20 text-accent-foreground shrink-0">
@@ -117,7 +118,7 @@ export function WelcomeScreen({
                       </span>
                       <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </ScrollArea>

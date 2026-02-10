@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '../ui/select';
+import { Button } from '../ui/button';
 import { Separator } from '../ui/separator';
 import { useProjectStore, removeProject } from '../../stores/project-store';
 import { AddProjectModal } from '../AddProjectModal';
@@ -54,7 +55,7 @@ export function ProjectSelector({
         open={open}
         onOpenChange={setOpen}
       >
-        <SelectTrigger className="w-full [&_span]:truncate border-transparent bg-foreground/5 hover:bg-foreground/8 focus:ring-0 focus:border-border/50 h-8 px-2">
+        <SelectTrigger className="w-full [&_span]:truncate border-border/40 bg-transparent hover:bg-transparent focus:ring-0 focus:border-border/60 h-9 px-2.5">
           <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
             <FolderOpen className="h-4 w-4 shrink-0 text-muted-foreground" />
             <SelectValue placeholder="Select a project..." className="truncate min-w-0 flex-1" />
@@ -73,8 +74,10 @@ export function ProjectSelector({
                     {project.name}
                   </span>
                 </SelectItem>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   className="absolute right-2 flex h-6 w-6 items-center justify-center rounded-md hover:bg-destructive/10 transition-colors"
                   onPointerDown={(e) => {
                     e.stopPropagation();
@@ -82,7 +85,7 @@ export function ProjectSelector({
                   onClick={(e) => handleRemoveProject(project.id, e)}
                 >
                   <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                </button>
+                </Button>
               </div>
             ))
           )}

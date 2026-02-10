@@ -313,9 +313,10 @@ export function TaskFiles({ task }: TaskFilesProps) {
               </div>
             ) : (
               files.map((file) => (
-                <button
+                <Button
                   type="button"
                   key={file.path}
+                  variant="ghost"
                   role="option"
                   aria-selected={selectedFile === file.path}
                   onClick={() => loadFileContent(file.path)}
@@ -332,7 +333,7 @@ export function TaskFiles({ task }: TaskFilesProps) {
                   {selectedFile === file.path && (
                     <ChevronRight className="h-3 w-3 text-muted-foreground" />
                   )}
-                </button>
+                </Button>
               ))
             )}
           </div>

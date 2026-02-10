@@ -339,9 +339,10 @@ export function TaskFormFields({
         )}
 
         {/* Reference Images Toggle */}
-        <button
+        <Button
           type="button"
           onClick={() => setShowReferenceImages(!showReferenceImages)}
+          variant="ghost"
           className={cn(
             'flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors',
             'w-full justify-between py-2 px-3 rounded-md hover:bg-muted/50'
@@ -363,7 +364,7 @@ export function TaskFormFields({
           ) : (
             <ChevronDown className="h-4 w-4" />
           )}
-        </button>
+        </Button>
 
         {/* Reference Images Section */}
         {showReferenceImages && (
@@ -414,8 +415,10 @@ export function TaskFormFields({
                     )}
                     {/* Remove button */}
                     {!disabled && (
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon"
                         className="absolute top-0.5 right-0.5 h-5 w-5 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -424,7 +427,7 @@ export function TaskFormFields({
                         aria-label={t('images.removeImageAriaLabel', { filename: image.filename })}
                       >
                         <X className="h-3 w-3" />
-                      </button>
+                      </Button>
                     )}
                   </div>
                 ))}
@@ -474,9 +477,10 @@ export function TaskFormFields({
         />
 
         {/* Classification Toggle */}
-        <button
+        <Button
           type="button"
           onClick={() => onShowClassificationChange(!showClassification)}
+          variant="ghost"
           className={cn(
             'flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors',
             'w-full justify-between py-2 px-3 rounded-md hover:bg-muted/50'
@@ -491,7 +495,7 @@ export function TaskFormFields({
           ) : (
             <ChevronDown className="h-4 w-4" />
           )}
-        </button>
+        </Button>
 
         {/* Classification Fields */}
         {showClassification && (

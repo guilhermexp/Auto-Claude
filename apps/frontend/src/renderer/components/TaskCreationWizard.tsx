@@ -674,9 +674,10 @@ export function TaskCreationWizard({
         </TaskFormFields>
 
         {/* Git Options Toggle - unique to creation */}
-        <button
+        <Button
           type="button"
           onClick={() => setShowGitOptions(!showGitOptions)}
+          variant="ghost"
           className={cn(
             'flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors',
             'w-full justify-between py-2 px-3 rounded-md hover:bg-muted/50'
@@ -699,7 +700,7 @@ export function TaskCreationWizard({
           ) : (
             <ChevronDown className="h-4 w-4" />
           )}
-        </button>
+        </Button>
 
         {/* Git Options */}
         {showGitOptions && (

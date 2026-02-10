@@ -160,7 +160,9 @@ export function AddProjectModal({ open, onOpenChange, onProjectAdded }: AddProje
 
       <div className="py-4 space-y-3">
         {/* Open Existing Option */}
-        <button
+        <Button
+          type="button"
+          variant="ghost"
           onClick={handleOpenExisting}
           className={cn(
             'w-full flex items-center gap-4 p-4 rounded-xl border border-border',
@@ -179,10 +181,12 @@ export function AddProjectModal({ open, onOpenChange, onProjectAdded }: AddProje
             </p>
           </div>
           <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-        </button>
+        </Button>
 
         {/* Create New Option */}
-        <button
+        <Button
+          type="button"
+          variant="ghost"
           onClick={() => setStep('create-form')}
           className={cn(
             'w-full flex items-center gap-4 p-4 rounded-xl border border-border',
@@ -201,7 +205,7 @@ export function AddProjectModal({ open, onOpenChange, onProjectAdded }: AddProje
             </p>
           </div>
           <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-        </button>
+        </Button>
       </div>
 
       {error && (

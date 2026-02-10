@@ -331,11 +331,14 @@ export function EnvConfigModal({
                   </Label>
                   <div className="space-y-2">
                     {claudeProfiles.map((profile) => (
-                      <button
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
                         key={profile.id}
                         onClick={() => setSelectedProfileId(profile.id)}
                         className={cn(
-                          "w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-colors text-left",
+                          "h-auto w-full justify-start gap-3 p-3 rounded-lg border-2 transition-colors text-left",
                           selectedProfileId === profile.id
                             ? "border-primary bg-primary/5"
                             : "border-border hover:border-primary/50"
@@ -368,7 +371,7 @@ export function EnvConfigModal({
                           "h-4 w-4 shrink-0",
                           selectedProfileId === profile.id ? "text-primary" : "text-transparent"
                         )} />
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </div>
@@ -466,9 +469,12 @@ export function EnvConfigModal({
 
             {/* Secondary: Manual Token Entry (Collapsible) */}
             <div className="space-y-3">
-              <button
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
                 onClick={() => setShowManualEntry(!showManualEntry)}
-                className="w-full flex items-center justify-between text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="h-auto w-full justify-between text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 <span>Enter token manually</span>
                 {showManualEntry ? (
@@ -476,7 +482,7 @@ export function EnvConfigModal({
                 ) : (
                   <ChevronRight className="h-4 w-4" />
                 )}
-              </button>
+              </Button>
 
               {showManualEntry && (
                 <div className="space-y-3 pl-4 border-l-2 border-border">
@@ -491,22 +497,28 @@ export function EnvConfigModal({
                           claude setup-token
                         </code>
                         {' '}
-                        <button
+                        <Button
+                          type="button"
+                          variant="link"
+                          size="sm"
                           onClick={handleCopyCommand}
-                          className="inline-flex items-center text-info hover:text-info/80"
+                          className="inline-flex h-auto items-center p-0 text-info hover:text-info/80"
                         >
                           <Copy className="h-3 w-3 ml-1" />
-                        </button>
+                        </Button>
                       </li>
                       <li>Copy the token and paste it below</li>
                     </ol>
-                    <button
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
                       onClick={handleOpenDocs}
-                      className="text-info hover:text-info/80 flex items-center gap-1 mt-2"
+                      className="mt-2 h-auto p-0 text-info hover:text-info/80 flex items-center gap-1"
                     >
                       <ExternalLink className="h-3 w-3" />
                       View documentation
-                    </button>
+                    </Button>
                   </div>
 
                   {/* Token input */}
@@ -526,17 +538,19 @@ export function EnvConfigModal({
                       />
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <button
+                          <Button
                             type="button"
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setShowToken(!showToken)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                            className="absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2 border-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"
                           >
                             {showToken ? (
                               <EyeOff className="h-4 w-4" />
                             ) : (
                               <Eye className="h-4 w-4" />
                             )}
-                          </button>
+                          </Button>
                         </TooltipTrigger>
                         <TooltipContent>
                           {showToken ? 'Hide token' : 'Show token'}

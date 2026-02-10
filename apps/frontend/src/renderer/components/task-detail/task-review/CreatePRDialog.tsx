@@ -145,15 +145,17 @@ export function CreatePRDialog({
                   : t('taskReview:pr.success.created')}
               </p>
               {result.prUrl && (
-                <button
+                <Button
                   type="button"
                   data-testid="pr-link-button"
+                  variant="link"
+                  size="sm"
                   onClick={handleOpenPR}
                   className="text-sm text-primary hover:underline flex items-center gap-1 bg-transparent border-none cursor-pointer p-0"
                 >
                   {result.prUrl}
                   <ExternalLink className="h-3 w-3" />
-                </button>
+                </Button>
               )}
             </div>
             <DialogFooter>

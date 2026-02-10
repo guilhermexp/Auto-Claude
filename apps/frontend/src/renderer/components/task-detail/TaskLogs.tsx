@@ -19,6 +19,7 @@ import {
   Cpu
 } from 'lucide-react';
 import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../ui/collapsible';
 import { cn } from '../../lib/utils';
 import { useSettingsStore } from '../../stores/settings-store';
@@ -233,7 +234,9 @@ function PhaseLogSection({ phase, phaseLog, isExpanded, onToggle, isTaskStuck, p
   return (
     <Collapsible open={isExpanded} onOpenChange={onToggle}>
       <CollapsibleTrigger asChild>
-        <button
+        <Button
+          type="button"
+          variant="ghost"
           className={cn(
             'w-full flex items-center justify-between p-3 rounded-lg border transition-colors',
             'hover:bg-secondary/50',
@@ -275,7 +278,7 @@ function PhaseLogSection({ phase, phaseLog, isExpanded, onToggle, isTaskStuck, p
             )}
             {getStatusBadge()}
           </div>
-        </button>
+        </Button>
       </CollapsibleTrigger>
       <CollapsibleContent>
         <div className="mt-1 ml-6 border-l-2 border-border pl-4 py-2 space-y-1">
@@ -368,7 +371,9 @@ function LogEntry({ entry }: LogEntryProps) {
             <span className="text-muted-foreground">Done</span>
           </div>
           {hasDetail && (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
               onClick={() => setIsExpanded(!isExpanded)}
               className={cn(
                 'flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded',
@@ -387,7 +392,7 @@ function LogEntry({ entry }: LogEntryProps) {
                   <span>Show output</span>
                 </>
               )}
-            </button>
+            </Button>
           )}
         </div>
         {hasDetail && isExpanded && (
@@ -409,7 +414,9 @@ function LogEntry({ entry }: LogEntryProps) {
           <span className="break-words flex-1">{entry.content}</span>
           <SubphaseBadge />
           {hasDetail && (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
               onClick={() => setIsExpanded(!isExpanded)}
               className={cn(
                 'flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded shrink-0',
@@ -418,7 +425,7 @@ function LogEntry({ entry }: LogEntryProps) {
               )}
             >
               {isExpanded ? <ChevronDown className="h-2.5 w-2.5" /> : <ChevronRight className="h-2.5 w-2.5" />}
-            </button>
+            </Button>
           )}
         </div>
         {hasDetail && isExpanded && (
@@ -462,7 +469,9 @@ function LogEntry({ entry }: LogEntryProps) {
         <span className="break-words whitespace-pre-wrap flex-1">{entry.content}</span>
         <SubphaseBadge />
         {hasDetail && (
-          <button
+          <Button
+            type="button"
+            variant="ghost"
             onClick={() => setIsExpanded(!isExpanded)}
             className={cn(
               'flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded shrink-0',
@@ -481,7 +490,7 @@ function LogEntry({ entry }: LogEntryProps) {
                 <span>More</span>
               </>
             )}
-          </button>
+          </Button>
         )}
       </div>
       {hasDetail && isExpanded && (

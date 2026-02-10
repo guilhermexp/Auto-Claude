@@ -5,6 +5,7 @@
 import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, CheckSquare, Square, MinusSquare } from 'lucide-react';
 import { Badge } from '../../ui/badge';
+import { Button } from '../../ui/button';
 import { cn } from '../../../lib/utils';
 import type { SeverityGroup } from '../constants/severity-config';
 import { SEVERITY_CONFIG } from '../constants/severity-config';
@@ -33,8 +34,9 @@ export function SeverityGroupHeader({
   const isPartiallySelected = selectedCount > 0 && selectedCount < count;
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
       onClick={onToggle}
       className="w-full flex items-center justify-between p-3 hover:bg-black/5 dark:hover:bg-white/5 rounded-t-lg transition-colors"
     >
@@ -69,6 +71,6 @@ export function SeverityGroupHeader({
       ) : (
         <ChevronRight className="h-4 w-4 text-muted-foreground" />
       )}
-    </button>
+    </Button>
   );
 }

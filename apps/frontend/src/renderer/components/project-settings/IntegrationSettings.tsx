@@ -145,7 +145,9 @@ export function IntegrationSettings({
     <>
       {/* Linear Integration Section */}
       <section className="space-y-3">
-        <button
+        <Button
+          type="button"
+          variant="ghost"
           onClick={onLinearToggle}
           className="w-full flex items-center justify-between text-sm font-semibold text-foreground hover:text-foreground/80"
         >
@@ -163,7 +165,7 @@ export function IntegrationSettings({
           ) : (
             <ChevronDown className="h-4 w-4" />
           )}
-        </button>
+        </Button>
 
         {linearExpanded && (
           <div className="space-y-4 pl-6 pt-2">
@@ -203,13 +205,15 @@ export function IntegrationSettings({
                       onChange={(e) => updateEnvConfig({ linearApiKey: e.target.value })}
                       className="pr-10"
                     />
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon"
                       onClick={() => setShowLinearKey(!showLinearKey)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground h-6 w-6"
                     >
                       {showLinearKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -324,7 +328,9 @@ export function IntegrationSettings({
 
       {/* GitHub Integration Section */}
       <section className="space-y-3">
-        <button
+        <Button
+          type="button"
+          variant="ghost"
           onClick={onGitHubToggle}
           className="w-full flex items-center justify-between text-sm font-semibold text-foreground hover:text-foreground/80"
         >
@@ -342,7 +348,7 @@ export function IntegrationSettings({
           ) : (
             <ChevronDown className="h-4 w-4" />
           )}
-        </button>
+        </Button>
 
         {githubExpanded && (
           <div className="space-y-4 pl-6 pt-2">
@@ -382,13 +388,15 @@ export function IntegrationSettings({
                       onChange={(e) => updateEnvConfig({ githubToken: e.target.value })}
                       className="pr-10"
                     />
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="icon"
                       onClick={() => setShowGitHubToken(!showGitHubToken)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground h-6 w-6"
                     >
                       {showGitHubToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                    </Button>
                   </div>
                 </div>
 

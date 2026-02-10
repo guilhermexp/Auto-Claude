@@ -3,6 +3,7 @@ import { Download, X, ChevronDown, ChevronUp, Check, AlertCircle, Loader2 } from
 import { useTranslation } from 'react-i18next';
 import { useDownloadStore } from '../stores/download-store';
 import { cn } from '../lib/utils';
+import { Button } from './ui/button';
 
 /**
  * GlobalDownloadIndicator Component
@@ -35,8 +36,9 @@ export function GlobalDownloadIndicator() {
     <div className="fixed bottom-4 right-4 z-50 max-w-sm">
       <div className="rounded-lg border border-border bg-card shadow-lg overflow-hidden">
         {/* Header */}
-        <button
+        <Button
           type="button"
+          variant="ghost"
           className={cn(
             'flex items-center justify-between px-3 py-2 cursor-pointer w-full text-left',
             hasActive ? 'bg-primary/10' : 'bg-muted/50'
@@ -65,8 +67,10 @@ export function GlobalDownloadIndicator() {
           </div>
           <div className="flex items-center gap-1">
             {!hasActive && (
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={(e) => {
                   e.stopPropagation();
                   // Clear all completed/failed downloads
@@ -80,7 +84,7 @@ export function GlobalDownloadIndicator() {
                 aria-label={t('downloads.clearAll')}
               >
                 <X className="h-3.5 w-3.5 text-muted-foreground" />
-              </button>
+              </Button>
             )}
             {isExpanded ? (
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -88,7 +92,7 @@ export function GlobalDownloadIndicator() {
               <ChevronUp className="h-4 w-4 text-muted-foreground" />
             )}
           </div>
-        </button>
+        </Button>
 
         {/* Download list (expanded) */}
         {isExpanded && (

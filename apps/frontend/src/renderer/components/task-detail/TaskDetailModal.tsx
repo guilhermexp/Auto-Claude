@@ -303,8 +303,10 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
             <span className="font-medium">{t('tasks:status.complete')}</span>
           </div>
            {task.metadata?.prUrl && (
-             <button
+             <Button
                type="button"
+               variant="link"
+               size="sm"
                onClick={() => {
                  if (task.metadata?.prUrl) {
                    window.electronAPI?.openExternal(task.metadata.prUrl);
@@ -314,7 +316,7 @@ function TaskDetailModalContent({ open, task, onOpenChange, onSwitchToTerminals,
              >
               <GitPullRequest className="h-5 w-5" />
               <span className="font-medium">{t(TASK_STATUS_LABELS[task.status])}</span>
-            </button>
+            </Button>
           )}
         </div>
       );

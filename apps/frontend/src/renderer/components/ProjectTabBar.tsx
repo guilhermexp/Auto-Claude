@@ -90,12 +90,12 @@ export function ProjectTabBar({
 
   return (
     <div className={cn(
-      'flex items-center h-14 border-b border-border/45 bg-background/95 project-tabbar-shell',
+      'flex items-center h-16 border-b border-border/45 bg-background/95 project-tabbar-shell',
       'overflow-visible',
       className
     )}>
-      <div className="min-w-0 flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent">
-        <div className="flex items-center min-w-max gap-1.5 px-2 py-1">
+      <div className="min-w-0 flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent px-2">
+        <div className="flex items-center min-w-max gap-2 px-1 py-2">
           {projects.map((project, index) => {
             const isActiveTab = activeProjectId === project.id;
             return (
@@ -119,13 +119,13 @@ export function ProjectTabBar({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 px-2.5 py-1 project-tabbar-actions">
+      <div className="flex items-center gap-2 px-3 py-2 project-tabbar-actions">
         <AuthStatusIndicator />
         <UsageIndicator />
         <Button
           variant="secondary"
           size="icon"
-          className="h-8 w-8 rounded-full"
+          className="h-8 w-8 rounded-xl border border-border/50 bg-card/70 hover:bg-card"
           onClick={onAddProject}
           aria-label={t('projectTab.addProjectAriaLabel')}
         >

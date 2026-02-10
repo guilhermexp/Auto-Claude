@@ -142,9 +142,10 @@ export function AgentProfileSettings({ onSave, isSaving, error }: AgentProfileSe
     const Icon = iconMap[profile.icon || 'Brain'] || Brain;
 
     return (
-      <button
+      <Button
         key={profile.id}
         onClick={() => handleSelectProfile(profile.id)}
+        variant="ghost"
         className={cn(
           'relative w-full rounded-lg p-4 text-left transition-all duration-200 settings-preset-button',
           isSelected && 'settings-preset-button-selected'
@@ -197,7 +198,7 @@ export function AgentProfileSettings({ onSave, isSaving, error }: AgentProfileSe
             </div>
           </div>
         </div>
-      </button>
+      </Button>
     );
   };
 
@@ -225,9 +226,10 @@ export function AgentProfileSettings({ onSave, isSaving, error }: AgentProfileSe
         {/* Phase Configuration - shown for all profiles */}
         <div className="mt-6 rounded-lg settings-info-card">
           {/* Header - Collapsible */}
-          <button
+          <Button
             type="button"
             onClick={() => setShowPhaseConfig(!showPhaseConfig)}
+            variant="ghost"
             className="flex w-full items-center justify-between p-4 text-left hover:bg-muted/50 transition-colors rounded-t-lg"
           >
             <div>
@@ -241,7 +243,7 @@ export function AgentProfileSettings({ onSave, isSaving, error }: AgentProfileSe
             ) : (
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
             )}
-          </button>
+          </Button>
 
           {/* Phase Configuration Content */}
           {showPhaseConfig && (

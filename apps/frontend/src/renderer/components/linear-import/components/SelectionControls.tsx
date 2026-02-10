@@ -3,6 +3,7 @@
  */
 
 import { CheckSquare, Square, Minus, RefreshCw } from 'lucide-react';
+import { Button } from '../../ui/button';
 
 interface SelectionControlsProps {
   isAllSelected: boolean;
@@ -28,7 +29,9 @@ export function SelectionControls({
   return (
     <div className="flex items-center justify-between py-2 border-b border-border shrink-0">
       <div className="flex items-center gap-3">
-        <button
+        <Button
+          type="button"
+          variant="ghost"
           onClick={isAllSelected ? onDeselectAll : onSelectAll}
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
         >
@@ -40,20 +43,22 @@ export function SelectionControls({
             <Square className="h-4 w-4" />
           )}
           {isAllSelected ? 'Deselect all' : 'Select all'}
-        </button>
+        </Button>
         <span className="text-xs text-muted-foreground">
           {selectedCount} of {filteredCount} selected
         </span>
       </div>
 
-      <button
+      <Button
+        type="button"
+        variant="ghost"
         onClick={onRefresh}
         className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
         disabled={isLoadingIssues}
       >
         <RefreshCw className={`h-3 w-3 ${isLoadingIssues ? 'animate-spin' : ''}`} />
         Refresh
-      </button>
+      </Button>
     </div>
   );
 }

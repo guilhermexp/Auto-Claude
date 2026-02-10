@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useMemo } from 'react';
 import { useToast } from '../../../hooks/use-toast';
 import { SettingsSection } from '../SettingsSection';
+import { Button } from '../../ui/button';
 import { useTerminalFontSettingsStore } from '../../../stores/terminal-font-settings-store';
 import type { TerminalFontSettings } from '../../../stores/terminal-font-settings-store';
 import { MAX_IMPORT_FILE_SIZE } from '../../../lib/terminal-font-constants';
@@ -214,35 +215,46 @@ export function TerminalFontSettings() {
           <span className="text-sm font-medium text-foreground">
             {t('terminalFonts.configActions', { defaultValue: 'Configuration:' })}
           </span>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={handleExport}
             className="px-3 py-1.5 text-sm rounded-md transition-colors hover:bg-accent text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {t('terminalFonts.export', { defaultValue: 'Export JSON' })}
-          </button>
-          <label className="px-3 py-1.5 text-sm rounded-md transition-colors hover:bg-accent text-foreground cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-            {t('terminalFonts.import', { defaultValue: 'Import JSON' })}
-            <input
-              type="file"
-              accept=".json"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  handleImport(file);
-                  e.target.value = ''; // Reset to allow re-importing same file
-                }
-              }}
-            />
-          </label>
-          <button
+          </Button>
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="px-3 py-1.5 text-sm rounded-md transition-colors hover:bg-accent text-foreground cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <label>
+              {t('terminalFonts.import', { defaultValue: 'Import JSON' })}
+              <input
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleImport(file);
+                    e.target.value = ''; // Reset to allow re-importing same file
+                  }
+                }}
+              />
+            </label>
+          </Button>
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={handleCopyToClipboard}
             className="px-3 py-1.5 text-sm rounded-md transition-colors hover:bg-accent text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {t('terminalFonts.copy', { defaultValue: 'Copy to Clipboard' })}
-          </button>
+          </Button>
         </div>
 
         {/* Font Configuration Panel */}

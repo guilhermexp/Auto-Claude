@@ -428,8 +428,10 @@ function TaskResultRow({ result, index, showDetails, onOpenPR }: TaskResultRowPr
         </div>
 
         {showDetails && result.status === 'success' && result.result?.prUrl && (
-          <button
+          <Button
             type="button"
+            variant="link"
+            size="sm"
             onClick={() => {
               const prUrl = result.result?.prUrl;
               if (prUrl) onOpenPR?.(prUrl);
@@ -440,7 +442,7 @@ function TaskResultRow({ result, index, showDetails, onOpenPR }: TaskResultRowPr
               ? t('taskReview:pr.success.alreadyExists')
               : t('taskReview:pr.success.created')}
             <ExternalLink className="h-3 w-3" />
-          </button>
+          </Button>
         )}
 
         {showDetails && result.status === 'skipped' && result.error && (

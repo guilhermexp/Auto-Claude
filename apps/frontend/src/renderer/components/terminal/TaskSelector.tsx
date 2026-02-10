@@ -1,5 +1,6 @@
 import { ListTodo, Plus, X, ChevronDown, Loader2 } from 'lucide-react';
 import type { Task } from '../../../shared/types';
+import { Button } from '../ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,9 +36,12 @@ export function TaskSelector({
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
             className={cn(
-              'flex items-center gap-1.5 h-6 px-2 rounded text-[10px] font-medium transition-colors',
+              'h-6 items-center gap-1.5 px-2 rounded text-[10px] font-medium transition-colors',
               phaseConfig.color,
               'hover:opacity-80 cursor-pointer'
             )}
@@ -50,7 +54,7 @@ export function TaskSelector({
             )}
             <span>{phaseConfig.label}</span>
             <ChevronDown className="h-2.5 w-2.5 opacity-60" />
-          </button>
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56">
           <div className="px-2 py-1.5 text-xs text-muted-foreground">
@@ -98,14 +102,17 @@ export function TaskSelector({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button
-          className="flex items-center gap-1.5 h-6 px-2 rounded text-[10px] font-medium transition-colors border border-border/50 bg-card/50 hover:bg-card hover:border-border text-muted-foreground hover:text-foreground"
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          className="h-6 items-center gap-1.5 px-2 rounded text-[10px] font-medium transition-colors border-border/50 bg-card/50 hover:bg-card hover:border-border text-muted-foreground hover:text-foreground"
           onClick={(e) => e.stopPropagation()}
         >
           <ListTodo className="h-3 w-3" />
           <span>Select task...</span>
           <ChevronDown className="h-2.5 w-2.5 opacity-60" />
-        </button>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56">
         {backlogTasks.length > 0 ? (

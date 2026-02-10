@@ -478,10 +478,12 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
   return (
     <div className="border border-border rounded-lg bg-card overflow-hidden">
       {/* Header - clickable to expand */}
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors text-left"
+        className="h-auto w-full justify-start gap-3 p-4 hover:bg-muted/50 transition-colors text-left"
       >
         <div className="p-2 rounded-lg bg-muted">
           <CategoryIcon className="h-4 w-4 text-muted-foreground" />
@@ -508,7 +510,7 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
             <ChevronRight className="h-4 w-4" />
           )}
         </div>
-      </button>
+      </Button>
 
       {/* Expanded content */}
       {isExpanded && (
@@ -520,14 +522,16 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                 MCP Servers
               </h4>
               {availableMcps.length > 0 && (
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={(e) => { e.stopPropagation(); setShowAddDialog(true); }}
-                  className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
+                  className="h-auto gap-1 px-1.5 py-1 text-xs text-primary hover:text-primary/80"
                 >
                   <Plus className="h-3 w-3" />
                   {tSettings('mcp.addServer')}
-                </button>
+                </Button>
               )}
             </div>
             {effectiveMcps.length > 0 || removedMcps.length > 0 ? (
@@ -552,14 +556,16 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                         )}
                       </div>
                       {canRemove && (
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="icon"
                           onClick={(e) => { e.stopPropagation(); onRemoveMcp(id, server); }}
-                          className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all"
+                          className="h-6 w-6 opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all"
                           title={tSettings('mcp.remove')}
                         >
                           <X className="h-3.5 w-3.5" />
-                        </button>
+                        </Button>
                       )}
                     </div>
                   );
@@ -580,14 +586,16 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                           ({tSettings('mcp.removed')})
                         </span>
                       </div>
-                      <button
+                      <Button
                         type="button"
+                        variant="ghost"
+                        size="icon"
                         onClick={(e) => { e.stopPropagation(); onAddMcp(id, server); }}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-primary transition-all"
+                        className="h-6 w-6 opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-primary transition-all"
                         title={tSettings('mcp.restore')}
                       >
                         <RotateCcw className="h-3.5 w-3.5" />
-                      </button>
+                      </Button>
                     </div>
                   );
                 })}
@@ -633,18 +641,19 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                 const server = allMcpServers[mcpId];
                 const ServerIcon = server?.icon || Server;
                 return (
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
                     key={mcpId}
                     onClick={() => { onAddMcp(id, mcpId); setShowAddDialog(false); }}
-                    className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                    className="h-auto w-full justify-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
                   >
                     <ServerIcon className="h-4 w-4 text-muted-foreground" />
                     <div>
                       <div className="font-medium text-sm">{server?.name || mcpId}</div>
                       <div className="text-xs text-muted-foreground">{server?.description}</div>
                     </div>
-                  </button>
+                  </Button>
                 );
               })
             ) : (
@@ -662,18 +671,19 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                   const server = allMcpServers[mcpId];
                   const ServerIcon = server?.icon || Server;
                   return (
-                    <button
+                    <Button
                       type="button"
+                      variant="secondary"
                       key={mcpId}
                       onClick={() => { onAddMcp(id, mcpId); setShowAddDialog(false); }}
-                      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left opacity-60"
+                      className="h-auto w-full justify-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left opacity-60"
                     >
                       <ServerIcon className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <div className="font-medium text-sm">{server?.name || mcpId}</div>
                         <div className="text-xs text-muted-foreground">{server?.description}</div>
                       </div>
-                    </button>
+                    </Button>
                   );
                 })}
               </>
@@ -1245,14 +1255,16 @@ export function AgentTools() {
                         {t('settings:mcp.customServers')}
                       </span>
                     </div>
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => { setEditingCustomServer(null); setShowCustomMcpDialog(true); }}
-                      className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
+                      className="h-auto gap-1 px-1.5 py-1 text-xs text-primary hover:text-primary/80"
                     >
                       <Plus className="h-3 w-3" />
                       {t('settings:mcp.addCustomServer')}
-                    </button>
+                    </Button>
                   </div>
 
                   {(envConfig.customMcpServers?.length ?? 0) > 0 ? (
@@ -1327,22 +1339,26 @@ export function AgentTools() {
                               </Button>
                               {/* Edit/Delete - show on hover */}
                               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button
+                                <Button
                                   type="button"
+                                  variant="ghost"
+                                  size="icon"
                                   onClick={() => { setEditingCustomServer(server); setShowCustomMcpDialog(true); }}
-                                  className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                                  className="h-7 w-7 p-1.5 text-muted-foreground hover:text-foreground transition-colors"
                                   title="Edit"
                                 >
                                   <Pencil className="h-3.5 w-3.5" />
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                   type="button"
+                                  variant="ghost"
+                                  size="icon"
                                   onClick={() => handleDeleteCustomServer(server.id)}
-                                  className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                                  className="h-7 w-7 p-1.5 text-muted-foreground hover:text-destructive transition-colors"
                                   title="Delete"
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
-                                </button>
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -1370,10 +1386,12 @@ export function AgentTools() {
             return (
               <div key={categoryId} className="space-y-3">
                 {/* Category Header */}
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => toggleCategory(categoryId)}
-                  className="flex items-center gap-2 w-full text-left hover:opacity-80 transition-opacity"
+                  className="h-auto w-full justify-start gap-2 text-left hover:opacity-80 transition-opacity"
                 >
                   {isExpanded ? (
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -1387,7 +1405,7 @@ export function AgentTools() {
                   <span className="text-xs text-muted-foreground">
                     ({agents.length} agents)
                   </span>
-                </button>
+                </Button>
 
                 {/* Agent Cards */}
                 {isExpanded && (

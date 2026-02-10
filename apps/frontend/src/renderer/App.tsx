@@ -1078,8 +1078,10 @@ export function App() {
             onViewChange={setActiveView}
           />
           {!isSidebarCollapsed && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               className="app-sidebar-resize-handle"
               onMouseDown={handleSidebarResizeStart}
               onKeyDown={(event) => {

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Type, Minus, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '../../../lib/utils';
+import { Button } from '../../ui/button';
 import { Label } from '../../ui/label';
 import { Combobox, ComboboxOption } from '../../ui/combobox';
 import type { TerminalFontSettings } from '../../../stores/terminal-font-settings-store';
@@ -168,8 +169,10 @@ export function FontConfigPanel({ settings, onSettingChange }: FontConfigPanelPr
               {settings.fontSize}px
             </span>
             <div className="flex items-center gap-1">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => handleFontSizeChange(settings.fontSize - FONT_SIZE_STEP)}
                 disabled={settings.fontSize <= FONT_SIZE_MIN}
                 className={cn(
@@ -181,9 +184,11 @@ export function FontConfigPanel({ settings, onSettingChange }: FontConfigPanelPr
                 title={t('terminalFonts.fontConfig.decreaseFontSize', { step: FONT_SIZE_STEP })}
               >
                 <Minus className="h-3.5 w-3.5" />
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => handleFontSizeChange(settings.fontSize + FONT_SIZE_STEP)}
                 disabled={settings.fontSize >= FONT_SIZE_MAX}
                 className={cn(
@@ -195,7 +200,7 @@ export function FontConfigPanel({ settings, onSettingChange }: FontConfigPanelPr
                 title={t('terminalFonts.fontConfig.increaseFontSize', { step: FONT_SIZE_STEP })}
               >
                 <Plus className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -252,8 +257,10 @@ export function FontConfigPanel({ settings, onSettingChange }: FontConfigPanelPr
             )}
           />
           <div className="flex items-center gap-1">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={() => handleFontWeightChange((settings.fontWeight - FONT_WEIGHT_STEP).toString())}
               disabled={settings.fontWeight <= FONT_WEIGHT_MIN}
               className={cn(
@@ -265,9 +272,11 @@ export function FontConfigPanel({ settings, onSettingChange }: FontConfigPanelPr
               title={t('terminalFonts.fontConfig.decreaseFontWeight', { step: FONT_WEIGHT_STEP })}
             >
               <Minus className="h-3.5 w-3.5" />
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={() => handleFontWeightChange((settings.fontWeight + FONT_WEIGHT_STEP).toString())}
               disabled={settings.fontWeight >= FONT_WEIGHT_MAX}
               className={cn(
@@ -279,7 +288,7 @@ export function FontConfigPanel({ settings, onSettingChange }: FontConfigPanelPr
               title={t('terminalFonts.fontConfig.increaseFontWeight', { step: FONT_WEIGHT_STEP })}
             >
               <Plus className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           </div>
         </div>
         <div className="text-xs text-muted-foreground">

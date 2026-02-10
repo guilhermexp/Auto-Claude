@@ -11,6 +11,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { Badge } from '../../ui/badge';
+import { Button } from '../../ui/button';
 import { PRIORITY_COLORS, STATE_TYPE_COLORS } from '../types';
 import type { LinearIssue } from '../types';
 
@@ -85,7 +86,9 @@ export function IssueCard({ issue, isSelected, onToggle }: IssueCardProps) {
 
           {/* Expandable description */}
           {issue.description && (
-            <button
+            <Button
+              type="button"
+              variant="ghost"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsExpanded(!isExpanded);
@@ -103,7 +106,7 @@ export function IssueCard({ issue, isSelected, onToggle }: IssueCardProps) {
                   Show description
                 </>
               )}
-            </button>
+            </Button>
           )}
 
           {isExpanded && issue.description && (

@@ -13,6 +13,11 @@ describe('vscode-to-css-mapping', () => {
     expect(hexToHslTriplet('#0034ff')).toBe('228 100% 50%');
   });
 
+  it('composites hex colors with alpha channel against a base color', () => {
+    // White with ~7.5% alpha over dark base should remain a dark/muted tone, not bright white.
+    expect(hexToHslTriplet('#E4E4E413', '#181818')).toBe('0 0% 20%');
+  });
+
   it('detects light and dark colors', () => {
     expect(isLightColor('#ffffff')).toBe(true);
     expect(isLightColor('#0a0e27')).toBe(false);

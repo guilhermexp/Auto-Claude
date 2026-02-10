@@ -287,8 +287,10 @@ export function TaskMetadata({ task }: TaskMetadataProps) {
                 <GitPullRequest className="h-3 w-3 text-info" />
                 {t('tasks:metadata.pullRequest')}
               </h3>
-              <button
+              <Button
                 type="button"
+                variant="link"
+                size="sm"
                 onClick={() => {
                   if (task.metadata?.prUrl) {
                     window.electronAPI.openExternal(task.metadata.prUrl);
@@ -298,7 +300,7 @@ export function TaskMetadata({ task }: TaskMetadataProps) {
               >
                 {task.metadata.prUrl}
                 <ExternalLink className="h-3 w-3" />
-              </button>
+              </Button>
             </div>
           )}
 

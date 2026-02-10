@@ -460,14 +460,16 @@ export function PRFilterBar({
             className="h-8 w-10 pl-8 pr-2 transition-colors github-pr-search-input"
           />
           {filters.searchQuery && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={() => onSearchChange('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground h-5 w-5"
               aria-label={t('prReview.clearSearch')}
             >
               <X className="h-3 w-3" />
-            </button>
+            </Button>
           )}
         </div>
 

@@ -1,5 +1,6 @@
 import { Brain, Scale, Zap, Check } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { Button } from './ui/button';
 import { DEFAULT_AGENT_PROFILES, AVAILABLE_MODELS, THINKING_LEVELS } from '../../shared/constants';
 import { useSettingsStore, saveSettings } from '../stores/settings-store';
 import type { AgentProfile } from '../../shared/types/settings';
@@ -49,9 +50,10 @@ export function AgentProfiles() {
     const Icon = iconMap[profile.icon || 'Brain'] || Brain;
 
     return (
-      <button
+      <Button
         key={profile.id}
         onClick={() => handleSelectProfile(profile.id)}
+        variant="ghost"
         className={cn(
           'relative w-full rounded-xl border p-6 text-left transition-all duration-200',
           'hover:border-primary/50 hover:shadow-md',
@@ -100,7 +102,7 @@ export function AgentProfiles() {
             </div>
           </div>
         </div>
-      </button>
+      </Button>
     );
   };
 

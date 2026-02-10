@@ -147,9 +147,10 @@ export function InvestigationDialog({
                 >
                   <div className="p-2 space-y-2">
                     {notes.map((note) => (
-                      <button
+                      <Button
                         type="button"
                         key={note.id}
+                        variant="ghost"
                         className="flex gap-3 p-3 rounded-lg border border-border bg-card hover:bg-accent/50 transition-colors cursor-pointer w-full text-left"
                         onClick={() => toggleNote(note.id)}
                       >
@@ -168,7 +169,7 @@ export function InvestigationDialog({
                             {note.body}
                           </p>
                         </div>
-                      </button>
+                      </Button>
                     ))}
                   </div>
                 </ScrollArea>

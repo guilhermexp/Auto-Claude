@@ -291,14 +291,17 @@ export function Sidebar({
     const Icon = item.icon;
 
     const button = (
-      <button
+      <Button
         type="button"
         key={item.id}
+        variant="ghost"
+        size="sm"
         onClick={() => handleNavClick(item.id)}
         disabled={!selectedProjectId}
         aria-keyshortcuts={item.shortcut}
         className={cn(
-          'w-full text-left py-2 cursor-pointer group relative transition-colors duration-75 app-sidebar-nav-item',
+          'h-auto w-full justify-start text-left py-2 cursor-pointer group relative transition-colors duration-75 app-sidebar-nav-item',
+          'bg-transparent border border-transparent shadow-none',
           'outline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70',
           'pl-2 pr-2 rounded-md',
           'disabled:pointer-events-none disabled:opacity-50',
@@ -306,7 +309,7 @@ export function Sidebar({
             ? 'bg-foreground/5 text-foreground app-sidebar-nav-item-active'
             : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
         )}
-      >
+        >
         <div className="flex items-center gap-2.5">
           <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
             <Icon className={cn('h-4 w-4', isActive ? 'opacity-100' : 'opacity-60')} />
@@ -323,7 +326,7 @@ export function Sidebar({
             </span>
           )}
         </div>
-      </button>
+      </Button>
     );
 
     // Wrap in tooltip when collapsed
@@ -404,33 +407,39 @@ export function Sidebar({
           <div className="flex items-center gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={onSettingsClick}
                   className={cn(
-                    'flex-1 flex items-center gap-2.5 py-1.5 pl-2 pr-2 text-sm rounded-md transition-colors duration-75 app-sidebar-footer-btn',
+                    'h-auto flex-1 justify-start gap-2.5 py-1.5 pl-2 pr-2 text-sm rounded-md transition-colors duration-75 app-sidebar-footer-btn',
+                    'bg-transparent border border-transparent shadow-none',
                     'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
                   )}
                 >
                   <Settings className="h-4 w-4 opacity-60" />
                   <span className="text-sm leading-tight">{t('actions.settings')}</span>
-                </button>
+                </Button>
               </TooltipTrigger>
               <TooltipContent side={isCollapsed ? "right" : "top"}>{t('tooltips.settings')}</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={() => window.open('https://github.com/AndyMik90/Auto-Claude/issues', '_blank')}
                   aria-label={t('tooltips.help')}
                   className={cn(
                     'flex items-center justify-center w-7 h-7 rounded-md transition-colors duration-75 app-sidebar-footer-btn',
+                    'bg-transparent border border-transparent shadow-none',
                     'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
                   )}
                 >
                   <HelpCircle className="h-4 w-4 opacity-60" />
-                </button>
+                </Button>
               </TooltipTrigger>
               <TooltipContent side={isCollapsed ? "right" : "top"}>{t('tooltips.help')}</TooltipContent>
             </Tooltip>

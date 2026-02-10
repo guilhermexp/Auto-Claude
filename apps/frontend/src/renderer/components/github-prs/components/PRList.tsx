@@ -251,9 +251,10 @@ export function PRList({
           const hasReviewResult = reviewState?.result !== null && reviewState?.result !== undefined;
 
           return (
-            <button
+            <Button
               type="button"
               key={pr.number}
+              variant="ghost"
               onClick={() => onSelectPR(pr.number)}
               className={cn(
                 'w-full p-4 rounded-xl border text-left transition-colors github-pr-list-item',
@@ -310,7 +311,7 @@ export function PRList({
                   </div>
                 </div>
               </div>
-            </button>
+            </Button>
           );
         })}
 

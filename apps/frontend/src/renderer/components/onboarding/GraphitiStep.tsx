@@ -410,13 +410,15 @@ export function GraphitiStep({ onNext, onBack, onSkip }: GraphitiStepProps) {
                 className="pr-10 font-mono text-sm"
                 disabled={isSaving || isValidating}
               />
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => toggleShowApiKey('openai')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2 border-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"
               >
                 {showApiKey['openai'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              </Button>
             </div>
             <p className="text-xs text-muted-foreground">
               Get your key from{' '}
@@ -443,13 +445,15 @@ export function GraphitiStep({ onNext, onBack, onSkip }: GraphitiStepProps) {
                 className="pr-10 font-mono text-sm"
                 disabled={isSaving || isValidating}
               />
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => toggleShowApiKey('anthropic')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2 border-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"
               >
                 {showApiKey['anthropic'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              </Button>
             </div>
             <p className="text-xs text-muted-foreground">
               Get your key from{' '}
@@ -476,13 +480,15 @@ export function GraphitiStep({ onNext, onBack, onSkip }: GraphitiStepProps) {
                   className="pr-10 font-mono text-sm"
                   disabled={isSaving || isValidating}
                 />
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="icon"
                   onClick={() => toggleShowApiKey('azure')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2 border-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"
                 >
                   {showApiKey['azure'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
+                </Button>
               </div>
             </div>
             <div className="space-y-2">
@@ -544,13 +550,15 @@ export function GraphitiStep({ onNext, onBack, onSkip }: GraphitiStepProps) {
                 className="pr-10 font-mono text-sm"
                 disabled={isSaving || isValidating}
               />
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => toggleShowApiKey('voyage')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2 border-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"
               >
                 {showApiKey['voyage'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              </Button>
             </div>
             <p className="text-xs text-muted-foreground">
               Get your key from{' '}
@@ -577,13 +585,15 @@ export function GraphitiStep({ onNext, onBack, onSkip }: GraphitiStepProps) {
                 className="pr-10 font-mono text-sm"
                 disabled={isSaving || isValidating}
               />
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => toggleShowApiKey('google')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2 border-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"
               >
                 {showApiKey['google'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              </Button>
             </div>
             <p className="text-xs text-muted-foreground">
               Get your key from{' '}
@@ -610,13 +620,15 @@ export function GraphitiStep({ onNext, onBack, onSkip }: GraphitiStepProps) {
                 className="pr-10 font-mono text-sm"
                 disabled={isSaving || isValidating}
               />
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => toggleShowApiKey('groq')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2 border-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"
               >
                 {showApiKey['groq'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              </Button>
             </div>
             <p className="text-xs text-muted-foreground">
               Get your key from{' '}
@@ -643,13 +655,15 @@ export function GraphitiStep({ onNext, onBack, onSkip }: GraphitiStepProps) {
                 className="pr-10 font-mono text-sm"
                 disabled={isSaving || isValidating}
               />
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => toggleShowApiKey('openrouter')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-1.5 top-1/2 h-7 w-7 -translate-y-1/2 border-0 bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground"
               >
                 {showApiKey['openrouter'] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              </Button>
             </div>
             <p className="text-xs text-muted-foreground">
               Get your key from{' '}
@@ -781,12 +795,15 @@ export function GraphitiStep({ onNext, onBack, onSkip }: GraphitiStepProps) {
             {/* Reconfigure link after success */}
             {success && (
               <div className="text-center text-sm text-muted-foreground">
-                <button
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
                   onClick={handleReconfigure}
-                  className="text-primary hover:text-primary/80 underline-offset-4 hover:underline"
+                  className="h-auto p-0 text-primary hover:text-primary/80 underline-offset-4 hover:underline"
                 >
                   Reconfigure Graphiti settings
-                </button>
+                </Button>
               </div>
             )}
 
@@ -845,13 +862,16 @@ export function GraphitiStep({ onNext, onBack, onSkip }: GraphitiStepProps) {
                           <li>Reduces repetitive explanations</li>
                           <li>No Docker required - uses embedded database</li>
                         </ul>
-                        <button
+                        <Button
+                          type="button"
+                          variant="link"
+                          size="sm"
                           onClick={handleOpenDocs}
-                          className="text-sm text-info hover:text-info/80 flex items-center gap-1"
+                          className="h-auto p-0 text-sm text-info hover:text-info/80 flex items-center gap-1"
                         >
                           <ExternalLink className="h-3 w-3" />
                           Learn more about Graphiti
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </CardContent>

@@ -68,9 +68,12 @@ export function ExistingCompetitorAnalysisDialog({
 
         <div className="py-4 space-y-3">
           {/* Option 1: Use existing (recommended) */}
-          <button
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
             onClick={handleUseExisting}
-            className="w-full rounded-lg bg-primary/10 border border-primary/30 p-4 text-left hover:bg-primary/20 transition-colors"
+            className="h-auto w-full rounded-lg bg-primary/10 border border-primary/30 p-4 text-left hover:bg-primary/20 transition-colors justify-start"
           >
             <div className="flex items-start gap-3">
               <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
@@ -86,12 +89,15 @@ export function ExistingCompetitorAnalysisDialog({
                 </p>
               </div>
             </div>
-          </button>
+          </Button>
 
           {/* Option 2: Run new analysis */}
-          <button
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
             onClick={handleRunNew}
-            className="w-full rounded-lg bg-muted/50 border border-border p-4 text-left hover:bg-muted transition-colors"
+            className="h-auto w-full rounded-lg bg-muted/50 border border-border p-4 text-left hover:bg-muted transition-colors justify-start"
           >
             <div className="flex items-start gap-3">
               <RefreshCw className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
@@ -104,12 +110,15 @@ export function ExistingCompetitorAnalysisDialog({
                 </p>
               </div>
             </div>
-          </button>
+          </Button>
 
           {/* Option 3: Skip */}
-          <button
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
             onClick={handleSkip}
-            className="w-full rounded-lg bg-muted/30 border border-border/50 p-4 text-left hover:bg-muted/50 transition-colors"
+            className="h-auto w-full rounded-lg bg-muted/30 border border-border/50 p-4 text-left hover:bg-muted/50 transition-colors justify-start"
           >
             <div className="flex items-start gap-3">
               <Globe className="h-5 w-5 text-muted-foreground/60 flex-shrink-0 mt-0.5" />
@@ -122,7 +131,7 @@ export function ExistingCompetitorAnalysisDialog({
                 </p>
               </div>
             </div>
-          </button>
+          </Button>
         </div>
 
         <AlertDialogFooter className="sm:justify-start">

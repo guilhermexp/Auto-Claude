@@ -638,8 +638,9 @@ function ProjectDropdown({
       )}
 
       <div className="relative">
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={() => setIsOpen(!isOpen)}
           disabled={isLoading}
           className="w-full flex items-center justify-between px-3 py-2 text-sm border border-input rounded-md bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
@@ -662,7 +663,7 @@ function ProjectDropdown({
             <span className="text-muted-foreground">{t('settings.selectProject')}</span>
           )}
           <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
+        </Button>
 
         {isOpen && !isLoading && (
           <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-64 overflow-hidden">
@@ -683,9 +684,10 @@ function ProjectDropdown({
                 </div>
               ) : (
                 filteredProjects.map((project) => (
-                  <button
+                  <Button
                     key={project.pathWithNamespace}
                     type="button"
+                    variant="ghost"
                     onClick={() => {
                       onSelect(project.pathWithNamespace);
                       setIsOpen(false);
@@ -706,7 +708,7 @@ function ProjectDropdown({
                         <p className="text-xs text-muted-foreground truncate">{project.description}</p>
                       )}
                     </div>
-                  </button>
+                  </Button>
                 ))
               )}
             </div>
@@ -883,8 +885,9 @@ function BranchSelector({
       )}
 
       <div className="relative pl-6">
-        <button
+        <Button
           type="button"
+          variant="outline"
           onClick={() => setIsOpen(!isOpen)}
           disabled={isLoading}
           className="w-full flex items-center justify-between px-3 py-2 text-sm border border-input rounded-md bg-background hover:bg-accent hover:text-accent-foreground disabled:opacity-50"
@@ -903,7 +906,7 @@ function BranchSelector({
             <span className="text-muted-foreground">{t('settings.autoDetect')}</span>
           )}
           <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-        </button>
+        </Button>
 
         {isOpen && !isLoading && (
           <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-64 overflow-hidden">
@@ -917,8 +920,9 @@ function BranchSelector({
               />
             </div>
 
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => {
                 onSelect('');
                 setIsOpen(false);
@@ -929,7 +933,7 @@ function BranchSelector({
               }`}
             >
               <span className="text-sm text-muted-foreground italic">{t('settings.autoDetect')}</span>
-            </button>
+            </Button>
 
             <div className="max-h-40 overflow-y-auto border-t border-border">
               {filteredBranches.length === 0 ? (
@@ -938,9 +942,10 @@ function BranchSelector({
                 </div>
               ) : (
                 filteredBranches.map((branch) => (
-                  <button
+                  <Button
                     key={branch}
                     type="button"
+                    variant="ghost"
                     onClick={() => {
                       onSelect(branch);
                       setIsOpen(false);
@@ -952,7 +957,7 @@ function BranchSelector({
                   >
                     <GitBranch className="h-3 w-3 text-muted-foreground" />
                     <span className="text-sm">{branch}</span>
-                  </button>
+                  </Button>
                 ))
               )}
             </div>

@@ -1052,8 +1052,10 @@ ${t('prReview.blockedStatusMessageFooter')}`;
                    <XCircle className="h-4 w-4" />
                    {t('prReview.failedPostCleanReview')}
                  </div>
-                 <button
+                 <Button
                    type="button"
+                   variant="ghost"
+                   size="sm"
                    onClick={() => setShowCleanReviewErrorDetails(!showCleanReviewErrorDetails)}
                    aria-expanded={showCleanReviewErrorDetails}
                    aria-controls={cleanReviewErrorDetailsId}
@@ -1070,7 +1072,7 @@ ${t('prReview.blockedStatusMessageFooter')}`;
                        <ChevronDown className="h-3 w-3" />
                      </>
                    )}
-                 </button>
+                 </Button>
                </div>
              )}
              {cleanReviewError && showCleanReviewErrorDetails && (

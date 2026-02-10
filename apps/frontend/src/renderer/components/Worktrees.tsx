@@ -514,15 +514,17 @@ export function Worktrees({ projectId }: WorktreesProps) {
       {isSelectionMode && totalWorktrees > 0 && (
         <div className="flex items-center justify-between py-2 mb-4 border-b border-border shrink-0 worktrees-selection-bar">
           <div className="flex items-center gap-3">
-            <button
+            <Button
               type="button"
               onClick={isAllSelected ? deselectAll : selectAll}
+              variant="ghost"
+              size="sm"
               className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground worktrees-inline-action"
             >
               {/* tri-state icon: isAllSelected -> CheckSquare, isSomeSelected -> Minus, none -> Square */}
               {isAllSelected ? <CheckSquare className="h-4 w-4 text-primary" /> : isSomeSelected ? <Minus className="h-4 w-4" /> : <Square className="h-4 w-4" />}
               {isAllSelected ? t('common:selection.clearSelection') : t('common:selection.selectAll')}
-            </button>
+            </Button>
             <span className="text-xs text-muted-foreground">
               {t('common:selection.selectedOfTotal', { selected: selectedCount, total: totalWorktrees })}
             </span>

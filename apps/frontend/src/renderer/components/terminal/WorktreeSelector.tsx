@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
 } from '../ui/alert-dialog';
 import { ScrollArea } from '../ui/scroll-area';
+import { Button } from '../ui/button';
 import { cn } from '../../lib/utils';
 import { useProjectStore } from '../../stores/project-store';
 
@@ -375,8 +376,10 @@ export function WorktreeSelector({
           )}
         </div>
         {item.type === 'terminal' && (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
@@ -387,7 +390,7 @@ export function WorktreeSelector({
             title={t('common:delete')}
           >
             <Trash2 className="h-3 w-3" />
-          </button>
+          </Button>
         )}
       </div>
     );
@@ -400,8 +403,10 @@ export function WorktreeSelector({
     <>
     <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           className={cn(
             'flex items-center gap-1 h-6 px-2 rounded text-xs font-medium transition-colors',
             'hover:bg-amber-500/10 hover:text-amber-500 text-muted-foreground'
@@ -411,7 +416,7 @@ export function WorktreeSelector({
           <FolderGit className="h-3 w-3" />
           <span>{t('terminal:worktree.create')}</span>
           <ChevronDown className="h-2.5 w-2.5 opacity-60" />
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
@@ -422,8 +427,10 @@ export function WorktreeSelector({
         }}
       >
         {/* Pinned: Create new worktree */}
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           className="flex items-center text-xs px-2 py-1.5 m-1 rounded-sm cursor-pointer text-amber-500 hover:bg-accent/50 w-[calc(100%-0.5rem)] text-left"
           onClick={(e) => {
             e.stopPropagation();
@@ -433,7 +440,7 @@ export function WorktreeSelector({
         >
           <Plus className="h-3 w-3 mr-2" />
           {t('terminal:worktree.createNew')}
-        </button>
+        </Button>
 
         <div className="border-t border-border" />
 
