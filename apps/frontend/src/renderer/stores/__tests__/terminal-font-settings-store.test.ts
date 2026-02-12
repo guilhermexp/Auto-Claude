@@ -102,10 +102,10 @@ describe('terminal-font-settings-store', () => {
       const state = useTerminalFontSettingsStore.getState();
 
       expect(state).toBeDefined();
-      expect(state.fontFamily).toEqual(['Ubuntu Mono', 'Source Code Pro', 'Liberation Mono', 'DejaVu Sans Mono', 'monospace']);
+      expect(state.fontFamily).toEqual(['Geist Mono', 'SauceCodePro Nerd Font', 'Ubuntu Mono', 'Source Code Pro', 'Liberation Mono', 'DejaVu Sans Mono', 'monospace']);
       expect(state.fontSize).toBe(13);
       expect(state.fontWeight).toBe(400);
-      expect(state.lineHeight).toBe(1.2);
+      expect(state.lineHeight).toBe(1.4);
       expect(state.letterSpacing).toBe(0);
       expect(state.cursorStyle).toBe('block');
       expect(state.cursorBlink).toBe(true);
@@ -166,8 +166,8 @@ describe('terminal-font-settings-store', () => {
       const windowsStoreModule = await import('../terminal-font-settings-store');
       const windowsStore = windowsStoreModule.useTerminalFontSettingsStore.getState();
 
-      expect(windowsStore.fontFamily).toEqual(['Cascadia Code', 'Consolas', 'Courier New', 'monospace']);
-      expect(windowsStore.fontSize).toBe(14);
+      expect(windowsStore.fontFamily).toEqual(['Geist Mono', 'CaskaydiaCove Nerd Font', 'Cascadia Code', 'Consolas', 'Courier New', 'monospace']);
+      expect(windowsStore.fontSize).toBe(13);
       expect(windowsStore.fontWeight).toBe(400);
     });
 
@@ -208,7 +208,7 @@ describe('terminal-font-settings-store', () => {
       const macStoreModule = await import('../terminal-font-settings-store');
       const macStore = macStoreModule.useTerminalFontSettingsStore.getState();
 
-      expect(macStore.fontFamily).toEqual(['SF Mono', 'Menlo', 'Monaco', 'monospace']);
+      expect(macStore.fontFamily).toEqual(['Geist Mono', 'Liga SFMono Nerd Font', 'SF Mono', 'Menlo', 'Monaco', 'monospace']);
       expect(macStore.fontSize).toBe(13);
       expect(macStore.fontWeight).toBe(400);
     });
@@ -216,7 +216,7 @@ describe('terminal-font-settings-store', () => {
     it('should initialize with Linux defaults', () => {
       const state = useTerminalFontSettingsStore.getState();
 
-      expect(state.fontFamily).toEqual(['Ubuntu Mono', 'Source Code Pro', 'Liberation Mono', 'DejaVu Sans Mono', 'monospace']);
+      expect(state.fontFamily).toEqual(['Geist Mono', 'SauceCodePro Nerd Font', 'Ubuntu Mono', 'Source Code Pro', 'Liberation Mono', 'DejaVu Sans Mono', 'monospace']);
       expect(state.fontSize).toBe(13);
       expect(state.fontWeight).toBe(400);
     });
@@ -263,8 +263,8 @@ describe('terminal-font-settings-store', () => {
       store.applyPreset('vscode');
 
       const state = useTerminalFontSettingsStore.getState();
-      expect(state.fontFamily).toEqual(['Consolas', 'Courier New', 'monospace']);
-      expect(state.fontSize).toBe(14);
+      expect(state.fontFamily).toEqual(['Geist Mono', 'CaskaydiaCove Nerd Font', 'Consolas', 'Courier New', 'monospace']);
+      expect(state.fontSize).toBe(13);
       expect(state.cursorStyle).toBe('block');
     });
 
@@ -274,7 +274,7 @@ describe('terminal-font-settings-store', () => {
       store.applyPreset('intellij');
 
       const state = useTerminalFontSettingsStore.getState();
-      expect(state.fontFamily).toEqual(['JetBrains Mono', 'Consolas', 'monospace']);
+      expect(state.fontFamily).toEqual(['Geist Mono', 'JetBrains Mono', 'Consolas', 'monospace']);
       expect(state.fontSize).toBe(13);
       expect(state.cursorStyle).toBe('block');
     });
@@ -285,7 +285,7 @@ describe('terminal-font-settings-store', () => {
       store.applyPreset('macos');
 
       const state = useTerminalFontSettingsStore.getState();
-      expect(state.fontFamily).toEqual(['SF Mono', 'Menlo', 'Monaco', 'monospace']);
+      expect(state.fontFamily).toEqual(['Geist Mono', 'Liga SFMono Nerd Font', 'SF Mono', 'Menlo', 'Monaco', 'monospace']);
       expect(state.fontSize).toBe(13);
       expect(state.cursorStyle).toBe('block');
     });
@@ -296,7 +296,7 @@ describe('terminal-font-settings-store', () => {
       store.applyPreset('ubuntu');
 
       const state = useTerminalFontSettingsStore.getState();
-      expect(state.fontFamily).toEqual(['Ubuntu Mono', 'monospace']);
+      expect(state.fontFamily).toEqual(['Geist Mono', 'SauceCodePro Nerd Font', 'Ubuntu Mono', 'monospace']);
       expect(state.fontSize).toBe(13);
       expect(state.cursorStyle).toBe('block');
     });

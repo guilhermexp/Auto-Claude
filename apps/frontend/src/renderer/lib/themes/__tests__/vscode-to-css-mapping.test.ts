@@ -15,7 +15,7 @@ describe('vscode-to-css-mapping', () => {
 
   it('composites hex colors with alpha channel against a base color', () => {
     // White with ~7.5% alpha over dark base should remain a dark/muted tone, not bright white.
-    expect(hexToHslTriplet('#E4E4E413', '#181818')).toBe('0 0% 20%');
+    expect(hexToHslTriplet('#E4E4E413', '#181818')).toBe('0 0% 15%');
   });
 
   it('detects light and dark colors', () => {
