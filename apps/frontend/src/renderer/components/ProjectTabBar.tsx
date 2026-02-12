@@ -90,7 +90,7 @@ export function ProjectTabBar({
 
   return (
     <div className={cn(
-      'flex items-center h-12 border-b border-border/30 bg-background project-tabbar-shell',
+      'flex items-center h-12 border-b bg-background project-tabbar-shell',
       'overflow-visible',
       className
     )}>
@@ -119,7 +119,7 @@ export function ProjectTabBar({
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 px-3 border-l border-border/20">
+      <div className="flex items-center gap-1.5 px-3 border-l border-border/14 project-tabbar-right-divider">
         <AuthStatusIndicator />
         <UsageIndicator />
         <button

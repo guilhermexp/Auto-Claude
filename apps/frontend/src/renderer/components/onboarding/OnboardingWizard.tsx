@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Wand2 } from 'lucide-react';
 import {
   FullScreenDialog,
   FullScreenDialogContent,
@@ -240,10 +239,7 @@ export function OnboardingWizard({
     <FullScreenDialog open={open} onOpenChange={handleOpenChange}>
       <FullScreenDialogContent className="onboarding-modal w-[95vw] max-w-[1200px] h-[88vh] max-h-[920px] bg-background">
         <FullScreenDialogHeader className="border-border/30 bg-background">
-          <FullScreenDialogTitle className="flex items-center gap-3">
-            <Wand2 className="h-6 w-6" />
-            {t('wizard.title')}
-          </FullScreenDialogTitle>
+          <FullScreenDialogTitle>{t('wizard.title')}</FullScreenDialogTitle>
           <FullScreenDialogDescription>
             {t('wizard.description')}
           </FullScreenDialogDescription>

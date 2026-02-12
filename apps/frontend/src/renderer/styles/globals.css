@@ -7,7 +7,7 @@
 /* Define custom theme colors for Tailwind CSS v4 */
 @theme {
   /* Font families */
-  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-sans: 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Inter, system-ui, -apple-system, sans-serif;
   --font-mono: var(--font-geist-mono), 'Geist Mono', ui-monospace, monospace;
 
   /* Font sizes - from ui.md reference */
@@ -367,7 +367,7 @@
 
 /* CSS variables for light mode */
 :root {
-  --font-geist-sans: 'Geist Sans', 'Geist', system-ui, -apple-system, sans-serif;
+  --font-geist-sans: 'SF Pro Text', 'SF Pro Display', 'Segoe UI', Inter, system-ui, -apple-system, sans-serif;
   --font-geist-mono: 'Geist Mono', ui-monospace, monospace;
 
   /* Layout Base */
@@ -2869,7 +2869,7 @@ body {
 .context-tabs-trigger[data-state="active"] {
   background-color: hsl(var(--secondary) / 0.85) !important;
   color: hsl(var(--foreground)) !important;
-  box-shadow: inset 0 0 0 1px hsl(var(--primary) / 0.18);
+  box-shadow: none;
 }
 
 .context-card {
@@ -3050,7 +3050,7 @@ body {
 .dark .context-tabs-trigger[data-state="active"] {
   background-color: #232323 !important;
   color: #f3f3f3 !important;
-  box-shadow: inset 0 0 0 1px #3a4458;
+  box-shadow: none;
 }
 
 .dark .context-action-button {
@@ -3360,7 +3360,7 @@ body {
 }
 
 .app-main-shell {
-  border-left: 1px solid hsl(var(--border) / 0.3);
+  border-left: 0;
 }
 
 .app-sidebar-shell {
@@ -3369,8 +3369,23 @@ body {
 }
 
 .app-sidebar-resizable {
+  position: relative;
   min-width: 72px;
   max-width: 420px;
+  border-right: 0;
+}
+
+/* Persistent high-contrast divider between sidebar and content */
+.app-sidebar-resizable::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0.5px;
+  height: 100%;
+  background-color: hsl(0 0% 100% / 0.13);
+  pointer-events: none;
+  z-index: 40;
 }
 
 .app-sidebar-resize-handle {
@@ -3391,15 +3406,15 @@ body {
   position: absolute;
   top: 0;
   right: 2px;
-  width: 2px;
+  width: 1px;
   height: 100%;
-  background-color: hsl(var(--border) / 0);
+  background-color: transparent;
   transition: background-color 120ms ease;
 }
 
 .app-sidebar-resizable:hover .app-sidebar-resize-handle::after,
 .app-sidebar-resize-handle:hover::after {
-  background-color: hsl(var(--border) / 0.45);
+  background-color: transparent;
 }
 
 .app-sidebar-resize-handle:focus-visible::after {
@@ -3433,6 +3448,16 @@ body {
 
 .project-tabbar-shell {
   background: hsl(var(--background));
+  border-bottom-color: hsl(0 0% 100% / 0.16);
+}
+
+.project-tabbar-right-divider {
+  border-left-color: hsl(0 0% 100% / 0.16) !important;
+}
+
+/* Keep shell separators visible but lighter (closer to native app chrome) */
+.app-sidebar-shell [data-orientation="horizontal"] {
+  background-color: hsl(var(--border) / 0.16);
 }
 
 .project-tabbar-actions {
@@ -3450,7 +3475,7 @@ body {
 /* Insights sidebar container */
 .insights-sidebar {
   background-color: hsl(var(--sidebar) / 0.75);
-  border-right: 1px solid hsl(var(--border) / 0.45);
+  border-right: 0.5px solid hsl(0 0% 100% / 0.13);
   transition: width 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
 }
 
@@ -3529,9 +3554,9 @@ body {
 
 /* Insights message bubble */
 .insights-message-bubble {
-  background-color: hsl(var(--card) / 0.78);
-  border: 1px solid hsl(var(--border) / 0.44);
-  border-radius: 1rem;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
 }
 
 /* Fix prose text colors globally (Tailwind v4 --color-* resolves to raw HSL numbers without hsl() wrapper) */
@@ -3571,8 +3596,44 @@ pre {
 }
 
 .insights-user-message-bubble {
-  background-color: hsl(var(--muted) / 0.33);
-  border: 1px solid hsl(var(--border) / 0.44);
+  background-color: hsl(0 0% 3% / 0.92);
+  border: 1px solid hsl(0 0% 100% / 0.06);
+  box-shadow: none;
+}
+
+.insights-user-meta {
+  font-size: 0.8rem;
+  color: hsl(var(--muted-foreground));
+  text-align: right;
+}
+
+.insights-assistant-label {
+  display: block;
+  font-size: 0.8rem;
+  color: hsl(var(--muted-foreground));
+  font-weight: 500;
+}
+
+.insights-assistant-content {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.insights-assistant-content.prose {
+  font-family: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Times New Roman', serif;
+  font-size: 1.06rem;
+  line-height: 1.66;
+}
+
+.insights-inline-activity {
+  margin-top: -0.15rem;
+  margin-bottom: 0.35rem;
+}
+
+.insights-chat-column {
+  width: min(100%, 980px);
+  margin: 0 auto;
 }
 
 /* Insights suggestion card */
@@ -3593,14 +3654,14 @@ pre {
 /* Insights chat input container */
 .insights-input-container {
   background-color: hsl(var(--background));
-  border-top: 1px solid hsl(var(--border) / 0.35);
+  border-top: 0.5px solid hsl(0 0% 100% / 0.13);
 }
 
 /* Insights chat input field */
 .insights-input-field {
-  background-color: hsl(var(--card) / 0.78);
-  border: 1px solid hsl(var(--border) / 0.45);
-  border-radius: 0.95rem;
+  background-color: hsl(var(--card) / 0.62);
+  border: 1px solid hsl(var(--border) / 0.52);
+  border-radius: 1.5rem;
   transition: all 0.15s;
 }
 
@@ -3618,18 +3679,89 @@ pre {
 }
 
 .insights-main-pane {
-  border-right: 1px solid hsl(var(--border) / 0.35);
+  border-right: 0.5px solid hsl(0 0% 100% / 0.13);
 }
 
 .insights-main-inner {
   max-width: 1120px;
   margin: 0 auto;
   width: 100%;
+  font-family: var(--font-sans);
+}
+
+.insights-empty-shell {
+  min-height: calc(100vh - 210px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.insights-empty-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: clamp(2.1rem, 4.2vw, 3.4rem);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: hsl(var(--foreground) / 0.92);
+}
+
+.insights-empty-composer {
+  width: min(100%, 700px);
+  border-radius: 1.4rem;
+  border: 1px solid hsl(var(--border) / 0.52);
+  background: hsl(var(--card) / 0.55);
+  padding: 0.9rem 1rem;
+  font-family: var(--font-sans);
+}
+
+.insights-empty-composer-footer {
+  margin-top: 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.insights-empty-actions {
+  width: min(100%, 700px);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.insights-empty-action-chip {
+  border: 1px solid hsl(var(--border) / 0.5) !important;
+  border-radius: 0.65rem;
+  background: hsl(var(--card) / 0.35) !important;
+  color: hsl(var(--foreground) / 0.88) !important;
+  gap: 0.45rem;
+  height: 2.3rem;
+  padding: 0 0.75rem;
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-weight: 500;
+}
+
+.insights-empty-action-chip:hover {
+  background: hsl(var(--card) / 0.58) !important;
+  border-color: hsl(var(--border) / 0.82) !important;
+}
+
+@media (max-width: 900px) {
+  .insights-empty-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 .insights-details-panel {
   background-color: hsl(var(--sidebar) / 0.7);
-  border-left: 1px solid hsl(var(--border) / 0.35);
+  border-left: 0.5px solid hsl(0 0% 100% / 0.13);
 }
 
 .insights-details-card {

@@ -352,8 +352,8 @@ export function Sidebar({
   return (
     <TooltipProvider>
       <div
-        className="flex h-full w-full flex-col bg-sidebar border-r app-sidebar-shell"
-        style={{ borderRightColor: 'hsl(var(--border) / 0.32)' }}
+        className="flex h-full w-full flex-col bg-sidebar app-sidebar-shell"
+        style={{ borderRightColor: 'transparent' }}
       >
         {/* Header with drag area - extra top padding for macOS traffic lights */}
         <div className="electron-drag flex h-14 items-center justify-between px-4 pt-6 gap-2">

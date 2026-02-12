@@ -119,12 +119,12 @@ function NavItem({ icon: Icon, label, isActive, isDisabled, onClick }: NavItemPr
       disabled={isDisabled}
       className={cn(
         'w-full h-9 justify-start gap-2.5 px-2.5 py-1.5 text-sm rounded-md font-normal transition-colors',
-        'border-l-2 border-transparent bg-transparent shadow-none',
+        '!bg-transparent !border-transparent shadow-none',
         isActive
-          ? 'border-l-foreground/70 text-foreground'
+          ? '!bg-primary/10 !border !border-primary/30 text-foreground'
           : isDisabled
             ? 'opacity-50 cursor-not-allowed text-muted-foreground'
-            : 'text-muted-foreground hover:text-foreground hover:bg-transparent'
+            : 'text-muted-foreground hover:text-foreground hover:!bg-transparent'
       )}
     >
       <Icon className={cn('h-4 w-4', isActive ? 'opacity-90' : 'opacity-60')} />

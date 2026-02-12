@@ -7,10 +7,13 @@ import {
   Languages,
   PanelLeftClose,
   PanelLeft,
-  FolderKanban,
-  GitBranch,
-  MessageSquare,
-  Activity
+  Sparkles,
+  Plus,
+  Send,
+  Layers,
+  Lightbulb,
+  Code,
+  Shield
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -33,8 +36,7 @@ import type { InsightsChatMessage, InsightsModelConfig } from '../../shared/type
 import {
   MessageBubble,
   ToolIndicator,
-  ChatInput,
-  EmptyState
+  ChatInput
 } from './chat-ui';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
@@ -42,7 +44,7 @@ import { cn } from '../lib/utils';
 import { useTextTranslation } from '../hooks/useTextTranslation';
 import { toast } from '../hooks/use-toast';
 import { useProjectStore } from '../stores/project-store';
-import type { GitStatus } from '../../shared/types';
+import { Textarea } from './ui/textarea';
 
 // createSafeLink - factory function that creates a SafeLink component with i18n support
 const createSafeLink = (opensInNewWindowText: string) => {
@@ -114,7 +116,6 @@ export function Insights({ projectId }: InsightsProps) {
   const [isUserAtBottom, setIsUserAtBottom] = useState(true);
   const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
-  const [gitStatus, setGitStatus] = useState<GitStatus | null>(null);
 
   const project = useProjectStore((state) =>
     state.projects.find((item) => item.id === projectId)
@@ -155,28 +156,6 @@ export function Insights({ projectId }: InsightsProps) {
     const cleanup = setupInsightsListeners();
     return cleanup;
   }, [projectId]);
-
-  useEffect(() => {
-    const loadGitStatus = async () => {
-      if (!project?.path) {
-        setGitStatus(null);
-        return;
-      }
-
-      try {
-        const result = await window.electronAPI.checkGitStatus(project.path);
-        if (result.success && result.data) {
-          setGitStatus(result.data);
-        } else {
-          setGitStatus(null);
-        }
-      } catch {
-        setGitStatus(null);
-      }
-    };
-
-    loadGitStatus();
-  }, [project?.path]);
 
   // Smart auto-scroll: only scroll if user is already at bottom
   // This allows users to scroll up to read previous messages without being
@@ -345,13 +324,14 @@ export function Insights({ projectId }: InsightsProps) {
     });
   }, [isTranslationEnabled, messages, getTranslatedText]);
 
-  const chatStatusText = status.phase === 'idle'
-    ? t('insights:chat.ready', 'Ready')
-    : status.phase === 'thinking'
-      ? t('insights:chat.thinking', 'Thinking...')
-      : status.phase === 'streaming'
-        ? t('insights:chat.streaming', 'Streaming...')
-        : t('insights:chat.error', 'Error');
+  const isEmptySession = messages.length === 0 && !streamingContent;
+  const greetingName = project?.name || t('insights:chat.defaultGreetingName', 'there');
+  const quickActions = [
+    { key: 'architecture', icon: Layers, text: t('emptyState.suggestions.architecture', 'What is the architecture of this project?') },
+    { key: 'improvements', icon: Lightbulb, text: t('emptyState.suggestions.improvements', 'Suggest improvements for code quality') },
+    { key: 'features', icon: Code, text: t('emptyState.suggestions.features', 'What features could I add next?') },
+    { key: 'security', icon: Shield, text: t('emptyState.suggestions.security', 'Are there any security concerns?') }
+  ];
 
   return (
     <div className="flex h-full bg-background insights-layout">
@@ -437,10 +417,66 @@ export function Insights({ projectId }: InsightsProps) {
           {/* Messages Area */}
           <ScrollArea className="flex-1" onViewportRef={setViewportEl}>
             <div className="p-6">
-              {messages.length === 0 && !streamingContent ? (
-                <EmptyState onSuggestionClick={handleSuggestionClick} />
+              {isEmptySession ? (
+                <div className="insights-empty-shell">
+                  <h1 className="insights-empty-title">
+                    <Sparkles className="h-8 w-8 text-primary" />
+                    <span>
+                      {t('insights:chat.greetingTitle', 'Boa madrugada')}, {greetingName}
+                    </span>
+                  </h1>
+
+                  <div className="insights-empty-composer">
+                    <Textarea
+                      ref={textareaRef}
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSend();
+                        }
+                      }}
+                      placeholder={t('insights:chat.placeholder', 'Ask about your codebase...')}
+                      className="min-h-[52px] resize-none border-0 bg-transparent p-0 text-[16px] placeholder:text-muted-foreground/80 focus-visible:ring-0"
+                      disabled={isLoading}
+                    />
+                    <div className="insights-empty-composer-footer">
+                      <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-md">
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={handleSend}
+                        disabled={!inputValue.trim() || isLoading}
+                        size="icon"
+                        className="h-10 w-10 rounded-xl insights-send-button"
+                      >
+                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="insights-empty-actions">
+                    {quickActions.map((action) => {
+                      const ActionIcon = action.icon;
+                      return (
+                        <Button
+                          key={action.key}
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="insights-empty-action-chip"
+                          onClick={() => handleSuggestionClick(action.text)}
+                        >
+                          <ActionIcon className="h-4 w-4" />
+                          {action.text}
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
               ) : (
-                <div className="space-y-6">
+                <div className="insights-chat-column space-y-8">
                   {displayedMessages.map((message) => (
                     <MessageBubble
                       key={message.id}
@@ -454,21 +490,16 @@ export function Insights({ projectId }: InsightsProps) {
 
                   {/* Streaming message */}
                   {(streamingContent || currentTool) && (
-                    <div className="flex gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                        <Bot className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="max-w-[85%] space-y-2">
-                        <span className="text-[10px] text-muted-foreground block">
-                          {t('insights:chat.assistant', 'Assistant')}
-                        </span>
+                    <div className="space-y-2">
+                      <span className="insights-assistant-label">
+                        {t('insights:chat.assistant', 'Assistant')}
+                      </span>
+                      <div className="space-y-2">
                         {streamingContent && (
-                        <div className="insights-message-bubble text-foreground rounded-2xl rounded-tl-sm px-4 py-3">
-                            <div className="prose prose-sm max-w-none dark:prose-invert">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                                {streamingContent}
-                              </ReactMarkdown>
-                            </div>
+                          <div className="insights-assistant-content prose prose-sm max-w-none dark:prose-invert">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                              {streamingContent}
+                            </ReactMarkdown>
                           </div>
                         )}
                         {currentTool && (
@@ -505,86 +536,18 @@ export function Insights({ projectId }: InsightsProps) {
             </div>
           </ScrollArea>
 
-          {/* Chat Input - 1Code style */}
-          <ChatInput
-            ref={textareaRef}
-            value={inputValue}
-            onChange={setInputValue}
-            onSend={handleSend}
-            isLoading={isLoading}
-          />
+          {/* Chat Input - keep docked input after conversation starts */}
+          {!isEmptySession && (
+            <ChatInput
+              ref={textareaRef}
+              value={inputValue}
+              onChange={setInputValue}
+              onSend={handleSend}
+              isLoading={isLoading}
+            />
+          )}
         </div>
       </div>
-
-      <aside className="hidden xl:flex xl:w-[320px] shrink-0 insights-details-panel">
-        <div className="w-full h-full overflow-y-auto px-4 py-5 space-y-3">
-          <h3 className="text-sm font-semibold tracking-wide text-foreground/90">
-            {t('insights:details.title', 'Details')}
-          </h3>
-
-          <section className="insights-details-card">
-            <header className="insights-details-card-title">
-              <FolderKanban className="h-4 w-4" />
-              <span>{t('insights:details.workspace', 'Workspace')}</span>
-            </header>
-            <div className="insights-details-list">
-              <div className="insights-details-row">
-                <span>{t('insights:details.project', 'Project')}</span>
-                <strong>{project?.name ?? '-'}</strong>
-              </div>
-              <div className="insights-details-row">
-                <span>{t('insights:details.branch', 'Branch')}</span>
-                <strong>{gitStatus?.currentBranch ?? '-'}</strong>
-              </div>
-              <div className="insights-details-row">
-                <span>{t('insights:details.path', 'Path')}</span>
-                <strong className="truncate">{project?.path ?? '-'}</strong>
-              </div>
-            </div>
-          </section>
-
-          <section className="insights-details-card">
-            <header className="insights-details-card-title">
-              <MessageSquare className="h-4 w-4" />
-              <span>{t('insights:details.session', 'Session')}</span>
-            </header>
-            <div className="insights-details-list">
-              <div className="insights-details-row">
-                <span>{t('insights:details.messages', 'Messages')}</span>
-                <strong>{messages.length}</strong>
-              </div>
-              <div className="insights-details-row">
-                <span>{t('insights:details.sessions', 'Conversations')}</span>
-                <strong>{sessions.length}</strong>
-              </div>
-            </div>
-          </section>
-
-          <section className="insights-details-card">
-            <header className="insights-details-card-title">
-              <Activity className="h-4 w-4" />
-              <span>{t('insights:details.status', 'Status')}</span>
-            </header>
-            <div className="insights-details-list">
-              <div className="insights-details-row">
-                <span>{t('insights:details.chatStatus', 'Chat')}</span>
-                <strong>{chatStatusText}</strong>
-              </div>
-              <div className="insights-details-row">
-                <span>{t('insights:details.translation', 'Translation')}</span>
-                <strong>{isTranslationEnabled ? t('common:labels.enabled', 'Enabled') : t('common:labels.disabled', 'Disabled')}</strong>
-              </div>
-              <div className="insights-details-row">
-                <span>{t('insights:details.repository', 'Repository')}</span>
-                <strong className="inline-flex items-center gap-1.5">
-                  <GitBranch className="h-3.5 w-3.5" />
-                  {gitStatus?.isGitRepo ? t('common:labels.detected', 'Detected') : t('common:labels.notAvailable', 'N/A')}
-                </strong>
-              </div>
-            </div>
-          </section>
-        </div>
-      </aside>
     </div>
   );
 }

@@ -414,7 +414,6 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
   const { t: tSettings } = useTranslation(['settings']);
   const { t } = useTranslation(['common']);
   const category = CATEGORIES[config.category as keyof typeof CATEGORIES];
-  const CategoryIcon = category.icon;
 
   // Get translated label and description for this agent
   const agentLabel = getAgentLabel(t, id);
@@ -485,9 +484,6 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
         onClick={() => setIsExpanded(!isExpanded)}
         className="h-auto w-full justify-start gap-3 p-4 hover:bg-muted/50 transition-colors text-left"
       >
-        <div className="p-2 rounded-lg bg-muted">
-          <CategoryIcon className="h-4 w-4 text-muted-foreground" />
-        </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-medium text-sm text-foreground">{agentLabel}</h3>
@@ -1381,7 +1377,6 @@ export function AgentTools() {
             if (agents.length === 0) return null;
 
             const isExpanded = expandedCategories.has(categoryId);
-            const CategoryIcon = category.icon;
 
             return (
               <div key={categoryId} className="space-y-3">
@@ -1391,14 +1386,13 @@ export function AgentTools() {
                   variant="ghost"
                   size="sm"
                   onClick={() => toggleCategory(categoryId)}
-                  className="h-auto w-full justify-start gap-2 text-left hover:opacity-80 transition-opacity"
+                  className="h-auto w-full justify-start gap-2 text-left !bg-transparent !border-transparent shadow-none hover:!bg-transparent hover:opacity-80 transition-opacity"
                 >
                   {isExpanded ? (
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   ) : (
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   )}
-                  <CategoryIcon className="h-4 w-4 text-muted-foreground" />
                   <h2 className="text-sm font-semibold text-foreground">
                     {category.label}
                   </h2>

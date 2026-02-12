@@ -1,5 +1,4 @@
 import { useTranslation } from 'react-i18next';
-import { User, Bot } from 'lucide-react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { InsightsChatMessage } from '../../../shared/types';
@@ -23,63 +22,55 @@ export function MessageBubble({
 }: MessageBubbleProps) {
   const { t } = useTranslation('insights');
   const isUser = message.role === 'user';
+  const formattedDate = new Date(message.timestamp).toLocaleDateString('pt-BR', {
+    day: 'numeric',
+    month: 'short',
+  });
 
   if (isUser) {
-    // User message - right aligned with bubble style
     return (
-      <div className="flex justify-end gap-3">
-        <div className="max-w-[75%]">
-          <div className="insights-user-message-bubble text-foreground rounded-2xl rounded-tr-sm px-4 py-3">
+      <div className="flex justify-end">
+        <div className="max-w-[76%] space-y-2">
+          <div className="insights-user-message-bubble rounded-2xl px-5 py-4 text-foreground">
             <div className="prose prose-sm max-w-none dark:prose-invert">
               <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                 {message.content}
               </ReactMarkdown>
             </div>
           </div>
-          <span className="text-[10px] text-muted-foreground mt-1 block text-right">
-            {t('chat.you', 'You')}
-          </span>
-        </div>
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
-          <User className="h-4 w-4 text-muted-foreground" />
+          <div className="insights-user-meta">
+            {formattedDate}
+          </div>
         </div>
       </div>
     );
   }
 
-  // Assistant message - left aligned with avatar
   return (
-    <div className="flex gap-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-        <Bot className="h-4 w-4 text-primary" />
+    <div className="space-y-2">
+      <span className="insights-assistant-label">
+        {t('chat.assistant', 'Assistant')}
+      </span>
+      <div className="insights-assistant-content prose prose-sm max-w-none dark:prose-invert">
+        <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+          {message.content}
+        </ReactMarkdown>
       </div>
-      <div className="max-w-[85%] space-y-2">
-        <span className="text-[10px] text-muted-foreground block">
-          {t('chat.assistant', 'Assistant')}
-        </span>
-        <div className="insights-message-bubble text-foreground rounded-2xl rounded-tl-sm px-4 py-3">
-          <div className="prose prose-sm max-w-none dark:prose-invert">
-            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-              {message.content}
-            </ReactMarkdown>
-          </div>
-        </div>
 
-        {/* Tool usage history */}
-        {message.toolsUsed && message.toolsUsed.length > 0 && (
+      {message.toolsUsed && message.toolsUsed.length > 0 && (
+        <div className="insights-inline-activity">
           <ToolUsageHistory tools={message.toolsUsed} />
-        )}
+        </div>
+      )}
 
-        {/* Task suggestion card */}
-        {message.suggestedTask && (
-          <SuggestedTaskCard
-            task={message.suggestedTask}
-            onCreateTask={onCreateTask}
-            isCreatingTask={isCreatingTask}
-            taskCreated={taskCreated}
-          />
-        )}
-      </div>
+      {message.suggestedTask && (
+        <SuggestedTaskCard
+          task={message.suggestedTask}
+          onCreateTask={onCreateTask}
+          isCreatingTask={isCreatingTask}
+          taskCreated={taskCreated}
+        />
+      )}
     </div>
   );
 }

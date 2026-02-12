@@ -147,7 +147,7 @@ export function AgentProfileSettings({ onSave, isSaving, error }: AgentProfileSe
         onClick={() => handleSelectProfile(profile.id)}
         variant="ghost"
         className={cn(
-          'relative w-full rounded-lg p-4 text-left transition-all duration-200 settings-preset-button',
+          'relative h-auto w-full items-start justify-start whitespace-normal rounded-lg p-4 text-left transition-all duration-200 settings-preset-button',
           isSelected && 'settings-preset-button-selected'
         )}
       >
@@ -267,15 +267,15 @@ export function AgentProfileSettings({ onSave, isSaving, error }: AgentProfileSe
               <div className="space-y-4">
                 {PHASE_KEYS.map((phase) => (
                   <div key={phase} className="space-y-2">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                       <Label className="text-sm font-medium text-foreground">
                         {t(`agentProfile.phases.${phase}.label`)}
                       </Label>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground sm:max-w-[55%] sm:text-right">
                         {t(`agentProfile.phases.${phase}.description`)}
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                       {/* Model Select */}
                       <div className="space-y-1">
                         <Label className="text-xs text-muted-foreground">{t('agentProfile.model')}</Label>
