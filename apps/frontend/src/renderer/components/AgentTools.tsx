@@ -475,7 +475,7 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
   );
 
   return (
-    <div className="border border-border rounded-lg bg-card overflow-hidden">
+    <div className="border border-border rounded-lg bg-card overflow-hidden worktrees-card">
       {/* Header - clickable to expand */}
       <Button
         type="button"
@@ -487,10 +487,10 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h3 className="font-medium text-sm text-foreground">{agentLabel}</h3>
-            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-secondary text-secondary-foreground">
+            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-secondary text-secondary-foreground worktrees-chip">
               {modelLabel}
             </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-secondary text-secondary-foreground">
+            <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-secondary text-secondary-foreground worktrees-chip">
               {thinkingLabel}
             </span>
           </div>
@@ -510,7 +510,7 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
 
       {/* Expanded content */}
       {isExpanded && (
-        <div className="border-t border-border p-4 space-y-4 bg-muted/30">
+        <div className="border-t border-border p-4 space-y-4 bg-muted/20">
           {/* MCP Servers */}
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -520,10 +520,10 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
               {availableMcps.length > 0 && (
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
                   onClick={(e) => { e.stopPropagation(); setShowAddDialog(true); }}
-                  className="h-auto gap-1 px-1.5 py-1 text-xs text-primary hover:text-primary/80"
+                  className="h-auto gap-1 px-2 py-1 text-xs worktrees-action-button"
                 >
                   <Plus className="h-3 w-3" />
                   {tSettings('mcp.addServer')}
@@ -546,7 +546,7 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                         <ServerIcon className="h-3.5 w-3.5 text-muted-foreground" />
                         <span className="font-medium">{serverInfo?.name || server}</span>
                         {isAdded && (
-                          <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded worktrees-chip">
                             {tSettings('mcp.added')}
                           </span>
                         )}
@@ -611,7 +611,7 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                 {config.tools.map((tool) => (
                   <span
                     key={tool}
-                    className="px-2 py-1 bg-muted rounded text-xs font-mono"
+                    className="px-2 py-1 bg-muted rounded text-xs font-mono worktrees-chip"
                   >
                     {tool}
                   </span>
@@ -642,7 +642,7 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                     variant="secondary"
                     key={mcpId}
                     onClick={() => { onAddMcp(id, mcpId); setShowAddDialog(false); }}
-                    className="h-auto w-full justify-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
+                    className="h-auto w-full justify-start gap-3 p-3 rounded-lg transition-colors text-left worktrees-action-button"
                   >
                     <ServerIcon className="h-4 w-4 text-muted-foreground" />
                     <div>
@@ -672,7 +672,7 @@ function AgentCard({ id, config, modelLabel, thinkingLabel, overrides, mcpServer
                       variant="secondary"
                       key={mcpId}
                       onClick={() => { onAddMcp(id, mcpId); setShowAddDialog(false); }}
-                      className="h-auto w-full justify-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left opacity-60"
+                      className="h-auto w-full justify-start gap-3 p-3 rounded-lg transition-colors text-left opacity-60 worktrees-action-button"
                     >
                       <ServerIcon className="h-4 w-4 text-muted-foreground" />
                       <div>
@@ -1069,16 +1069,14 @@ export function AgentTools() {
   );
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col worktrees-page">
       {/* Header */}
-      <div className="border-b border-border p-6">
+      <div className="border-b border-border/60 px-6 py-5">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-muted">
-            <Server className="h-5 w-5 text-muted-foreground" />
-          </div>
+          <Server className="h-6 w-6 text-foreground shrink-0" />
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-semibold text-foreground">MCP Server Overview</h1>
+              <h1 className="text-2xl font-bold text-foreground">MCP Server Overview</h1>
               {selectedProject && (
                 <span className="text-sm text-muted-foreground">
                   for {selectedProject.name}
@@ -1104,8 +1102,10 @@ export function AgentTools() {
         <div className="p-6 space-y-6">
           {/* No project selected message */}
           {!selectedProject && (
-            <div className="rounded-lg border border-border bg-card p-6 text-center">
-              <AlertCircle className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+            <div className="rounded-lg border border-border bg-card p-6 text-center worktrees-card">
+              <div className="rounded-full bg-muted p-4 mb-3 w-fit mx-auto">
+                <AlertCircle className="h-8 w-8 text-muted-foreground" />
+              </div>
               <h2 className="text-sm font-medium text-foreground mb-1">{t('settings:mcp.noProjectSelected')}</h2>
               <p className="text-sm text-muted-foreground">
                 {t('settings:mcp.noProjectSelectedDescription')}
@@ -1115,8 +1115,10 @@ export function AgentTools() {
 
           {/* Project not initialized message */}
           {selectedProject && !selectedProject.autoBuildPath && (
-            <div className="rounded-lg border border-border bg-card p-6 text-center">
-              <Info className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
+            <div className="rounded-lg border border-border bg-card p-6 text-center worktrees-card">
+              <div className="rounded-full bg-muted p-4 mb-3 w-fit mx-auto">
+                <Info className="h-8 w-8 text-muted-foreground" />
+              </div>
               <h2 className="text-sm font-medium text-foreground mb-1">{t('settings:mcp.projectNotInitialized')}</h2>
               <p className="text-sm text-muted-foreground">
                 {t('settings:mcp.projectNotInitializedDescription')}
@@ -1126,7 +1128,7 @@ export function AgentTools() {
 
           {/* MCP Server Configuration */}
           {envConfig && (
-            <div className="rounded-lg border border-border bg-card p-4">
+            <div className="rounded-lg border border-border bg-card p-4 worktrees-card">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-medium text-foreground">{t('settings:mcp.configuration')}</h2>
                 <span className="text-xs text-muted-foreground">
@@ -1136,7 +1138,7 @@ export function AgentTools() {
 
               <div className="space-y-4">
                 {/* Context7 */}
-                <div className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                <div className="flex items-center justify-between py-2 border-b border-border/60 last:border-0">
                   <div className="flex items-center gap-3">
                     <Search className="h-4 w-4 text-muted-foreground" />
                     <div>
@@ -1151,7 +1153,7 @@ export function AgentTools() {
                 </div>
 
                 {/* Graphiti Memory */}
-                <div className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                <div className="flex items-center justify-between py-2 border-b border-border/60 last:border-0">
                   <div className="flex items-center gap-3">
                     <Brain className="h-4 w-4 text-muted-foreground" />
                     <div>
@@ -1171,7 +1173,7 @@ export function AgentTools() {
                 </div>
 
                 {/* Linear */}
-                <div className="flex items-center justify-between py-2 border-b border-border last:border-0">
+                <div className="flex items-center justify-between py-2 border-b border-border/60 last:border-0">
                   <div className="flex items-center gap-3">
                     <ClipboardList className="h-4 w-4 text-muted-foreground" />
                     <div>
@@ -1200,7 +1202,7 @@ export function AgentTools() {
                   </div>
 
                   {/* Electron */}
-                  <div className="flex items-center justify-between py-2 border-b border-border">
+                  <div className="flex items-center justify-between py-2 border-b border-border/60">
                     <div className="flex items-center gap-3">
                       <Monitor className="h-4 w-4 text-muted-foreground" />
                       <div>
@@ -1231,7 +1233,7 @@ export function AgentTools() {
                 </div>
 
                 {/* Auto-Claude (always enabled) */}
-                <div className="flex items-center justify-between py-2 border-t border-border opacity-60">
+                <div className="flex items-center justify-between py-2 border-t border-border/60 opacity-60">
                   <div className="flex items-center gap-3">
                     <ListChecks className="h-4 w-4 text-muted-foreground" />
                     <div>
@@ -1243,7 +1245,7 @@ export function AgentTools() {
                 </div>
 
                 {/* Custom MCP Servers Section */}
-                <div className="pt-4 border-t border-border">
+                <div className="pt-4 border-t border-border/60">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Terminal className="h-3 w-3 text-muted-foreground" />
@@ -1253,10 +1255,10 @@ export function AgentTools() {
                     </div>
                     <Button
                       type="button"
-                      variant="ghost"
+                      variant="secondary"
                       size="sm"
                       onClick={() => { setEditingCustomServer(null); setShowCustomMcpDialog(true); }}
-                      className="h-auto gap-1 px-1.5 py-1 text-xs text-primary hover:text-primary/80"
+                      className="h-auto gap-1 px-2 py-1 text-xs worktrees-action-button"
                     >
                       <Plus className="h-3 w-3" />
                       {t('settings:mcp.addCustomServer')}
@@ -1290,7 +1292,7 @@ export function AgentTools() {
                         return (
                           <div
                             key={server.id}
-                            className="flex items-center justify-between py-2 px-3 bg-muted/50 rounded-lg group"
+                            className="flex items-center justify-between py-2 px-3 rounded-lg group worktrees-card"
                           >
                             <div className="flex items-center gap-3">
                               {/* Status indicator */}
@@ -1319,11 +1321,11 @@ export function AgentTools() {
                             <div className="flex items-center gap-1">
                               {/* Test button - always visible */}
                               <Button
-                                variant="ghost"
+                                variant="secondary"
                                 size="sm"
                                 onClick={() => handleTestConnection(server)}
                                 disabled={isTesting}
-                                className="h-7 px-2 text-xs"
+                                className="h-7 px-2 text-xs worktrees-action-button"
                                 title="Test Connection"
                               >
                                 {isTesting ? (
@@ -1337,20 +1339,20 @@ export function AgentTools() {
                               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <Button
                                   type="button"
-                                  variant="ghost"
+                                  variant="secondary"
                                   size="icon"
                                   onClick={() => { setEditingCustomServer(server); setShowCustomMcpDialog(true); }}
-                                  className="h-7 w-7 p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                                  className="h-7 w-7 p-1.5 worktrees-action-button"
                                   title="Edit"
                                 >
                                   <Pencil className="h-3.5 w-3.5" />
                                 </Button>
                                 <Button
                                   type="button"
-                                  variant="ghost"
+                                  variant="destructive"
                                   size="icon"
                                   onClick={() => handleDeleteCustomServer(server.id)}
-                                  className="h-7 w-7 p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                                  className="h-7 w-7 p-1.5 worktrees-danger-button"
                                   title="Delete"
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />

@@ -1,4 +1,4 @@
-import { RefreshCw, AlertCircle, FolderTree } from 'lucide-react';
+import { RefreshCw, AlertCircle, FolderTree, Layers, Boxes, Wrench } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
@@ -31,8 +31,11 @@ export function ProjectIndexTab({
         {/* Header with refresh */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-foreground">{t('projectIndex.title')}</h2>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <FolderTree className="h-6 w-6" />
+              {t('projectIndex.title')}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
               {t('projectIndex.description')}
             </p>
           </div>
@@ -41,7 +44,7 @@ export function ProjectIndexTab({
               <Button
                 variant="secondary"
                 size="sm"
-                className="context-action-button"
+                className="worktrees-action-button"
                 onClick={onRefresh}
                 disabled={indexLoading}
               >
@@ -55,11 +58,13 @@ export function ProjectIndexTab({
 
         {/* Error state */}
         {indexError && (
-          <div className="flex items-center gap-3 p-4 rounded-lg context-error-banner">
-            <AlertCircle className="h-5 w-5 shrink-0" />
-            <div>
-              <p className="font-medium">{t('projectIndex.errorTitle')}</p>
-              <p className="text-sm opacity-80">{indexError}</p>
+          <div className="mb-4 rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium text-destructive">{t('projectIndex.errorTitle')}</p>
+                <p className="text-muted-foreground mt-1">{indexError}</p>
+              </div>
             </div>
           </div>
         )}
@@ -73,13 +78,15 @@ export function ProjectIndexTab({
 
         {/* No index state */}
         {!indexLoading && !projectIndex && !indexError && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <FolderTree className="h-12 w-12 text-muted-foreground mb-4" />
+          <div className="flex h-full min-h-[360px] flex-col items-center justify-center text-center">
+            <div className="rounded-full bg-muted p-4 mb-4">
+              <FolderTree className="h-8 w-8 text-muted-foreground" />
+            </div>
             <h3 className="text-lg font-medium text-foreground">{t('projectIndex.noIndexTitle')}</h3>
-            <p className="text-sm text-muted-foreground mt-2 max-w-sm">
+            <p className="text-sm text-muted-foreground mt-2 max-w-md">
               {t('projectIndex.noIndexDescription')}
             </p>
-            <Button onClick={onRefresh} className="mt-4">
+            <Button onClick={onRefresh} className="mt-4 worktrees-action-button" variant="secondary">
               <RefreshCw className="h-4 w-4 mr-2" />
               {t('projectIndex.analyzeProject')}
             </Button>
@@ -90,17 +97,20 @@ export function ProjectIndexTab({
         {projectIndex && (
           <div className="space-y-6">
             {/* Project Overview */}
-            <Card className="context-card">
+            <Card className="context-card worktrees-card">
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">{t('projectIndex.overview')}</CardTitle>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Layers className="h-4 w-4" />
+                  {t('projectIndex.overview')}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="capitalize context-chip context-chip-neutral">
+                  <Badge variant="outline" className="capitalize context-chip context-chip-neutral worktrees-chip">
                     {projectIndex.project_type}
                   </Badge>
                   {Object.keys(projectIndex.services).length > 0 && (
-                    <Badge variant="secondary" className="context-chip context-chip-info">
+                    <Badge variant="secondary" className="context-chip context-chip-info worktrees-chip">
                       {t('projectIndex.serviceCount', { count: Object.keys(projectIndex.services).length })}
                     </Badge>
                   )}
@@ -114,7 +124,8 @@ export function ProjectIndexTab({
             {/* Services */}
             {Object.keys(projectIndex.services).length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Boxes className="h-4 w-4" />
                   {t('projectIndex.services')}
                 </h3>
                 <div className="grid gap-4 md:grid-cols-2">
@@ -128,10 +139,11 @@ export function ProjectIndexTab({
             {/* Infrastructure */}
             {Object.keys(projectIndex.infrastructure).length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Wrench className="h-4 w-4" />
                   {t('projectIndex.infrastructure')}
                 </h3>
-                <Card className="context-card">
+                <Card className="context-card worktrees-card">
                   <CardContent className="pt-6">
                     <div className="grid gap-4 sm:grid-cols-2">
                       {projectIndex.infrastructure.docker_compose && (
@@ -149,7 +161,7 @@ export function ProjectIndexTab({
                             <span className="text-xs text-muted-foreground">{t('projectIndex.dockerServices')}</span>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {projectIndex.infrastructure.docker_services.map((svc) => (
-                                <Badge key={svc} variant="secondary" className="text-xs context-chip context-chip-neutral">
+                                <Badge key={svc} variant="secondary" className="text-xs context-chip context-chip-neutral worktrees-chip">
                                   {svc}
                                 </Badge>
                               ))}
@@ -165,10 +177,11 @@ export function ProjectIndexTab({
             {/* Conventions */}
             {Object.keys(projectIndex.conventions).length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Wrench className="h-4 w-4" />
                   {t('projectIndex.conventions')}
                 </h3>
-                <Card className="context-card">
+                <Card className="context-card worktrees-card">
                   <CardContent className="pt-6">
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {projectIndex.conventions.python_linting && (

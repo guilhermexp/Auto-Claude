@@ -12,7 +12,7 @@ export function IdeationFilters({ activeTab, onTabChange, children }: IdeationFi
   const { t } = useTranslation('ideation');
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="h-full flex flex-col">
-      <TabsList className="shrink-0 mx-4 mt-4 flex-wrap h-auto gap-1 ideation-filters-list">
+      <TabsList className="shrink-0 mx-6 mt-4 mb-2 flex-wrap h-auto gap-1 ideation-filters-list">
         <TabsTrigger value="all" className="ideation-filters-trigger">
           {t('filters.all')}
         </TabsTrigger>

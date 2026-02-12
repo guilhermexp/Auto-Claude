@@ -401,7 +401,15 @@ export function Sidebar({
         {/* Bottom section with Settings, Help, and New Task */}
         <div className="px-2 pb-3 pt-2 space-y-2">
           {/* Claude Code Status Badge */}
-          {!isCollapsed && <ClaudeCodeStatusBadge />}
+          {!isCollapsed && (
+            <ClaudeCodeStatusBadge
+              className={cn(
+                'h-auto justify-start gap-2.5 py-1.5 pl-2 pr-2 text-sm rounded-md transition-colors duration-75 app-sidebar-footer-btn',
+                'bg-transparent border border-transparent shadow-none',
+                'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
+              )}
+            />
+          )}
 
           {/* Settings and Help row */}
           <div className="flex items-center gap-1">

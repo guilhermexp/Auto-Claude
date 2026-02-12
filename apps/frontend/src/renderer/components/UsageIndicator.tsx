@@ -38,18 +38,15 @@ const THRESHOLD_ELEVATED = 71;  // Yellow: Moderate usage
  */
 const getColorClass = (percent: number): string => {
   if (percent >= THRESHOLD_CRITICAL) return 'text-red-500';
-  if (percent >= THRESHOLD_WARNING) return 'text-orange-500';
-  if (percent >= THRESHOLD_ELEVATED) return 'text-yellow-500';
-  return 'text-green-500';
+  return 'text-foreground';
 };
 
 /**
  * Get background/border color classes for badges based on usage percentage
  */
 const getBadgeColorClasses = (percent: number): string => {
-  if (percent >= THRESHOLD_CRITICAL) return 'border-destructive/60 text-destructive bg-destructive/10';
-  if (percent >= THRESHOLD_WARNING) return 'border-yellow-500/60 text-yellow-400 bg-yellow-500/10';
-  return 'border-border/40 bg-muted/40 text-foreground';
+  if (percent >= THRESHOLD_CRITICAL) return 'project-tabbar-control text-destructive';
+  return 'project-tabbar-control text-foreground';
 };
 
 /**
@@ -57,9 +54,7 @@ const getBadgeColorClasses = (percent: number): string => {
  */
 const getGradientClass = (percent: number): string => {
   if (percent >= THRESHOLD_CRITICAL) return 'bg-red-500';
-  if (percent >= THRESHOLD_WARNING) return 'bg-orange-500';
-  if (percent >= THRESHOLD_ELEVATED) return 'bg-yellow-500';
-  return 'bg-green-500';
+  return 'bg-foreground/45';
 };
 
 /**
@@ -67,9 +62,7 @@ const getGradientClass = (percent: number): string => {
  */
 const getBarColorClass = (percent: number): string => {
   if (percent >= THRESHOLD_CRITICAL) return 'bg-red-500';
-  if (percent >= THRESHOLD_WARNING) return 'bg-orange-500';
-  if (percent >= THRESHOLD_ELEVATED) return 'bg-yellow-500';
-  return 'bg-green-500';
+  return 'bg-foreground/45';
 };
 
 export function UsageIndicator() {
@@ -366,7 +359,7 @@ export function UsageIndicator() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border bg-muted/50 text-muted-foreground">
+      <div className="project-tabbar-control flex items-center gap-1.5 px-2.5 py-1.5 text-muted-foreground">
         <Activity className="h-3.5 w-3.5 motion-safe:animate-pulse" />
         <span className="text-xs font-semibold">{t('common:usage.loading')}</span>
       </div>
@@ -386,10 +379,10 @@ export function UsageIndicator() {
               type="button"
               variant="secondary"
               size="sm"
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-md border cursor-help ${
+              className={`project-tabbar-control flex items-center gap-1.5 px-2.5 py-1.5 cursor-help ${
                 needsReauth
-                  ? 'bg-red-500/10 border-red-500/20 text-red-500'
-                  : 'bg-muted/50 text-muted-foreground'
+                  ? 'text-red-500'
+                  : 'text-muted-foreground'
               }`}
               aria-label={needsReauth ? t('common:usage.reauthRequired') : t('common:usage.dataUnavailable')}
             >
@@ -507,11 +500,11 @@ export function UsageIndicator() {
       <PopoverContent
         side="bottom"
         align="end"
-        className="usage-popover text-xs w-72 p-0 border-border/20 shadow-sm"
+        className="usage-popover header-dropdown-panel text-xs w-72 max-w-[calc(100vw-2rem)] p-0 border-border/20 shadow-sm"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="p-3 space-y-3">
+        <div className="p-4 space-y-3.5">
           {/* Header with overall status */}
           <div className="flex items-center gap-1.5 pb-2 border-b border-border/30">
             <Icon className="h-3.5 w-3.5" />
@@ -624,10 +617,10 @@ export function UsageIndicator() {
             {/* Initials Avatar with warning indicator for re-auth needed */}
             <div className="relative">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                usage.needsReauthentication ? 'bg-red-500/10' : 'bg-primary/10'
+                usage.needsReauthentication ? 'bg-red-500/10' : 'bg-muted'
               }`}>
                 <span className={`text-xs font-semibold ${
-                  usage.needsReauthentication ? 'text-red-500' : 'text-primary'
+                  usage.needsReauthentication ? 'text-red-500' : 'text-foreground'
                 }`}>
                   {getInitials(usage.profileName)}
                 </span>
@@ -651,7 +644,7 @@ export function UsageIndicator() {
                 )}
               </div>
               <div className={`font-medium text-xs truncate ${
-                usage.needsReauthentication ? 'text-destructive' : 'text-primary'
+                usage.needsReauthentication ? 'text-destructive' : 'text-foreground'
               }`}>
                 {usage.profileEmail || usage.profileName}
               </div>

@@ -82,8 +82,8 @@ export function ChangelogFilters({
   const localBranches = branches.filter((b) => !b.isRemote);
 
   return (
-    <div className="w-80 shrink-0 border-r border-border overflow-y-auto">
-      <div className="p-6 space-y-6">
+    <div className="w-80 shrink-0 overflow-y-auto border-r border-border/40">
+      <div className="space-y-5 p-6">
         {/* Source Mode Selection */}
         <div className="space-y-3">
           <Label className="text-sm font-medium">Changelog Source</Label>
@@ -94,7 +94,7 @@ export function ChangelogFilters({
           >
             <label
               className={cn(
-                'flex items-start gap-3 rounded-lg p-3 cursor-pointer transition-all changelog-source-card',
+                'changelog-source-card flex cursor-pointer items-start gap-3 rounded-xl p-3.5 transition-all',
                 sourceMode === 'tasks' && 'changelog-source-card-selected'
               )}
             >
@@ -117,7 +117,7 @@ export function ChangelogFilters({
 
             <label
               className={cn(
-                'flex items-start gap-3 rounded-lg p-3 cursor-pointer transition-all changelog-source-card',
+                'changelog-source-card flex cursor-pointer items-start gap-3 rounded-xl p-3.5 transition-all',
                 sourceMode === 'git-history' && 'changelog-source-card-selected'
               )}
             >
@@ -137,7 +137,7 @@ export function ChangelogFilters({
 
             <label
               className={cn(
-                'flex items-start gap-3 rounded-lg p-3 cursor-pointer transition-all changelog-source-card',
+                'changelog-source-card flex cursor-pointer items-start gap-3 rounded-xl p-3.5 transition-all',
                 sourceMode === 'branch-diff' && 'changelog-source-card-selected'
               )}
             >
@@ -159,7 +159,7 @@ export function ChangelogFilters({
 
         {/* Git History Options */}
         {sourceMode === 'git-history' && (
-          <Card className="changelog-options-card">
+          <Card className="changelog-options-card rounded-xl border-border/40 shadow-none">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">Git History Options</CardTitle>
             </CardHeader>
@@ -299,8 +299,8 @@ export function ChangelogFilters({
 
               {/* Load Preview Button */}
               <Button
-                variant="outline"
-                className="w-full"
+                variant="secondary"
+                className="worktrees-action-button h-9 w-full"
                 onClick={onLoadCommitsPreview}
                 disabled={isLoadingCommits || isLoadingGitData}
               >
@@ -322,7 +322,7 @@ export function ChangelogFilters({
 
         {/* Branch Diff Options */}
         {sourceMode === 'branch-diff' && (
-          <Card className="changelog-options-card">
+          <Card className="changelog-options-card rounded-xl border-border/40 shadow-none">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">Branch Comparison</CardTitle>
             </CardHeader>
@@ -384,8 +384,8 @@ export function ChangelogFilters({
 
               {/* Load Preview Button */}
               <Button
-                variant="outline"
-                className="w-full"
+                variant="secondary"
+                className="worktrees-action-button h-9 w-full"
                 onClick={onLoadCommitsPreview}
                 disabled={isLoadingCommits || isLoadingGitData || !baseBranch || !compareBranch || baseBranch === compareBranch}
               >

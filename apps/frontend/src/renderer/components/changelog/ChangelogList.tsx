@@ -64,25 +64,25 @@ export function ChangelogList({
       {sourceMode === 'tasks' && (
         <>
           {/* Task selection header */}
-          <div className="flex items-center justify-between border-b border-border px-6 py-3 bg-muted/30">
+          <div className="flex items-center justify-between border-b border-border/40 px-6 py-4">
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium">
                 {selectedTaskIds.length} of {doneTasks.length} tasks selected
               </span>
               <div className="flex gap-1">
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
                   onClick={onSelectAll}
-                  className="h-7 px-2 text-xs"
+                  className="worktrees-action-button h-8 px-2.5 text-xs"
                 >
                   Select All
                 </Button>
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
                   onClick={onDeselectAll}
-                  className="h-7 px-2 text-xs"
+                  className="worktrees-action-button h-8 px-2.5 text-xs"
                 >
                   Clear
                 </Button>
@@ -122,7 +122,7 @@ export function ChangelogList({
       {(sourceMode === 'git-history' || sourceMode === 'branch-diff') && (
         <>
           {/* Commit preview header */}
-          <div className="flex items-center justify-between border-b border-border px-6 py-3 bg-muted/30">
+          <div className="flex items-center justify-between border-b border-border/40 px-6 py-4">
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium">
                 {previewCommits.length} commit{previewCommits.length !== 1 ? 's' : ''} found
@@ -166,7 +166,7 @@ export function ChangelogList({
       )}
 
       {/* Footer with Continue button */}
-      <div className="flex items-center justify-end border-t border-border px-6 py-4 bg-background">
+      <div className="flex items-center justify-end border-t border-border/40 px-6 py-4">
         <Button onClick={onContinue} disabled={!canContinue} size="lg">
           Continue
           <ArrowRight className="ml-2 h-4 w-4" />

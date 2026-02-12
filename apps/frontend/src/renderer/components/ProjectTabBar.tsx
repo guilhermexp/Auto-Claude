@@ -124,7 +124,7 @@ export function ProjectTabBar({
         <UsageIndicator />
         <button
           type="button"
-          className="h-7 w-7 flex items-center justify-center rounded-sm text-muted-foreground/60 hover:text-foreground hover:bg-muted/25 transition-colors"
+          className="project-tabbar-control h-8 px-2.5 flex items-center justify-center text-muted-foreground transition-colors"
           onClick={onAddProject}
           aria-label={t('projectTab.addProjectAriaLabel')}
         >

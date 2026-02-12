@@ -165,22 +165,22 @@ export function AddProjectModal({ open, onOpenChange, onProjectAdded }: AddProje
           variant="ghost"
           onClick={handleOpenExisting}
           className={cn(
-            'w-full flex items-center gap-4 p-4 rounded-xl border border-border',
-            'bg-card hover:bg-accent hover:border-accent transition-all duration-200',
+            'h-auto min-h-[92px] w-full justify-start items-start gap-4 rounded-xl border border-border/40 p-4',
+            'bg-muted/20 hover:bg-muted/35 hover:border-border/60 transition-all duration-200',
             'text-left group'
           )}
           aria-label={t('addProject.openExistingAriaLabel')}
         >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-            <FolderOpen className="h-6 w-6 text-primary" />
+          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+            <FolderOpen className="h-5 w-5 text-foreground/80" />
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-foreground">{t('addProject.openExisting')}</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg font-medium leading-tight text-foreground">{t('addProject.openExisting')}</h3>
+            <p className="mt-1 text-sm leading-snug text-muted-foreground">
               {t('addProject.openExistingDescription')}
             </p>
           </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
         </Button>
 
         {/* Create New Option */}
@@ -189,22 +189,22 @@ export function AddProjectModal({ open, onOpenChange, onProjectAdded }: AddProje
           variant="ghost"
           onClick={() => setStep('create-form')}
           className={cn(
-            'w-full flex items-center gap-4 p-4 rounded-xl border border-border',
-            'bg-card hover:bg-accent hover:border-accent transition-all duration-200',
+            'h-auto min-h-[92px] w-full justify-start items-start gap-4 rounded-xl border border-border/40 p-4',
+            'bg-muted/20 hover:bg-muted/35 hover:border-border/60 transition-all duration-200',
             'text-left group'
           )}
           aria-label={t('addProject.createNewAriaLabel')}
         >
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-success/10">
-            <FolderPlus className="h-6 w-6 text-success" />
+          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+            <FolderPlus className="h-5 w-5 text-foreground/80" />
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-foreground">{t('addProject.createNew')}</h3>
-            <p className="text-sm text-muted-foreground mt-0.5">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-lg font-medium leading-tight text-foreground">{t('addProject.createNew')}</h3>
+            <p className="mt-1 text-sm leading-snug text-muted-foreground">
               {t('addProject.createNewDescription')}
             </p>
           </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" />
         </Button>
       </div>
 
@@ -297,7 +297,7 @@ export function AddProjectModal({ open, onOpenChange, onProjectAdded }: AddProje
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-[640px]">
         {step === 'choose' ? renderChooseStep() : renderCreateForm()}
       </DialogContent>
     </Dialog>

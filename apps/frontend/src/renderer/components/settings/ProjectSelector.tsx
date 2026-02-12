@@ -55,7 +55,7 @@ export function ProjectSelector({
         open={open}
         onOpenChange={setOpen}
       >
-        <SelectTrigger className="w-full [&_span]:truncate border-border/40 bg-transparent hover:bg-transparent focus:ring-0 focus:border-border/60 h-9 px-2.5">
+        <SelectTrigger className="settings-select-trigger w-full [&_span]:truncate border-border/40 bg-transparent hover:bg-transparent focus:ring-0 focus:border-border/60 h-9 px-2.5">
           <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
             <FolderOpen className="h-4 w-4 shrink-0 text-muted-foreground" />
             <SelectValue placeholder="Select a project..." className="truncate min-w-0 flex-1" />
@@ -76,9 +76,9 @@ export function ProjectSelector({
                 </SelectItem>
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="destructive"
                   size="icon"
-                  className="absolute right-2 flex h-6 w-6 items-center justify-center rounded-md hover:bg-destructive/10 transition-colors"
+                  className="absolute right-2 flex h-6 w-6 items-center justify-center rounded-md transition-colors worktrees-danger-button"
                   onPointerDown={(e) => {
                     e.stopPropagation();
                   }}

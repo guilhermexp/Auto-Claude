@@ -398,19 +398,26 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
             </Button>
           </PopoverTrigger>
         </TooltipTrigger>
-        <TooltipContent side="right">{getTooltipText()}</TooltipContent>
+        <TooltipContent side="top">{getTooltipText()}</TooltipContent>
       </Tooltip>
 
-      <PopoverContent side="right" align="end" className="claude-cli-popover w-72 border-border/20 shadow-sm">
-        <div className="space-y-3">
+      <PopoverContent
+        side="top"
+        align="center"
+        alignOffset={6}
+        sideOffset={8}
+        collisionPadding={12}
+        className="claude-cli-popover header-dropdown-panel w-[var(--radix-popover-trigger-width)] min-w-[248px] border-border/20 p-3 shadow-sm"
+      >
+        <div className="space-y-2.5">
           {/* Header */}
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <Terminal className="h-4 w-4 text-primary" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted">
+              <Terminal className="h-3.5 w-3.5 text-foreground/80" />
             </div>
             <div>
-              <h4 className="text-sm font-medium">Claude Code CLI</h4>
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <h4 className="text-sm font-medium leading-tight">Claude Code CLI</h4>
+              <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
                 {getStatusIcon()}
                 {status === "installed" && t("navigation:claudeCode.installed", "Installed")}
                 {status === "outdated" && t("navigation:claudeCode.outdated", "Update available")}
@@ -423,31 +430,31 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
 
           {/* Version info */}
           {versionInfo && status !== "loading" && (
-            <div className="text-xs space-y-1 p-2 bg-muted rounded-md border border-border/20">
+            <div className="space-y-1 rounded-md border border-border/25 bg-muted/30 p-2 text-xs">
               {versionInfo.installed && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
+                <div className="grid grid-cols-[96px_1fr] items-center gap-2">
+                  <span className="text-muted-foreground/90">
                     {t("navigation:claudeCode.current", "Current")}:
                   </span>
-                  <span className="font-mono">{versionInfo.installed}</span>
+                  <span className="text-right font-mono">{versionInfo.installed}</span>
                 </div>
               )}
               {versionInfo.latest && versionInfo.latest !== "unknown" && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
+                <div className="grid grid-cols-[96px_1fr] items-center gap-2">
+                  <span className="text-muted-foreground/90">
                     {t("navigation:claudeCode.latest", "Latest")}:
                   </span>
-                  <span className="font-mono">{versionInfo.latest}</span>
+                  <span className="text-right font-mono">{versionInfo.latest}</span>
                 </div>
               )}
               {versionInfo.path && (
-                <div className="flex justify-between items-center gap-2">
-                  <span className="text-muted-foreground flex items-center gap-1">
+                <div className="grid grid-cols-[96px_1fr] items-center gap-2">
+                  <span className="flex items-center gap-1 text-muted-foreground/90">
                     <FolderOpen className="h-3 w-3" />
                     {t("navigation:claudeCode.path", "Path")}:
                   </span>
                   <span
-                    className="font-mono text-[10px] truncate max-w-[140px]"
+                    className="truncate text-right font-mono text-[10px]"
                     title={versionInfo.path}
                   >
                     {versionInfo.path}
@@ -455,9 +462,9 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
                 </div>
               )}
               {lastChecked && (
-                <div className="flex justify-between text-muted-foreground">
+                <div className="grid grid-cols-[96px_1fr] items-center gap-2 text-muted-foreground/90">
                   <span>{t("navigation:claudeCode.lastChecked", "Last checked")}:</span>
-                  <span>{lastChecked.toLocaleTimeString()}</span>
+                  <span className="text-right">{lastChecked.toLocaleTimeString()}</span>
                 </div>
               )}
             </div>
@@ -468,7 +475,7 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
             {(status === "not-found" || status === "outdated") && (
               <Button
                 size="sm"
-                className="flex-1 gap-1"
+                className="h-7 flex-1 gap-1 text-xs"
                 onClick={handleInstall}
                 disabled={isInstalling}
               >
@@ -485,7 +492,7 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
             <Button
               variant="outline"
               size="sm"
-              className="gap-1"
+              className="h-7 gap-1 px-2.5 text-xs"
               onClick={() => checkVersion()}
               disabled={status === "loading"}
             >
@@ -504,8 +511,8 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
 
           {/* Version selector - only show when Claude is installed */}
           {versionInfo?.installed && (
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground">
+            <div className="space-y-1">
+              <label className="text-[11px] text-muted-foreground">
                 {t("navigation:claudeCode.switchVersion", "Switch Version")}
               </label>
               <Select
@@ -513,7 +520,7 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
                 onValueChange={handleVersionSelect}
                 disabled={isLoadingVersions || isInstalling}
               >
-                <SelectTrigger className="h-8 text-xs border-border/30">
+                <SelectTrigger className="h-7 text-xs border-border/30">
                   <SelectValue
                     placeholder={
                       isLoadingVersions
@@ -550,8 +557,8 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
 
           {/* CLI Installation selector - show when multiple installations are found */}
           {installations.length > 1 && (
-            <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground">
+            <div className="space-y-1">
+              <label className="text-[11px] text-muted-foreground">
                 {t("navigation:claudeCode.switchInstallation", "Switch Installation")}
               </label>
               <Select
@@ -559,7 +566,7 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
                 onValueChange={handleInstallationSelect}
                 disabled={isLoadingInstallations || isInstalling}
               >
-                <SelectTrigger className="h-8 text-xs border-border/30">
+                <SelectTrigger className="h-7 text-xs border-border/30">
                   <SelectValue
                     placeholder={
                       isLoadingInstallations
@@ -599,7 +606,7 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
           <Button
             variant="link"
             size="sm"
-            className="w-full text-xs text-muted-foreground gap-1"
+            className="h-7 w-full justify-start px-0 text-xs text-muted-foreground gap-1"
             onClick={() =>
               window.electronAPI?.openExternal?.(
                 "https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md"

@@ -123,7 +123,7 @@ export function MemoriesTab({
     <ScrollArea className="h-full">
       <div className="p-6 space-y-6 context-page-section">
         {/* Memory Status */}
-        <Card className="context-card">
+        <Card className="context-card worktrees-card">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
@@ -131,12 +131,12 @@ export function MemoriesTab({
                 {t('graphMemoryStatus')}
               </CardTitle>
               {memoryStatus?.available ? (
-                <Badge variant="outline" className="context-chip context-chip-success">
+                <Badge variant="outline" className="context-chip context-chip-success worktrees-chip">
                   <CheckCircle className="h-3 w-3 mr-1" />
                   {t('connected')}
                 </Badge>
               ) : (
-                <Badge variant="outline" className="context-chip context-chip-neutral">
+                <Badge variant="outline" className="context-chip context-chip-neutral worktrees-chip">
                   <XCircle className="h-3 w-3 mr-1" />
                   {t('notAvailable')}
                 </Badge>
@@ -207,7 +207,7 @@ export function MemoriesTab({
               onKeyDown={handleSearchKeyDown}
               className="context-search-input"
             />
-            <Button onClick={handleSearch} disabled={searchLoading} variant="secondary" className="context-action-button">
+            <Button onClick={handleSearch} disabled={searchLoading} variant="secondary" className="worktrees-action-button">
               <Search className={cn('h-4 w-4', searchLoading && 'animate-pulse')} />
             </Button>
           </div>
@@ -219,10 +219,10 @@ export function MemoriesTab({
                 {t('searchMemories.resultsFound', { count: searchResults.length })}
               </p>
               {searchResults.map((result, idx) => (
-                <Card key={idx} className="context-card-soft">
+                <Card key={idx} className="context-card-soft worktrees-card">
                   <CardContent className="pt-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className="text-xs capitalize context-chip context-chip-muted">
+                      <Badge variant="outline" className="text-xs capitalize context-chip context-chip-muted worktrees-chip">
                         {result.type.replace('_', ' ')}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
@@ -264,8 +264,8 @@ export function MemoriesTab({
                   variant="secondary"
                   size="sm"
                   className={cn(
-                    'gap-1.5 h-8 context-filter-pill',
-                    isActive && 'context-filter-pill-active',
+                    'gap-1.5 h-8 worktrees-action-button',
+                    isActive && 'worktrees-action-button-active',
                     !isActive && count === 0 && 'opacity-50'
                   )}
                   onClick={() => setActiveFilter(category)}
@@ -278,7 +278,8 @@ export function MemoriesTab({
                       variant="secondary"
                       className={cn(
                         'ml-1 px-1.5 py-0 text-xs context-chip context-chip-neutral',
-                        isActive && 'context-filter-pill-count-active'
+                        isActive && 'context-filter-pill-count-active',
+                        'worktrees-chip'
                       )}
                     >
                       {count}
@@ -315,7 +316,7 @@ export function MemoriesTab({
                 variant="secondary"
                 size="sm"
                 onClick={() => setActiveFilter('all')}
-                className="mt-2 context-action-button"
+                className="mt-2 worktrees-action-button"
               >
                 {t('memoryBrowser.showAll')}
               </Button>

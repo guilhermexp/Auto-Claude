@@ -51,19 +51,17 @@ export function IdeationHeader({
   const { t } = useTranslation(['common', 'ideation']);
   const hasSelection = selectedCount > 0;
   return (
-    <div className="shrink-0 border-b border-border/60 px-5 py-4 bg-card/65 backdrop-blur-sm">
+    <div className="shrink-0 border-b border-border/60 px-6 py-5">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <div className="flex items-center gap-2.5 mb-1.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/12 border border-primary/25">
-              <Lightbulb className="h-4 w-4 text-primary" />
-            </div>
-            <h2 className="text-xl font-semibold tracking-tight">{t('ideation:header.title')}</h2>
-            <Badge variant="outline" className="ideation-chip ideation-tone-neutral px-2.5 py-1 text-xs font-medium">
+            <Lightbulb className="h-6 w-6 text-foreground" />
+            <h2 className="text-2xl font-bold text-foreground">{t('ideation:header.title')}</h2>
+            <Badge variant="outline" className="ideation-chip ideation-tone-neutral worktrees-chip px-2.5 py-1 text-xs font-medium">
               {t('ideation:header.ideasCount', { count: totalIdeas })}
             </Badge>
           </div>
-          <p className="text-sm text-muted-foreground/90 leading-relaxed">
+          <p className="text-sm text-muted-foreground mt-1">
             {t('ideation:header.description')}
           </p>
         </div>
@@ -71,12 +69,13 @@ export function IdeationHeader({
           {/* Selection controls */}
           {hasSelection ? (
             <>
-              <Badge variant="secondary" className="mr-1 ideation-chip ideation-tone-selected px-2.5 py-1">
+              <Badge variant="secondary" className="mr-1 ideation-chip ideation-tone-selected worktrees-chip px-2.5 py-1">
                 {t('ideation:header.selectedCount', { count: selectedCount })}
               </Badge>
               <Button
                 variant="destructive"
                 size="sm"
+                className="worktrees-danger-button"
                 onClick={onDeleteSelected}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
@@ -87,6 +86,7 @@ export function IdeationHeader({
                   <Button
                     variant="secondary"
                     size="icon"
+                    className="worktrees-action-button"
                     onClick={onClearSelection}
                     aria-label={t('accessibility.clearSelectionAriaLabel')}
                   >
@@ -104,6 +104,7 @@ export function IdeationHeader({
                   <Button
                     variant="secondary"
                     size="icon"
+                    className="worktrees-action-button"
                     onClick={onSelectAll}
                     aria-label={t('accessibility.selectAllAriaLabel')}
                   >
@@ -122,6 +123,7 @@ export function IdeationHeader({
                 <Button
                   variant={isTranslateEnabled ? 'default' : 'secondary'}
                   size="icon"
+                  className={isTranslateEnabled ? 'worktrees-action-button-active' : 'worktrees-action-button'}
                   onClick={onToggleTranslate}
                   aria-label={
                     isTranslateEnabled
@@ -150,6 +152,7 @@ export function IdeationHeader({
               <Button
                 variant={showDismissed ? 'default' : 'secondary'}
                 size="icon"
+                className={showDismissed ? 'worktrees-action-button-active' : 'worktrees-action-button'}
                 onClick={onToggleShowDismissed}
                 aria-label={showDismissed ? t('accessibility.hideDismissedAriaLabel') : t('accessibility.showDismissedAriaLabel')}
               >
@@ -165,6 +168,7 @@ export function IdeationHeader({
               <Button
                 variant="secondary"
                 size="icon"
+                className="worktrees-action-button"
                 onClick={onOpenConfig}
                 aria-label={t('accessibility.configureAriaLabel')}
               >
@@ -178,6 +182,7 @@ export function IdeationHeader({
               <TooltipTrigger asChild>
                 <Button
                   variant="secondary"
+                  className="worktrees-action-button"
                   onClick={onOpenAddMore}
                   aria-label={t('accessibility.addMoreAriaLabel')}
                 >
@@ -194,6 +199,7 @@ export function IdeationHeader({
                 <Button
                   variant="destructive"
                   size="icon"
+                  className="worktrees-danger-button"
                   onClick={onDismissAll}
                   aria-label={t('accessibility.dismissAllAriaLabel')}
                 >
@@ -208,6 +214,7 @@ export function IdeationHeader({
               <Button
                 variant="secondary"
                 size="icon"
+                className="worktrees-action-button"
                 onClick={onRefresh}
                 aria-label={t('accessibility.regenerateIdeasAriaLabel')}
               >

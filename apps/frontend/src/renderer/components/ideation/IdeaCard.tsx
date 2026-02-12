@@ -152,7 +152,7 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 worktrees-action-button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onConvert(idea);
@@ -169,7 +169,7 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
                   <Button
                     variant="destructive"
                     size="sm"
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 worktrees-danger-button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onDismiss(idea);
@@ -191,7 +191,7 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 worktrees-action-button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onGoToTask(idea.taskId!);
@@ -213,7 +213,7 @@ export function IdeaCard({ idea, isSelected, onClick, onConvert, onGoToTask, onD
                   <Button
                     variant="secondary"
                     size="sm"
-                    className="h-8 w-8 p-0"
+                    className="h-8 w-8 p-0 worktrees-action-button"
                     onClick={(e) => {
                       e.stopPropagation();
                       onGoToTask(idea.taskId!);

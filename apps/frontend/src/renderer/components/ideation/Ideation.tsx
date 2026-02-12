@@ -406,7 +406,7 @@ export function Ideation({ projectId, onGoToTask }: IdeationProps) {
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden worktrees-page">
       {/* Header */}
       <IdeationHeader
         totalIdeas={summary.totalIdeas}
@@ -436,7 +436,7 @@ export function Ideation({ projectId, onGoToTask }: IdeationProps) {
       <div className="flex-1 overflow-hidden">
         <IdeationFilters activeTab={activeTab} onTabChange={setActiveTab}>
           {/* All Ideas View */}
-          <TabsContent value="all" className="flex-1 overflow-auto p-4">
+          <TabsContent value="all" className="flex-1 overflow-auto p-6 pt-4">
             <div className="grid gap-3">
               {displayedActiveIdeas.map((idea) => (
                 <IdeaCard
@@ -469,7 +469,7 @@ export function Ideation({ projectId, onGoToTask }: IdeationProps) {
               getTranslatedIdea(idea, getTranslatedText)
             )
             return (
-              <TabsContent key={type} value={type} className="flex-1 overflow-auto p-4">
+              <TabsContent key={type} value={type} className="flex-1 overflow-auto p-6 pt-4">
                 <div className="mb-4 p-3 rounded-lg ideation-type-description">
                   <p className="text-sm text-muted-foreground">
                     {t(`typeDescriptions.${type}`)}

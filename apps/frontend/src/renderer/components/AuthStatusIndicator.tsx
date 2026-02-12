@@ -162,7 +162,7 @@ export function AuthStatusIndicator() {
         <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="destructive" size="icon" className="h-8 w-8">
+              <Button variant="destructive" size="icon" className="project-tabbar-control project-tabbar-control-icon h-8 w-8">
                 <AlertTriangle className="h-3.5 w-3.5 motion-safe:animate-pulse" />
               </Button>
             </TooltipTrigger>
@@ -190,7 +190,7 @@ export function AuthStatusIndicator() {
               type="button"
               variant="secondary"
               size="sm"
-              className="h-8 gap-1.5 px-3 text-sm font-medium"
+              className="project-tabbar-control h-8 gap-1.5 px-3 text-sm font-medium"
               aria-label={t('common:usage.authenticationAriaLabel', { provider: badgeLabel })}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -199,8 +199,8 @@ export function AuthStatusIndicator() {
               </span>
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom" className="auth-details-popover text-xs max-w-xs p-0 border-border/20 shadow-sm">
-            <div className="p-3 space-y-3">
+          <TooltipContent side="bottom" className="auth-details-popover header-dropdown-panel text-xs w-72 max-w-[calc(100vw-2rem)] p-0 border-border/20 shadow-sm">
+            <div className="p-4 space-y-3.5">
               {/* Header section */}
               <div className="flex items-center justify-between pb-2 border-b border-border/30">
                 <div className="flex items-center gap-1.5">
@@ -279,7 +279,7 @@ export function AuthStatusIndicator() {
         <TooltipProvider delayDuration={200}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="destructive" size="sm" className="h-8 px-2.5 text-xs font-semibold">
+              <Button variant="destructive" size="sm" className="project-tabbar-control h-8 px-2.5 text-xs font-semibold">
                 {Math.round(usage.sessionPercent)}%
               </Button>
             </TooltipTrigger>

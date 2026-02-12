@@ -118,13 +118,12 @@ function NavItem({ icon: Icon, label, isActive, isDisabled, onClick }: NavItemPr
       onClick={handleClick}
       disabled={isDisabled}
       className={cn(
-        'w-full h-9 justify-start gap-2.5 px-2.5 py-1.5 text-sm rounded-md font-normal transition-colors',
-        '!bg-transparent !border-transparent shadow-none',
+        'settings-nav-item w-full h-9 justify-start gap-2.5 px-2.5 py-1.5 text-sm rounded-md font-normal transition-colors',
         isActive
-          ? '!bg-primary/10 !border !border-primary/30 text-foreground'
+          ? 'settings-nav-item-active text-foreground'
           : isDisabled
             ? 'opacity-50 cursor-not-allowed text-muted-foreground'
-            : 'text-muted-foreground hover:text-foreground hover:!bg-transparent'
+            : 'text-muted-foreground hover:text-foreground'
       )}
     >
       <Icon className={cn('h-4 w-4', isActive ? 'opacity-90' : 'opacity-60')} />
@@ -273,7 +272,7 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
       }
       onOpenChange(newOpen);
     }}>
-      <FullScreenDialogContent className="w-[95vw] max-w-[1400px] h-[88vh] max-h-[920px]">
+      <FullScreenDialogContent className="settings-modal-shell w-[95vw] max-w-[1400px] h-[88vh] max-h-[920px]">
         <FullScreenDialogHeader className="sr-only">
           <FullScreenDialogTitle>{t('title')}</FullScreenDialogTitle>
           <FullScreenDialogDescription>
@@ -281,22 +280,22 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
           </FullScreenDialogDescription>
         </FullScreenDialogHeader>
         <FullScreenDialogBody className="p-0">
-          <div className="settings-modal flex h-full min-h-0 bg-background">
+          <div className="settings-modal worktrees-page flex h-full min-h-0 bg-background">
             {/* Navigation sidebar - 1Code style: narrow, darker background */}
-            <nav className="w-[360px] min-w-0 max-w-[360px] flex-[0_0_360px] py-4 flex flex-col bg-sidebar border-r border-border/30 overflow-hidden box-border min-h-0">
+            <nav className="w-[360px] min-w-0 max-w-[360px] flex-[0_0_360px] py-4 flex flex-col bg-sidebar border-r border-border/30 box-border min-h-0">
               {/* Title */}
-              <h2 className="text-lg font-semibold px-3 pb-4 text-foreground">
+              <h2 className="text-lg font-semibold px-4 pb-4 text-foreground">
                 {t('title')}
               </h2>
 
-              <ScrollArea className="settings-scroll-area flex-1 min-h-0 w-full max-w-full px-3 box-border">
-                <div className="space-y-4 w-full max-w-full box-border overflow-hidden">
+              <ScrollArea className="settings-scroll-area flex-1 min-h-0 w-full max-w-full px-4 box-border">
+                <div className="space-y-4 w-full max-w-full box-border pr-1">
                   {/* APPLICATION Section */}
                   <div>
                     <h3 className="mb-2 px-2 text-sm font-medium text-muted-foreground">
                       {t('tabs.app')}
                     </h3>
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 pr-1">
                       {appNavItemsConfig.map((item) => (
                         <NavItem
                           key={item.id}
@@ -321,8 +320,8 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
                             onRerunWizard();
                           }}
                           className={cn(
-                            'w-full h-9 justify-start gap-2.5 px-2.5 py-1.5 text-sm rounded-md font-normal transition-colors mt-1',
-                            'border-l-2 border-transparent bg-transparent text-muted-foreground hover:text-foreground hover:bg-transparent'
+                            'settings-nav-item w-full h-9 justify-start gap-2.5 px-2.5 py-1.5 text-sm rounded-md font-normal transition-colors mt-1',
+                            'text-muted-foreground hover:text-foreground'
                           )}
                         >
                           <Sparkles className="h-4 w-4 opacity-60" />
@@ -350,7 +349,7 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
                     </div>
 
                     {/* Project Nav Items */}
-                    <div className="space-y-0.5">
+                    <div className="space-y-0.5 pr-1">
                       {projectNavItemsConfig.map((item) => (
                         <NavItem
                           key={item.id}
@@ -371,7 +370,7 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
 
               {/* Version at bottom */}
               {version && (
-                <div className="settings-divider mt-auto pt-4 border-t border-border/30 mx-1">
+                <div className="settings-divider mt-auto pt-4 border-t border-border/30 mx-2">
                   <p className="text-xs text-muted-foreground text-center">
                     {t('updates.version')} {version}
                   </p>

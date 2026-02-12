@@ -171,7 +171,7 @@ export function AppUpdateNotification() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-[min(92vw,860px)] max-w-[860px] max-h-[80vh] p-5">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Download className="h-5 w-5" />
@@ -185,7 +185,7 @@ export function AppUpdateNotification() {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-auto pr-1">
           {/* Version Info */}
           <div className="rounded-lg border border-border bg-muted/50 p-4">
             <div className="flex items-center justify-between">
@@ -213,7 +213,7 @@ export function AppUpdateNotification() {
 
           {/* Release Notes */}
           {updateInfo.releaseNotes && (
-            <div className="bg-background rounded-lg p-4 max-h-64 overflow-y-auto border border-border/50">
+            <div className="bg-background rounded-lg p-3 max-h-44 overflow-y-auto border border-border/50">
               <div className="prose prose-sm dark:prose-invert max-w-none">
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
@@ -297,7 +297,7 @@ export function AppUpdateNotification() {
           )}
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row gap-3">
+        <DialogFooter className="flex flex-col sm:flex-row gap-2">
           <Button variant="outline" onClick={handleDismiss} disabled={isDownloading}>
             {isDownloaded
               ? t("dialogs:appUpdate.installLater", "Install Later")

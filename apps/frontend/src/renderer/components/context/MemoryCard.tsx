@@ -68,7 +68,7 @@ function SectionHeader({ icon: Icon, title, count }: { icon: React.ComponentType
       <Icon className="h-4 w-4 text-muted-foreground" />
       <span className="text-sm font-medium text-foreground">{title}</span>
       {count !== undefined && count > 0 && (
-        <Badge variant="secondary" className="text-xs px-1.5 py-0 context-chip context-chip-neutral">
+        <Badge variant="secondary" className="text-xs px-1.5 py-0 context-chip context-chip-neutral worktrees-chip">
           {count}
         </Badge>
       )}
@@ -147,7 +147,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
   const specId = parsed?.spec_id;
 
   return (
-    <Card className="context-card-soft transition-colors">
+    <Card className="context-card-soft transition-colors worktrees-card">
       <CardContent className="pt-4 pb-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
@@ -157,7 +157,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline" className={`text-xs capitalize font-medium context-chip ${typeColor}`}>
+                <Badge variant="outline" className={`text-xs capitalize font-medium context-chip worktrees-chip ${typeColor}`}>
                   {typeLabel}
                 </Badge>
                 {sessionLabel && (
@@ -184,7 +184,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
               variant="secondary"
               size="sm"
               onClick={() => setExpanded(!expanded)}
-              className="shrink-0 gap-1 context-action-button"
+              className="shrink-0 gap-1 worktrees-action-button"
             >
               {expanded ? (
                 <>
@@ -283,7 +283,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
                       ? pattern
                       : (pattern?.pattern || pattern?.applies_to || JSON.stringify(pattern));
                     return text ? (
-                      <Badge key={idx} variant="secondary" className="text-xs context-chip context-chip-purple">
+                      <Badge key={idx} variant="secondary" className="text-xs context-chip context-chip-purple worktrees-chip">
                         {text}
                       </Badge>
                     ) : null;
@@ -315,7 +315,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
                 <SectionHeader icon={FileCode} title={t('memoryCard.changedFiles')} count={parsed.discoveries.changed_files.length} />
                 <div className="flex flex-wrap gap-1.5 pl-4">
                   {parsed.discoveries.changed_files.map((file, idx) => (
-                    <Badge key={idx} variant="outline" className="text-xs font-mono context-chip context-chip-muted">
+                    <Badge key={idx} variant="outline" className="text-xs font-mono context-chip context-chip-muted worktrees-chip">
                       {file}
                     </Badge>
                   ))}
@@ -331,7 +331,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
                   {parsed.discoveries.file_insights.map((insight, idx) => (
                     <div key={idx} className="text-sm">
                       {insight.path && (
-                        <Badge variant="outline" className="text-xs font-mono mb-1 context-chip context-chip-muted">
+                        <Badge variant="outline" className="text-xs font-mono mb-1 context-chip context-chip-muted worktrees-chip">
                           {insight.path}
                         </Badge>
                       )}
@@ -353,7 +353,7 @@ export function MemoryCard({ memory }: MemoryCardProps) {
                 <SectionHeader icon={CheckCircle2} title={t('memoryCard.subtasksCompleted')} count={parsed.subtasks_completed.length} />
                 <div className="flex flex-wrap gap-1.5 pl-4">
                   {parsed.subtasks_completed.map((task, idx) => (
-                    <Badge key={idx} variant="secondary" className="text-xs font-mono context-chip context-chip-neutral">
+                    <Badge key={idx} variant="secondary" className="text-xs font-mono context-chip context-chip-neutral worktrees-chip">
                       {task}
                     </Badge>
                   ))}

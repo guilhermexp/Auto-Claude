@@ -191,9 +191,19 @@ export function initializeAppUpdater(window: BrowserWindow, betaUpdates = false)
   // Error handling
   autoUpdater.on('error', (error) => {
     console.error('[app-updater] Update error:', error);
+
+    // Clear stale downloaded state when update package validation/signature fails.
+    // Without this, Settings may keep showing "Install and Restart" forever.
+    const message = error?.message ?? '';
+    const isValidationFailure =
+      /code signature|did not pass validation|shipit|signature/i.test(message);
+    if (isValidationFailure) {
+      downloadedUpdateInfo = null;
+    }
+
     if (mainWindow) {
       mainWindow.webContents.send(IPC_CHANNELS.APP_UPDATE_ERROR, {
-        message: error.message
+        message
       });
     }
   });

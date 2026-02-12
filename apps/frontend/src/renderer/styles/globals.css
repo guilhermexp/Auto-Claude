@@ -292,10 +292,46 @@
 /* Settings modal border consistency (prevents legacy dark/strong borders) */
 .settings-modal nav {
   border-right-color: hsl(var(--border) / 0.3) !important;
+  background-color: hsl(var(--card) / 0.35) !important;
 }
 
 .settings-modal .settings-divider {
   border-color: hsl(var(--border) / 0.3) !important;
+}
+
+.settings-modal .settings-nav-item {
+  background-color: transparent !important;
+  border: 1px solid transparent !important;
+  color: hsl(var(--muted-foreground)) !important;
+  box-shadow: none !important;
+}
+
+.settings-modal .settings-nav-item:hover {
+  background-color: hsl(var(--muted) / 0.45) !important;
+  border-color: hsl(var(--border) / 0.35) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.settings-modal .settings-nav-item.settings-nav-item-active {
+  background-color: hsl(var(--muted) / 0.7) !important;
+  border-color: hsl(var(--primary) / 0.3) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.settings-modal .settings-select-trigger {
+  background-color: hsl(var(--muted) / 0.5) !important;
+  border-color: hsl(var(--border) / 0.3) !important;
+  color: hsl(var(--foreground)) !important;
+}
+
+.settings-modal-shell {
+  border-color: hsl(var(--border) / 0.3) !important;
+  background: hsl(var(--card) / 0.95) !important;
+  box-shadow: var(--shadow-xl) !important;
+}
+
+.dark .settings-modal-shell {
+  background: hsl(var(--card) / 0.95) !important;
 }
 
 .settings-modal .settings-card,
@@ -340,9 +376,16 @@
 .auth-details-popover,
 .claude-cli-popover {
   background-color: hsl(var(--popover) / 0.98) !important;
-  border-color: hsl(var(--border) / 0.2) !important;
+  border-color: hsl(var(--border) / 0.24) !important;
   box-shadow: var(--shadow-sm) !important;
-  font-family: var(--font-mono);
+}
+
+.header-dropdown-panel {
+  border-radius: 0.95rem !important;
+  background-color: hsl(var(--popover) / 0.97) !important;
+  font-family: var(--font-geist-sans), var(--font-sans), 'SF Pro Text', system-ui, -apple-system, sans-serif !important;
+  letter-spacing: normal !important;
+  line-height: 1.35;
 }
 
 .dark .usage-popover,
@@ -1872,73 +1915,75 @@ body {
 
 /* Source mode selection cards */
 .changelog-source-card {
-  background-color: hsl(var(--card) / 0.96);
-  border: 1px solid hsl(var(--border) / 0.8);
-  box-shadow: var(--shadow-sm);
+  background-color: hsl(var(--muted) / 0.3);
+  border: 1px solid hsl(var(--border) / 0.35);
+  box-shadow: none;
 }
 
 .changelog-source-card:hover {
-  border-color: hsl(var(--primary) / 0.4);
+  background-color: hsl(var(--muted) / 0.45);
+  border-color: hsl(var(--border) / 0.55);
 }
 
 .changelog-source-card-selected {
-  border-color: hsl(var(--primary) / 0.5);
-  background-color: hsl(var(--primary) / 0.05);
+  border-color: hsl(var(--primary) / 0.25);
+  background-color: hsl(var(--muted) / 0.6);
 }
 
 .dark .changelog-source-card {
-  background-color: #171717;
-  border-color: #2f2f2f;
+  background-color: #1a1a1a;
+  border-color: #2a2a2a;
 }
 
 .dark .changelog-source-card:hover {
-  border-color: hsl(var(--primary) / 0.5);
+  background-color: #232323;
+  border-color: #363636;
 }
 
 .dark .changelog-source-card-selected {
-  background-color: hsl(var(--primary) / 0.08);
-  border-color: hsl(var(--primary) / 0.5);
+  background-color: #252525;
+  border-color: hsl(var(--primary) / 0.24);
 }
 
 /* Options cards (Git History, Branch Comparison) */
 .changelog-options-card {
-  background-color: hsl(var(--card) / 0.96);
-  border: 1px solid hsl(var(--border) / 0.8);
-  box-shadow: var(--shadow-sm);
+  background-color: hsl(var(--muted) / 0.22);
+  border: 1px solid hsl(var(--border) / 0.35);
+  box-shadow: none;
 }
 
 .dark .changelog-options-card {
-  background-color: #171717;
-  border-color: #2f2f2f;
+  background-color: #1a1a1a;
+  border-color: #2a2a2a;
 }
 
 /* Task/Commit list item cards */
 .changelog-list-item {
-  background-color: hsl(var(--card) / 0.96);
-  border: 1px solid hsl(var(--border) / 0.8);
+  background-color: hsl(var(--muted) / 0.22);
+  border: 1px solid hsl(var(--border) / 0.35);
 }
 
 .changelog-list-item:hover {
-  background-color: hsl(var(--muted) / 0.5);
+  background-color: hsl(var(--muted) / 0.45);
 }
 
 .changelog-list-item-selected {
-  border-color: hsl(var(--primary) / 0.45);
-  background-color: hsl(var(--secondary) / 0.58);
+  border-color: hsl(var(--primary) / 0.24);
+  background-color: hsl(var(--muted) / 0.58);
 }
 
 .dark .changelog-list-item {
-  background-color: #171717;
-  border-color: #2f2f2f;
+  background-color: #1a1a1a;
+  border-color: #2a2a2a;
 }
 
 .dark .changelog-list-item:hover {
-  background-color: #1f1f1f;
+  background-color: #232323;
 }
 
 .dark .changelog-list-item-selected {
-  background-color: #1d222d;
-  border-color: #334057;
+  background-color: #252525;
+  border-color: hsl(var(--primary) / 0.24);
 }
 
 /* ============================================
@@ -3110,72 +3155,75 @@ body {
 .settings-card {
   background-color: hsl(var(--card));
   border: 1px solid hsl(var(--border) / 0.3);
-  box-shadow: var(--shadow-sm);
+  box-shadow: none;
 }
 
 /* Settings card footer */
 .settings-card-footer {
-  background-color: hsl(var(--muted) / 0.45);
+  background-color: hsl(var(--muted) / 0.3);
   border-top: 1px solid hsl(var(--border) / 0.3);
 }
 
 /* Settings mode selector buttons (Light/Dark/System) */
 .settings-mode-button {
-  background-color: transparent;
+  background-color: hsl(var(--muted) / 0.5);
   border: 1px solid hsl(var(--border) / 0.3);
+  color: hsl(var(--muted-foreground));
 }
 
 .settings-mode-button:hover {
-  border-color: hsl(var(--primary) / 0.5);
-  background-color: hsl(var(--accent) / 0.5);
+  background-color: hsl(var(--muted) / 0.7);
+  color: hsl(var(--foreground));
 }
 
 .settings-mode-button-selected {
-  border-color: hsl(var(--primary));
-  background-color: hsl(var(--primary) / 0.05);
+  background-color: hsl(var(--muted) / 0.7);
+  border-color: hsl(var(--primary) / 0.3);
+  color: hsl(var(--foreground));
 }
 
 .dark .settings-mode-button-selected {
-  border-color: hsl(var(--primary));
-  background-color: hsl(var(--primary) / 0.08);
+  background-color: #252525;
+  border-color: hsl(var(--primary) / 0.25);
+  color: #f0f0f0;
 }
 
 /* Settings theme cards */
 .settings-theme-card {
-  background-color: transparent;
+  background-color: hsl(var(--card));
   border: 1px solid hsl(var(--border) / 0.3);
 }
 
 .settings-theme-card:hover {
-  border-color: hsl(var(--primary) / 0.5);
-  background-color: hsl(var(--accent) / 0.3);
-  box-shadow: var(--shadow-md);
+  border-color: hsl(var(--border) / 0.45);
+  background-color: hsl(var(--muted) / 0.35);
+  box-shadow: none;
 }
 
 .settings-theme-card-selected {
-  border-color: hsl(var(--primary));
-  background-color: hsl(var(--primary) / 0.05);
-  box-shadow: var(--shadow-sm);
+  background-color: hsl(var(--muted) / 0.7);
+  border-color: hsl(var(--primary) / 0.3);
+  box-shadow: none;
 }
 
 .dark .settings-theme-card-selected {
-  border-color: hsl(var(--primary));
-  background-color: hsl(var(--primary) / 0.08);
+  background-color: #252525;
+  border-color: hsl(var(--primary) / 0.25);
 }
 
 /* Settings account profile cards */
 .settings-profile-card {
-  background-color: hsl(var(--background));
+  background-color: hsl(var(--card));
   border: 1px solid hsl(var(--border) / 0.3);
 }
 
 .settings-profile-card:hover {
-  background-color: hsl(var(--muted) / 0.5);
+  background-color: hsl(var(--muted) / 0.35);
 }
 
 .settings-profile-card-active {
-  border-color: hsl(var(--primary));
-  background-color: hsl(var(--primary) / 0.05);
+  background-color: hsl(var(--muted) / 0.7);
+  border-color: hsl(var(--primary) / 0.3);
 }
 
 .settings-profile-card-warning {
@@ -3184,8 +3232,8 @@ body {
 }
 
 .dark .settings-profile-card-active {
-  border-color: hsl(var(--primary));
-  background-color: hsl(var(--primary) / 0.08);
+  background-color: #252525;
+  border-color: hsl(var(--primary) / 0.25);
 }
 
 .dark .settings-profile-card-warning {
@@ -3195,13 +3243,13 @@ body {
 
 /* Settings section container */
 .settings-section-container {
-  background-color: hsl(var(--muted) / 0.3);
+  background-color: hsl(var(--card));
   border: 1px solid hsl(var(--border) / 0.3);
 }
 
 /* Settings toggle row (Switch toggles with labels) */
 .settings-toggle-row {
-  background-color: transparent;
+  background-color: hsl(var(--muted) / 0.2);
   border: 1px solid hsl(var(--border) / 0.3);
   border-radius: 0.5rem;
   padding: 1rem;
@@ -3232,28 +3280,31 @@ body {
 
 /* Settings preset buttons (Display scale, Language) */
 .settings-preset-button {
-  background-color: transparent;
+  background-color: hsl(var(--muted) / 0.5);
   border: 1px solid hsl(var(--border) / 0.3);
+  color: hsl(var(--muted-foreground));
 }
 
 .settings-preset-button:hover {
-  border-color: hsl(var(--primary) / 0.5);
-  background-color: hsl(var(--accent) / 0.5);
+  background-color: hsl(var(--muted) / 0.7);
+  color: hsl(var(--foreground));
 }
 
 .settings-preset-button-selected {
-  border-color: hsl(var(--primary));
-  background-color: hsl(var(--primary) / 0.05);
+  background-color: hsl(var(--muted) / 0.7);
+  border-color: hsl(var(--primary) / 0.3);
+  color: hsl(var(--foreground));
 }
 
 .dark .settings-preset-button-selected {
-  border-color: hsl(var(--primary));
-  background-color: hsl(var(--primary) / 0.08);
+  background-color: #252525;
+  border-color: hsl(var(--primary) / 0.25);
+  color: #f0f0f0;
 }
 
 /* Settings info card (Debug info, version info) */
 .settings-info-card {
-  background-color: hsl(var(--muted) / 0.5);
+  background-color: hsl(var(--card));
   border: 1px solid hsl(var(--border) / 0.3);
   border-radius: 0.5rem;
   padding: 1rem;
@@ -3466,6 +3517,24 @@ body {
 
 .project-tab-item {
   position: relative;
+}
+
+.project-tabbar-control {
+  border: 1px solid hsl(var(--border) / 0.42) !important;
+  background-color: hsl(var(--foreground) / 0.06) !important;
+  border-radius: 0.95rem !important;
+  color: hsl(var(--foreground) / 0.9);
+}
+
+.project-tabbar-control:hover {
+  border-color: hsl(var(--border) / 0.5) !important;
+  background-color: hsl(var(--foreground) / 0.08) !important;
+}
+
+.project-tabbar-control-icon {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
 }
 
 /* ============================================

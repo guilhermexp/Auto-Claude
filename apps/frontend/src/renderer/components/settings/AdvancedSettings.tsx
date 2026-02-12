@@ -188,6 +188,12 @@ export function AdvancedSettings({ settings, onSettingsChange, section, version,
       setAppUpdateError(error.message);
       setIsDownloadingAppUpdate(false);
       setAppDownloadProgress(null);
+
+      // If signature/validation failed, clear stale "downloaded" UI state.
+      if (/code signature|did not pass validation|shipit|signature/i.test(error.message)) {
+        setIsAppUpdateDownloaded(false);
+        setAppUpdateInfo(null);
+      }
     });
 
     return () => {
