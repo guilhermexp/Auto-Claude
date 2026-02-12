@@ -44,6 +44,8 @@ type StatusType = "loading" | "installed" | "outdated" | "not-found" | "error";
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
 // Delay before re-checking version after install/update
 const VERSION_RECHECK_DELAY_MS = 5000;
+// Custom builds use a pinned/private Claude CLI; suppress upstream npm update prompts in UI.
+const SUPPRESS_CLAUDE_CODE_UPDATE_NOTICE = true;
 
 /**
  * Claude Code CLI status badge for the sidebar.
@@ -89,7 +91,7 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
 
         if (!result.data.installed) {
           setStatus("not-found");
-        } else if (result.data.isOutdated) {
+        } else if (result.data.isOutdated && !SUPPRESS_CLAUDE_CODE_UPDATE_NOTICE) {
           setStatus("outdated");
         } else {
           setStatus("installed");
@@ -360,42 +362,92 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
     }
   };
 
+  const getCardTone = () => {
+    switch (status) {
+      case "installed":
+        return "border-green-500/30 bg-green-500/10";
+      case "outdated":
+        return "border-warning/35 bg-warning/10";
+      case "not-found":
+      case "error":
+        return "border-destructive/35 bg-destructive/10";
+      default:
+        return "border-info/30 bg-info/10";
+    }
+  };
+
+  const getStatusChip = () => {
+    switch (status) {
+      case "installed":
+        return "bg-green-500/15 text-green-500";
+      case "outdated":
+        return "bg-warning/20 text-warning";
+      case "not-found":
+      case "error":
+        return "bg-destructive/20 text-destructive";
+      default:
+        return "bg-muted/40 text-muted-foreground";
+    }
+  };
+
+  const getStatusLabel = () => {
+    switch (status) {
+      case "installed":
+        return t("navigation:claudeCode.installed", "Installed");
+      case "outdated":
+        return t("common:update", "Update");
+      case "not-found":
+        return t("common:install", "Install");
+      case "loading":
+        return t("navigation:claudeCode.checking", "Checking...");
+      case "error":
+        return t("navigation:claudeCode.error", "Error");
+    }
+  };
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <Tooltip>
         <TooltipTrigger asChild>
           <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
+              type="button"
               className={cn(
-                "w-full justify-start gap-2 text-xs",
-                status === "not-found" || status === "error" ? "text-destructive" : "",
-                status === "outdated" ? "text-yellow-600 dark:text-yellow-500" : "",
+                "w-full rounded-lg border p-3 text-left transition-colors",
+                "focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 focus-visible:outline-offset-2",
+                "hover:border-border/60",
+                getCardTone(),
                 className
               )}
             >
-              <div className="relative">
-                <Terminal className="h-4 w-4" />
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="relative">
+                    <Terminal className="h-4 w-4" />
+                    <span
+                      className={cn(
+                        "absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full",
+                        getStatusColor()
+                      )}
+                    />
+                  </div>
+                  <span className="truncate text-sm font-medium">Claude Code</span>
+                </div>
                 <span
                   className={cn(
-                    "absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full",
-                    getStatusColor()
+                    "shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium",
+                    getStatusChip()
                   )}
-                />
+                >
+                  {getStatusLabel()}
+                </span>
               </div>
-              <span className="truncate">Claude Code</span>
-              {status === "outdated" && (
-                <span className="ml-auto text-[10px] bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 px-1.5 py-0.5 rounded">
-                  {t("common:update", "Update")}
-                </span>
-              )}
-              {status === "not-found" && (
-                <span className="ml-auto text-[10px] bg-destructive/20 text-destructive px-1.5 py-0.5 rounded">
-                  {t("common:install", "Install")}
-                </span>
-              )}
-            </Button>
+              <p className="mt-2 truncate text-xs text-muted-foreground">
+                {versionInfo?.installed
+                  ? t("navigation:claudeCode.current", "Current") + `: ${versionInfo.installed}`
+                  : getTooltipText()}
+              </p>
+            </button>
           </PopoverTrigger>
         </TooltipTrigger>
         <TooltipContent side="top">{getTooltipText()}</TooltipContent>

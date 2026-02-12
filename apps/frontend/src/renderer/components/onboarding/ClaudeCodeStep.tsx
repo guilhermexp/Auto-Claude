@@ -12,6 +12,8 @@ interface ClaudeCodeStepProps {
 }
 
 type DetectionStatus = 'loading' | 'installed' | 'outdated' | 'not-found' | 'error';
+// Custom builds use a pinned/private Claude CLI; suppress upstream npm update prompts in UI.
+const SUPPRESS_CLAUDE_CODE_UPDATE_NOTICE = true;
 
 /**
  * Claude Code CLI installation step for the onboarding wizard.
@@ -48,7 +50,7 @@ export function ClaudeCodeStep({ onNext, onBack, onSkip }: ClaudeCodeStepProps) 
 
         if (!result.data.installed) {
           setStatus('not-found');
-        } else if (result.data.isOutdated) {
+        } else if (result.data.isOutdated && !SUPPRESS_CLAUDE_CODE_UPDATE_NOTICE) {
           setStatus('outdated');
         } else {
           setStatus('installed');

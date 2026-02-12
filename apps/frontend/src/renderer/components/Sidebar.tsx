@@ -404,9 +404,7 @@ export function Sidebar({
           {!isCollapsed && (
             <ClaudeCodeStatusBadge
               className={cn(
-                'h-auto justify-start gap-2.5 py-1.5 pl-2 pr-2 text-sm rounded-md transition-colors duration-75 app-sidebar-footer-btn',
-                'bg-transparent border border-transparent shadow-none',
-                'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
+                'app-sidebar-footer-btn'
               )}
             />
           )}
