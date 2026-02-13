@@ -73,6 +73,7 @@ function DroppableStatusColumn({
   onFeatureClick,
   onConvertToSpec,
   onGoToTask,
+  onArchive,
   isOver
 }: DroppableStatusColumnProps) {
   const { setNodeRef } = useDroppable({
@@ -160,6 +161,7 @@ function DroppableStatusColumn({
                     onClick={() => onFeatureClick(feature)}
                     onConvertToSpec={onConvertToSpec}
                     onGoToTask={onGoToTask}
+                    onArchive={onArchive}
                   />
                 ))
               )}
@@ -176,7 +178,8 @@ export function RoadmapKanbanView({
   onFeatureClick,
   onConvertToSpec,
   onGoToTask,
-  onSave
+  onSave,
+  onArchive
 }: RoadmapKanbanViewProps) {
   const [activeFeature, setActiveFeature] = useState<RoadmapFeature | null>(null);
   const [overColumnId, setOverColumnId] = useState<string | null>(null);
@@ -302,6 +305,7 @@ export function RoadmapKanbanView({
               onFeatureClick={onFeatureClick}
               onConvertToSpec={onConvertToSpec}
               onGoToTask={onGoToTask}
+              onArchive={onArchive}
               isOver={overColumnId === column.id}
             />
           ))}
