@@ -67,13 +67,14 @@ jobs:
         run: cd apps/frontend && npm run package:mac -- --x64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CSC_LINK: ${{ secrets.MAC_CERTIFICATE }}
-          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERTIFICATE_PASSWORD }}
+          # Disable code signing for forks without certificates
+          CSC_IDENTITY_AUTO_DISCOVERY: false
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}
           SENTRY_PROFILES_SAMPLE_RATE: ${{ secrets.SENTRY_PROFILES_SAMPLE_RATE }}
 
       - name: Submit notarization (async)
+        if: ${{ secrets.APPLE_ID != '' }}
         id: notarize
         uses: ./.github/actions/submit-macos-notarization
         with:
@@ -135,13 +136,14 @@ jobs:
         run: cd apps/frontend && npm run package:mac -- --arm64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CSC_LINK: ${{ secrets.MAC_CERTIFICATE }}
-          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERTIFICATE_PASSWORD }}
+          # Disable code signing for forks without certificates
+          CSC_IDENTITY_AUTO_DISCOVERY: false
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}
           SENTRY_PROFILES_SAMPLE_RATE: ${{ secrets.SENTRY_PROFILES_SAMPLE_RATE }}
 
       - name: Submit notarization (async)
+        if: ${{ secrets.APPLE_ID != '' }}
         id: notarize
         uses: ./.github/actions/submit-macos-notarization
         with:
