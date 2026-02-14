@@ -1,3 +1,11 @@
+## 2.7.10 - Build Fix for Forks (Complete)
+
+### 🐛 Bug Fixes
+
+- Removed notarization job entirely for forks without Apple certificates
+
+---
+
 ## 2.7.9 - Build Fix for Forks
 
 ### 🐛 Bug Fixes
