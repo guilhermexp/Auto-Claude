@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Archive } from 'lucide-react';
 import { RoadmapGenerationProgress } from './RoadmapGenerationProgress';
 import { CompetitorAnalysisDialog } from './CompetitorAnalysisDialog';
 import { ExistingCompetitorAnalysisDialog } from './ExistingCompetitorAnalysisDialog';
@@ -8,17 +10,30 @@ import { RoadmapHeader } from './roadmap/RoadmapHeader';
 import { RoadmapEmptyState } from './roadmap/RoadmapEmptyState';
 import { RoadmapTabs } from './roadmap/RoadmapTabs';
 import { FeatureDetailPanel } from './roadmap/FeatureDetailPanel';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from './ui/alert-dialog';
 import { useRoadmapData, useFeatureActions, useRoadmapGeneration, useRoadmapSave, useFeatureDelete } from './roadmap/hooks';
 import { getCompetitorInsightsForFeature } from './roadmap/utils';
 import type { RoadmapFeature } from '../../shared/types';
 import type { RoadmapProps } from './roadmap/types';
 
 export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
+  const { t } = useTranslation('common');
+
   // State management
   const [selectedFeature, setSelectedFeature] = useState<RoadmapFeature | null>(null);
   const [activeTab, setActiveTab] = useState('kanban');
   const [showAddFeatureDialog, setShowAddFeatureDialog] = useState(false);
   const [showCompetitorViewer, setShowCompetitorViewer] = useState(false);
+  const [pendingArchiveFeatureId, setPendingArchiveFeatureId] = useState<string | null>(null);
 
   // Custom hooks
   const { roadmap, competitorAnalysis, generationStatus } = useRoadmapData(projectId);
@@ -54,11 +69,17 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
     }
   };
 
-  const handleArchiveFeature = async (featureId: string) => {
-    await deleteFeature(featureId);
-    if (selectedFeature?.id === featureId) {
+  const handleArchiveFeature = (featureId: string) => {
+    setPendingArchiveFeatureId(featureId);
+  };
+
+  const confirmArchiveFeature = async () => {
+    if (!pendingArchiveFeatureId) return;
+    await deleteFeature(pendingArchiveFeatureId);
+    if (selectedFeature?.id === pendingArchiveFeatureId) {
       setSelectedFeature(null);
     }
+    setPendingArchiveFeatureId(null);
   };
 
   // Show generation progress
@@ -169,6 +190,34 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
         open={showAddFeatureDialog}
         onOpenChange={setShowAddFeatureDialog}
       />
+
+      {/* Archive Confirmation Dialog */}
+      <AlertDialog
+        open={!!pendingArchiveFeatureId}
+        onOpenChange={(open) => { if (!open) setPendingArchiveFeatureId(null); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-2">
+              <Archive className="h-5 w-5 text-muted-foreground" />
+              <AlertDialogTitle>{t('roadmap.archiveFeatureConfirmTitle')}</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription>
+              {t('roadmap.archiveFeatureConfirmDescription', {
+                title: pendingArchiveFeatureId
+                  ? roadmap.features.find((f) => f.id === pendingArchiveFeatureId)?.title ?? ''
+                  : '',
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('buttons.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmArchiveFeature}>
+              {t('roadmap.archiveFeature')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
