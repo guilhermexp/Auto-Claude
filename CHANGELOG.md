@@ -1,3 +1,13 @@
+## 2.7.7 - Fork Auto-Update Configuration
+
+### ✨ New Features
+
+- Configured auto-update to use fork repository (guilhermexp/Auto-Claude)
+
+- Updated package metadata to point to fork repository
+
+---
+
 ## 2.7.5 - Security & Platform Improvements
 
 ### ✨ New Features
