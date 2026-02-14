@@ -1,3 +1,11 @@
+## 2.7.9 - Build Fix for Forks
+
+### 🐛 Bug Fixes
+
+- Disabled code signing and notarization for forks without certificates
+
+---
+
 ## 2.7.8 - Fork Configuration Complete
 
 ### ✨ New Features
