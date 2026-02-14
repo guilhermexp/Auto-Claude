@@ -3,15 +3,15 @@
   "version": "2.7.6-beta.2",
   "type": "module",
   "description": "Desktop UI for Auto Claude autonomous coding framework",
-  "homepage": "https://github.com/AndyMik90/Auto-Claude",
+  "homepage": "https://github.com/guilhermexp/Auto-Claude",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AndyMik90/Auto-Claude.git"
+    "url": "https://github.com/guilhermexp/Auto-Claude.git"
   },
   "main": "./out/main/index.js",
   "author": {
     "name": "Auto Claude Team",
-    "email": "119136210+AndyMik90@users.noreply.github.com"
+    "email": "guilherme-varela@hotmail.com"
   },
   "license": "AGPL-3.0",
   "engines": {
@@ -151,7 +151,7 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "AndyMik90",
+        "owner": "guilhermexp",
         "repo": "Auto-Claude"
       }
     ],

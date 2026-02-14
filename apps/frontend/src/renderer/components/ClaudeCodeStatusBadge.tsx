@@ -362,49 +362,6 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
     }
   };
 
-  const getCardTone = () => {
-    switch (status) {
-      case "installed":
-        return "border-green-500/30 bg-green-500/10";
-      case "outdated":
-        return "border-warning/35 bg-warning/10";
-      case "not-found":
-      case "error":
-        return "border-destructive/35 bg-destructive/10";
-      default:
-        return "border-info/30 bg-info/10";
-    }
-  };
-
-  const getStatusChip = () => {
-    switch (status) {
-      case "installed":
-        return "bg-green-500/15 text-green-500";
-      case "outdated":
-        return "bg-warning/20 text-warning";
-      case "not-found":
-      case "error":
-        return "bg-destructive/20 text-destructive";
-      default:
-        return "bg-muted/40 text-muted-foreground";
-    }
-  };
-
-  const getStatusLabel = () => {
-    switch (status) {
-      case "installed":
-        return t("navigation:claudeCode.installed", "Installed");
-      case "outdated":
-        return t("common:update", "Update");
-      case "not-found":
-        return t("common:install", "Install");
-      case "loading":
-        return t("navigation:claudeCode.checking", "Checking...");
-      case "error":
-        return t("navigation:claudeCode.error", "Error");
-    }
-  };
-
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <Tooltip>
@@ -413,17 +370,18 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
             <button
               type="button"
               className={cn(
-                "w-full rounded-lg border p-3 text-left transition-colors",
+                "w-full rounded-md px-2 py-1.5 text-left transition-colors duration-75",
+                "bg-transparent border border-transparent",
                 "focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 focus-visible:outline-offset-2",
-                "hover:border-border/60",
-                getCardTone(),
+                "hover:bg-foreground/5 hover:text-foreground",
+                "text-muted-foreground",
                 className
               )}
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="relative">
-                    <Terminal className="h-4 w-4" />
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="relative flex-shrink-0 w-4 h-4 flex items-center justify-center">
+                    <Terminal className="h-4 w-4 opacity-60" />
                     <span
                       className={cn(
                         "absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full",
@@ -431,22 +389,12 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
                       )}
                     />
                   </div>
-                  <span className="truncate text-sm font-medium">Claude Code</span>
+                  <span className="truncate text-sm leading-tight">Claude Code</span>
                 </div>
-                <span
-                  className={cn(
-                    "shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium",
-                    getStatusChip()
-                  )}
-                >
-                  {getStatusLabel()}
+                <span className="text-[10px] text-muted-foreground/60 truncate max-w-[60px]">
+                  {versionInfo?.installed ? versionInfo.installed.replace(/^v/, '') : ''}
                 </span>
               </div>
-              <p className="mt-2 truncate text-xs text-muted-foreground">
-                {versionInfo?.installed
-                  ? t("navigation:claudeCode.current", "Current") + `: ${versionInfo.installed}`
-                  : getTooltipText()}
-              </p>
             </button>
           </PopoverTrigger>
         </TooltipTrigger>
@@ -455,8 +403,8 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
 
       <PopoverContent
         side="top"
-        align="center"
-        alignOffset={6}
+        align="start"
+        alignOffset={-8}
         sideOffset={8}
         collisionPadding={12}
         className="claude-cli-popover header-dropdown-panel w-[var(--radix-popover-trigger-width)] min-w-[248px] border-border/20 p-3 shadow-sm"

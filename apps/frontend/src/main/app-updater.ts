@@ -29,7 +29,7 @@ import { compareVersions } from './updater/version-manager';
 import { isMacOS } from './platform';
 
 // GitHub repo info for API calls
-const GITHUB_OWNER = 'AndyMik90';
+const GITHUB_OWNER = 'guilhermexp';
 const GITHUB_REPO = 'Auto-Claude';
 
 // Debug mode - DEBUG_UPDATER=true or development mode
