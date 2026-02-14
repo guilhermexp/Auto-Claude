@@ -1,3 +1,13 @@
+## 2.7.8 - Fork Configuration Complete
+
+### ✨ New Features
+
+- All GitHub references updated to fork repository (guilhermexp/Auto-Claude)
+
+- Removed upstream remote for cleaner git status
+
+---
+
 ## 2.7.7 - Fork Auto-Update Configuration
 
 ### ✨ New Features
