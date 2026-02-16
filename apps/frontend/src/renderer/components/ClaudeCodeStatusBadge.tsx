@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Terminal,
@@ -153,13 +153,19 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
     }
   }, []);
 
-  // Initial check and periodic re-check
+  // Initial check and periodic re-check (deduplicated to prevent StrictMode double-fire)
+  const isCheckingRef = useRef(false);
   useEffect(() => {
-    checkVersion();
+    if (!isCheckingRef.current) {
+      isCheckingRef.current = true;
+      checkVersion().finally(() => { isCheckingRef.current = false; });
+    }
 
-    // Set up periodic check
     const interval = setInterval(() => {
-      checkVersion();
+      if (!isCheckingRef.current) {
+        isCheckingRef.current = true;
+        checkVersion().finally(() => { isCheckingRef.current = false; });
+      }
     }, CHECK_INTERVAL_MS);
 
     return () => clearInterval(interval);

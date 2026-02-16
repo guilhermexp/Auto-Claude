@@ -151,11 +151,15 @@ export function useTaskDetail({ task }: UseTaskDetailOptions) {
     const isReverseOrder = logOrder === 'reverse-chronological';
 
     if (activeTab === 'logs' && !isUserScrolledUp) {
-      if (isReverseOrder && logsContainerRef.current) {
-        logsContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (!isReverseOrder && logsEndRef.current) {
-        logsEndRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
+      // Defer scroll writes to the next frame and avoid smooth animation on high-frequency log updates.
+      // This reduces forced reflow warnings while preserving auto-follow behavior.
+      requestAnimationFrame(() => {
+        if (isReverseOrder && logsContainerRef.current) {
+          logsContainerRef.current.scrollTo({ top: 0, behavior: 'auto' });
+        } else if (!isReverseOrder && logsEndRef.current) {
+          logsEndRef.current.scrollIntoView({ behavior: 'auto' });
+        }
+      });
     }
   }, [activeTab, isUserScrolledUp, logOrder, phaseLogs]);
 

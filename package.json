@@ -1,6 +1,6 @@
 {
   "name": "auto-claude",
-  "version": "2.7.10",
+  "version": "2.7.11",
   "description": "Autonomous multi-agent coding framework powered by Claude AI",
   "license": "AGPL-3.0",
   "author": "Auto Claude Team",
@@ -23,7 +23,10 @@
     "package": "cd apps/frontend && npm run package",
     "package:mac": "cd apps/frontend && npm run package:mac",
     "package:win": "cd apps/frontend && npm run package:win",
-    "package:linux": "cd apps/frontend && npm run package:linux"
+    "package:linux": "cd apps/frontend && npm run package:linux",
+    "release": "./scripts/release.sh patch",
+    "release:minor": "./scripts/release.sh minor",
+    "release:major": "./scripts/release.sh major"
   },
   "engines": {
     "node": ">=24.0.0",
@@ -31,7 +34,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/AndyMik90/Auto-Claude.git"
+    "url": "https://github.com/guilhermexp/Auto-Claude.git"
   },
   "keywords": [
     "ai",

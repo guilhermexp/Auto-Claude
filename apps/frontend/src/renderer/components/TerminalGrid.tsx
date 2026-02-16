@@ -37,7 +37,9 @@ import { useTerminalStore } from '../stores/terminal-store';
 import { useTaskStore } from '../stores/task-store';
 import { useFileExplorerStore } from '../stores/file-explorer-store';
 import { TERMINAL_DOM_UPDATE_DELAY_MS, PANEL_CLEANUP_GRACE_PERIOD_MS } from '../../shared/constants';
-import type { SessionDateInfo } from '../../shared/types';
+import type { SessionDateInfo, Task } from '../../shared/types';
+
+const EMPTY_TASKS: Task[] = [];
 
 interface TerminalGridProps {
   projectPath?: string;
@@ -131,8 +133,10 @@ export function TerminalGrid({ projectPath, onNewTaskClick, isActive = false }: 
   const setClaudeMode = useTerminalStore((state) => state.setClaudeMode);
   const reorderTerminals = useTerminalStore((state) => state.reorderTerminals);
 
-  // Get tasks from task store for task selection dropdown in terminals
-  const tasks = useTaskStore((state) => state.tasks);
+  // Avoid subscribing to task updates when the terminals view is hidden.
+  // This prevents off-screen terminal UI from re-rendering on every task/log tick.
+  const selectTasks = useCallback((state: { tasks: Task[] }) => (isActive ? state.tasks : EMPTY_TASKS), [isActive]);
+  const tasks = useTaskStore(selectTasks);
 
   // File explorer state
   const fileExplorerOpen = useFileExplorerStore((state) => state.isOpen);

@@ -100,6 +100,9 @@ async function ensureProfileManagerInitialized(): Promise<
   }
 }
 
+// Module-level: track in-flight TASK_START to prevent duplicate processing
+const taskStartInFlight = new Set<string>();
+
 /**
  * Register task execution handlers (start, stop, review, status management, recovery)
  */
@@ -120,6 +123,14 @@ export function registerTaskExecutionHandlers(
         return;
       }
 
+      // Idempotency guard: skip if already in-flight or running
+      if (taskStartInFlight.has(taskId) || agentManager.isRunning(taskId)) {
+        console.warn('[TASK_START] Ignoring duplicate request for:', taskId);
+        return;
+      }
+      taskStartInFlight.add(taskId);
+
+      try {
       // Ensure profile manager is initialized before checking auth
       // This prevents race condition where auth check runs before profile data loads from disk
       const initResult = await ensureProfileManagerInitialized();
@@ -291,6 +302,9 @@ export function registerTaskExecutionHandlers(
           },
           project.id
         );
+      }
+      } finally {
+        taskStartInFlight.delete(taskId);
       }
     }
   );

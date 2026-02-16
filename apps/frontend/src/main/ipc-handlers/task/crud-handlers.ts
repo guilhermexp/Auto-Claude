@@ -12,6 +12,10 @@ import { isPathWithinBase, findTaskWorktree } from '../../worktree-paths';
 import { cleanupWorktree } from '../../utils/worktree-cleanup';
 import { taskStateManager } from '../../task-state-manager';
 
+// Time-based dedup for TASK_LIST to coalesce rapid-fire calls from multiple renderer effects + StrictMode
+const taskListRecentResults = new Map<string, { result: IPCResult<Task[]>; timestamp: number }>();
+const TASK_LIST_DEDUP_MS = 500;
+
 /**
  * Register task CRUD (Create, Read, Update, Delete) handlers
  */
@@ -25,6 +29,14 @@ export function registerTaskCRUDHandlers(agentManager: AgentManager): void {
   ipcMain.handle(
     IPC_CHANNELS.TASK_LIST,
     async (_, projectId: string, options?: { forceRefresh?: boolean }): Promise<IPCResult<Task[]>> => {
+      // Time-based dedup: return cached result if same projectId was fetched recently
+      if (!options?.forceRefresh) {
+        const cached = taskListRecentResults.get(projectId);
+        if (cached && Date.now() - cached.timestamp < TASK_LIST_DEDUP_MS) {
+          return cached.result;
+        }
+      }
+
       console.warn('[IPC] TASK_LIST called with projectId:', projectId, 'options:', options);
 
       // If forceRefresh is requested, invalidate cache and clear XState actors
@@ -33,12 +45,15 @@ export function registerTaskCRUDHandlers(agentManager: AgentManager): void {
       if (options?.forceRefresh) {
         projectStore.invalidateTasksCache(projectId);
         taskStateManager.clearAllTasks();
+        taskListRecentResults.clear();
         console.warn('[IPC] TASK_LIST cache and task state cleared for forceRefresh');
       }
 
       const tasks = projectStore.getTasks(projectId);
       console.warn('[IPC] TASK_LIST returning', tasks.length, 'tasks');
-      return { success: true, data: tasks };
+      const result: IPCResult<Task[]> = { success: true, data: tasks };
+      taskListRecentResults.set(projectId, { result, timestamp: Date.now() });
+      return result;
     }
   );
 

@@ -728,13 +728,32 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   }
 }));
 
+// Pending-promise map to deduplicate concurrent loadTasks calls for the same project
+const pendingLoads = new Map<string, Promise<void>>();
+
 /**
- * Load tasks for a project
+ * Load tasks for a project.
+ * Concurrent calls for the same projectId are coalesced into a single IPC request.
+ *
  * @param projectId - The project ID to load tasks for
  * @param options - Optional parameters
  * @param options.forceRefresh - If true, invalidates server-side cache before fetching (for refresh button)
  */
 export async function loadTasks(projectId: string, options?: { forceRefresh?: boolean }): Promise<void> {
+  // forceRefresh bypasses dedup so the user always gets fresh data from the refresh button
+  if (!options?.forceRefresh) {
+    const existing = pendingLoads.get(projectId);
+    if (existing) return existing;
+  }
+
+  const promise = loadTasksInternal(projectId, options).finally(() => {
+    pendingLoads.delete(projectId);
+  });
+  pendingLoads.set(projectId, promise);
+  return promise;
+}
+
+async function loadTasksInternal(projectId: string, options?: { forceRefresh?: boolean }): Promise<void> {
   const store = useTaskStore.getState();
   store.setLoading(true);
   store.setError(null);

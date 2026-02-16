@@ -186,8 +186,8 @@ export function registerSettingsHandlers(
         }
       }
 
-      // Configure CLI tools with current settings
-      configureTools({
+      // Configure CLI tools with current settings (only re-warms if config changed)
+      const configChanged = configureTools({
         pythonPath: settings.pythonPath,
         gitPath: settings.gitPath,
         githubCLIPath: settings.githubCLIPath,
@@ -195,10 +195,12 @@ export function registerSettingsHandlers(
         claudePath: settings.claudePath,
       });
 
-      // Re-warm cache asynchronously after configuring (non-blocking)
-      preWarmToolCache(['claude']).catch((error) => {
-        console.warn('[SETTINGS_GET] Failed to re-warm CLI cache:', error);
-      });
+      if (configChanged) {
+        // Re-warm cache asynchronously after configuring (non-blocking)
+        preWarmToolCache(['claude']).catch((error) => {
+          console.warn('[SETTINGS_GET] Failed to re-warm CLI cache:', error);
+        });
+      }
 
       return { success: true, data: settings as AppSettings };
     }
