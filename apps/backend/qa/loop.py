@@ -129,7 +129,9 @@ async def run_qa_validation_loop(
             print("\n❌ Build is not ready for QA validation.")
             completed, total = count_subtasks(spec_dir)
             debug("qa_loop", "Build progress", completed=completed, total=total)
-            print(f"   Progress: {completed}/{total} subtasks completed")
+            print(
+                f"   Progress: {completed}/{total} subtasks in terminal state (completed/failed/stuck)"
+            )
             return False
 
     # Emit phase event at start of QA validation (before any early returns)

@@ -115,6 +115,23 @@ def is_build_complete(spec_dir: Path) -> bool:
     return total > 0 and completed == total
 
 
+def _load_stuck_subtask_ids(spec_dir: Path) -> set[str]:
+    """Load IDs of subtasks marked as stuck from attempt_history.json."""
+    stuck_subtask_ids: set[str] = set()
+    attempt_history_file = spec_dir / "memory" / "attempt_history.json"
+    if attempt_history_file.exists():
+        try:
+            with open(attempt_history_file, encoding="utf-8") as f:
+                attempt_history = json.load(f)
+            for entry in attempt_history.get("stuck_subtasks", []):
+                if "subtask_id" in entry:
+                    stuck_subtask_ids.add(entry["subtask_id"])
+        except (OSError, json.JSONDecodeError, UnicodeDecodeError):
+            # Corrupted attempt history is non-fatal; skip stuck-subtask filtering
+            pass
+    return stuck_subtask_ids
+
+
 def is_build_ready_for_qa(spec_dir: Path) -> bool:
     """
     Check if the build is ready for QA validation.
@@ -133,20 +150,7 @@ def is_build_ready_for_qa(spec_dir: Path) -> bool:
     if not plan_file.exists():
         return False
 
-    # Load stuck subtask IDs from attempt_history.json
-    stuck_subtask_ids = set()
-    attempt_history_file = spec_dir / "memory" / "attempt_history.json"
-    if attempt_history_file.exists():
-        try:
-            with open(attempt_history_file, encoding="utf-8") as f:
-                attempt_history = json.load(f)
-            stuck_subtask_ids = {
-                entry["subtask_id"]
-                for entry in attempt_history.get("stuck_subtasks", [])
-                if "subtask_id" in entry
-            }
-        except (OSError, json.JSONDecodeError, UnicodeDecodeError):
-            pass
+    stuck_subtask_ids = _load_stuck_subtask_ids(spec_dir)
 
     try:
         with open(plan_file, encoding="utf-8") as f:
@@ -475,22 +479,7 @@ def get_next_subtask(spec_dir: Path) -> dict | None:
     if not plan_file.exists():
         return None
 
-    # Load stuck subtasks from recovery manager's attempt history
-    stuck_subtask_ids = set()
-    attempt_history_file = spec_dir / "memory" / "attempt_history.json"
-    if attempt_history_file.exists():
-        try:
-            with open(attempt_history_file, encoding="utf-8") as f:
-                attempt_history = json.load(f)
-            # Collect IDs of subtasks marked as stuck
-            stuck_subtask_ids = {
-                entry["subtask_id"]
-                for entry in attempt_history.get("stuck_subtasks", [])
-                if "subtask_id" in entry
-            }
-        except (OSError, json.JSONDecodeError, UnicodeDecodeError):
-            # If we can't read the file, continue without stuck checking
-            pass
+    stuck_subtask_ids = _load_stuck_subtask_ids(spec_dir)
 
     try:
         with open(plan_file, encoding="utf-8") as f:

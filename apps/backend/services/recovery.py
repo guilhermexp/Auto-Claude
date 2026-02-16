@@ -527,7 +527,11 @@ class RecoveryManager:
                     for subtask in phase.get("subtasks", []):
                         if subtask.get("id") == subtask_id:
                             subtask["status"] = "failed"
-                            subtask["notes"] = f"Marked as stuck: {reason}"
+                            stuck_note = f"Marked as stuck: {reason}"
+                            existing = subtask.get("actual_output", "")
+                            subtask["actual_output"] = (
+                                f"{stuck_note}\n{existing}" if existing else stuck_note
+                            )
                             updated = True
                             break
                     if updated:

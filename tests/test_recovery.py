@@ -298,9 +298,9 @@ def test_mark_subtask_stuck_updates_plan(test_env):
     subtask_1_1 = updated_plan["phases"][0]["subtasks"][0]
     assert subtask_1_1["id"] == "subtask-1-1"
     assert subtask_1_1["status"] == "failed", "Stuck subtask status should be 'failed'"
-    assert "notes" in subtask_1_1, "Notes field should be added"
-    assert "Marked as stuck" in subtask_1_1["notes"], "Notes should mention stuck status"
-    assert reason in subtask_1_1["notes"], "Notes should include the reason"
+    assert "actual_output" in subtask_1_1, "actual_output field should be added"
+    assert "Marked as stuck" in subtask_1_1["actual_output"], "actual_output should mention stuck status"
+    assert reason in subtask_1_1["actual_output"], "actual_output should include the reason"
 
     # Verify other subtask was not affected
     subtask_1_2 = updated_plan["phases"][0]["subtasks"][1]
