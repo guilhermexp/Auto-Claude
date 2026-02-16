@@ -1,3 +1,23 @@
+## 2.7.11 - Startup Performance & Log Noise Reduction
+
+### 🛠️ Improvements
+
+- TASK_START idempotency guard prevents duplicate processing (profile init, git check, XState transitions)
+- TASK_LIST time-based dedup (500ms) coalesces rapid-fire IPC calls from multiple renderer effects
+- CLI Tools cache only clears and pre-warms when configuration actually changes
+- loadTasks promise coalescing deduplicates concurrent calls for the same project
+- Spellcheck language sync skips redundant calls when language hasn't changed
+- Claude Code version check prevents concurrent checks via ref guard
+- Replaced dynamic import of setActiveAPIProfile with static import (eliminates Vite mixed import warning)
+
+### 🐛 Bug Fixes
+
+- Fixed CLI Tools pre-warming running 5x on startup (now 1x)
+- Fixed TASK_LIST being called ~21 times on startup (now ~5, one per project)
+- Fixed TASK_START handler processing duplicate requests before AgentManager could reject them
+
+---
+
 ## 2.7.10 - Build Fix for Forks (Complete)
 
 ### 🐛 Bug Fixes
