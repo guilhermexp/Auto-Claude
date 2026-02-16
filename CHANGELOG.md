@@ -1,3 +1,13 @@
+## 2.7.12 - Fix macOS Auto-Update Code Signing
+
+### 🐛 Bug Fixes
+
+- Fixed macOS auto-update failing with "Code signature did not pass validation" error
+- CI now generates a self-signed certificate for consistent code signing across builds
+- Squirrel.Mac (ShipIt) no longer rejects updates due to ad-hoc signature identity mismatch
+
+---
+
 ## 2.7.11 - Startup Performance & Log Noise Reduction
 
 ### 🛠️ Improvements

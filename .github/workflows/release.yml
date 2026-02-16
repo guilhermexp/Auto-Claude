@@ -53,6 +53,37 @@ jobs:
           restore-keys: |
             python-bundle-${{ runner.os }}-x64-3.12.8-rust-
 
+      - name: Create self-signed certificate for code signing
+        run: |
+          # Create a temporary keychain for signing
+          security create-keychain -p "build" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "build" build.keychain
+          security set-keychain-settings -t 3600 build.keychain
+          # Generate a self-signed code signing certificate
+          cat > /tmp/cert.cnf << 'CERTEOF'
+          [req]
+          distinguished_name = req_dn
+          x509_extensions = codesign
+          prompt = no
+          [req_dn]
+          CN = Auto-Claude Dev
+          [codesign]
+          keyUsage = digitalSignature
+          extendedKeyUsage = codeSigning
+          CERTEOF
+          openssl req -x509 -newkey rsa:2048 -keyout /tmp/key.pem -out /tmp/cert.pem -days 365 -nodes -config /tmp/cert.cnf
+          openssl pkcs12 -export -out /tmp/cert.p12 -inkey /tmp/key.pem -in /tmp/cert.pem -passout pass:build
+          security import /tmp/cert.p12 -k build.keychain -P "build" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "build" build.keychain
+          # Get the identity hash for electron-builder
+          IDENTITY=$(security find-identity -v -p codesigning build.keychain | grep "Auto-Claude Dev" | head -1 | awk '{print $2}')
+          echo "CSC_NAME=${IDENTITY}" >> $GITHUB_ENV
+          echo "CSC_KEYCHAIN=build.keychain" >> $GITHUB_ENV
+          echo "Self-signed certificate created with identity: ${IDENTITY}"
+          # Clean up temp files
+          rm -f /tmp/key.pem /tmp/cert.pem /tmp/cert.p12 /tmp/cert.cnf
+
       - name: Build application
         run: cd apps/frontend && npm run build
         env:
@@ -64,8 +95,9 @@ jobs:
         run: cd apps/frontend && npm run package:mac -- --x64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Disable code signing for forks without certificates
-          CSC_IDENTITY_AUTO_DISCOVERY: false
+          CSC_IDENTITY_AUTO_DISCOVERY: true
+          CSC_NAME: ${{ env.CSC_NAME }}
+          CSC_KEYCHAIN: ${{ env.CSC_KEYCHAIN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}
           SENTRY_PROFILES_SAMPLE_RATE: ${{ secrets.SENTRY_PROFILES_SAMPLE_RATE }}
@@ -110,6 +142,37 @@ jobs:
           restore-keys: |
             python-bundle-${{ runner.os }}-arm64-3.12.8-
 
+      - name: Create self-signed certificate for code signing
+        run: |
+          # Create a temporary keychain for signing
+          security create-keychain -p "build" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "build" build.keychain
+          security set-keychain-settings -t 3600 build.keychain
+          # Generate a self-signed code signing certificate
+          cat > /tmp/cert.cnf << 'CERTEOF'
+          [req]
+          distinguished_name = req_dn
+          x509_extensions = codesign
+          prompt = no
+          [req_dn]
+          CN = Auto-Claude Dev
+          [codesign]
+          keyUsage = digitalSignature
+          extendedKeyUsage = codeSigning
+          CERTEOF
+          openssl req -x509 -newkey rsa:2048 -keyout /tmp/key.pem -out /tmp/cert.pem -days 365 -nodes -config /tmp/cert.cnf
+          openssl pkcs12 -export -out /tmp/cert.p12 -inkey /tmp/key.pem -in /tmp/cert.pem -passout pass:build
+          security import /tmp/cert.p12 -k build.keychain -P "build" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "build" build.keychain
+          # Get the identity hash for electron-builder
+          IDENTITY=$(security find-identity -v -p codesigning build.keychain | grep "Auto-Claude Dev" | head -1 | awk '{print $2}')
+          echo "CSC_NAME=${IDENTITY}" >> $GITHUB_ENV
+          echo "CSC_KEYCHAIN=build.keychain" >> $GITHUB_ENV
+          echo "Self-signed certificate created with identity: ${IDENTITY}"
+          # Clean up temp files
+          rm -f /tmp/key.pem /tmp/cert.pem /tmp/cert.p12 /tmp/cert.cnf
+
       - name: Build application
         run: cd apps/frontend && npm run build
         env:
@@ -121,8 +184,9 @@ jobs:
         run: cd apps/frontend && npm run package:mac -- --arm64
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Disable code signing for forks without certificates
-          CSC_IDENTITY_AUTO_DISCOVERY: false
+          CSC_IDENTITY_AUTO_DISCOVERY: true
+          CSC_NAME: ${{ env.CSC_NAME }}
+          CSC_KEYCHAIN: ${{ env.CSC_KEYCHAIN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.SENTRY_TRACES_SAMPLE_RATE }}
           SENTRY_PROFILES_SAMPLE_RATE: ${{ secrets.SENTRY_PROFILES_SAMPLE_RATE }}
