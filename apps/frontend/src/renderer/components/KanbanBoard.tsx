@@ -139,27 +139,13 @@ function droppableColumnPropsAreEqual(
   // Quick checks first
   if (prevProps.status !== nextProps.status) return false;
   if (prevProps.isOver !== nextProps.isOver) return false;
-  if (prevProps.onTaskClick !== nextProps.onTaskClick) return false;
-  if (prevProps.onStatusChange !== nextProps.onStatusChange) return false;
-  if (prevProps.onAddClick !== nextProps.onAddClick) return false;
-  if (prevProps.onArchiveAll !== nextProps.onArchiveAll) return false;
-  if (prevProps.onQueueSettings !== nextProps.onQueueSettings) return false;
-  if (prevProps.onQueueAll !== nextProps.onQueueAll) return false;
   if (prevProps.maxParallelTasks !== nextProps.maxParallelTasks) return false;
   if (prevProps.archivedCount !== nextProps.archivedCount) return false;
   if (prevProps.showArchived !== nextProps.showArchived) return false;
-  if (prevProps.onToggleArchived !== nextProps.onToggleArchived) return false;
-  if (prevProps.onSelectAll !== nextProps.onSelectAll) return false;
-  if (prevProps.onDeselectAll !== nextProps.onDeselectAll) return false;
-  if (prevProps.onToggleSelect !== nextProps.onToggleSelect) return false;
   if (prevProps.isCollapsed !== nextProps.isCollapsed) return false;
-  if (prevProps.onToggleCollapsed !== nextProps.onToggleCollapsed) return false;
   if (prevProps.columnWidth !== nextProps.columnWidth) return false;
   if (prevProps.isResizing !== nextProps.isResizing) return false;
-  if (prevProps.onResizeStart !== nextProps.onResizeStart) return false;
-  if (prevProps.onResizeEnd !== nextProps.onResizeEnd) return false;
   if (prevProps.isLocked !== nextProps.isLocked) return false;
-  if (prevProps.onToggleLocked !== nextProps.onToggleLocked) return false;
 
   // Compare selection props
   const prevSelected = prevProps.selectedTaskIds;

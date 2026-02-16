@@ -118,16 +118,23 @@ function NavItem({ icon: Icon, label, isActive, isDisabled, onClick }: NavItemPr
       onClick={handleClick}
       disabled={isDisabled}
       className={cn(
-        'settings-nav-item w-full h-9 justify-start gap-2.5 px-2.5 py-1.5 text-sm rounded-md font-normal transition-colors',
+        'h-auto w-full justify-start text-left py-2 cursor-pointer group relative transition-colors duration-75 app-sidebar-nav-item',
+        'bg-transparent border border-transparent shadow-none',
+        'pl-2 pr-2 rounded-md',
+        'disabled:pointer-events-none disabled:opacity-50',
         isActive
-          ? 'settings-nav-item-active text-foreground'
+          ? 'bg-foreground/5 text-foreground app-sidebar-nav-item-active'
           : isDisabled
             ? 'opacity-50 cursor-not-allowed text-muted-foreground'
-            : 'text-muted-foreground hover:text-foreground'
+            : 'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
       )}
     >
-      <Icon className={cn('h-4 w-4', isActive ? 'opacity-90' : 'opacity-60')} />
-      <span className="truncate">{label}</span>
+      <div className="flex items-center gap-2.5">
+        <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+          <Icon className={cn('h-4 w-4', isActive ? 'opacity-100' : 'opacity-60')} />
+        </div>
+        <span className="truncate text-sm leading-tight flex-1">{label}</span>
+      </div>
     </Button>
   );
 }
@@ -281,21 +288,21 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
         </FullScreenDialogHeader>
         <FullScreenDialogBody className="p-0">
           <div className="settings-modal worktrees-page flex h-full min-h-0 bg-background">
-            {/* Navigation sidebar - 1Code style: narrow, darker background */}
-            <nav className="w-[360px] min-w-0 max-w-[360px] flex-[0_0_360px] py-4 flex flex-col bg-sidebar border-r border-border/30 box-border min-h-0">
+            {/* Navigation sidebar - matches main app sidebar styling */}
+            <nav className="settings-sidebar w-[360px] min-w-0 max-w-[360px] flex-[0_0_360px] py-4 flex flex-col bg-sidebar border-r border-border/30 box-border min-h-0">
               {/* Title */}
               <h2 className="text-lg font-semibold px-4 pb-4 text-foreground">
                 {t('title')}
               </h2>
 
-              <ScrollArea className="settings-scroll-area flex-1 min-h-0 w-full max-w-full px-4 box-border">
-                <div className="space-y-4 w-full max-w-full box-border pr-1">
+              <ScrollArea className="settings-scroll-area flex-1 min-h-0 w-full max-w-full px-3 box-border">
+                <div className="space-y-6 w-full max-w-full box-border">
                   {/* APPLICATION Section */}
                   <div>
-                    <h3 className="mb-2 px-2 text-sm font-medium text-muted-foreground">
+                    <h3 className="mb-2 pl-1 text-xs font-medium text-muted-foreground">
                       {t('tabs.app')}
                     </h3>
-                    <div className="space-y-0.5 pr-1">
+                    <div className="space-y-1.5">
                       {appNavItemsConfig.map((item) => (
                         <NavItem
                           key={item.id}
@@ -320,23 +327,29 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
                             onRerunWizard();
                           }}
                           className={cn(
-                            'settings-nav-item w-full h-9 justify-start gap-2.5 px-2.5 py-1.5 text-sm rounded-md font-normal transition-colors mt-1',
-                            'text-muted-foreground hover:text-foreground'
+                            'h-auto w-full justify-start text-left py-2 cursor-pointer group relative transition-colors duration-75 app-sidebar-nav-item',
+                            'bg-transparent border border-transparent shadow-none',
+                            'pl-2 pr-2 rounded-md',
+                            'text-muted-foreground hover:bg-foreground/5 hover:text-foreground'
                           )}
                         >
-                          <Sparkles className="h-4 w-4 opacity-60" />
-                          <span className="truncate">{t('actions.rerunWizard')}</span>
+                          <div className="flex items-center gap-2.5">
+                            <div className="flex-shrink-0 w-4 h-4 flex items-center justify-center">
+                              <Sparkles className="h-4 w-4 opacity-60" />
+                            </div>
+                            <span className="truncate text-sm leading-tight flex-1">{t('actions.rerunWizard')}</span>
+                          </div>
                         </Button>
                       )}
                     </div>
                   </div>
 
                   {/* Separator */}
-                  <div className="settings-divider border-t border-border/30 mx-2" />
+                  <div className="border-t border-border/30 mx-1" />
 
                   {/* PROJECT Section */}
                   <div>
-                    <h3 className="mb-2 px-2 text-sm font-medium text-muted-foreground">
+                    <h3 className="mb-2 pl-1 text-xs font-medium text-muted-foreground">
                       {t('tabs.project')}
                     </h3>
 
@@ -349,7 +362,7 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
                     </div>
 
                     {/* Project Nav Items */}
-                    <div className="space-y-0.5 pr-1">
+                    <div className="space-y-1.5">
                       {projectNavItemsConfig.map((item) => (
                         <NavItem
                           key={item.id}
@@ -370,7 +383,7 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
 
               {/* Version at bottom */}
               {version && (
-                <div className="settings-divider mt-auto pt-4 border-t border-border/30 mx-2">
+                <div className="mt-auto pt-4 border-t border-border/30 mx-1">
                   <p className="text-xs text-muted-foreground text-center">
                     {t('updates.version')} {version}
                   </p>

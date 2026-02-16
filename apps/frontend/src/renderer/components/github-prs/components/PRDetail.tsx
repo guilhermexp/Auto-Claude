@@ -79,7 +79,7 @@ export function PRDetail({
   startedAt,
   isReviewing,
   initialNewCommitsCheck,
-  isActive: _isActive = false,
+  isActive = false,
   isLoadingFiles = false,
   onRunReview,
   onRunFollowupReview,
@@ -169,6 +169,10 @@ export function PRDetail({
   const hasPostedFindings = postedFindingIds.size > 0 || reviewResult?.hasPostedFindings;
 
   const checkForNewCommits = useCallback(async () => {
+    if (!isActive) {
+      return;
+    }
+
     // Prevent duplicate concurrent calls using ref (avoids callback recreation)
     if (isCheckingNewCommitsRef.current) {
       return;
@@ -215,9 +219,12 @@ export function PRDetail({
       // the operation tracking should be reset.
       isCheckingNewCommitsRef.current = false;
     }
-  }, [reviewResult, onCheckNewCommits, newCommitsCheck]);
+  }, [reviewResult, onCheckNewCommits, newCommitsCheck, isActive]);
 
   useEffect(() => {
+    if (!isActive) {
+      return;
+    }
     checkForNewCommits();
     return () => {
       // Cleanup abort controller on unmount
@@ -225,7 +232,7 @@ export function PRDetail({
         checkNewCommitsAbortRef.current.abort();
       }
     };
-  }, [checkForNewCommits]);
+  }, [checkForNewCommits, isActive]);
 
   // Clear success message after 3 seconds
   useEffect(() => {
@@ -252,6 +259,7 @@ export function PRDetail({
 
   // Load logs when logs section is expanded or when reviewing (for live logs)
   useEffect(() => {
+    if (!isActive) return;
     if (logsExpanded && !logsLoadedRef.current && !isLoadingLogs) {
       logsLoadedRef.current = true;
       setIsLoadingLogs(true);
@@ -260,13 +268,15 @@ export function PRDetail({
         .catch(() => setPrLogs(null))
         .finally(() => setIsLoadingLogs(false));
     }
-  }, [logsExpanded, onGetLogs, isLoadingLogs]);
+  }, [logsExpanded, onGetLogs, isLoadingLogs, isActive]);
 
   // Track previous reviewing state to detect transitions
   const wasReviewingRef = useRef(false);
 
   // Refresh logs periodically while reviewing (even faster during active review)
   useEffect(() => {
+    if (!isActive) return;
+
     const wasReviewing = wasReviewingRef.current;
     wasReviewingRef.current = isReviewing;
 
@@ -298,7 +308,7 @@ export function PRDetail({
     refreshLogs();
     const interval = setInterval(refreshLogs, 1500);
     return () => clearInterval(interval);
-  }, [isReviewing, onGetLogs]);
+  }, [isReviewing, onGetLogs, isActive]);
 
   // Reset logs state when PR changes
   useEffect(() => {
@@ -321,6 +331,8 @@ export function PRDetail({
 
   // Check for workflows awaiting approval (fork PRs) when PR changes or review completes
   useEffect(() => {
+    if (!isActive) return;
+
     const checkWorkflows = async () => {
       try {
         const result = await window.electronAPI.github.getWorkflowsAwaitingApproval(
@@ -335,11 +347,13 @@ export function PRDetail({
 
     checkWorkflows();
     // Re-check when a review is completed (CI status might have changed)
-  }, [pr.number, reviewResult]);
+  }, [pr.number, reviewResult, isActive]);
 
   // Check merge readiness (real-time validation) when PR is selected
   // This runs on every PR selection to catch stale verdicts
   useEffect(() => {
+    if (!isActive) return;
+
     // Cancel any pending check
     if (mergeReadinessAbortRef.current) {
       mergeReadinessAbortRef.current.abort();
@@ -372,7 +386,7 @@ export function PRDetail({
         mergeReadinessAbortRef.current.abort();
       }
     };
-  }, [pr.number, projectId, mergeReadinessRefreshKey]);
+  }, [pr.number, projectId, mergeReadinessRefreshKey, isActive]);
 
   // Handler to approve a workflow
   const handleApproveWorkflow = useCallback(async (runId: number) => {

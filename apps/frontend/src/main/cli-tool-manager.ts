@@ -290,10 +290,20 @@ class CLIToolManager {
    *
    * @param config - User configuration for CLI tool paths
    */
-  configure(config: ToolConfig): void {
+  configure(config: ToolConfig): boolean {
+    // Skip if configuration hasn't actually changed
+    if (this.userConfig &&
+        this.userConfig.pythonPath === config.pythonPath &&
+        this.userConfig.gitPath === config.gitPath &&
+        this.userConfig.githubCLIPath === config.githubCLIPath &&
+        this.userConfig.gitlabCLIPath === config.gitlabCLIPath &&
+        this.userConfig.claudePath === config.claudePath) {
+      return false;
+    }
     this.userConfig = config;
     this.cache.clear();
     console.warn('[CLI Tools] Configuration updated, cache cleared');
+    return true;
   }
 
   /**
@@ -2120,8 +2130,8 @@ export function getClaudeCliPathForSdk(): string | null {
  * });
  * ```
  */
-export function configureTools(config: ToolConfig): void {
-  cliToolManager.configure(config);
+export function configureTools(config: ToolConfig): boolean {
+  return cliToolManager.configure(config);
 }
 
 /**
