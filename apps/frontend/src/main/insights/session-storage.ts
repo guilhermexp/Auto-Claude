@@ -45,6 +45,9 @@ export class SessionStorage {
           timestamp: new Date(t.timestamp)
         }))
       }));
+      if (session.pendingAction?.createdAt) {
+        session.pendingAction.createdAt = new Date(session.pendingAction.createdAt as unknown as string);
+      }
       return session;
     } catch {
       return null;

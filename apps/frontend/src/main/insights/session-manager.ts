@@ -56,6 +56,7 @@ export class SessionManager {
       projectId,
       title: 'New Conversation',
       messages: [],
+      pendingAction: null,
       createdAt: new Date(),
       updatedAt: new Date()
     };

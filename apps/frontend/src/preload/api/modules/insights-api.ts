@@ -5,6 +5,7 @@ import type {
   InsightsChatStatus,
   InsightsStreamChunk,
   InsightsModelConfig,
+  InsightsKanbanSnapshot,
   Task,
   TaskMetadata,
   IPCResult
@@ -31,6 +32,18 @@ export interface InsightsAPI {
   deleteInsightsSession: (projectId: string, sessionId: string) => Promise<IPCResult>;
   renameInsightsSession: (projectId: string, sessionId: string, newTitle: string) => Promise<IPCResult>;
   updateInsightsModelConfig: (projectId: string, sessionId: string, modelConfig: InsightsModelConfig) => Promise<IPCResult>;
+  confirmInsightsAction: (
+    projectId: string,
+    sessionId: string,
+    actionId: string,
+    confirmed: boolean
+  ) => Promise<IPCResult>;
+  cancelInsightsAction: (
+    projectId: string,
+    sessionId: string,
+    actionId: string
+  ) => Promise<IPCResult>;
+  getInsightsKanbanSnapshot: (projectId: string) => Promise<IPCResult<InsightsKanbanSnapshot>>;
 
   // Event Listeners
   onInsightsStreamChunk: (
@@ -86,6 +99,24 @@ export const createInsightsAPI = (): InsightsAPI => ({
 
   updateInsightsModelConfig: (projectId: string, sessionId: string, modelConfig: InsightsModelConfig): Promise<IPCResult> =>
     invokeIpc(IPC_CHANNELS.INSIGHTS_UPDATE_MODEL_CONFIG, projectId, sessionId, modelConfig),
+
+  confirmInsightsAction: (
+    projectId: string,
+    sessionId: string,
+    actionId: string,
+    confirmed: boolean
+  ): Promise<IPCResult> =>
+    invokeIpc(IPC_CHANNELS.INSIGHTS_CONFIRM_ACTION, projectId, sessionId, actionId, confirmed),
+
+  cancelInsightsAction: (
+    projectId: string,
+    sessionId: string,
+    actionId: string
+  ): Promise<IPCResult> =>
+    invokeIpc(IPC_CHANNELS.INSIGHTS_CANCEL_ACTION, projectId, sessionId, actionId),
+
+  getInsightsKanbanSnapshot: (projectId: string): Promise<IPCResult<InsightsKanbanSnapshot>> =>
+    invokeIpc(IPC_CHANNELS.INSIGHTS_GET_KANBAN_SNAPSHOT, projectId),
 
   // Event Listeners
   onInsightsStreamChunk: (

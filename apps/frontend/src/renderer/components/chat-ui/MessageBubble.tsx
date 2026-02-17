@@ -8,9 +8,9 @@ import { SuggestedTaskCard } from './SuggestedTaskCard';
 interface MessageBubbleProps {
   message: InsightsChatMessage;
   markdownComponents: Components;
-  onCreateTask: () => void;
-  isCreatingTask: boolean;
-  taskCreated: boolean;
+  onCreateTask: (taskIndex: number) => void;
+  isCreatingTask: (taskIndex: number) => boolean;
+  taskCreated: (taskIndex: number) => boolean;
 }
 
 export function MessageBubble({
@@ -63,14 +63,15 @@ export function MessageBubble({
         </div>
       )}
 
-      {message.suggestedTask && (
+      {message.suggestedTasks?.map((task, taskIndex) => (
         <SuggestedTaskCard
-          task={message.suggestedTask}
-          onCreateTask={onCreateTask}
-          isCreatingTask={isCreatingTask}
-          taskCreated={taskCreated}
+          key={`${message.id}-task-${taskIndex}`}
+          task={task}
+          onCreateTask={() => onCreateTask(taskIndex)}
+          isCreatingTask={isCreatingTask(taskIndex)}
+          taskCreated={taskCreated(taskIndex)}
         />
-      )}
+      ))}
     </div>
   );
 }

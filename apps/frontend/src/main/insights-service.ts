@@ -3,7 +3,9 @@ import type {
   InsightsSession,
   InsightsSessionSummary,
   InsightsChatMessage,
-  InsightsModelConfig
+  InsightsModelConfig,
+  InsightsActionProposal,
+  InsightsActionResult
 } from '../shared/types';
 import { InsightsConfig } from './insights/config';
 import { InsightsPaths } from './insights/paths';
@@ -147,6 +149,7 @@ export class InsightsService extends EventEmitter {
       timestamp: new Date()
     };
     session.messages.push(userMessage);
+    session.pendingAction = null;
     session.updatedAt = new Date();
     this.sessionManager.saveSession(projectPath, session);
 
@@ -180,6 +183,7 @@ export class InsightsService extends EventEmitter {
       };
 
       session.messages.push(assistantMessage);
+      session.pendingAction = result.pendingAction ?? null;
       session.updatedAt = new Date();
       this.sessionManager.saveSession(projectPath, session);
 
@@ -196,6 +200,77 @@ export class InsightsService extends EventEmitter {
    */
   updateSessionModelConfig(projectPath: string, sessionId: string, modelConfig: InsightsModelConfig): boolean {
     return this.sessionManager.updateSessionModelConfig(projectPath, sessionId, modelConfig);
+  }
+
+  appendUserMessage(
+    projectId: string,
+    projectPath: string,
+    content: string
+  ): InsightsSession | null {
+    const session = this.sessionManager.loadSession(projectId, projectPath);
+    if (!session) return null;
+    session.messages.push({
+      id: `msg-${Date.now()}`,
+      role: 'user',
+      content,
+      timestamp: new Date()
+    });
+    session.updatedAt = new Date();
+    this.sessionManager.saveSession(projectPath, session);
+    this.emit('session-updated', projectId, session);
+    return session;
+  }
+
+  setPendingAction(
+    projectId: string,
+    projectPath: string,
+    action: InsightsActionProposal | null
+  ): InsightsSession | null {
+    const session = this.sessionManager.loadSession(projectId, projectPath);
+    if (!session) return null;
+    session.pendingAction = action;
+    session.updatedAt = new Date();
+    this.sessionManager.saveSession(projectPath, session);
+    console.log('[INSIGHTS_KANBAN] pending-action-updated', {
+      projectId,
+      sessionId: session.id,
+      actionId: action?.actionId ?? null,
+      intent: action?.intent ?? null,
+      requiresConfirmation: action?.requiresConfirmation ?? null
+    });
+    this.emit('session-updated', projectId, session);
+    return session;
+  }
+
+  appendActionResultMessage(
+    projectId: string,
+    projectPath: string,
+    actionResult: InsightsActionResult
+  ): InsightsSession | null {
+    const session = this.sessionManager.loadSession(projectId, projectPath);
+    if (!session) return null;
+
+    session.pendingAction = null;
+    session.messages.push({
+      id: `msg-${Date.now()}`,
+      role: 'assistant',
+      content: actionResult.summary,
+      timestamp: new Date()
+    });
+    session.updatedAt = new Date();
+    this.sessionManager.saveSession(projectPath, session);
+    console.log('[INSIGHTS_KANBAN] action-result-appended', {
+      projectId,
+      sessionId: session.id,
+      actionId: actionResult.actionId,
+      intent: actionResult.intent,
+      success: actionResult.success,
+      cancelled: Boolean(actionResult.cancelled),
+      executedCount: actionResult.executedSpecIds.length,
+      failedCount: actionResult.failed.length
+    });
+    this.emit('session-updated', projectId, session);
+    return session;
   }
 }
 

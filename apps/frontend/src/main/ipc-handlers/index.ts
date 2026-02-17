@@ -104,7 +104,7 @@ export function setupIpcHandlers(
   registerChangelogHandlers(getMainWindow);
 
   // Insights handlers
-  registerInsightsHandlers(getMainWindow);
+  registerInsightsHandlers(agentManager, getMainWindow);
 
   // Memory & infrastructure handlers (for Graphiti/LadybugDB)
   registerMemoryHandlers();

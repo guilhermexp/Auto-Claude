@@ -109,7 +109,8 @@ import type {
   InsightsSessionSummary,
   InsightsChatStatus,
   InsightsStreamChunk,
-  InsightsModelConfig
+  InsightsModelConfig,
+  InsightsKanbanSnapshot
 } from './insights';
 import type {
   Roadmap,
@@ -805,6 +806,18 @@ export interface ElectronAPI {
   deleteInsightsSession: (projectId: string, sessionId: string) => Promise<IPCResult>;
   renameInsightsSession: (projectId: string, sessionId: string, newTitle: string) => Promise<IPCResult>;
   updateInsightsModelConfig: (projectId: string, sessionId: string, modelConfig: InsightsModelConfig) => Promise<IPCResult>;
+  confirmInsightsAction: (
+    projectId: string,
+    sessionId: string,
+    actionId: string,
+    confirmed: boolean
+  ) => Promise<IPCResult>;
+  cancelInsightsAction: (
+    projectId: string,
+    sessionId: string,
+    actionId: string
+  ) => Promise<IPCResult>;
+  getInsightsKanbanSnapshot: (projectId: string) => Promise<IPCResult<InsightsKanbanSnapshot>>;
 
   // Insights event listeners
   onInsightsStreamChunk: (

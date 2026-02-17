@@ -265,7 +265,7 @@ export function PRList({
               variant="ghost"
               onClick={() => onSelectPR(pr.number)}
               className={cn(
-                'w-full p-4 rounded-xl border text-left transition-colors github-pr-list-item',
+                'w-full h-auto whitespace-normal p-4 rounded-xl border text-left transition-colors github-pr-list-item',
                 selectedPRNumber === pr.number && 'github-pr-list-item-selected'
               )}
             >
@@ -274,7 +274,7 @@ export function PRList({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="text-sm text-muted-foreground">#{pr.number}</span>
-                    <Badge variant="outline" className="text-xs github-pr-chip github-pr-chip-neutral">
+                    <Badge variant="outline" className="text-xs truncate max-w-[200px] github-pr-chip github-pr-chip-neutral" title={pr.headRefName}>
                       {pr.headRefName}
                     </Badge>
                     {/* Review status flow dots + label */}

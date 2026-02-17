@@ -95,7 +95,16 @@
     "reviewMergeUnknownError": "Erreur inconnue",
     "reviewMergeUnexpectedError": "Erreur inattendue",
     "reviewMergeCancelledByUser": "Annulé par l'utilisateur",
-    "reviewMergePrLink": "PR : {{url}}"
+    "reviewMergePrLink": "PR : {{url}}",
+    "reviewMergeMinimize": "Minimiser",
+    "reviewMergeExpand": "Voir les détails",
+    "reviewMergeStep_reviewing": "Révision",
+    "reviewMergeStep_checking_conflicts": "Conflits",
+    "reviewMergeStep_planning": "Plan",
+    "reviewMergeStep_building": "Build",
+    "reviewMergeStep_verifying": "Vérifier",
+    "reviewMergeStep_creating_pr": "PR",
+    "reviewMergeStep_merging": "Fusion"
   },
   "worktreeCleanup": {
     "title": "Terminer la tâche",

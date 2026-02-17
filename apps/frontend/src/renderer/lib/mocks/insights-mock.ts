@@ -83,6 +83,21 @@ export const insightsMock = {
     return { success: true };
   },
 
+  confirmInsightsAction: async () => ({ success: true }),
+  cancelInsightsAction: async () => ({ success: true }),
+  getInsightsKanbanSnapshot: async (projectId: string) => ({
+    success: true,
+    data: {
+      projectId,
+      asOf: new Date().toISOString(),
+      counts: {},
+      queue: [],
+      inProgress: [],
+      humanReview: [],
+      error: []
+    }
+  }),
+
   sendInsightsMessage: () => {
     console.warn('[Browser Mock] sendInsightsMessage called');
   },

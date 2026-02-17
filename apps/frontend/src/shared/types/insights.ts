@@ -175,6 +175,67 @@ export interface InsightsToolUsage {
   timestamp: Date;
 }
 
+export type InsightsKanbanIntent =
+  | 'status_summary'
+  | 'list_human_review'
+  | 'list_errors'
+  | 'start_tasks'
+  | 'stop_tasks'
+  | 'delete_tasks'
+  | 'review_tasks'
+  | 'queue_count'
+  | 'in_progress_count';
+
+export interface InsightsKanbanTargetSelector {
+  specIds?: string[];
+  filter?: 'queue' | 'in_progress' | 'human_review' | 'error' | 'all';
+  limit?: number;
+  raw?: string;
+}
+
+export interface InsightsKanbanTaskSummary {
+  specId: string;
+  title: string;
+  status: string;
+  reviewReason?: string;
+}
+
+export interface InsightsKanbanSnapshot {
+  projectId: string;
+  asOf: string;
+  counts: Record<string, number>;
+  queue: InsightsKanbanTaskSummary[];
+  inProgress: InsightsKanbanTaskSummary[];
+  humanReview: InsightsKanbanTaskSummary[];
+  error: InsightsKanbanTaskSummary[];
+}
+
+export interface InsightsActionProposal {
+  actionId: string;
+  intent: InsightsKanbanIntent;
+  targets?: InsightsKanbanTargetSelector;
+  resolvedSpecIds?: string[];
+  requiresConfirmation: boolean;
+  reason: string;
+  createdAt: Date;
+}
+
+export interface InsightsActionFailure {
+  specId: string;
+  error: string;
+}
+
+export interface InsightsActionResult {
+  actionId: string;
+  intent: InsightsKanbanIntent;
+  success: boolean;
+  cancelled?: boolean;
+  summary: string;
+  executedSpecIds: string[];
+  failed: InsightsActionFailure[];
+  snapshot: InsightsKanbanSnapshot;
+}
+
 export interface InsightsChatMessage {
   id: string;
   role: InsightsChatRole;
@@ -195,6 +256,7 @@ export interface InsightsSession {
   projectId: string;
   title?: string; // Auto-generated from first message or user-set
   messages: InsightsChatMessage[];
+  pendingAction?: InsightsActionProposal | null;
   modelConfig?: InsightsModelConfig; // Per-session model configuration
   createdAt: Date;
   updatedAt: Date;
@@ -218,13 +280,15 @@ export interface InsightsChatStatus {
 }
 
 export interface InsightsStreamChunk {
-  type: 'text' | 'task_suggestion' | 'tool_start' | 'tool_end' | 'done' | 'error';
+  type: 'text' | 'task_suggestion' | 'tool_start' | 'tool_end' | 'action_proposal' | 'action_result' | 'done' | 'error';
   content?: string;
   suggestedTasks?: Array<{
     title: string;
     description: string;
     metadata?: TaskMetadata;
   }>;
+  actionProposal?: InsightsActionProposal;
+  actionResult?: InsightsActionResult;
   tool?: {
     name: string;
     input?: string;  // Brief description of what's being searched/read

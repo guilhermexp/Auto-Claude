@@ -8,7 +8,8 @@ import type {
   InsightsChatStatus,
   InsightsStreamChunk,
   InsightsToolUsage,
-  InsightsModelConfig
+  InsightsModelConfig,
+  InsightsActionProposal
 } from '../../shared/types';
 import { MODEL_ID_MAP } from '../../shared/constants';
 import { InsightsConfig } from './config';
@@ -21,6 +22,7 @@ interface ProcessorResult {
   fullResponse: string;
   suggestedTasks?: InsightsChatMessage['suggestedTasks'];
   toolsUsed: InsightsToolUsage[];
+  pendingAction?: InsightsActionProposal;
 }
 
 /**
@@ -129,6 +131,7 @@ export class InsightsExecutor extends EventEmitter {
       let fullResponse = '';
       const suggestedTasks: InsightsChatMessage['suggestedTasks'] = [];
       const toolsUsed: InsightsToolUsage[] = [];
+      let pendingAction: InsightsActionProposal | undefined;
       let allInsightsOutput = '';
       let stderrOutput = '';
 
@@ -146,10 +149,17 @@ export class InsightsExecutor extends EventEmitter {
                 suggestedTasks.push(task);
               }
             });
+          } else if (line.startsWith('__KANBAN_ACTION__:')) {
+            this.handleKanbanAction(projectId, line, (proposal) => {
+              pendingAction = proposal;
+            });
           } else if (line.startsWith('__TOOL_START__:')) {
             this.handleToolStart(projectId, line, toolsUsed);
           } else if (line.startsWith('__TOOL_END__:')) {
             this.handleToolEnd(projectId, line);
+          } else if (line.startsWith('[DEBUG ')) {
+            // Ignore backend debug traces from runner output to avoid polluting chat UI.
+            continue;
           } else if (line.trim()) {
             fullResponse += line + '\n';
             this.emit('stream-chunk', projectId, {
@@ -197,7 +207,8 @@ export class InsightsExecutor extends EventEmitter {
           resolve({
             fullResponse: fullResponse.trim(),
             suggestedTasks: suggestedTasks.length > 0 ? suggestedTasks : undefined,
-            toolsUsed
+            toolsUsed,
+            pendingAction
           });
         } else {
           // Include stderr output in error message for debugging
@@ -251,6 +262,31 @@ export class InsightsExecutor extends EventEmitter {
       } as InsightsStreamChunk);
     } catch {
       // Not valid JSON, treat as normal text (should not emit here as it's already handled)
+    }
+  }
+
+  /**
+   * Handle kanban action proposal marker from insights runner.
+   */
+  private handleKanbanAction(
+    projectId: string,
+    line: string,
+    onActionFound: (action: InsightsActionProposal) => void
+  ): void {
+    try {
+      const actionJson = line.substring('__KANBAN_ACTION__:'.length);
+      const rawAction = JSON.parse(actionJson) as InsightsActionProposal & { createdAt?: string };
+      const action: InsightsActionProposal = {
+        ...rawAction,
+        createdAt: rawAction.createdAt ? new Date(rawAction.createdAt) : new Date()
+      };
+      onActionFound(action);
+      this.emit('stream-chunk', projectId, {
+        type: 'action_proposal',
+        actionProposal: action
+      } as InsightsStreamChunk);
+    } catch {
+      // Ignore parse errors and continue streaming normal text.
     }
   }
 
