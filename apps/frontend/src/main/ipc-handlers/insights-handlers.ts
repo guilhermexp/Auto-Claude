@@ -1,5 +1,6 @@
 import { ipcMain, app } from "electron";
 import type { BrowserWindow } from "electron";
+import type { AgentManager } from "../agent";
 import path from "path";
 import { existsSync, readdirSync, mkdirSync, writeFileSync, readFileSync } from "fs";
 import { debugError } from "../../shared/utils/debug-logger";
@@ -16,6 +17,8 @@ import type {
   InsightsSession,
   InsightsSessionSummary,
   InsightsModelConfig,
+  InsightsActionResult,
+  InsightsActionProposal,
   Task,
   TaskMetadata,
   AppSettings,
@@ -23,6 +26,7 @@ import type {
 import { projectStore } from "../project-store";
 import { insightsService } from "../insights-service";
 import { safeSendToRenderer } from "./utils";
+import { TaskControlService } from "../services/task-control-service";
 
 /**
  * Read insights feature settings from the settings file
@@ -61,7 +65,48 @@ function getInsightsFeatureSettings(): InsightsModelConfig {
 /**
  * Register all insights-related IPC handlers
  */
-export function registerInsightsHandlers(getMainWindow: () => BrowserWindow | null): void {
+export function registerInsightsHandlers(
+  agentManager: AgentManager,
+  getMainWindow: () => BrowserWindow | null
+): void {
+  const taskControlService = new TaskControlService(agentManager);
+  const KANBAN_LOG_PREFIX = '[INSIGHTS_KANBAN]';
+
+  const normalizeDecision = (text: string): "confirm" | "cancel" | null => {
+    const value = text.trim().toLowerCase();
+    if (!value) return null;
+
+    const confirmSet = new Set([
+      "sim",
+      "s",
+      "yes",
+      "y",
+      "ok",
+      "okay",
+      "confirmar",
+      "confirma",
+      "pode",
+      "pode executar",
+      "executa",
+      "iniciar"
+    ]);
+
+    const cancelSet = new Set([
+      "nao",
+      "não",
+      "n",
+      "no",
+      "cancelar",
+      "cancela",
+      "parar",
+      "pare",
+      "stop"
+    ]);
+
+    if (confirmSet.has(value)) return "confirm";
+    if (cancelSet.has(value)) return "cancel";
+    return null;
+  };
   // ============================================
   // Insights Operations
   // ============================================
@@ -90,6 +135,53 @@ export function registerInsightsHandlers(getMainWindow: () => BrowserWindow | nu
           projectId,
           "Project not found"
         );
+        return;
+      }
+
+      const session = insightsService.loadSession(projectId, project.path);
+      const pendingAction = session?.pendingAction as InsightsActionProposal | null | undefined;
+      const decision = pendingAction ? normalizeDecision(message) : null;
+
+      if (pendingAction && decision) {
+        console.log(`${KANBAN_LOG_PREFIX} text-decision`, {
+          projectId,
+          sessionId: session?.id,
+          actionId: pendingAction.actionId,
+          intent: pendingAction.intent,
+          decision
+        });
+        insightsService.appendUserMessage(projectId, project.path, message);
+
+        const result: InsightsActionResult =
+          decision === "confirm"
+            ? await taskControlService.executeIntent(projectId, pendingAction)
+            : {
+                actionId: pendingAction.actionId,
+                intent: pendingAction.intent,
+                success: true,
+                cancelled: true,
+                summary: `Action cancelled: ${pendingAction.intent}.`,
+                executedSpecIds: [],
+                failed: [],
+                snapshot: taskControlService.getKanbanSnapshot(projectId)
+              };
+
+        insightsService.setPendingAction(projectId, project.path, null);
+        insightsService.appendActionResultMessage(projectId, project.path, result);
+        console.log(`${KANBAN_LOG_PREFIX} text-decision-result`, {
+          projectId,
+          sessionId: session?.id,
+          actionId: result.actionId,
+          intent: result.intent,
+          success: result.success,
+          cancelled: Boolean(result.cancelled),
+          executedCount: result.executedSpecIds.length,
+          failedCount: result.failed.length
+        });
+        safeSendToRenderer(getMainWindow, IPC_CHANNELS.INSIGHTS_STREAM_CHUNK, projectId, {
+          type: "action_result",
+          actionResult: result
+        });
         return;
       }
 
@@ -345,6 +437,166 @@ export function registerInsightsHandlers(getMainWindow: () => BrowserWindow | nu
         return { success: true };
       }
       return { success: false, error: "Failed to update model configuration" };
+    }
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.INSIGHTS_GET_KANBAN_SNAPSHOT,
+    async (_, projectId: string): Promise<IPCResult> => {
+      const project = projectStore.getProject(projectId);
+      if (!project) {
+        return { success: false, error: "Project not found" };
+      }
+
+      const snapshot = taskControlService.getKanbanSnapshot(projectId);
+      return { success: true, data: snapshot };
+    }
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.INSIGHTS_CANCEL_ACTION,
+    async (
+      _,
+      projectId: string,
+      sessionId: string,
+      actionId: string
+    ): Promise<IPCResult> => {
+      const project = projectStore.getProject(projectId);
+      if (!project) {
+        return { success: false, error: "Project not found" };
+      }
+
+      const session = insightsService.loadSession(projectId, project.path);
+      if (!session || session.id !== sessionId) {
+        return { success: false, error: "Insights session not found" };
+      }
+
+      const pendingAction = session.pendingAction;
+      if (!pendingAction || pendingAction.actionId !== actionId) {
+        return { success: false, error: "Pending action not found" };
+      }
+
+      console.log(`${KANBAN_LOG_PREFIX} cancel-request`, {
+        projectId,
+        sessionId,
+        actionId,
+        intent: pendingAction.intent,
+        source: "ipc_cancel"
+      });
+      const snapshot = taskControlService.getKanbanSnapshot(projectId);
+      const result: InsightsActionResult = {
+        actionId,
+        intent: pendingAction.intent,
+        success: true,
+        cancelled: true,
+        summary: `Action cancelled: ${pendingAction.intent}.`,
+        executedSpecIds: [],
+        failed: [],
+        snapshot
+      };
+
+      insightsService.setPendingAction(projectId, project.path, null);
+      insightsService.appendActionResultMessage(projectId, project.path, result);
+      safeSendToRenderer(getMainWindow, IPC_CHANNELS.INSIGHTS_STREAM_CHUNK, projectId, {
+        type: "action_result",
+        actionResult: result
+      });
+      console.log(`${KANBAN_LOG_PREFIX} cancel-result`, {
+        projectId,
+        sessionId,
+        actionId: result.actionId,
+        intent: result.intent
+      });
+      return { success: true, data: result };
+    }
+  );
+
+  ipcMain.handle(
+    IPC_CHANNELS.INSIGHTS_CONFIRM_ACTION,
+    async (
+      _,
+      projectId: string,
+      sessionId: string,
+      actionId: string,
+      confirmed: boolean
+    ): Promise<IPCResult> => {
+      const project = projectStore.getProject(projectId);
+      if (!project) {
+        return { success: false, error: "Project not found" };
+      }
+
+      const session = insightsService.loadSession(projectId, project.path);
+      if (!session || session.id !== sessionId) {
+        return { success: false, error: "Insights session not found" };
+      }
+
+      const pendingAction = session.pendingAction as InsightsActionProposal | null;
+      if (!pendingAction || pendingAction.actionId !== actionId) {
+        return { success: false, error: "Pending action not found" };
+      }
+
+      console.log(`${KANBAN_LOG_PREFIX} confirm-request`, {
+        projectId,
+        sessionId,
+        actionId,
+        intent: pendingAction.intent,
+        confirmed
+      });
+      if (!confirmed) {
+        const snapshot = taskControlService.getKanbanSnapshot(projectId);
+        const cancelledResult: InsightsActionResult = {
+          actionId,
+          intent: pendingAction.intent,
+          success: true,
+          cancelled: true,
+          summary: `Action cancelled: ${pendingAction.intent}.`,
+          executedSpecIds: [],
+          failed: [],
+          snapshot
+        };
+        insightsService.setPendingAction(projectId, project.path, null);
+        insightsService.appendActionResultMessage(projectId, project.path, cancelledResult);
+        safeSendToRenderer(getMainWindow, IPC_CHANNELS.INSIGHTS_STREAM_CHUNK, projectId, {
+          type: "action_result",
+          actionResult: cancelledResult
+        });
+        console.log(`${KANBAN_LOG_PREFIX} confirm-result`, {
+          projectId,
+          sessionId,
+          actionId: cancelledResult.actionId,
+          intent: cancelledResult.intent,
+          success: cancelledResult.success,
+          cancelled: true,
+          executedCount: 0,
+          failedCount: 0
+        });
+        return { success: true, data: cancelledResult };
+      }
+
+      try {
+        const result = await taskControlService.executeIntent(projectId, pendingAction);
+        insightsService.setPendingAction(projectId, project.path, null);
+        insightsService.appendActionResultMessage(projectId, project.path, result);
+        safeSendToRenderer(getMainWindow, IPC_CHANNELS.INSIGHTS_STREAM_CHUNK, projectId, {
+          type: "action_result",
+          actionResult: result
+        });
+        console.log(`${KANBAN_LOG_PREFIX} confirm-result`, {
+          projectId,
+          sessionId,
+          actionId: result.actionId,
+          intent: result.intent,
+          success: result.success,
+          cancelled: Boolean(result.cancelled),
+          executedCount: result.executedSpecIds.length,
+          failedCount: result.failed.length
+        });
+        return { success: true, data: result };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        insightsService.setPendingAction(projectId, project.path, null);
+        return { success: false, error: `Failed to execute action: ${errorMessage}` };
+      }
     }
   );
 

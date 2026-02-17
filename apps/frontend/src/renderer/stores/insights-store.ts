@@ -7,6 +7,7 @@ import type {
   InsightsStreamChunk,
   InsightsToolUsage,
   InsightsModelConfig,
+  InsightsActionProposal,
   TaskMetadata,
   Task
 } from '../../shared/types';
@@ -44,6 +45,7 @@ interface InsightsState {
   finalizeStreamingMessage: () => void;
   clearSession: () => void;
   setLoadingSessions: (loading: boolean) => void;
+  setPendingAction: (action: InsightsActionProposal | null) => void;
 }
 
 const initialStatus: InsightsChatStatus = {
@@ -71,6 +73,18 @@ export const useInsightsStore = create<InsightsState>((set, _get) => ({
   setStatus: (status) => set({ status }),
 
   setLoadingSessions: (loading) => set({ isLoadingSessions: loading }),
+
+  setPendingAction: (action) =>
+    set((state) => {
+      if (!state.session) return state;
+      return {
+        session: {
+          ...state.session,
+          pendingAction: action,
+          updatedAt: new Date()
+        }
+      };
+    }),
 
   setPendingMessage: (message) => set({ pendingMessage: message }),
 
@@ -351,6 +365,32 @@ export async function createTaskFromSuggestion(
   return null;
 }
 
+export async function confirmInsightsAction(
+  projectId: string,
+  sessionId: string,
+  actionId: string
+): Promise<boolean> {
+  const result = await window.electronAPI.confirmInsightsAction(projectId, sessionId, actionId, true);
+  if (result.success) {
+    await loadInsightsSession(projectId);
+    return true;
+  }
+  return false;
+}
+
+export async function cancelInsightsAction(
+  projectId: string,
+  sessionId: string,
+  actionId: string
+): Promise<boolean> {
+  const result = await window.electronAPI.cancelInsightsAction(projectId, sessionId, actionId);
+  if (result.success) {
+    await loadInsightsSession(projectId);
+    return true;
+  }
+  return false;
+}
+
 // IPC listener setup - call this once when the app initializes
 export function setupInsightsListeners(): () => void {
   const store = useInsightsStore.getState;
@@ -395,6 +435,36 @@ export function setupInsightsListeners(): () => void {
           if (chunk.suggestedTasks) {
             store().addStreamingTasks(chunk.suggestedTasks);
           }
+          break;
+        case 'action_proposal': {
+          const action = chunk.actionProposal;
+          if (!action) break;
+          store().setPendingAction(action);
+          store().setCurrentTool(null);
+
+          if (!action.requiresConfirmation) {
+            const session = store().session;
+            if (session?.id) {
+              window.electronAPI.confirmInsightsAction(
+                _projectId,
+                session.id,
+                action.actionId,
+                true
+              ).catch((err: unknown) => {
+                console.error('[insights-store] auto-confirm action failed:', err);
+              });
+            }
+          }
+          break;
+        }
+        case 'action_result':
+          store().setCurrentTool(null);
+          store().finalizeStreamingMessage();
+          store().setPendingAction(null);
+          store().setStatus({
+            phase: 'complete',
+            message: chunk.actionResult?.summary ?? ''
+          });
           break;
         case 'done':
           // Finalize any remaining content

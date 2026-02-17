@@ -86,3 +86,8 @@ await service.sendMessage(projectId, projectPath, message);
 ## Migration Notes
 
 This refactoring maintains 100% backward compatibility. All functionality from the original 659-line file is preserved, just better organized across 5 focused modules.
+
+## Kanban Operator
+
+Documentation for the conversational Kanban operator in Insights:
+- `./KANBAN_OPERATOR.md`

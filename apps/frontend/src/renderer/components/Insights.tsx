@@ -28,11 +28,13 @@ import {
   renameSession,
   updateModelConfig,
   createTaskFromSuggestion,
+  confirmInsightsAction,
+  cancelInsightsAction,
   setupInsightsListeners
 } from '../stores/insights-store';
 import { loadTasks } from '../stores/task-store';
 import { ChatHistorySidebar } from './ChatHistorySidebar';
-import type { InsightsChatMessage, InsightsModelConfig } from '../../shared/types';
+import type { InsightsChatMessage, InsightsModelConfig, TaskMetadata } from '../../shared/types';
 import {
   MessageBubble,
   ToolIndicator,
@@ -94,6 +96,7 @@ export function Insights({ projectId }: InsightsProps) {
   const streamingContent = useInsightsStore((state) => state.streamingContent);
   const currentTool = useInsightsStore((state) => state.currentTool);
   const isLoadingSessions = useInsightsStore((state) => state.isLoadingSessions);
+  const pendingAction = useInsightsStore((state) => state.session?.pendingAction ?? null);
   const isPortugueseUi = i18n.resolvedLanguage === 'pt';
   const {
     isEnabled: isTranslationEnabled,
@@ -116,6 +119,7 @@ export function Insights({ projectId }: InsightsProps) {
   const [isUserAtBottom, setIsUserAtBottom] = useState(true);
   const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isSubmittingAction, setIsSubmittingAction] = useState(false);
 
   const project = useProjectStore((state) =>
     state.projects.find((item) => item.id === projectId)
@@ -234,6 +238,26 @@ export function Insights({ projectId }: InsightsProps) {
     }
   };
 
+  const handleConfirmPendingAction = async () => {
+    if (!session?.id || !pendingAction) return;
+    setIsSubmittingAction(true);
+    try {
+      await confirmInsightsAction(projectId, session.id, pendingAction.actionId);
+    } finally {
+      setIsSubmittingAction(false);
+    }
+  };
+
+  const handleCancelPendingAction = async () => {
+    if (!session?.id || !pendingAction) return;
+    setIsSubmittingAction(true);
+    try {
+      await cancelInsightsAction(projectId, session.id, pendingAction.actionId);
+    } finally {
+      setIsSubmittingAction(false);
+    }
+  };
+
   const handleModelConfigChange = async (config: InsightsModelConfig) => {
     // If we have a session, persist the config
     if (session?.id) {
@@ -262,19 +286,16 @@ export function Insights({ projectId }: InsightsProps) {
         { key: `${message.id}:content`, text: message.content },
       ];
 
-      if (message.suggestedTask?.title) {
+      message.suggestedTasks?.forEach((task, index) => {
         entries.push({
-          key: `${message.id}:suggestedTaskTitle`,
-          text: message.suggestedTask.title,
+          key: `${message.id}:suggestedTaskTitle:${index}`,
+          text: task.title,
         });
-      }
-
-      if (message.suggestedTask?.description) {
         entries.push({
-          key: `${message.id}:suggestedTaskDescription`,
-          text: message.suggestedTask.description,
+          key: `${message.id}:suggestedTaskDescription:${index}`,
+          text: task.description,
         });
-      }
+      });
 
       return entries;
     });
@@ -314,19 +335,17 @@ export function Insights({ projectId }: InsightsProps) {
       return {
         ...message,
         content: getTranslatedText(`${message.id}:content`, message.content),
-        suggestedTask: message.suggestedTask
-          ? {
-              ...message.suggestedTask,
-              title: getTranslatedText(
-                `${message.id}:suggestedTaskTitle`,
-                message.suggestedTask.title
-              ),
-              description: getTranslatedText(
-                `${message.id}:suggestedTaskDescription`,
-                message.suggestedTask.description
-              ),
-            }
-          : undefined,
+        suggestedTasks: message.suggestedTasks?.map((task, index) => ({
+          ...task,
+          title: getTranslatedText(
+            `${message.id}:suggestedTaskTitle:${index}`,
+            task.title
+          ),
+          description: getTranslatedText(
+            `${message.id}:suggestedTaskDescription:${index}`,
+            task.description
+          ),
+        })),
       };
     });
   }, [isTranslationEnabled, messages, getTranslatedText]);
@@ -489,11 +508,52 @@ export function Insights({ projectId }: InsightsProps) {
                       key={message.id}
                       message={message}
                       markdownComponents={markdownComponents}
-                      onCreateTask={() => handleCreateTask(message)}
-                      isCreatingTask={creatingTask === message.id}
-                      taskCreated={taskCreated.has(message.id)}
+                      onCreateTask={(taskIndex) => {
+                        const task = message.suggestedTasks?.[taskIndex];
+                        if (!task) return;
+                        void handleCreateTask(message.id, taskIndex, task);
+                      }}
+                      isCreatingTask={(taskIndex) =>
+                        creatingTask.has(`${message.id}-${taskIndex}`)
+                      }
+                      taskCreated={(taskIndex) =>
+                        taskCreated.has(`${message.id}-${taskIndex}`)
+                      }
                     />
                   ))}
+
+                  {pendingAction && pendingAction.requiresConfirmation && (
+                    <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+                      <div className="text-sm font-medium">
+                        {t('insights:kanban.pendingAction.title', { intent: pendingAction.intent })}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {pendingAction.reason}
+                      </div>
+                      {pendingAction.resolvedSpecIds && pendingAction.resolvedSpecIds.length > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          {t('insights:kanban.pendingAction.ids', { ids: pendingAction.resolvedSpecIds.join(', ') })}
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={handleConfirmPendingAction}
+                          disabled={isSubmittingAction}
+                        >
+                          {isSubmittingAction ? <Loader2 className="h-4 w-4 animate-spin" /> : t('insights:kanban.pendingAction.confirm')}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleCancelPendingAction}
+                          disabled={isSubmittingAction}
+                        >
+                          {t('insights:kanban.pendingAction.cancel')}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Streaming message */}
                   {(streamingContent || currentTool) && (

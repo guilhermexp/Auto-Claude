@@ -210,5 +210,13 @@
     "healthLabel": "Health",
     "dependencies": "Dependencies ({{count}})",
     "moreDependencies": "+{{count}} more"
+  },
+  "kanban": {
+    "pendingAction": {
+      "title": "Pending action: {{intent}}",
+      "ids": "IDs: {{ids}}",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    }
   }
 }
