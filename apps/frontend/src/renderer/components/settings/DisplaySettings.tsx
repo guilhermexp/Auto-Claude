@@ -309,6 +309,9 @@ export function DisplaySettings({ settings, onSettingsChange }: DisplaySettingsP
               </SelectContent>
             </Select>
           </div>
+          <p className="text-xs text-muted-foreground">
+            {t('gpuAcceleration.helperText')}
+          </p>
         </div>
       </div>
     </SettingsSection>

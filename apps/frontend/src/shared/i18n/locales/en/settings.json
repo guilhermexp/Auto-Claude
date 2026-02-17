@@ -197,7 +197,8 @@
     "description": "Use WebGL for terminal rendering (experimental, faster with many terminals)",
     "auto": "Auto (use WebGL when supported)",
     "on": "Always on",
-    "off": "Off (default)"
+    "off": "Off (default)",
+    "helperText": "Changes apply to new terminals only"
   },
   "general": {
     "otherAgentSettings": "Other Agent Settings",

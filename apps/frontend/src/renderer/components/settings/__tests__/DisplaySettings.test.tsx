@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import '../../../../shared/i18n';
 import { DisplaySettings } from '../DisplaySettings';
@@ -15,20 +15,24 @@ vi.mock('../../../stores/settings-store', () => ({
   }))
 }));
 
-// Track onValueChange callbacks per Select instance
-let selectCallbacks: Array<(v: string) => void> = [];
+// Track onValueChange callbacks per Select instance, keyed by the SelectTrigger id
+let selectCallbacks: Map<string, (v: string) => void> = new Map();
+let currentSelectCallback: ((v: string) => void) | null = null;
 
 // Mock Radix Select to make it testable in jsdom (portals don't work in jsdom)
 vi.mock('../../ui/select', () => {
   return {
     Select: ({ value, onValueChange, children }: { value: string; onValueChange: (v: string) => void; children: React.ReactNode }) => {
-      selectCallbacks.push(onValueChange);
-      const idx = selectCallbacks.length - 1;
-      return <div data-testid={`select-root-${idx}`} data-value={value}>{children}</div>;
+      currentSelectCallback = onValueChange;
+      return <div data-value={value}>{children}</div>;
     },
-    SelectTrigger: ({ id, children }: { id?: string; className?: string; children: React.ReactNode }) => (
-      <button data-testid={`select-trigger-${id || 'unknown'}`}>{children}</button>
-    ),
+    SelectTrigger: ({ id, children }: { id?: string; className?: string; children: React.ReactNode }) => {
+      if (id && currentSelectCallback) {
+        selectCallbacks.set(id, currentSelectCallback);
+        currentSelectCallback = null;
+      }
+      return <button data-testid={`select-trigger-${id || 'unknown'}`}>{children}</button>;
+    },
     SelectValue: () => null,
     SelectContent: ({ children }: { className?: string; children: React.ReactNode }) => (
       <div data-testid="select-content">{children}</div>
@@ -52,7 +56,8 @@ describe('DisplaySettings - GPU Acceleration Dropdown', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    selectCallbacks = [];
+    selectCallbacks = new Map();
+    currentSelectCallback = null;
     mockOnSettingsChange = vi.fn();
   });
 
@@ -80,23 +85,25 @@ describe('DisplaySettings - GPU Acceleration Dropdown', () => {
   it('should display the current GPU acceleration value from settings', () => {
     const settingsWithOn: AppSettings = { ...defaultSettings, gpuAcceleration: 'on' };
 
-    const { container } = render(
+    render(
       <DisplaySettings settings={settingsWithOn} onSettingsChange={mockOnSettingsChange} />
     );
 
-    // The GPU acceleration select is the second Select rendered (index 1, after logOrder)
-    const gpuSelect = container.querySelector('[data-testid="select-root-1"]');
+    // The GPU acceleration select is identified by its trigger id
+    const gpuTrigger = screen.getByTestId('select-trigger-gpuAcceleration');
+    const gpuSelect = gpuTrigger.closest('[data-value]');
     expect(gpuSelect).toHaveAttribute('data-value', 'on');
   });
 
   it('should default to "off" when gpuAcceleration is not set', () => {
     const settingsWithoutGpu: AppSettings = { ...defaultSettings, gpuAcceleration: undefined };
 
-    const { container } = render(
+    render(
       <DisplaySettings settings={settingsWithoutGpu} onSettingsChange={mockOnSettingsChange} />
     );
 
-    const gpuSelect = container.querySelector('[data-testid="select-root-1"]');
+    const gpuTrigger = screen.getByTestId('select-trigger-gpuAcceleration');
+    const gpuSelect = gpuTrigger.closest('[data-value]');
     expect(gpuSelect).toHaveAttribute('data-value', 'off');
   });
 
@@ -105,8 +112,7 @@ describe('DisplaySettings - GPU Acceleration Dropdown', () => {
       <DisplaySettings settings={defaultSettings} onSettingsChange={mockOnSettingsChange} />
     );
 
-    // selectCallbacks[1] is the GPU acceleration Select's onValueChange
-    selectCallbacks[1]('on');
+    selectCallbacks.get('gpuAcceleration')!('on');
 
     expect(mockOnSettingsChange).toHaveBeenCalledWith(
       expect.objectContaining({ gpuAcceleration: 'on' })
@@ -118,7 +124,7 @@ describe('DisplaySettings - GPU Acceleration Dropdown', () => {
       <DisplaySettings settings={defaultSettings} onSettingsChange={mockOnSettingsChange} />
     );
 
-    selectCallbacks[1]('off');
+    selectCallbacks.get('gpuAcceleration')!('off');
 
     expect(mockOnSettingsChange).toHaveBeenCalledWith(
       expect.objectContaining({ gpuAcceleration: 'off' })
@@ -132,7 +138,7 @@ describe('DisplaySettings - GPU Acceleration Dropdown', () => {
       <DisplaySettings settings={settingsWithOff} onSettingsChange={mockOnSettingsChange} />
     );
 
-    selectCallbacks[1]('auto');
+    selectCallbacks.get('gpuAcceleration')!('auto');
 
     expect(mockOnSettingsChange).toHaveBeenCalledWith(
       expect.objectContaining({ gpuAcceleration: 'auto' })

@@ -663,9 +663,9 @@ export class TerminalSessionStore {
     // Keep the ID in pendingDelete for a short time to handle any in-flight
     // async operations, then clean up to prevent memory leaks
     const timer = setTimeout(() => {
-      debugLog('[TerminalSessionStore] Cleanup timer fired for:', sessionId,
-        'removing from pendingDelete. Remaining:', this.pendingDelete.size - 1);
       this.pendingDelete.delete(sessionId);
+      debugLog('[TerminalSessionStore] Cleanup timer fired for:', sessionId,
+        'removing from pendingDelete. Remaining:', this.pendingDelete.size);
       this.pendingDeleteTimers.delete(sessionId);
     }, 5000);
     this.pendingDeleteTimers.set(sessionId, timer);

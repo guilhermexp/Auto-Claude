@@ -342,10 +342,6 @@ function performWrite(terminal: TerminalProcess, data: string): Promise<void> {
       setImmediate(writeChunk);
     } else {
       try {
-        if (terminal.hasExited) {
-          resolve();
-          return;
-        }
         terminal.pty.write(data);
         debugLog('[PtyManager:writeToPty] Write completed successfully');
       } catch (error) {
