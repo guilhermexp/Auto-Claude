@@ -52,10 +52,12 @@ export function useTerminalEvents({
         const store = useTerminalStore.getState();
         store.setTerminalStatus(terminalId, 'exited');
         // Reset Claude mode when terminal exits - the Claude process has ended
-        // Use updateTerminal instead of setClaudeMode to avoid changing status back to 'running'
+        // setTerminalStatus('exited') already sends SHELL_EXITED to XState (which handles
+        // claude_active -> exited transition), so setClaudeMode(false) here only updates Zustand
+        // (its XState guard skips CLAUDE_EXITED since the machine is already in 'exited')
         const terminal = store.getTerminal(terminalId);
         if (terminal?.isClaudeMode) {
-          store.updateTerminal(terminalId, { isClaudeMode: false });
+          store.setClaudeMode(terminalId, false);
         }
         onExitRef.current?.(exitCode);
 
