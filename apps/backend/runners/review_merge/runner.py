@@ -29,6 +29,7 @@ import os
 import re
 import shutil
 import subprocess
+from collections import deque
 from pathlib import Path
 
 # Configure safe encoding on Windows
@@ -161,18 +162,22 @@ def emit_review_merge_progress(
         pass
 
 
-async def _query_and_collect(client, prompt: str) -> str:
-    """Send a prompt to a ClaudeSDKClient and collect the text response."""
-    await client.query(prompt)
-    response_text = ""
-    async for msg in client.receive_response():
-        msg_type = type(msg).__name__
-        if msg_type == "AssistantMessage" and hasattr(msg, "content"):
-            for block in msg.content:
-                block_type = type(block).__name__
-                if block_type == "TextBlock" and hasattr(block, "text"):
-                    response_text += block.text
-    return response_text
+def _extract_tool_display(block) -> str | None:
+    """Extract readable tool input for logging."""
+    inp = getattr(block, "input", None)
+    if not inp or not isinstance(inp, dict):
+        return None
+    if "pattern" in inp:
+        return f"pattern: {inp['pattern']}"
+    if "file_path" in inp:
+        fp = inp["file_path"]
+        return f"...{fp[-47:]}" if len(fp) > 50 else fp
+    if "command" in inp:
+        cmd = inp["command"]
+        return f"{cmd[:47]}..." if len(cmd) > 50 else cmd
+    if "path" in inp:
+        return inp["path"]
+    return None
 
 
 class ReviewMergeRunner:
@@ -255,6 +260,65 @@ class ReviewMergeRunner:
         except subprocess.SubprocessError:
             return "main"
 
+    # ── Agent execution ──
+
+    async def _run_agent_with_tools(
+        self, client, prompt: str, stage: str
+    ) -> tuple[str, str]:
+        """Run agent session with full tool access, emitting structured log events.
+
+        Mirrors run_agent_session() pattern from agents/session.py but outputs
+        via emit_review_merge_log() for frontend parsing.
+
+        Returns: (status, response_text) where status is 'complete' or 'error'
+        """
+        await client.query(prompt)
+        response_text = ""
+        current_tools: deque[str] = deque()
+
+        async for msg in client.receive_response():
+            msg_type = type(msg).__name__
+
+            if msg_type == "AssistantMessage" and hasattr(msg, "content"):
+                for block in msg.content:
+                    block_type = type(block).__name__
+
+                    if block_type == "TextBlock" and hasattr(block, "text"):
+                        response_text += block.text
+                        if block.text.strip():
+                            emit_review_merge_log(
+                                "info",
+                                content=block.text[:500],
+                                stage=stage,
+                            )
+
+                    elif block_type == "ToolUseBlock" and hasattr(block, "name"):
+                        current_tools.append(block.name)
+                        tool_input = _extract_tool_display(block)
+                        emit_review_merge_log(
+                            "tool_start",
+                            tool_name=block.name,
+                            tool_input=tool_input,
+                            stage=stage,
+                        )
+
+            elif msg_type == "UserMessage" and hasattr(msg, "content"):
+                for block in msg.content:
+                    block_type = type(block).__name__
+                    if block_type == "ToolResultBlock":
+                        is_error = getattr(block, "is_error", False)
+                        result_content = str(getattr(block, "content", ""))
+                        tool_name = current_tools.popleft() if current_tools else "unknown"
+                        emit_review_merge_log(
+                            "tool_end",
+                            tool_name=tool_name,
+                            success=not is_error,
+                            detail=result_content[:2000],
+                            stage=stage,
+                        )
+
+        return "complete", response_text
+
     # ── Review methods ──
 
     def _get_diff(self) -> str:
@@ -330,9 +394,7 @@ class ReviewMergeRunner:
         return all_findings
 
     async def _run_claude_review(self, diff: str, changed_files: list[str]) -> ReviewFindings:
-        """Run Claude agent to review code changes for bugs, security, and patterns."""
-        emit_review_merge_log("tool_start", tool_name="Bash", tool_input="claude agent (reviewer) — bugs, security, patterns", stage="reviewing")
-
+        """Run Claude agent with tool access to review code changes."""
         # Truncate diff if too large
         max_diff_chars = 80000
         truncated = False
@@ -342,8 +404,13 @@ class ReviewMergeRunner:
             truncated = True
 
         files_list = "\n".join(f"- {f}" for f in changed_files[:50])
+        worktree = str(self.worktree_path)
 
-        prompt = f"""Review the following code changes and identify issues. Focus ONLY on changes introduced in this diff — not pre-existing problems.
+        prompt = f"""You are a senior code reviewer. Review the following code changes and identify issues.
+Focus ONLY on changes introduced in this diff — not pre-existing problems.
+
+## Working directory
+{worktree}
 
 ## Changed files
 {files_list}
@@ -354,6 +421,12 @@ class ReviewMergeRunner:
 ```
 {"(diff truncated due to size)" if truncated else ""}
 
+## Instructions
+You have access to Read, Glob, Grep, and Bash tools. If the diff is truncated or you need more context to understand the changes, USE these tools to read the affected files before forming your assessment. For example:
+- Use Read to examine the full file when the diff context is insufficient
+- Use Grep to search for related usage patterns across the codebase
+- Use Bash to run `git log` for recent commit context
+
 ## Review areas
 Analyze the diff for:
 1. **Bugs**: Logic errors, off-by-one, null/undefined access, race conditions, incorrect types
@@ -362,7 +435,7 @@ Analyze the diff for:
 4. **Patterns**: Breaking existing code conventions, inconsistent naming, missing error handling
 
 ## Output format
-Return ONLY a JSON array of findings. Each finding must have:
+After your analysis, return ONLY a JSON array of findings. Each finding must have:
 - "file": file path
 - "line": line number or null
 - "severity": "critical" | "high" | "medium" | "low"
@@ -378,7 +451,7 @@ Rules:
 - Score critical/high ONLY for real bugs or security issues
 - Use medium for patterns and performance, low for minor suggestions
 
-Respond with ONLY the JSON array, no other text."""
+Your final output must be ONLY the JSON array."""
 
         qa_model = get_phase_model(self.spec_dir, "qa", self.model)
         qa_betas = get_phase_model_betas(self.spec_dir, "qa", qa_model)
@@ -401,9 +474,10 @@ Respond with ONLY the JSON array, no other text."""
             )
 
             async with client:
-                response = await _query_and_collect(client, prompt)
+                _status, response = await self._run_agent_with_tools(
+                    client, prompt, "reviewing"
+                )
 
-            emit_review_merge_log("tool_end", tool_name="Bash", detail=response[:2000] if response else "No findings", stage="reviewing")
             return self._parse_json_findings(response, source="claude")
 
         except Exception as e:
@@ -634,13 +708,16 @@ Respond with ONLY the JSON array, no other text."""
     async def _plan_fixes(
         self, findings: ReviewFindings, conflicts: list[str]
     ) -> str:
-        """Use Claude agent to plan fixes for findings and conflicts."""
+        """Use Claude agent with tool access to plan fixes."""
         # Build context for the planner
         issues_text = []
         for f in findings.findings:
             if f.severity in ("critical", "high") and not f.fixed:
                 loc = f"{f.file}:{f.line}" if f.line else f.file
-                issues_text.append(f"- [{f.severity.upper()}] {loc}: {f.description}")
+                issues_text.append(
+                    f"- [{f.severity.upper()}] {loc}: {f.description}"
+                    + (f" (suggestion: {f.suggestion})" if f.suggestion else "")
+                )
 
         conflicts_text = ""
         if conflicts:
@@ -648,17 +725,31 @@ Respond with ONLY the JSON array, no other text."""
                 f"- {c}" for c in conflicts
             )
 
-        prompt = (
-            f"Review the following code issues and merge conflicts, then create a fix plan.\n\n"
-            f"## Code Review Findings\n"
-            f"{chr(10).join(issues_text) if issues_text else 'No critical/high issues.'}\n"
-            f"{conflicts_text}\n\n"
-            f"## Instructions\n"
-            f"1. Read the affected files to understand the context\n"
-            f"2. Output a structured fix plan as a JSON array of actions\n"
-            f"3. Prioritize: critical first, then high severity\n"
-            f"4. For merge conflicts, propose resolution strategy\n"
-        )
+        worktree = str(self.worktree_path)
+
+        prompt = f"""You are a senior engineer planning fixes for code review findings.
+
+## Working directory
+{worktree}
+
+## Code Review Findings
+{chr(10).join(issues_text) if issues_text else 'No critical/high issues.'}
+{conflicts_text}
+
+## Instructions
+You have access to Read, Glob, Grep, and Bash tools. You MUST use them:
+1. Use Read to examine each affected file and understand surrounding context
+2. Use Grep to find related patterns or usages that might be affected by fixes
+3. Use Glob to discover related test files or configuration
+
+After reading the code, output a structured fix plan as a numbered list. For each fix:
+- State which file(s) to modify and what change to make
+- Explain WHY the change fixes the issue
+- Note any dependencies between fixes (order matters)
+- Prioritize: critical first, then high severity
+- For merge conflicts, describe the resolution strategy
+
+Keep fixes minimal and targeted — do not suggest refactoring beyond what's needed."""
 
         qa_model = get_phase_model(self.spec_dir, "qa", self.model)
         qa_betas = get_phase_model_betas(self.spec_dir, "qa", qa_model)
@@ -668,7 +759,7 @@ Respond with ONLY the JSON array, no other text."""
         )
 
         issues_summary = f"{len(issues_text)} issues, {len(conflicts)} conflicts"
-        emit_review_merge_log("tool_start", tool_name="Bash", tool_input=f"claude agent (planner) — {issues_summary}", stage="planning")
+        emit_review_merge_log("info", content=f"Planning fixes: {issues_summary}", stage="planning")
         emit_review_merge_log("info", content=f"Using model: {qa_model}", stage="planning")
 
         client = create_client(
@@ -682,26 +773,37 @@ Respond with ONLY the JSON array, no other text."""
         )
 
         async with client:
-            response = await _query_and_collect(client, prompt)
-            emit_review_merge_log(
-                "tool_end", tool_name="Bash",
-                detail=response[:2000] if response else "No plan generated",
-                stage="planning",
+            _status, response = await self._run_agent_with_tools(
+                client, prompt, "planning"
             )
             return response
 
     async def _apply_fixes(self, plan: str) -> None:
-        """Use Claude agent to implement the fix plan in the worktree."""
-        prompt = (
-            f"Apply the following fix plan to the codebase. "
-            f"Make minimal, targeted changes. Commit each logical fix separately.\n\n"
-            f"## Fix Plan\n{plan}\n\n"
-            f"## Instructions\n"
-            f"1. Read each affected file before making changes\n"
-            f"2. Apply the fix using Edit/Write tools\n"
-            f"3. Run any relevant tests if available\n"
-            f"4. Commit each fix with a descriptive message\n"
-        )
+        """Use Claude agent with tool access to implement fixes."""
+        worktree = str(self.worktree_path)
+
+        prompt = f"""You are a senior engineer applying code fixes in a git worktree.
+
+## Working directory
+{worktree}
+
+## Fix Plan
+{plan}
+
+## Instructions
+You have access to Read, Write, Edit, Glob, Grep, and Bash tools. You MUST use them:
+1. Use Read to examine each file BEFORE modifying it
+2. Use Edit for targeted changes (preferred over Write for partial modifications)
+3. Use Write only when creating new files or rewriting entire files
+4. Use Bash to run `git add` and `git commit` after each logical fix
+5. Use Bash to run tests if a test runner is available (e.g., `npm test`, `pytest`)
+
+Rules:
+- Make minimal, targeted changes — do not refactor beyond the fix plan
+- Read each file before editing to ensure the edit target string is exact
+- Commit each logical fix separately with a descriptive message
+- If a test fails after your fix, investigate and adjust before committing
+- All file paths are relative to the working directory above"""
 
         qa_model = get_phase_model(self.spec_dir, "qa", self.model)
         qa_betas = get_phase_model_betas(self.spec_dir, "qa", qa_model)
@@ -710,7 +812,7 @@ Respond with ONLY the JSON array, no other text."""
             self.spec_dir, "qa", qa_model, self.thinking_level
         )
 
-        emit_review_merge_log("tool_start", tool_name="Bash", tool_input=f"claude agent (fixer) — applying plan", stage="building")
+        emit_review_merge_log("info", content="Applying fix plan...", stage="building")
         emit_review_merge_log("info", content=f"Using model: {qa_model}", stage="building")
 
         client = create_client(
@@ -724,11 +826,8 @@ Respond with ONLY the JSON array, no other text."""
         )
 
         async with client:
-            response = await _query_and_collect(client, prompt)
-            emit_review_merge_log(
-                "tool_end", tool_name="Bash",
-                detail=response[:2000] if response else "Fixes applied",
-                stage="building",
+            _status, response = await self._run_agent_with_tools(
+                client, prompt, "building"
             )
 
     async def run(self) -> ReviewMergeResult:

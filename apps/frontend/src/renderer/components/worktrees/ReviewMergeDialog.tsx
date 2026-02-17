@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import {
   SearchCheck,
   Loader2,
@@ -20,6 +20,7 @@ import {
   FolderSearch,
   Pencil,
   Info,
+  Minimize2,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -40,13 +41,17 @@ import type {
   ReviewMergeLogEntry,
 } from '../../../shared/types';
 
-interface ReviewMergeDialogProps {
+export interface ReviewMergeDialogProps {
   open: boolean;
-  taskId: string;
   specName: string;
   baseBranch: string;
+  progress: ReviewMergeProgressData | null;
+  logEntries: ReviewMergeLogEntry[];
+  isRunning: boolean;
+  isCancelling: boolean;
+  result: ReviewMergeResult | null;
   onOpenChange: (open: boolean) => void;
-  onComplete?: (result: ReviewMergeResult) => void;
+  onCancel: () => void;
 }
 
 const stageIconMap: Record<string, typeof FileSearch> = {
@@ -221,124 +226,27 @@ function LogEntryItem({ entry, t }: { entry: ReviewMergeLogEntry; t: (key: strin
   );
 }
 
-// ── Main dialog ──
+// ── Main dialog (controlled — state managed by parent) ──
 
 export function ReviewMergeDialog({
   open,
-  taskId,
   specName,
   baseBranch,
+  progress,
+  logEntries,
+  isRunning,
+  isCancelling,
+  result,
   onOpenChange,
-  onComplete,
+  onCancel,
 }: ReviewMergeDialogProps) {
   const { t } = useTranslation(['dialogs', 'common']);
-  const [progress, setProgress] = useState<ReviewMergeProgressData | null>(null);
-  const [result, setResult] = useState<ReviewMergeResult | null>(null);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
-  const [logEntries, setLogEntries] = useState<ReviewMergeLogEntry[]>([]);
   const [showErrorLogs, setShowErrorLogs] = useState(false);
-  const logEndRef = useRef<HTMLDivElement>(null);
-  const startedRef = useRef(false);
 
   const hasError = progress?.stage === 'error' || (result !== null && !result.success);
 
-  // Auto-scroll activity log
-  useEffect(() => {
-    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [logEntries]);
-
-  // Subscribe to progress and log events (always active while dialog is open)
-  useEffect(() => {
-    if (!open) return;
-
-    const unsubProgress = window.electronAPI?.onReviewMergeProgress(
-      (_taskId: string, progressData: ReviewMergeProgressData) => {
-        if (_taskId === taskId) {
-          setProgress(progressData);
-        }
-      }
-    );
-
-    const MAX_LOG_ENTRIES = 500;
-    const unsubLog = window.electronAPI?.onReviewMergeLog(
-      (_taskId: string, entry: ReviewMergeLogEntry) => {
-        if (_taskId === taskId) {
-          setLogEntries((prev) => {
-            const updated = [...prev, entry];
-            return updated.length > MAX_LOG_ENTRIES ? updated.slice(-MAX_LOG_ENTRIES) : updated;
-          });
-        }
-      }
-    );
-
-    return () => {
-      unsubProgress?.();
-      unsubLog?.();
-    };
-  }, [open, taskId]);
-
-  // Start the pipeline when dialog opens (only once, guarded by startedRef)
-  useEffect(() => {
-    if (!open) {
-      startedRef.current = false;
-      return;
-    }
-
-    // Guard against React StrictMode double-invocation
-    if (startedRef.current) return;
-    startedRef.current = true;
-
-    setProgress(null);
-    setResult(null);
-    setIsRunning(true);
-    setIsCancelling(false);
-    setLogEntries([]);
-    setShowErrorLogs(false);
-
-    // Start the review-merge process
-    window.electronAPI?.reviewAndMergeWorktree(taskId).then((ipcResult) => {
-      // Ignore "already in progress" responses from duplicate StrictMode calls
-      if (!ipcResult.success && ipcResult.error?.includes('already in progress')) {
-        return;
-      }
-      setIsRunning(false);
-      if (ipcResult.success && ipcResult.data) {
-        setResult(ipcResult.data);
-        onComplete?.(ipcResult.data);
-      } else {
-        setResult({
-          success: false,
-          message: ipcResult.error || t('dialogs:worktrees.reviewMergeUnknownError'),
-          logs: ipcResult.data?.logs,
-        });
-      }
-    }).catch((err: unknown) => {
-      setIsRunning(false);
-      setResult({
-        success: false,
-        message: err instanceof Error ? err.message : t('dialogs:worktrees.reviewMergeUnexpectedError'),
-      });
-    });
-  }, [open, taskId]);
-
-  const handleCancel = useCallback(async () => {
-    setIsCancelling(true);
-    try {
-      await window.electronAPI?.cancelReviewMerge(taskId);
-    } catch {
-      // Ignore cancel errors
-    }
-    setIsRunning(false);
-    setResult({ success: false, message: t('dialogs:worktrees.reviewMergeCancelledByUser') });
-  }, [taskId]);
-
-  const handleClose = useCallback(() => {
-    if (isRunning && !isCancelling) {
-      return;
-    }
-    onOpenChange(false);
-  }, [isRunning, isCancelling, onOpenChange]);
+  // Reverse log entries so newest appear at top
+  const reversedLogEntries = useMemo(() => [...logEntries].reverse(), [logEntries]);
 
   const getStageLabel = (stage: ReviewMergeStage): string => {
     return t(`dialogs:worktrees.reviewMergeStage_${stage}`);
@@ -352,8 +260,16 @@ export function ReviewMergeDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="sm:max-w-lg max-h-[85vh] flex flex-col"
+        onEscapeKeyDown={(e) => {
+          if (isRunning && !isCancelling) e.preventDefault();
+        }}
+        onInteractOutside={(e) => {
+          if (isRunning && !isCancelling) e.preventDefault();
+        }}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <SearchCheck className="h-5 w-5" />
@@ -407,7 +323,7 @@ export function ReviewMergeDialog({
             </div>
           )}
 
-          {/* Activity log — TaskLogs-style entries */}
+          {/* Activity log — newest entries first */}
           <div className="border rounded-md overflow-auto flex-1 min-h-[120px] max-h-[350px]">
             <div className="p-2 space-y-1">
               {logEntries.length === 0 && isRunning && (
@@ -416,10 +332,9 @@ export function ReviewMergeDialog({
                   <span>{t('common:labels.loading')}...</span>
                 </div>
               )}
-              {logEntries.map((entry, i) => (
-                <LogEntryItem key={`${entry.type}-${entry.tool_name || ''}-${i}`} entry={entry} t={t} />
+              {reversedLogEntries.map((entry, i) => (
+                <LogEntryItem key={`${entry.type}-${entry.tool_name || ''}-${logEntries.length - 1 - i}`} entry={entry} t={t} />
               ))}
-              <div ref={logEndRef} />
             </div>
           </div>
 
@@ -463,13 +378,19 @@ export function ReviewMergeDialog({
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-row gap-2">
+          {isRunning && !isCancelling && (
+            <Button variant="secondary" size="sm" onClick={() => onOpenChange(false)}>
+              <Minimize2 className="h-3.5 w-3.5 mr-1.5" />
+              {t('dialogs:worktrees.reviewMergeMinimize')}
+            </Button>
+          )}
           {isRunning && !isCancelling ? (
-            <Button variant="destructive" size="sm" onClick={handleCancel}>
+            <Button variant="destructive" size="sm" onClick={onCancel}>
               {t('dialogs:worktrees.reviewMergeCancel')}
             </Button>
           ) : (
-            <Button variant="default" size="sm" onClick={handleClose}>
+            <Button variant="default" size="sm" onClick={() => onOpenChange(false)}>
               {t('dialogs:worktrees.reviewMergeClose')}
             </Button>
           )}

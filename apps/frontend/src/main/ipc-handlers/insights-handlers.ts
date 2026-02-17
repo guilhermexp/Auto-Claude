@@ -167,7 +167,11 @@ export function registerInsightsHandlers(
               };
 
         insightsService.setPendingAction(projectId, project.path, null);
-        insightsService.appendActionResultMessage(projectId, project.path, result);
+        // Only persist a chat message for confirmed/executed results; cancelled results
+        // are conveyed via the action_result stream chunk (no English-only bubble needed).
+        if (!result.cancelled) {
+          insightsService.appendActionResultMessage(projectId, project.path, result);
+        }
         console.log(`${KANBAN_LOG_PREFIX} text-decision-result`, {
           projectId,
           sessionId: session?.id,
@@ -496,7 +500,7 @@ export function registerInsightsHandlers(
       };
 
       insightsService.setPendingAction(projectId, project.path, null);
-      insightsService.appendActionResultMessage(projectId, project.path, result);
+      // Cancelled results are conveyed via the stream chunk; no persistent chat bubble needed.
       safeSendToRenderer(getMainWindow, IPC_CHANNELS.INSIGHTS_STREAM_CHUNK, projectId, {
         type: "action_result",
         actionResult: result
@@ -555,7 +559,7 @@ export function registerInsightsHandlers(
           snapshot
         };
         insightsService.setPendingAction(projectId, project.path, null);
-        insightsService.appendActionResultMessage(projectId, project.path, cancelledResult);
+        // Cancelled results are conveyed via the stream chunk; no persistent chat bubble needed.
         safeSendToRenderer(getMainWindow, IPC_CHANNELS.INSIGHTS_STREAM_CHUNK, projectId, {
           type: "action_result",
           actionResult: cancelledResult
