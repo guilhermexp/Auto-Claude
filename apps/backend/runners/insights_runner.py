@@ -117,7 +117,7 @@ ALLOWED_MIME_TYPES = frozenset(
     ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp"]
 )
 
-MAX_IMAGE_FILE_SIZE = 20 * 1024 * 1024  # 20 MB
+MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024  # 10 MB (aligned with frontend MAX_IMAGE_SIZE)
 
 
 def load_images_from_manifest(manifest_path: str) -> list[dict]:
@@ -139,14 +139,14 @@ def load_images_from_manifest(manifest_path: str) -> list[dict]:
             image_path = entry.get("path")
             mime_type = entry.get("mimeType", "image/png")
 
-            if not image_path or not Path(image_path).exists():
+            if not image_path:
                 debug_error(
                     "insights_runner",
-                    f"Image file not found: {image_path}",
+                    "Image entry missing path field",
                 )
                 continue
 
-            # Validate path is within temp directory
+            # Validate path is within temp directory before checking existence
             try:
                 resolved = Path(image_path).resolve()
                 if not resolved.is_relative_to(tmp_dir):
@@ -159,6 +159,13 @@ def load_images_from_manifest(manifest_path: str) -> list[dict]:
                 debug_error(
                     "insights_runner",
                     f"Invalid image path, skipping: {image_path}",
+                )
+                continue
+
+            if not resolved.exists():
+                debug_error(
+                    "insights_runner",
+                    f"Image file not found: {image_path}",
                 )
                 continue
 
@@ -302,31 +309,14 @@ Current question: {message}"""
 
         # Use async context manager pattern
         async with client:
-            # Build the query - include images as content blocks if available
+            # Build the query - images are stored for reference but SDK doesn't support multi-modal input yet
             if images:
-                # Construct multi-modal content blocks for vision analysis
-                content_blocks = []
-                for img in images:
-                    content_blocks.append(
-                        {
-                            "type": "image",
-                            "source": {
-                                "type": "base64",
-                                "media_type": img["media_type"],
-                                "data": img["data"],
-                            },
-                        }
-                    )
-                content_blocks.append({"type": "text", "text": full_prompt})
-
                 debug(
                     "insights_runner",
-                    "Sending multi-modal query",
+                    "Images attached but SDK does not support multi-modal input",
                     image_count=len(images),
                 )
 
-                # The SDK's query() method only accepts strings, not content blocks.
-                # We need to send a text-only query and warn the user that images are not supported.
                 # TODO: When the SDK adds support for multi-modal content blocks, update this.
                 image_note = f"\n\n[Note: The user attached {len(images)} image(s), but the current SDK version does not support multi-modal input. Please ask the user to describe the image content instead.]"
                 print(

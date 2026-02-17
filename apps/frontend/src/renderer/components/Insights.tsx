@@ -50,7 +50,8 @@ import {
   TASK_CATEGORY_COLORS,
   TASK_COMPLEXITY_LABELS,
   TASK_COMPLEXITY_COLORS,
-  MAX_IMAGE_SIZE
+  MAX_IMAGE_SIZE,
+  MAX_IMAGES_PER_TASK
 } from '../../shared/constants';
 
 // createSafeLink - factory function that creates a SafeLink component with i18n support
@@ -212,12 +213,18 @@ export function Insights({ projectId }: InsightsProps) {
   };
 
   const handleScreenshotCapture = useCallback(async (imageData: string) => {
+    // Check image count limit before processing
+    if (pendingImages.length >= MAX_IMAGES_PER_TASK) {
+      setImageError(t('insights.images.maxImagesReached'));
+      return;
+    }
+
     // imageData is base64 PNG from ScreenshotCapture
     const approximateSize = Math.ceil(imageData.length * 0.75); // approximate base64 size
 
     // Validate size - match the validation used for regular image uploads
     if (approximateSize > MAX_IMAGE_SIZE) {
-      setImageError(`Screenshot is too large (${Math.round(approximateSize / 1024 / 1024)}MB). Maximum size is ${Math.round(MAX_IMAGE_SIZE / 1024 / 1024)}MB. Consider capturing a smaller area.`);
+      setImageError(t('insights.images.screenshotTooLarge', { size: Math.round(approximateSize / 1024 / 1024), max: Math.round(MAX_IMAGE_SIZE / 1024 / 1024) }));
       return;
     }
 
@@ -233,7 +240,7 @@ export function Insights({ projectId }: InsightsProps) {
     };
     setPendingImages([...pendingImages, newImage]);
     setImageError(null);
-  }, [pendingImages, setPendingImages, setImageError]);
+  }, [pendingImages, setPendingImages, setImageError, t]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -517,6 +524,11 @@ export function Insights({ projectId }: InsightsProps) {
           </div>
         </div>
 
+        {/* Image analysis warning */}
+        {pendingImages.length > 0 && (
+          <p className="mt-1 text-xs text-amber-500">{t('insights.images.analysisUnsupported')}</p>
+        )}
+
         {/* Image error */}
         {imageError && (
           <p className="mt-1 text-xs text-destructive">{imageError}</p>
@@ -614,14 +626,16 @@ function MessageBubble({
         {/* Image attachments for user messages */}
         {isUser && message.images && message.images.length > 0 && (
           <div className="flex flex-wrap gap-2">
-            {message.images.map((image) => (
-              <img
-                key={image.id}
-                src={image.thumbnail || (image.data ? `data:${image.mimeType};base64,${image.data}` : '')}
-                alt={image.filename}
-                className="max-w-[200px] max-h-[200px] rounded-md border border-border object-contain"
-              />
-            ))}
+            {message.images
+              .filter(img => img.thumbnail || img.data)
+              .map((image) => (
+                <img
+                  key={image.id}
+                  src={image.thumbnail || `data:${image.mimeType};base64,${image.data}`}
+                  alt={image.filename}
+                  className="max-w-[200px] max-h-[200px] rounded-md border border-border object-contain"
+                />
+              ))}
           </div>
         )}
 

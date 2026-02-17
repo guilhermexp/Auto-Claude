@@ -440,7 +440,9 @@
       "maxImagesReached": "Maximum number of images reached",
       "invalidType": "Invalid file type. Please use PNG, JPEG, GIF, or WebP.",
       "processFailed": "Failed to process image",
-      "dragOver": "Drop image to attach"
+      "dragOver": "Drop image to attach",
+      "analysisUnsupported": "Note: Image analysis is not yet supported. Images are stored for reference but cannot be analyzed by the model.",
+      "screenshotTooLarge": "Screenshot is too large ({{size}}MB). Maximum size is {{max}}MB. Consider capturing a smaller area."
     }
   },
   "ideation": {

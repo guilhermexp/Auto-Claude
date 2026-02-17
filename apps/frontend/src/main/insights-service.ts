@@ -6,6 +6,7 @@ import type {
   InsightsModelConfig,
   ImageAttachment
 } from '../shared/types';
+import { MAX_IMAGES_PER_TASK } from '../shared/constants';
 import { InsightsConfig } from './insights/config';
 import { InsightsPaths } from './insights/paths';
 import { SessionStorage } from './insights/session-storage';
@@ -141,11 +142,15 @@ export class InsightsService extends EventEmitter {
       session.title = this.storage.generateTitle(message);
     }
 
+    // Guard: cap images to MAX_IMAGES_PER_TASK
+    if (images && images.length > MAX_IMAGES_PER_TASK) {
+      images = images.slice(0, MAX_IMAGES_PER_TASK);
+    }
+
     // Add user message (store thumbnails only for persistence, strip full data)
     const persistImages = images?.map(img => ({
       ...img,
-      data: undefined,
-      thumbnail: img.thumbnail
+      data: undefined
     }));
     const userMessage: InsightsChatMessage = {
       id: `msg-${Date.now()}`,
