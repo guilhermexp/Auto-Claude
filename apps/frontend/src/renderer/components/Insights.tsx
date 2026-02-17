@@ -526,7 +526,10 @@ export function Insights({ projectId }: InsightsProps) {
 
         {/* Image analysis warning */}
         {pendingImages.length > 0 && (
-          <p className="mt-1 text-xs text-amber-500">{t('insights.images.analysisUnsupported')}</p>
+          <div className="mt-1 flex items-center gap-1.5 rounded-md bg-amber-500/10 px-2 py-1 text-xs text-amber-500">
+            <AlertCircle className="h-3 w-3 shrink-0" />
+            <span>{t('insights.images.analysisUnsupported')}</span>
+          </div>
         )}
 
         {/* Image error */}
@@ -625,17 +628,20 @@ function MessageBubble({
 
         {/* Image attachments for user messages */}
         {isUser && message.images && message.images.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {message.images
-              .filter(img => img.thumbnail || img.data)
-              .map((image) => (
-                <img
-                  key={image.id}
-                  src={image.thumbnail || `data:${image.mimeType};base64,${image.data}`}
-                  alt={image.filename}
-                  className="max-w-[200px] max-h-[200px] rounded-md border border-border object-contain"
-                />
-              ))}
+          <div className="space-y-1.5">
+            <div className="flex flex-wrap gap-2">
+              {message.images
+                .filter(img => img.thumbnail || img.data)
+                .map((image) => (
+                  <img
+                    key={image.id}
+                    src={image.thumbnail || `data:${image.mimeType};base64,${image.data}`}
+                    alt={image.filename}
+                    className="max-w-[200px] max-h-[200px] rounded-md border border-border object-contain"
+                  />
+                ))}
+            </div>
+            <p className="text-xs text-muted-foreground italic">{t('insights.images.notAnalyzed')}</p>
           </div>
         )}
 

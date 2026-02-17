@@ -13,7 +13,7 @@ import type {
   InsightsModelConfig,
   ImageAttachment
 } from '../../shared/types';
-import { MODEL_ID_MAP } from '../../shared/constants';
+import { MODEL_ID_MAP, MAX_IMAGES_PER_TASK, MAX_IMAGE_SIZE } from '../../shared/constants';
 import { InsightsConfig } from './config';
 import { detectRateLimit, createSDKRateLimitInfo } from '../rate-limit-detector';
 
@@ -119,6 +119,14 @@ export class InsightsExecutor extends EventEmitter {
     // Write image files and manifest if images are provided
     const imagesTempFiles: string[] = [];
     let imagesManifestFile: string | undefined;
+
+    // Defense-in-depth: cap image count and filter oversized images in the executor
+    if (images && images.length > MAX_IMAGES_PER_TASK) {
+      images = images.slice(0, MAX_IMAGES_PER_TASK);
+    }
+    if (images) {
+      images = images.filter(img => !img.data || Buffer.byteLength(img.data, 'base64') <= MAX_IMAGE_SIZE);
+    }
 
     if (images && images.length > 0) {
       try {
