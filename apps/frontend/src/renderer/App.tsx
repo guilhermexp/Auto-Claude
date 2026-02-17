@@ -59,7 +59,7 @@ import { useTaskStore, loadTasks } from './stores/task-store';
 import { useSettingsStore, loadSettings, loadProfiles, saveSettings } from './stores/settings-store';
 import { useClaudeProfileStore, loadClaudeProfiles } from './stores/claude-profile-store';
 import { useTerminalStore, restoreTerminalSessions } from './stores/terminal-store';
-import { initializeGitHubListeners } from './stores/github';
+import { initializeGitHubListeners, cleanupGitHubListeners } from './stores/github';
 import { initDownloadProgressListener } from './stores/download-store';
 import { GlobalDownloadIndicator } from './components/GlobalDownloadIndicator';
 import { useIpcListeners } from './hooks/useIpc';
@@ -317,6 +317,7 @@ export function App() {
 
     return () => {
       cleanupDownloadListener();
+      cleanupGitHubListeners();
     };
   }, []);
 

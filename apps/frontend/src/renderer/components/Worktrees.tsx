@@ -176,8 +176,9 @@ export function Worktrees({ projectId }: WorktreesProps) {
       debugLog('[Worktrees] Task worktrees result:', taskResult);
       debugLog('[Worktrees] Terminal worktrees result:', terminalResult);
 
-      if (taskResult.success && taskResult.data) {
-        setWorktrees(taskResult.data.worktrees);
+      if (taskResult.success) {
+        // Always update state when successful, even if data is null/undefined
+        setWorktrees(taskResult.data?.worktrees || []);
       } else {
         setError(taskResult.error || t('common:errors.failedToLoadTaskWorktrees'));
       }
@@ -448,6 +449,10 @@ export function Worktrees({ projectId }: WorktreesProps) {
       if (result.success) {
         // Refresh worktrees after successful delete
         await loadWorktrees();
+        toast({
+          title: t('common:actions.success'),
+          description: t('common:worktrees.deleteSuccess', { branch: terminalWorktreeToDelete.name }),
+        });
         setTerminalWorktreeToDelete(null);
       } else {
         setError(result.error || t('common:errors.failedToDeleteTerminalWorktree', { name: terminalWorktreeToDelete.name }));
@@ -907,7 +912,7 @@ export function Worktrees({ projectId }: WorktreesProps) {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      <AlertDialog open={showDeleteConfirm} onOpenChange={(open) => !open && !isDeleting && setShowDeleteConfirm(false)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('dialogs:worktrees.deleteTitle')}</AlertDialogTitle>
@@ -924,7 +929,10 @@ export function Worktrees({ projectId }: WorktreesProps) {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>{t('common:buttons.cancel')}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
@@ -945,7 +953,7 @@ export function Worktrees({ projectId }: WorktreesProps) {
       </AlertDialog>
 
       {/* Terminal Worktree Delete Confirmation Dialog */}
-      <AlertDialog open={!!terminalWorktreeToDelete} onOpenChange={(open) => !open && setTerminalWorktreeToDelete(null)}>
+      <AlertDialog open={!!terminalWorktreeToDelete} onOpenChange={(open) => !open && !isDeletingTerminal && setTerminalWorktreeToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('dialogs:worktrees.deleteTerminalTitle')}</AlertDialogTitle>
@@ -964,7 +972,10 @@ export function Worktrees({ projectId }: WorktreesProps) {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeletingTerminal}>{t('common:buttons.cancel')}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDeleteTerminalWorktree}
+              onClick={(e) => {
+                e.preventDefault();
+                handleDeleteTerminalWorktree();
+              }}
               disabled={isDeletingTerminal}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
@@ -985,7 +996,7 @@ export function Worktrees({ projectId }: WorktreesProps) {
       </AlertDialog>
 
       {/* Bulk Delete Confirmation Dialog */}
-      <AlertDialog open={showBulkDeleteConfirm} onOpenChange={setShowBulkDeleteConfirm}>
+      <AlertDialog open={showBulkDeleteConfirm} onOpenChange={(open) => !open && !isBulkDeleting && setShowBulkDeleteConfirm(false)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">

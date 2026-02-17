@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { ExternalLink, Play, TrendingUp } from 'lucide-react';
+import { TaskOutcomeBadge, getTaskOutcomeColorClass } from './TaskOutcomeBadge';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
@@ -58,7 +59,11 @@ export function FeatureCard({
           <h3 className="font-medium">{feature.title}</h3>
           <p className="text-sm text-muted-foreground line-clamp-2">{feature.description}</p>
         </div>
-        {feature.linkedSpecId ? (
+        {feature.taskOutcome ? (
+          <Badge variant="outline" className={`text-xs ${getTaskOutcomeColorClass(feature.taskOutcome)}`}>
+            <TaskOutcomeBadge outcome={feature.taskOutcome} size="md" />
+          </Badge>
+        ) : feature.linkedSpecId ? (
           <Button
             variant="outline"
             size="sm"

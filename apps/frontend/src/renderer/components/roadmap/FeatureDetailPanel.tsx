@@ -11,6 +11,7 @@ import {
   TrendingUp,
   Trash2,
 } from 'lucide-react';
+import { TaskOutcomeBadge } from './TaskOutcomeBadge';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';

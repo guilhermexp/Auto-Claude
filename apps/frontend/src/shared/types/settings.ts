@@ -191,10 +191,10 @@ export interface ExternalThemeData {
 }
 
 // Thinking level for Claude model (budget token allocation)
-export type ThinkingLevel = 'none' | 'low' | 'medium' | 'high' | 'ultrathink';
+export type ThinkingLevel = 'low' | 'medium' | 'high';
 
 // Model type shorthand
-export type ModelTypeShort = 'haiku' | 'sonnet' | 'opus';
+export type ModelTypeShort = 'haiku' | 'sonnet' | 'opus' | 'opus-1m' | 'opus-4.5';
 
 // Phase-based model configuration for Auto profile
 // Each phase can use a different model optimized for that task type
@@ -320,6 +320,7 @@ export interface AppSettings {
   // Migration flags (internal use)
   _migratedAgentProfileToAuto?: boolean;
   _migratedDefaultModelSync?: boolean;
+  _migratedUltrathinkToHigh?: boolean;
   // Language preference for UI (i18n)
   language?: SupportedLanguage;
   // Developer tools preferences

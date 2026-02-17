@@ -176,6 +176,8 @@ export function GitHubIssues({ onOpenSettings, onNavigateToTask }: GitHubIssuesP
             onSelectIssue={selectIssue}
             onInvestigate={handleInvestigate}
             onLoadMore={!isSearchActive ? handleLoadMore : undefined}
+            onRetry={handleRefresh}
+            onOpenSettings={onOpenSettings}
           />
         </div>
 

@@ -21,7 +21,12 @@ from linear_updater import (
     linear_task_started,
     linear_task_stuck,
 )
-from phase_config import get_phase_model, get_phase_thinking_budget
+from phase_config import (
+    get_fast_mode,
+    get_phase_client_thinking_kwargs,
+    get_phase_model,
+    get_phase_model_betas,
+)
 from phase_event import ExecutionPhase, emit_phase
 from progress import (
     count_subtasks,
@@ -588,9 +593,17 @@ async def run_autonomous_agent(
         # first_run means we're in planning phase, otherwise coding phase
         current_phase = "planning" if first_run else "coding"
         phase_model = get_phase_model(spec_dir, current_phase, model)
-        phase_thinking_budget = get_phase_thinking_budget(spec_dir, current_phase)
+        phase_betas = get_phase_model_betas(spec_dir, current_phase, model)
+        thinking_kwargs = get_phase_client_thinking_kwargs(
+            spec_dir, current_phase, phase_model
+        )
 
         # Generate appropriate prompt
+        fast_mode = get_fast_mode(spec_dir)
+        logger.info(
+            f"[Coder] [Fast Mode] {'ENABLED' if fast_mode else 'disabled'} for phase={current_phase}"
+        )
+
         if first_run:
             # Create client for planning phase
             stderr_lines.clear()
@@ -858,6 +871,7 @@ async def run_autonomous_agent(
                 linear_enabled=linear_is_enabled,
                 status_manager=status_manager,
                 source_spec_dir=source_spec_dir,
+                error_info=error_info,
             )
 
             # Check for stuck subtasks

@@ -21,6 +21,7 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
+from core.fast_mode import ensure_fast_mode_in_user_settings
 from core.platform import (
     is_windows,
     validate_cli_path,
@@ -465,10 +466,9 @@ def create_client(
         agent_type: Agent type identifier from AGENT_CONFIGS
                    (e.g., 'coder', 'planner', 'qa_reviewer', 'spec_gatherer')
         max_thinking_tokens: Token budget for extended thinking (None = disabled)
-                            - ultrathink: 16000 (spec creation)
-                            - high: 10000 (QA review)
-                            - medium: 5000 (planning, validation)
-                            - None: disabled (coding)
+                            - high: 16384 (spec creation, QA review)
+                            - medium: 4096 (planning, validation)
+                            - low: 1024 (coding)
         output_format: Optional structured output format for validated JSON responses.
                       Use {"type": "json_schema", "schema": Model.model_json_schema()}
                       See: https://platform.claude.com/docs/en/agent-sdk/structured-outputs
@@ -504,6 +504,24 @@ def create_client(
 
     if config_dir:
         logger.info(f"Using CLAUDE_CONFIG_DIR for profile: {config_dir}")
+
+    # Inject effort level for adaptive thinking models (e.g., Opus 4.6)
+    if effort_level:
+        sdk_env["CLAUDE_CODE_EFFORT_LEVEL"] = effort_level
+
+    # Fast mode requires the CLI to read "fastMode" from user settings.
+    # The SDK default (setting_sources=None) passes --setting-sources "" which
+    # blocks ALL filesystem settings. We must explicitly enable "user" source
+    # so the CLI reads ~/.claude/settings.json where fastMode: true lives.
+    # See: https://code.claude.com/docs/en/fast-mode
+    if fast_mode:
+        ensure_fast_mode_in_user_settings()
+        logger.info("[Fast Mode] ACTIVE — will enable user setting source for fastMode")
+        print(
+            "[Fast Mode] ACTIVE — enabling user settings source for CLI to read fastMode"
+        )
+    else:
+        logger.info("[Fast Mode] inactive — not requested for this client")
 
     # Debug: Log git-bash path detection on Windows
     if "CLAUDE_CODE_GIT_BASH_PATH" in sdk_env:
@@ -668,7 +686,12 @@ def create_client(
         print("   - Worktree permissions: granted for original project directories")
     print("   - Bash commands restricted to allowlist")
     if max_thinking_tokens:
-        print(f"   - Extended thinking: {max_thinking_tokens:,} tokens")
+        thinking_info = f"{max_thinking_tokens:,} tokens"
+        if effort_level:
+            thinking_info += f" + effort={effort_level}"
+        if fast_mode:
+            thinking_info += " + fast mode"
+        print(f"   - Extended thinking: {thinking_info}")
     else:
         print("   - Extended thinking: disabled")
 
@@ -840,5 +863,9 @@ def create_client(
     # See: https://platform.claude.com/docs/en/agent-sdk/subagents
     if agents:
         options_kwargs["agents"] = agents
+
+    # Add beta headers if specified (e.g., for 1M context window)
+    if betas:
+        options_kwargs["betas"] = betas
 
     return ClaudeSDKClient(options=ClaudeAgentOptions(**options_kwargs))

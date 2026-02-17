@@ -111,7 +111,7 @@ export function Insights({ projectId }: InsightsProps) {
   }), [t]);
 
   const [inputValue, setInputValue] = useState('');
-  const [creatingTask, setCreatingTask] = useState<string | null>(null);
+  const [creatingTask, setCreatingTask] = useState<Set<string>>(new Set());
   const [taskCreated, setTaskCreated] = useState<Set<string>>(new Set());
   const [isUserAtBottom, setIsUserAtBottom] = useState(true);
   const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
@@ -171,7 +171,7 @@ export function Insights({ projectId }: InsightsProps) {
     textareaRef.current?.focus();
   }, []);
 
-  // Reset taskCreated when switching sessions
+  // Reset task creation state when switching sessions
   useEffect(() => {
     setTaskCreated(new Set());
   }, [session?.id]);
@@ -205,25 +205,32 @@ export function Insights({ projectId }: InsightsProps) {
     return await renameSession(projectId, sessionId, newTitle);
   };
 
-  const handleCreateTask = async (message: InsightsChatMessage) => {
-    if (!message.suggestedTask) return;
-
-    setCreatingTask(message.id);
+  const handleCreateTask = async (
+    messageId: string,
+    taskIndex: number,
+    taskData: { title: string; description: string; metadata?: TaskMetadata }
+  ) => {
+    const taskKey = `${messageId}-${taskIndex}`;
+    setCreatingTask(prev => new Set(prev).add(taskKey));
     try {
       const task = await createTaskFromSuggestion(
         projectId,
-        message.suggestedTask.title,
-        message.suggestedTask.description,
-        message.suggestedTask.metadata
+        taskData.title,
+        taskData.description,
+        taskData.metadata
       );
 
       if (task) {
-        setTaskCreated(prev => new Set(prev).add(message.id));
+        setTaskCreated(prev => new Set(prev).add(taskKey));
         // Reload tasks to show the new task in the kanban
         loadTasks(projectId);
       }
     } finally {
-      setCreatingTask(null);
+      setCreatingTask(prev => {
+        const next = new Set(prev);
+        next.delete(taskKey);
+        return next;
+      });
     }
   };
 

@@ -295,6 +295,8 @@
     "newIssue": "{{count}} new issue",
     "newIssue_plural": "{{count}} new issues",
     "reviewFailed": "Review Failed",
+    "externalReviewDetected": "External Review Detected",
+    "reviewStartedExternally": "This review was started from another session",
     "description": "Description",
     "noDescription": "No description provided.",
     "followupReviewDetails": "Follow-up Review Details",
@@ -421,6 +423,12 @@
     "done": "Done",
     "failedLabel": "Failed",
     "starting": "Starting..."
+  },
+  "insights": {
+    "suggestedTask": "Suggested Task",
+    "creating": "Creating...",
+    "taskCreated": "Task Created",
+    "createTask": "Create Task"
   },
   "ideation": {
     "converting": "Converting...",
@@ -656,6 +664,14 @@
     "step2": "Find the profile in the Claude Accounts section",
     "step3": "Click \"Authenticate\" to complete login",
     "footer": "The account will be available once you complete authentication."
+  },
+  "roadmap": {
+    "taskCompleted": "Completed",
+    "taskDeleted": "Deleted",
+    "taskArchived": "Archived",
+    "showMoreFeatures": "Show {{count}} more feature",
+    "showMoreFeatures_plural": "Show {{count}} more features",
+    "showLessFeatures": "Show less"
   },
   "roadmapGeneration": {
     "progress": "Progress",

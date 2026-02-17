@@ -5,6 +5,7 @@ import type {
   RoadmapFeature,
   RoadmapFeatureStatus,
   RoadmapGenerationStatus,
+  TaskOutcome,
   FeatureSource
 } from '../../shared/types';
 import { debugError, debugLog } from '../../shared/utils/debug-logger';
@@ -60,7 +61,7 @@ interface RoadmapState {
   setGenerationStatus: (status: RoadmapGenerationStatus) => void;
   setCurrentProjectId: (projectId: string | null) => void;
   updateFeatureStatus: (featureId: string, status: RoadmapFeatureStatus) => void;
-  markFeatureDoneBySpecId: (specId: string) => void;
+  markFeatureDoneBySpecId: (specId: string, taskOutcome?: TaskOutcome) => void;
   updateFeatureLinkedSpec: (featureId: string, specId: string) => void;
   deleteFeature: (featureId: string) => void;
   clearRoadmap: () => void;
@@ -117,7 +118,9 @@ export const useRoadmapStore = create<RoadmapState>((set) => ({
       if (!state.roadmap) return state;
 
       const updatedFeatures = state.roadmap.features.map((feature) =>
-        feature.id === featureId ? { ...feature, status } : feature
+        feature.id === featureId
+          ? { ...feature, status, ...(status !== 'done' ? { taskOutcome: undefined, previousStatus: undefined } : {}) }
+          : feature
       );
 
       return {
@@ -130,13 +133,13 @@ export const useRoadmapStore = create<RoadmapState>((set) => ({
     }),
 
   // Mark feature as done when its linked task completes
-  markFeatureDoneBySpecId: (specId: string) =>
+  markFeatureDoneBySpecId: (specId: string, taskOutcome: TaskOutcome = 'completed') =>
     set((state) => {
       if (!state.roadmap) return state;
 
       const updatedFeatures = state.roadmap.features.map((feature) =>
         feature.linkedSpecId === specId
-          ? { ...feature, status: 'done' as RoadmapFeatureStatus }
+          ? { ...feature, status: 'done' as RoadmapFeatureStatus, taskOutcome, previousStatus: feature.status !== 'done' ? feature.status : feature.previousStatus }
           : feature
       );
 
@@ -262,6 +265,67 @@ export const useRoadmapStore = create<RoadmapState>((set) => ({
   }
 }));
 
+/**
+ * Reconcile roadmap features with their linked tasks.
+ * Catches cases where tasks were completed/deleted before this fix was deployed,
+ * or if the app crashed mid-operation.
+ */
+async function reconcileLinkedFeatures(projectId: string, roadmap: Roadmap): Promise<void> {
+  const store = useRoadmapStore.getState();
+
+  // Find features that have a linkedSpecId but aren't done yet (or are done without taskOutcome)
+  const featuresNeedingReconciliation = roadmap.features.filter(
+    (f) => f.linkedSpecId && (f.status !== 'done' || !f.taskOutcome)
+  );
+
+  if (featuresNeedingReconciliation.length === 0) return;
+
+  // Fetch current tasks for the project
+  const tasksResult = await window.electronAPI.getTasks(projectId);
+  if (!tasksResult.success || !tasksResult.data) return;
+
+  // Guard against empty task list (e.g., specs directory temporarily inaccessible)
+  // to avoid falsely marking all linked features as 'deleted'
+  if (tasksResult.data.length === 0 && featuresNeedingReconciliation.length > 0) return;
+
+  const taskMap = new Map(tasksResult.data.map((t) => [t.specId || t.id, t]));
+  let hasChanges = false;
+
+  for (const feature of featuresNeedingReconciliation) {
+    const task = taskMap.get(feature.linkedSpecId!);
+
+    if (!task) {
+      // Task no longer exists → mark as done with deleted outcome
+      if (feature.status !== 'done' || feature.taskOutcome !== 'deleted') {
+        store.markFeatureDoneBySpecId(feature.linkedSpecId!, 'deleted');
+        hasChanges = true;
+      }
+    } else if (task.status === 'done' || task.status === 'pr_created') {
+      // Task is completed → mark feature as done
+      if (feature.status !== 'done' || !feature.taskOutcome) {
+        store.markFeatureDoneBySpecId(feature.linkedSpecId!, 'completed');
+        hasChanges = true;
+      }
+    } else if (task.metadata?.archivedAt) {
+      // Task is archived → mark feature as done with archived outcome
+      if (feature.status !== 'done' || feature.taskOutcome !== 'archived') {
+        store.markFeatureDoneBySpecId(feature.linkedSpecId!, 'archived');
+        hasChanges = true;
+      }
+    }
+  }
+
+  if (hasChanges) {
+    const updatedRoadmap = useRoadmapStore.getState().roadmap;
+    if (updatedRoadmap) {
+      console.log('[Roadmap] Reconciled linked features with task states');
+      window.electronAPI.saveRoadmap(projectId, updatedRoadmap).catch((err) => {
+        console.error('[Roadmap] Failed to save reconciled roadmap:', err);
+      });
+    }
+  }
+}
+
 // Helper functions for loading roadmap
 export async function loadRoadmap(projectId: string): Promise<void> {
   const store = useRoadmapStore.getState();
@@ -325,6 +389,9 @@ export async function loadRoadmap(projectId: string): Promise<void> {
         debugError('[Roadmap] Failed to save migrated roadmap:', err);
       });
     }
+
+    // Reconcile features with linked tasks that may have been completed/deleted
+    await reconcileLinkedFeatures(projectId, migratedRoadmap);
 
     // Extract and set competitor analysis separately if present
     if (migratedRoadmap.competitorAnalysis) {
