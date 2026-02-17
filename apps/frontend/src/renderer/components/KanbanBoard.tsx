@@ -174,43 +174,43 @@ const getEmptyStateContent = (status: TaskStatus, t: (key: string) => string): {
   switch (status) {
     case 'backlog':
       return {
-        icon: <Inbox className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <Inbox className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyBacklog'),
         subtext: t('kanban.emptyBacklogHint')
       };
     case 'queue':
       return {
-        icon: <Loader2 className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <Loader2 className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyQueue'),
         subtext: t('kanban.emptyQueueHint')
       };
     case 'in_progress':
       return {
-        icon: <Loader2 className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <Loader2 className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyInProgress'),
         subtext: t('kanban.emptyInProgressHint')
       };
     case 'ai_review':
       return {
-        icon: <Eye className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <Eye className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyAiReview'),
         subtext: t('kanban.emptyAiReviewHint')
       };
     case 'human_review':
       return {
-        icon: <Eye className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <Eye className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyHumanReview'),
         subtext: t('kanban.emptyHumanReviewHint')
       };
     case 'done':
       return {
-        icon: <CheckCircle2 className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <CheckCircle2 className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyDone'),
         subtext: t('kanban.emptyDoneHint')
       };
     default:
       return {
-        icon: <Inbox className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <Inbox className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyDefault')
       };
   }
@@ -378,8 +378,8 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
         )}
       >
         {/* Column header - enhanced styling */}
-        <div className="flex items-center justify-between p-4 kanban-column-header">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center justify-between p-3 px-3.5 kanban-column-header">
+        <div className="flex items-center gap-2">
           {/* Collapse button */}
           {onToggleCollapsed && (
             <Tooltip delayDuration={200}>
@@ -434,7 +434,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           {/* Lock toggle button - available for all columns */}
           {onToggleLocked && (
             <Tooltip delayDuration={200}>
@@ -540,22 +540,22 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
 
       {/* Task list */}
       <div className="flex-1 min-h-0">
-        <ScrollArea className="h-full px-3 pb-3 pt-2">
+        <ScrollArea className="h-full px-2.5 pb-2.5 pt-1.5">
           <SortableContext
             items={taskIds}
             strategy={verticalListSortingStrategy}
           >
-            <div className="space-y-3 min-h-[120px]">
+            <div className="space-y-2 min-h-[80px]">
               {tasks.length === 0 ? (
                 <div
                   className={cn(
-                    'empty-column-dropzone flex flex-col items-center justify-center py-6',
+                    'empty-column-dropzone flex flex-col items-center justify-center py-4',
                     isOver && 'active'
                   )}
                 >
                   {isOver ? (
                     <>
-                      <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mb-2">
+                      <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mb-2">
                         <Plus className="h-4 w-4 text-primary" />
                       </div>
                       <span className="text-sm font-medium text-primary">{t('kanban.dropHere')}</span>
@@ -1440,7 +1440,7 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex flex-1 gap-4 overflow-x-auto p-6">
+        <div className="flex flex-1 gap-3 overflow-x-auto p-4">
           {TASK_STATUS_COLUMNS.map((status) => (
             <DroppableColumn
               key={status}

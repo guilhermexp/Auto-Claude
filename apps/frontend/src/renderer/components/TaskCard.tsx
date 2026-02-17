@@ -345,7 +345,7 @@ export const TaskCard = memo(function TaskCard({
       )}
       onClick={onClick}
     >
-      <CardContent className="p-3">
+      <CardContent className="p-2.5">
         <div className={isSelectable ? 'flex gap-3' : undefined}>
           {/* Checkbox for selectable mode - stops event propagation */}
           {isSelectable && (
@@ -370,14 +370,14 @@ export const TaskCard = memo(function TaskCard({
 
         {/* Description - sanitized to handle markdown content (memoized) */}
         {sanitizedDescription && (
-          <p className="mt-2 text-xs text-muted-foreground line-clamp-2">
+          <p className="mt-1.5 text-xs text-muted-foreground line-clamp-1">
             {sanitizedDescription}
           </p>
         )}
 
         {/* Metadata badges */}
         {(task.metadata || isStuck || isIncomplete || hasActiveExecution || reviewReasonInfo) && (
-          <div className="task-card-metadata mt-2.5 flex flex-wrap gap-1.5">
+          <div className="task-card-metadata mt-2 flex flex-wrap gap-1">
             {/* Stuck indicator - highest priority */}
             {isStuck && (
               <Badge
@@ -507,7 +507,7 @@ export const TaskCard = memo(function TaskCard({
 
         {/* Progress section - Phase-aware with animations */}
         {(task.subtasks.length > 0 || hasActiveExecution || isRunning || isStuck) && (
-          <div className="mt-4">
+          <div className="mt-2.5">
             <PhaseProgressIndicator
               phase={executionPhase}
               subtasks={task.subtasks}
@@ -519,7 +519,7 @@ export const TaskCard = memo(function TaskCard({
         )}
 
         {/* Footer */}
-        <div className="task-card-footer mt-4 flex items-center justify-between">
+        <div className="task-card-footer mt-2.5 flex items-center justify-between">
           <div className="task-time-pill flex items-center gap-1.5 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
             <span>{relativeTime}</span>

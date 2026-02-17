@@ -117,7 +117,7 @@ export const PhaseProgressIndicator = memo(function PhaseProgressIndicator({
   const activeEntries = getActivePhaseEntries();
 
   return (
-    <div ref={containerRef} className={cn('task-phase-progress space-y-2', className)}>
+    <div ref={containerRef} className={cn('task-phase-progress space-y-1.5', className)}>
       {/* Progress label row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -158,7 +158,7 @@ export const PhaseProgressIndicator = memo(function PhaseProgressIndicator({
       {/* Progress bar */}
       <div
         className={cn(
-          'relative h-2 w-full overflow-hidden rounded-full',
+          'relative h-1.5 w-full overflow-hidden rounded-full',
           isStuck ? 'bg-warning/20' : 'bg-border'
         )}
       >
@@ -207,7 +207,7 @@ export const PhaseProgressIndicator = memo(function PhaseProgressIndicator({
 
       {/* Subtask indicators (only show when subtasks exist) */}
       {totalSubtasks > 0 && (
-        <div className="flex flex-wrap gap-1.5 mt-2">
+        <div className="flex flex-wrap gap-1.5 mt-1.5">
           {subtasks.slice(0, 10).map((subtask, index) => {
             const isInProgress = subtask.status === 'in_progress';
             const shouldPulse = isInProgress && isVisible;
@@ -297,7 +297,7 @@ const PhaseStepsIndicator = memo(function PhaseStepsIndicator({
   };
 
   return (
-    <div className="task-phase-steps flex items-center gap-1 mt-2">
+    <div className="task-phase-steps flex items-center gap-1 mt-1">
       {phases.map((phase, index) => {
         const state = getPhaseState(phase.key);
         const shouldAnimate = state === 'active' && !isStuck && isVisible;
