@@ -1072,8 +1072,10 @@ export function registerTaskExecutionHandlers(
 
           for (const dir of specDirsToClean) {
             const attemptHistoryPath = path.join(dir, 'memory', 'attempt_history.json');
+            const historyContent = safeReadFileSync(attemptHistoryPath);
+            if (!historyContent) continue;
+
             try {
-              const historyContent = readFileSync(attemptHistoryPath, 'utf-8');
               const history = JSON.parse(historyContent);
 
               // Collect stuck subtask IDs before clearing
@@ -1103,10 +1105,7 @@ export function registerTaskExecutionHandlers(
               writeFileAtomicSync(attemptHistoryPath, JSON.stringify(history, null, 2));
               console.log(`[Recovery] Cleared attempt_history.json at: ${dir} (reset ${stuckIds.size} stuck entries)`);
             } catch (historyErr) {
-              // File might not exist - that's fine, no stuck markers to clear
-              if ((historyErr as NodeJS.ErrnoException).code !== 'ENOENT') {
-                console.warn(`[Recovery] Could not clear attempt_history at ${dir}:`, historyErr);
-              }
+              console.warn(`[Recovery] Could not parse attempt_history at ${dir}:`, historyErr);
             }
           }
         }

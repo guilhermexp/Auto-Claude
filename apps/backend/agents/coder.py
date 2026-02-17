@@ -13,6 +13,7 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from context.constants import SKIP_DIRS
 from core.client import create_client
 from core.file_utils import write_json_atomic
 from linear_updater import (
@@ -99,27 +100,8 @@ logger = logging.getLogger(__name__)
 # FILE VALIDATION UTILITIES
 # =============================================================================
 
-# Directories to exclude from file path search
-_EXCLUDE_DIRS = frozenset(
-    {
-        "node_modules",
-        ".git",
-        "dist",
-        "build",
-        ".venv",
-        "__pycache__",
-        ".next",
-        ".nuxt",
-        ".auto-claude",
-        "coverage",
-        ".tox",
-        ".idea",
-        ".vscode",
-        "vendor",
-        "target",
-        "out",
-    }
-)
+# Directories to exclude from file path search — extends context.constants.SKIP_DIRS
+_EXCLUDE_DIRS = frozenset(SKIP_DIRS | {".auto-claude", ".tox", "out"})
 
 
 def _build_file_index(
@@ -393,7 +375,7 @@ def _auto_correct_subtask_files(
             logger.info(
                 f"Persisted {len(corrections)} path correction(s) to implementation_plan.json"
             )
-        except OSError as e:
+        except (OSError, TypeError, ValueError) as e:
             logger.warning(f"Failed to persist path corrections: {e}")
 
     return still_missing
@@ -474,7 +456,7 @@ def _validate_plan_file_paths(spec_dir: Path, project_dir: Path) -> str | None:
         try:
             write_json_atomic(plan_file, plan)
             logger.info(f"Persisted {corrections_made} post-plan path correction(s)")
-        except OSError as e:
+        except (OSError, TypeError, ValueError) as e:
             logger.warning(f"Failed to persist post-plan corrections: {e}")
 
     if not all_missing:
@@ -1240,6 +1222,11 @@ async def run_autonomous_agent(
                     first_run = True
                     status = "continue"
                 else:
+                    if path_issues:
+                        logger.warning(
+                            f"Plan has uncorrectable file paths after "
+                            f"{planning_validation_failures} retries - proceeding anyway"
+                        )
                     plan_validated = True
                     planning_retry_context = None
             else:
