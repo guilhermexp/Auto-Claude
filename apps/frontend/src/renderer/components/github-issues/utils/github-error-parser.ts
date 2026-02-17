@@ -138,7 +138,7 @@ function extractRateLimitResetTime(error: string): Date | undefined {
   }
 
   // Then try absolute timestamp pattern
-  const absolutePattern = /(?:reset[s]?\s*at[:\s]*|X-RateLimit-Reset[:\s]*)(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z?|\d+)/i;
+  const absolutePattern = /(?:reset[s]?\s*at[:\s]*|X-RateLimit-Reset[:\s]*)(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?|\d+)/i;
   const match = error.match(absolutePattern);
   if (!match) {
     return undefined;
@@ -157,7 +157,7 @@ function extractRateLimitResetTime(error: string): Date | undefined {
 
   // Check if it's a Unix timestamp (seconds or milliseconds)
   const numericValue = parseInt(resetValue, 10);
-  if (!Number.isNaN(numericValue)) {
+  if (!Number.isNaN(numericValue) && resetValue.length >= 10) {
     // GitHub API uses seconds, JavaScript uses milliseconds
     // Values > 1e12 are likely milliseconds already
     const timestamp = numericValue > 1e12 ? numericValue : numericValue * 1000;

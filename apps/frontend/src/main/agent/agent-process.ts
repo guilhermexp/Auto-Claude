@@ -649,12 +649,22 @@ export class AgentProcessManager {
     // Get OAuth mode clearing vars (clears stale ANTHROPIC_* vars when in OAuth mode)
     const oauthModeClearVars = getOAuthModeClearVars(apiProfileEnv);
 
+    // Defensive cleanup: if a config dir is set, force SDK auth resolution via that dir.
+    // getBestAvailableProfileEnv() already does this, but we keep a local guard here.
+    const cleanedEnv = env.CLAUDE_CONFIG_DIR
+      ? {
+        ...env,
+        CLAUDE_CODE_OAUTH_TOKEN: '',
+        ANTHROPIC_API_KEY: ''
+      }
+      : env;
+
     debugLog('[AgentProcess:spawnProcess] Environment merge chain for task:', taskId, {
       baseEnv: {
-        hasOAuthToken: !!env.CLAUDE_CODE_OAUTH_TOKEN,
-        hasApiKey: !!env.ANTHROPIC_API_KEY,
-        hasConfigDir: !!env.CLAUDE_CONFIG_DIR,
-        configDir: env.CLAUDE_CONFIG_DIR || '(not set)',
+        hasOAuthToken: !!cleanedEnv.CLAUDE_CODE_OAUTH_TOKEN,
+        hasApiKey: !!cleanedEnv.ANTHROPIC_API_KEY,
+        hasConfigDir: !!cleanedEnv.CLAUDE_CONFIG_DIR,
+        configDir: cleanedEnv.CLAUDE_CONFIG_DIR || '(not set)',
       },
       oauthModeClearVars: Object.keys(oauthModeClearVars),
       apiProfileEnv: {
@@ -671,7 +681,7 @@ export class AgentProcessManager {
       childProcess = spawn(pythonCommand, [...pythonBaseArgs, ...args], {
         cwd,
         env: {
-          ...env, // Already includes process.env, extraEnv, profileEnv, PYTHONUNBUFFERED, PYTHONUTF8
+          ...cleanedEnv, // Already includes process.env, extraEnv, profileEnv, PYTHONUNBUFFERED, PYTHONUTF8
           ...pythonEnv, // Include Python environment (PYTHONPATH for bundled packages)
           ...oauthModeClearVars, // Clear stale ANTHROPIC_* vars when in OAuth mode
           ...apiProfileEnv // Include active API profile config (highest priority for ANTHROPIC_* vars)
