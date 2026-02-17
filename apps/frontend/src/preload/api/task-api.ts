@@ -75,6 +75,12 @@ export interface TaskAPI {
   unarchiveTasks: (projectId: string, taskIds: string[]) => Promise<IPCResult<boolean>>;
   createWorktreePR: (taskId: string, options?: WorktreeCreatePROptions) => Promise<IPCResult<WorktreeCreatePRResult>>;
 
+  // Review & Merge
+  reviewAndMergeWorktree: (taskId: string, options?: import('../../shared/types').ReviewMergeOptions) => Promise<IPCResult<import('../../shared/types').ReviewMergeResult>>;
+  onReviewMergeProgress: (callback: (taskId: string, progress: import('../../shared/types').ReviewMergeProgressData) => void) => () => void;
+  onReviewMergeLog: (callback: (taskId: string, entry: import('../../shared/types').ReviewMergeLogEntry) => void) => () => void;
+  cancelReviewMerge: (taskId: string) => Promise<IPCResult<{ cancelled: boolean }>>;
+
   // Task Event Listeners
   // Note: projectId is optional for backward compatibility - events without projectId will still work
   onTaskProgress: (callback: (taskId: string, plan: ImplementationPlan, projectId?: string) => void) => () => void;
@@ -201,6 +207,45 @@ export const createTaskAPI = (): TaskAPI => ({
 
   createWorktreePR: (taskId: string, options?: WorktreeCreatePROptions): Promise<IPCResult<WorktreeCreatePRResult>> =>
     ipcRenderer.invoke(IPC_CHANNELS.TASK_WORKTREE_CREATE_PR, taskId, options),
+
+  // Review & Merge
+  reviewAndMergeWorktree: (taskId: string, options?: import('../../shared/types').ReviewMergeOptions): Promise<IPCResult<import('../../shared/types').ReviewMergeResult>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.TASK_WORKTREE_REVIEW_MERGE, taskId, options),
+
+  onReviewMergeProgress: (
+    callback: (taskId: string, progress: import('../../shared/types').ReviewMergeProgressData) => void
+  ): (() => void) => {
+    const handler = (
+      _event: Electron.IpcRendererEvent,
+      taskId: string,
+      progress: import('../../shared/types').ReviewMergeProgressData
+    ): void => {
+      callback(taskId, progress);
+    };
+    ipcRenderer.on(IPC_CHANNELS.TASK_REVIEW_MERGE_PROGRESS, handler);
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.TASK_REVIEW_MERGE_PROGRESS, handler);
+    };
+  },
+
+  onReviewMergeLog: (
+    callback: (taskId: string, entry: import('../../shared/types').ReviewMergeLogEntry) => void
+  ): (() => void) => {
+    const handler = (
+      _event: Electron.IpcRendererEvent,
+      taskId: string,
+      entry: import('../../shared/types').ReviewMergeLogEntry
+    ): void => {
+      callback(taskId, entry);
+    };
+    ipcRenderer.on(IPC_CHANNELS.TASK_REVIEW_MERGE_LOG, handler);
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.TASK_REVIEW_MERGE_LOG, handler);
+    };
+  },
+
+  cancelReviewMerge: (taskId: string): Promise<IPCResult<{ cancelled: boolean }>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.TASK_REVIEW_MERGE_CANCEL, taskId),
 
   // Task Event Listeners
   onTaskProgress: (

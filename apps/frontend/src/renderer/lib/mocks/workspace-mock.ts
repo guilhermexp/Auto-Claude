@@ -62,6 +62,23 @@ export const workspaceMock = {
     }
   }),
 
+  reviewAndMergeWorktree: async () => ({
+    success: true,
+    data: {
+      success: true,
+      message: 'Review & Merge completed',
+      prUrl: 'https://github.com/example/repo/pull/123'
+    }
+  }),
+
+  onReviewMergeProgress: () => () => {},
+  onReviewMergeLog: () => () => {},
+
+  cancelReviewMerge: async () => ({
+    success: true,
+    data: { cancelled: true }
+  }),
+
   discardWorktree: async (_taskId: string, _skipStatusChange?: boolean) => ({
     success: true,
     data: {

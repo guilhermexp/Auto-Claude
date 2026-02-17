@@ -350,6 +350,27 @@ AGENT_CONFIGS = {
         "auto_claude_tools": [],
         "thinking_default": "high",
     },
+    # ═══════════════════════════════════════════════════════════════════════
+    # REVIEW & MERGE PIPELINE
+    # ═══════════════════════════════════════════════════════════════════════
+    "review_merge_reviewer": {
+        "tools": BASE_READ_TOOLS + ["Bash"],
+        "mcp_servers": [],
+        "auto_claude_tools": [],
+        "thinking_default": "high",
+    },
+    "review_merge_planner": {
+        "tools": BASE_READ_TOOLS + ["Bash"],
+        "mcp_servers": [],
+        "auto_claude_tools": [],
+        "thinking_default": "high",
+    },
+    "review_merge_fixer": {
+        "tools": BASE_READ_TOOLS + BASE_WRITE_TOOLS + ["Bash"],
+        "mcp_servers": [],
+        "auto_claude_tools": [],
+        "thinking_default": "medium",
+    },
 }
 
 

@@ -1,6 +1,6 @@
 import { ipcMain, BrowserWindow, shell, app } from 'electron';
 import { IPC_CHANNELS, AUTO_BUILD_PATHS, DEFAULT_APP_SETTINGS, DEFAULT_FEATURE_MODELS, DEFAULT_FEATURE_THINKING, MODEL_ID_MAP, THINKING_BUDGET_MAP, getSpecsDir } from '../../../shared/constants';
-import type { IPCResult, WorktreeStatus, WorktreeDiff, WorktreeDiffFile, WorktreeMergeResult, WorktreeDiscardResult, WorktreeListResult, WorktreeListItem, WorktreeCreatePROptions, WorktreeCreatePRResult, SupportedIDE, SupportedTerminal, AppSettings } from '../../../shared/types';
+import type { IPCResult, WorktreeStatus, WorktreeDiff, WorktreeDiffFile, WorktreeMergeResult, WorktreeDiscardResult, WorktreeListResult, WorktreeListItem, WorktreeCreatePROptions, WorktreeCreatePRResult, SupportedIDE, SupportedTerminal, AppSettings, ReviewMergeOptions, ReviewMergeResult, ReviewMergeProgressData } from '../../../shared/types';
 import path from 'path';
 import { minimatch } from 'minimatch';
 import { existsSync, readdirSync, statSync, readFileSync, promises as fsPromises } from 'fs';
@@ -3434,6 +3434,322 @@ export function registerWorktreeHandlers(
           error: error instanceof Error ? error.message : 'Failed to create PR'
         };
       }
+    }
+  );
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // REVIEW & MERGE PIPELINE
+  // ═══════════════════════════════════════════════════════════════════════
+
+  // Track active review-merge processes for cancellation
+  const activeReviewMergeProcesses = new Map<string, ReturnType<typeof spawn>>();
+
+  /**
+   * Review & Merge: CodeRabbit review → AI fix loop → PR → merge
+   */
+  ipcMain.handle(
+    IPC_CHANNELS.TASK_WORKTREE_REVIEW_MERGE,
+    async (_, taskId: string, options?: ReviewMergeOptions): Promise<IPCResult<ReviewMergeResult>> => {
+      const isDebugMode = process.env.DEBUG === 'true' || process.env.NODE_ENV === 'development';
+      const debug = (...args: unknown[]) => {
+        if (isDebugMode) console.warn('[REVIEW_MERGE DEBUG]', ...args);
+      };
+
+      try {
+        debug('Handler called with taskId:', taskId, 'options:', options);
+
+        // Guard against duplicate spawns (React StrictMode can invoke the handler twice)
+        if (activeReviewMergeProcesses.has(taskId)) {
+          debug('Process already running for taskId:', taskId, '— ignoring duplicate call');
+          return { success: false, error: 'Review & Merge already in progress for this task' };
+        }
+
+        // Ensure Python environment is ready
+        if (!pythonEnvManager.isEnvReady()) {
+          const autoBuildSource = getEffectiveSourcePath();
+          if (autoBuildSource) {
+            const status = await pythonEnvManager.initialize(autoBuildSource);
+            if (!status.ready) {
+              return { success: false, error: `Python environment not ready: ${status.error || 'Unknown error'}` };
+            }
+          } else {
+            return { success: false, error: 'Python environment not ready and Auto Claude source not found' };
+          }
+        }
+
+        const { task, project } = findTaskAndProject(taskId);
+        if (!task || !project) {
+          debug('Task or project not found');
+          return { success: false, error: 'Task not found' };
+        }
+
+        debug('Found task:', task.specId, 'project:', project.path);
+
+        const sourcePath = getEffectiveSourcePath();
+        if (!sourcePath) {
+          return { success: false, error: 'Auto Claude source not found' };
+        }
+
+        // Fix bare repo if needed
+        if (fixMisconfiguredBareRepo(project.path)) {
+          debug('Fixed misconfigured bare repository at:', project.path);
+        }
+
+        const specDir = path.join(project.path, project.autoBuildPath || '.auto-claude', 'specs', task.specId);
+        if (!existsSync(specDir)) {
+          return { success: false, error: 'Spec directory not found' };
+        }
+
+        // Build runner args
+        const runnerModule = 'runners.review_merge.runner';
+        const args = [
+          '-m', runnerModule,
+          '--spec', task.specId,
+          '--project-dir', project.path,
+        ];
+
+        // Add base branch
+        const taskBaseBranch = getTaskBaseBranch(specDir);
+        const projectMainBranch = project.settings?.mainBranch;
+        const effectiveBaseBranch = options?.baseBranch || taskBaseBranch || projectMainBranch;
+        if (effectiveBaseBranch) {
+          args.push('--base-branch', effectiveBaseBranch);
+        }
+
+        // Add optional args
+        if (options?.maxIterations) {
+          args.push('--max-iterations', String(options.maxIterations));
+        }
+        if (options?.prTarget) {
+          args.push('--pr-target', options.prTarget);
+        }
+        if (options?.prTitle) {
+          args.push('--pr-title', options.prTitle);
+        }
+        if (options?.prDraft) {
+          args.push('--pr-draft');
+        }
+        if (options?.skipMerge) {
+          args.push('--skip-merge');
+        }
+
+        // Add model settings
+        const utilitySettings = getUtilitySettings();
+        args.push('--model', utilitySettings.modelId || 'sonnet');
+        if (utilitySettings.thinkingLevel) {
+          args.push('--thinking-level', utilitySettings.thinkingLevel);
+        }
+
+        const pythonPath = getConfiguredPythonPath();
+        const [pythonCommand, pythonBaseArgs] = parsePythonCommand(pythonPath);
+        const pythonEnv = pythonEnvManagerSingleton.getPythonEnv();
+        const profileResult = getBestAvailableProfileEnv();
+        const profileEnv = profileResult.env;
+
+        debug('Running review-merge:', pythonCommand, [...pythonBaseArgs, ...args].join(' '));
+
+        return new Promise((resolve) => {
+          const TIMEOUT_MS = 1800000; // 30 minutes for full pipeline
+          let timeoutId: NodeJS.Timeout | null = null;
+          let resolved = false;
+
+          const reviewMergeProcess = spawn(pythonCommand, [...pythonBaseArgs, ...args], {
+            cwd: sourcePath,
+            env: {
+              ...getIsolatedGitEnv(),
+              ...pythonEnv,
+              ...profileEnv,
+              PYTHONUNBUFFERED: '1',
+              PYTHONUTF8: '1',
+              UTILITY_MODEL: utilitySettings.model,
+              UTILITY_MODEL_ID: utilitySettings.modelId,
+              UTILITY_THINKING_BUDGET: utilitySettings.thinkingBudget === null ? '' : (utilitySettings.thinkingBudget?.toString() || '')
+            },
+            stdio: ['ignore', 'pipe', 'pipe']
+          });
+
+          // Track for cancellation
+          activeReviewMergeProcesses.set(taskId, reviewMergeProcess);
+
+          let stdout = '';
+          let stderr = '';
+
+          timeoutId = setTimeout(() => {
+            if (!resolved) {
+              resolved = true;
+              activeReviewMergeProcesses.delete(taskId);
+              killProcessGracefully(reviewMergeProcess, {
+                debugPrefix: '[REVIEW_MERGE]',
+                debug: isDebugMode
+              });
+              resolve({
+                success: false,
+                error: 'Review & Merge pipeline timed out after 30 minutes'
+              });
+            }
+          }, TIMEOUT_MS);
+
+          const REVIEW_MERGE_MARKER = '__REVIEW_MERGE__:';
+          const REVIEW_MERGE_LOG_MARKER = '__REVIEW_MERGE_LOG__:';
+          let lineBuffer = ''; // Buffer for partial JSON lines spanning data chunks
+
+          reviewMergeProcess.stdout?.on('data', (data: Buffer) => {
+            const chunk = data.toString('utf-8');
+            debug('STDOUT:', chunk);
+            stdout += chunk;
+
+            // Prepend any buffered partial line from previous chunk
+            const combined = lineBuffer + chunk;
+            const lines = combined.split('\n');
+
+            // Last element may be a partial line - buffer it for next chunk
+            lineBuffer = lines.pop() || '';
+
+            // Parse progress and log events
+            for (const line of lines) {
+              const trimmed = line.trim();
+              if (!trimmed) continue;
+              if (trimmed.startsWith(REVIEW_MERGE_MARKER)) {
+                try {
+                  const payload = JSON.parse(trimmed.slice(REVIEW_MERGE_MARKER.length));
+                  const mainWindow = getMainWindow();
+                  if (mainWindow) {
+                    mainWindow.webContents.send(
+                      IPC_CHANNELS.TASK_REVIEW_MERGE_PROGRESS,
+                      taskId,
+                      payload as ReviewMergeProgressData
+                    );
+                  }
+                } catch {
+                  debug('Failed to parse progress event:', trimmed);
+                }
+              } else if (trimmed.startsWith(REVIEW_MERGE_LOG_MARKER)) {
+                try {
+                  const payload = JSON.parse(trimmed.slice(REVIEW_MERGE_LOG_MARKER.length));
+                  const mainWindow = getMainWindow();
+                  if (mainWindow) {
+                    mainWindow.webContents.send(
+                      IPC_CHANNELS.TASK_REVIEW_MERGE_LOG,
+                      taskId,
+                      { ...payload, timestamp: new Date().toISOString() }
+                    );
+                  }
+                } catch {
+                  debug('Failed to parse log event:', trimmed);
+                }
+              }
+            }
+          });
+
+          reviewMergeProcess.stderr?.on('data', (data: Buffer) => {
+            const chunk = data.toString('utf-8');
+            debug('STDERR:', chunk);
+            stderr += chunk;
+          });
+
+          reviewMergeProcess.on('close', (code) => {
+            if (resolved) return;
+            resolved = true;
+            if (timeoutId) clearTimeout(timeoutId);
+            activeReviewMergeProcesses.delete(taskId);
+
+            debug('Process exited with code:', code);
+
+            // Flush any remaining buffered line
+            if (lineBuffer.trim()) {
+              stdout += lineBuffer + '\n';
+            }
+
+            // Build combined logs for error display
+            const combinedLogs = [
+              stderr ? `[stderr]\n${stderr}` : '',
+              stdout ? `[stdout]\n${stdout}` : '',
+            ].filter(Boolean).join('\n\n');
+
+            // Try to parse the final JSON result from stdout
+            const lines = stdout.trim().split('\n');
+            for (let i = lines.length - 1; i >= 0; i--) {
+              const line = lines[i].trim();
+              if (line.startsWith('{') && line.includes('"success"')) {
+                try {
+                  const result = JSON.parse(line);
+                  resolve({
+                    success: result.success,
+                    data: {
+                      success: result.success,
+                      message: result.message || '',
+                      prUrl: result.pr_url,
+                      iterationsUsed: result.iterations_used,
+                      findingsSummary: result.findings_summary,
+                      logs: result.success ? undefined : combinedLogs,
+                    }
+                  });
+                  return;
+                } catch {
+                  // Continue looking
+                }
+              }
+            }
+
+            // Fallback
+            if (code === 0) {
+              resolve({
+                success: true,
+                data: {
+                  success: true,
+                  message: 'Review & Merge completed',
+                }
+              });
+            } else {
+              resolve({
+                success: false,
+                error: stderr || stdout || `Process exited with code ${code}`,
+                data: {
+                  success: false,
+                  message: stderr || stdout || `Process exited with code ${code}`,
+                  logs: combinedLogs,
+                }
+              });
+            }
+          });
+
+          reviewMergeProcess.on('error', (err) => {
+            if (resolved) return;
+            resolved = true;
+            if (timeoutId) clearTimeout(timeoutId);
+            activeReviewMergeProcesses.delete(taskId);
+            resolve({
+              success: false,
+              error: `Failed to start review-merge: ${err.message}`
+            });
+          });
+        });
+      } catch (error) {
+        console.error('[REVIEW_MERGE] Exception in handler:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Failed to run review & merge'
+        };
+      }
+    }
+  );
+
+  /**
+   * Cancel an active Review & Merge process
+   */
+  ipcMain.handle(
+    IPC_CHANNELS.TASK_REVIEW_MERGE_CANCEL,
+    async (_, taskId: string): Promise<IPCResult<{ cancelled: boolean }>> => {
+      const proc = activeReviewMergeProcesses.get(taskId);
+      if (proc) {
+        killProcessGracefully(proc, {
+          debugPrefix: '[REVIEW_MERGE_CANCEL]',
+          debug: process.env.DEBUG === 'true'
+        });
+        activeReviewMergeProcesses.delete(taskId);
+        return { success: true, data: { cancelled: true } };
+      }
+      return { success: true, data: { cancelled: false } };
     }
   );
 }

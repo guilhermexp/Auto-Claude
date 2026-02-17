@@ -43,6 +43,7 @@ from .workspace_commands import (
     handle_list_worktrees_command,
     handle_merge_command,
     handle_review_command,
+    handle_review_merge_command,
 )
 
 
@@ -158,6 +159,11 @@ Environment Variables:
         "--create-pr",
         action="store_true",
         help="Push branch and create a GitHub Pull Request",
+    )
+    build_group.add_argument(
+        "--review-merge",
+        action="store_true",
+        help="Review code with CodeRabbit, auto-fix issues, create PR, and merge",
     )
 
     # PR options
@@ -435,6 +441,19 @@ def _run_cli() -> None:
         if not result.get("success"):
             sys.exit(1)
         return
+
+    if args.review_merge:
+        success = handle_review_merge_command(
+            project_dir=project_dir,
+            spec_name=spec_dir.name,
+            base_branch=args.base_branch,
+            model=args.model,
+            thinking_level=args.thinking_level,
+            pr_target=args.pr_target,
+            pr_title=args.pr_title,
+            pr_draft=args.pr_draft,
+        )
+        sys.exit(0 if success else 1)
 
     # Handle QA commands
     if args.qa_status:

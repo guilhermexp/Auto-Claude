@@ -505,6 +505,60 @@ export interface WorktreeListResult {
   worktrees: WorktreeListItem[];
 }
 
+// Review & Merge pipeline types
+export type ReviewMergeStage =
+  | 'reviewing'
+  | 'checking_conflicts'
+  | 'planning'
+  | 'building'
+  | 'verifying'
+  | 'creating_pr'
+  | 'merging'
+  | 'complete'
+  | 'error'
+  | 'max_iterations';
+
+export interface ReviewMergeOptions {
+  baseBranch?: string;
+  maxIterations?: number;
+  prTarget?: string;
+  prTitle?: string;
+  prDraft?: boolean;
+  skipMerge?: boolean;
+}
+
+export interface ReviewMergeProgressData {
+  stage: ReviewMergeStage;
+  message: string;
+  percent: number;
+  iteration?: number;
+  maxIterations?: number;
+  findingsSummary?: string;
+  conflicts?: string[];
+}
+
+export type ReviewMergeLogType = 'tool_start' | 'tool_end' | 'info' | 'success' | 'error' | 'text';
+
+export interface ReviewMergeLogEntry {
+  type: ReviewMergeLogType;
+  timestamp: string;
+  tool_name?: string;
+  tool_input?: string;
+  content?: string;
+  success?: boolean;
+  detail?: string;
+  stage?: ReviewMergeStage;
+}
+
+export interface ReviewMergeResult {
+  success: boolean;
+  message: string;
+  prUrl?: string;
+  iterationsUsed?: number;
+  findingsSummary?: string;
+  logs?: string;
+}
+
 // Stuck task recovery types
 export interface StuckTaskInfo {
   taskId: string;

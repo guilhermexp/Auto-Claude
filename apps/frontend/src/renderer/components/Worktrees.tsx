@@ -19,7 +19,8 @@ import {
   Terminal,
   CheckSquare2,
   CheckSquare,
-  Square
+  Square,
+  SearchCheck
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -47,8 +48,9 @@ import {
 import { useProjectStore } from '../stores/project-store';
 import { useTaskStore } from '../stores/task-store';
 import { useToast } from '../hooks/use-toast';
-import type { WorktreeListItem, WorktreeMergeResult, TerminalWorktreeConfig, WorktreeStatus, Task, WorktreeCreatePROptions, WorktreeCreatePRResult } from '../../shared/types';
+import type { WorktreeListItem, WorktreeMergeResult, TerminalWorktreeConfig, WorktreeStatus, Task, WorktreeCreatePROptions, WorktreeCreatePRResult, ReviewMergeResult } from '../../shared/types';
 import { CreatePRDialog } from './task-detail/task-review/CreatePRDialog';
+import { ReviewMergeDialog } from './worktrees/ReviewMergeDialog';
 import { debugError, debugLog, debugWarn } from '../../shared/utils/debug-logger';
 
 // Prefix constants for worktree ID parsing
@@ -94,6 +96,11 @@ export function Worktrees({ projectId }: WorktreesProps) {
   const [showCreatePRDialog, setShowCreatePRDialog] = useState(false);
   const [prWorktree, setPrWorktree] = useState<WorktreeListItem | null>(null);
   const [prTask, setPrTask] = useState<Task | null>(null);
+
+  // Review & Merge dialog state
+  const [showReviewMergeDialog, setShowReviewMergeDialog] = useState(false);
+  const [reviewMergeWorktree, setReviewMergeWorktree] = useState<WorktreeListItem | null>(null);
+  const [reviewMergeTaskId, setReviewMergeTaskId] = useState<string>('');
 
   // Selection state
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -316,6 +323,23 @@ export function Worktrees({ projectId }: WorktreesProps) {
     setPrWorktree(worktree);
     setPrTask(task);
     setShowCreatePRDialog(true);
+  };
+
+  const openReviewMergeDialog = (worktree: WorktreeListItem, task: Task) => {
+    setReviewMergeWorktree(worktree);
+    setReviewMergeTaskId(task.id);
+    setShowReviewMergeDialog(true);
+  };
+
+  const handleReviewMergeComplete = (result: ReviewMergeResult) => {
+    if (result.success) {
+      toast({
+        title: t('dialogs:worktrees.reviewMergeSuccess'),
+        description: result.prUrl ? t('dialogs:worktrees.reviewMergePrLink', { url: result.prUrl }) : result.message,
+      });
+      // Refresh worktree list
+      loadWorktrees();
+    }
   };
 
   // Handle Create PR
@@ -664,6 +688,16 @@ export function Worktrees({ projectId }: WorktreesProps) {
                             <GitMerge className="h-3.5 w-3.5 mr-1.5" />
                             {t('dialogs:worktrees.mergeTo', { branch: worktree.baseBranch })}
                           </Button>
+                          {task && (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => openReviewMergeDialog(worktree, task)}
+                            >
+                              <SearchCheck className="h-3.5 w-3.5 mr-1.5" />
+                              {t('dialogs:worktrees.reviewAndMerge')}
+                            </Button>
+                          )}
                           {task && (
                             <Button
                               variant="info"
@@ -1041,6 +1075,18 @@ export function Worktrees({ projectId }: WorktreesProps) {
           worktreeStatus={worktreeToStatus(prWorktree)}
           onOpenChange={setShowCreatePRDialog}
           onCreatePR={handleCreatePR}
+        />
+      )}
+
+      {/* Review & Merge Dialog */}
+      {reviewMergeWorktree && (
+        <ReviewMergeDialog
+          open={showReviewMergeDialog}
+          taskId={reviewMergeTaskId}
+          specName={reviewMergeWorktree.specName || reviewMergeWorktree.branch}
+          baseBranch={reviewMergeWorktree.baseBranch || 'main'}
+          onOpenChange={setShowReviewMergeDialog}
+          onComplete={handleReviewMergeComplete}
         />
       )}
     </div>

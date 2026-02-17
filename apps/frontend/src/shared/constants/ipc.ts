@@ -47,6 +47,10 @@ export const IPC_CHANNELS = {
   TASK_WORKTREE_OPEN_IN_IDE: 'task:worktreeOpenInIDE',
   TASK_WORKTREE_OPEN_IN_TERMINAL: 'task:worktreeOpenInTerminal',
   TASK_WORKTREE_DETECT_TOOLS: 'task:worktreeDetectTools',  // Detect installed IDEs/terminals
+  TASK_WORKTREE_REVIEW_MERGE: 'task:worktreeReviewMerge',
+  TASK_REVIEW_MERGE_PROGRESS: 'task:reviewMergeProgress',
+  TASK_REVIEW_MERGE_LOG: 'task:reviewMergeLog',
+  TASK_REVIEW_MERGE_CANCEL: 'task:reviewMergeCancel',
   TASK_LIST_WORKTREES: 'task:listWorktrees',
   TASK_ARCHIVE: 'task:archive',
   TASK_UNARCHIVE: 'task:unarchive',

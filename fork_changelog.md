@@ -588,3 +588,401 @@ Tracks local/private fork changes against upstream.
 - Sync result: no-upstream-updates
 - Last synced upstream commit: 5745cb14
 
+## 2026-02-17T06:08:06Z
+
+- Branch: develop
+- HEAD: 212e0af6
+- Upstream base: upstream/main
+- Previous synced upstream commit (from changelog): 5745cb14
+- Target upstream commit for this run: 5745cb14
+- Private commits: 246
+- Commit list:
+  - 212e0af6 Adjust UI spacing and styling for better compactness
+  - 376f4e9c Merge branch 'develop' of https://github.com/guilhermexp/Auto-Claude into develop
+  - e12b9719 fix: resolve task execution failures and improve API profile support
+  - 4d206401 Simplify AbortSignal handling in profile API
+  - 5d22f403 fix: macOS auto-update code signing with self-signed certificate
+  - 523cc90d chore: bump version to 2.7.11
+  - ab416b85 Optimize performance with debouncing and deduplication
+  - 3c88a245 feat: adicionar script de release automatizado
+  - 66abe100 chore: remover build de Linux - apenas macOS e Windows
+  - 52679a0d chore: bump version to 2.7.10
+  - 6cb3cbc6 fix: remover notarização para forks sem certificados Apple
+  - fca3a048 chore: bump version to 2.7.9
+  - 9a2611d0 fix: desabilitar code signing para forks sem certificados
+  - e345d7a8 chore: bump version to 2.7.8
+  - 1cbc043e chore: atualizar referências do .github para fork guilhermexp
+  - d4cafc32 chore: bump version to 2.7.7
+  - 8b08f10a Update repository links and ownership to guilhermexp
+  - 265967f4 Atualizar badge e ocultar alerta
+  - 33b4712f Padronizar cores e componentes das p
+  - 0c64f4bb Ajusta layout footer sidebar
+  - af1d25b5 Slim sidebar and clean chat labels
+  - 58a90c48 Record fork-safe-upstream-sync run
+  - 92c714ea test: align font and theme expectations with current defaults
+  - 54e43216 chore(sync): merge upstream/main preserving local customizations (no tree changes)
+  - 8e3024f3 Flatten UI: minimal tabs, lighter cards, compact buttons
+  - 29c2c636 Improve theme UI responsiveness
+  - 8730ff87 Melhora UI e desempenho tema
+  - e3538b6e Update app buttons to ShadCN
+  - 48985ae6 Update application icons with new design
+  - b2926b8c Update UI themes to match NEW-UI
+  - 0fbdb904 Update theme handling flow
+  - 02dd4051 Documentar tokens e temas UI
+  - 90332d74 Documenta leyalt tokens y modo
+  - 39783911 Update TaskDetailModal styling
+  - dc5baec2 Padronizar bordas dos componentes
+  - c4969b04 Remove chat panel borders
+  - 53774a6c Ajustar cores do modo escuro
+  - 82b451fd Update auth.py
+  - 83f9c1c9 Update models.py
+  - 657cc3eb Add retry limit for unclassified errors and stderr auth detection
+  - b340b272 Refactor initialization and logging
+  - 5bbed62c Refactor: Improve task state management and agent handling
+  - 1ef683ee test: update tests to use semantic token for auth badges
+  - 6cd0aff4 chore: update claude opus model to 4-6-20251101
+  - 07f861ed chore(sync): merge upstream/develop preserving local customizations
+  - d639f6ef auto-claude: 199-bug-logs-disappear-after-restart (#1728)
+  - 4438c0b1 auto-claude: 198-critical-oauth-token-revocation-causes-infinite-40 (#1747)
+  - 32bf353d Fix Panel Constraints Error During Terminal Exit (#1757)
+  - 2db36982 auto-claude: 190-bug-context-page-crash-multiple-root-causes-when-v (#1724)
+  - 09f059ca feat: add search/filter to WorktreeSelector dropdown (#1754)
+  - b5de0d9f fix(terminal): push worktree branch to remote with tracking on creation (#1753)
+  - 445da186 auto-claude: 189-subtask-execution-stuck-in-infinite-retry-loop-whe (#1723)
+  - f8499e96 auto-claude: 188-terminal-claude-sessions-require-manual-click-to-r (#1743)
+  - 826583b8 auto-claude: 200-bug-changelog-and-release-generation (#1729)
+  - ac4fe4f4 fix(terminal): use each terminal's cwd for invoke Claude all button (#1756)
+  - 152e5409 feat(terminal): read Claude Code CLI settings and inject env vars into PTY sessions (#1750)
+  - 2c2a8a75 fix: correct .auto-claude path mismatch causing discovery phase timeout (#1748)
+  - 7e799ee5 fix: remove incorrect /v1 suffix from OpenRouter API URL (#1749)
+  - 7bebf623 hotfix/display-settings
+  - 216b58bc fix: prevent terminal worktree crash with race condition fixes (#1586) (#1658)
+  - 0ddd740b hotfix/beta2 readme
+  - 2e2b8236 fix: correct log order sorting and add configurable log order setting (#1720)
+  - acb131b7 fix(ollama): stop infinite subprocess spawning from useEffect re-render loop (#1716)
+  - df528f06 fix(graphiti): migrate graphiti_memory imports to canonical paths (#1714)
+  - ff91a1af fix: improve auto-updater for beta releases and DMG installs (#1681)
+  - 6d0222fa feat: unified operation registry for intelligent auth/rate limit recovery (#1698)
+  - fe08c644 fix: Prevent stale worktree data from overriding correct task status (#1710)
+  - a5e3cc9a feat: add subscriptionType and rateLimitTier to ClaudeProfile (#1688)
+  - 4587162e auto-claude: subtask-1-1 - Add useTaskStore import and update task state after successful PR creation (#1683)
+  - b4e6b2fe auto-claude: 182-implement-pagination-and-filtering-for-github-pr-l (#1654)
+  - d9cd300f auto-claude: 181-add-expand-button-for-long-task-descriptions (#1653)
+  - f5a7e26d fix(terminal): resolve text alignment issues on expand/minimize (#1650)
+  - 5f63daa3 fix(windows): use full path to where.exe for reliable executable lookup (#1659)
+  - e6e8da17 fix: resolve ideation stuck at 3/6 types bug (#1660)
+  - 9317148b Clarify Local and Origin Branch Distinction (#1652)
+  - 47302062 auto-claude: 186-set-default-dark-mode-on-startup (#1656)
+  - ae703be9 auto-claude: subtask-1-1 - Add min-h-0 to enable scrolling in Roadmap tabs (#1655)
+  - 5293fb39 fix: XState status lifecycle & cross-project contamination fixes (#1647)
+  - 8030c59f hotfix: fix test_integration_phase4 dataclass import error
+  - ab91f7ba fix: restore version 2.7.6-beta.2 after accidental revert
+  - a2c3507d hotfix/pr-review-bug
+  - 26134c28 chore: bump version to 2.7.6-beta.2
+  - 303b3781 fix: bundle xstate in main process for packaged Electron app (#1637)
+  - 1d2f47b0 hotfix(ci): install libarchive-tools for Linux package verification
+  - 985c7967 chore: release 2.7.6-beta.1 (#1630)
+  - 9b38eb34 ready for beta
+  - e2f9abad refactor(frontend): complete XState task state machine migration (#1338) (#1575)
+  - d16be307 Merge conflict resolution progress bar and log viewer (#1620)
+  - bad1a9b2 fix: align Linux package builds (AppImage/deb/Flatpak) with target-specific extraResources (#1623)
+  - cd423c65 Fix/gitlab bugs (#1519 and #1521) (#1544)
+  - 02ed91c9 feat(kanban): add bulk task delete and worktree cleanup improvements (#1588)
+  - fe5cc582 fix: add worktree isolation warning to prevent agent escape (#1528)
+  - 8f02a512 feat(ui): add spell check support for text inputs (#1304)
+  - 1e199716 fix(windows): complete Windows credential fixes with path normalization (#1585)
+  - 900dd436 AI-Powered GitHub PR Template Generation (#1618)
+  - f355e09d Fix pty.node SIGABRT crash on macOS shutdown (#1619)
+  - bde2ca4b fix(merge): use git merge for diverged branches with progress tracking (#1605)
+  - 7bf12e85 Surface Billing/Credit Exhaustion Errors to UI (Issue #1580) (#1617)
+  - 54d0cd2f auto-claude: subtask-1-1 - Change $teamId type from ID! to String! in the team query (#1627)
+  - f8cc63af fix(auth): support API profile mode without OAuth requirement (#1616)
+  - 0aea4fb5 fix: agent retry loop for tool concurrency errors (#1546) [v3] (#1606)
+  - 4070a4c2 fix(queue): enforce max parallel tasks and auto-refresh UI (#1594)
+  - a1114664 Persist Kanban column collapse state per project via main process (#1579)
+  - bfc23282 feat(pr-review): evidence-based validation and trigger-driven exploration (#1593)
+  - eee97e7e fix(ui): smart auto-scroll for Insights streaming responses (#1591)
+  - c1f24c07 fix(changelog): validate Claude CLI exists before generation (#1305)
+  - 286591c0 auto-claude: subtask-1-1 - Add min-w-0 class to subtask title row flex container (#1578)
+  - 8d18cc81 auto-claude: subtask-1-1 - Remove Popover wrapper and related functionality from ClaudeCodeStatusBadge (#1566)
+  - 52e426a4 fix(claude-profile): preserve subscriptionType and rateLimitTier during token refresh (#1556)
+  - d8f00fe5 auto-claude: subtask-1-1 - Update cancelReview callback to handle both success and failure cases (#1551)
+  - 9b07ed46 fix(backend): prioritize git remote detection over env var for repo (#1555)
+  - 2b72694d fix(backend): handle detached HEAD state when pushing branch for PR creation (#1560)
+  - fe616f78 chore(deps): consolidate dependabot updates (#1552)
+  - 4243530e fix: add explicit UTF-8 encoding across all Electron main process I/O (#1554)
+  - 6f1002dd fix(backend): pass OAuth token to Python subprocess for authentication
+  - 399a7e73 perf(frontend): async parallel worktree listing to prevent UI freezes (#1553)
+  - 83a64b88 auto-claude: subtask-1-1 - Remove amber lock indicator line from kanban resize handle (#1557)
+  - 1c626602 fix(frontend): resolve TerminalFontSettings infinite re-render loop (#1536)
+  - 1860c2c4 fix(frontend): respect hasCompletedOnboarding from ~/.claude.json (#1537)
+  - 94d94133 fix: prevent planner from generating invalid verification types (#1388) (#1529)
+  - e9680e51 cleanup & chores
+  - e2d45bcd chore: remove .planning from tracking and gitignore .planning-archive
+  - 496b2b96 fix(frontend): resolve Insights scroll-to-blank-space issue on macOS (ACS-382) (#1535)
+  - f289107b feat: add customizable terminal fonts with OS-specific defaults (#1412)
+  - 16eeb301 Add dev mode screenshot capture warning (#1516)
+  - 1e453653 fix: add worktree isolation warnings to prevent agent escape (ACS-394) (#1495)
+  - f6b264d5 fix: resolve flaky subprocess-spawn test on Windows CI (ACS-392) (#1494)
+  - 988ec0c2 feat(task-logger): strip ANSI escape codes from logs and extend coverage (#1411)
+  - 26c9083d fix(frontend): use spawn() instead of exec() for Windows terminal launching (#1498)
+  - 05cf0a51 fix(api-profiles): correct z.AI China preset URL and rename provider presets (#1500)
+  - 8576754a fix: validate branch pattern before worktree cleanup to prevent deleting wrong branch (#1493)
+  - d940b6ad Real-Time Updates for Insights Chat (#1511)
+  - 8d8306b8 Fix Terminal UI Rendering Issues (#1514)
+  - 9f6c0026 Fix terminal content resizing on expansion (#1512)
+  - 63e2847f Restore Terminal Session History on App Restart (#1515)
+  - b269ac30 Move Reference Images Above Task Title & Fix Image Display Issues (#1513)
+  - aa2cb4fa auto-claude: 143-fix-github-integration-ui-refresh-issues (#1467)
+  - 1e72c8d7 feat: Multi-profile account swapping with token refresh and queue routing (#1496)
+  - ae4e48e8 Simplified Testing Strategy for Regression Prevention (#1379)
+  - 9bd3d7e3 auto-claude: 152-persist-tasks-during-roadmap-regeneration (#1463)
+  - bc5f550e Debug Kanban Memory & Add Sentry Monitoring (#1380)
+  - 53111dbb auto-claude: 147-remove-outdated-compatibility-shims (#1465)
+  - b955badf auto-claude: 162-fix-worktree-error-on-repeated-task-starts (#1453)
+  - 31f116db auto-claude: 155-fix-pr-list-diff-display-metrics (#1458)
+  - d081af04 auto-claude: 151-fix-pr-review-agent-token-refresh-on-account-swap (#1456)
+  - 4937d574 auto-claude: 148-add-progress-persistence-and-status-indicators (#1464)
+  - 0299009d auto-claude: 154-fix-task-modal-conflict-check-status-refresh (#1462)
+  - d6597307 auto-claude: 153-widen-kanban-columns-and-add-collapse-feature (#1457)
+  - 783f0fe0 auto-claude: subtask-1-1 - Add filter after map operation to remove empty str (#1466)
+  - 43a97e1b fix: add formatReleaseNotes helper for markdown changelog rendering (#1468)
+  - d17c1788 feat(sidebar): add collapsible sidebar toggle (#1501)
+  - 8d2f6629 fix(auth): check .credentials.json for Linux profile authentication (#1492)
+  - 1185a558 auto-claude: subtask-1-1 - Replace ReleaseNotesRenderer with ReactMarkdown (#1454)
+  - 9a3b48c2 auto-claude: 156-fix-electron-app-version-detection-bug (#1459)
+  - 0c299081 auto-claude: subtask-1-1 - Add --no-track flag to git worktree add command (#1455)
+  - 91edc0e1 auto-claude: subtask-1-1 - Change task.specId to taskId in 3 startSpecCreation calls (#1461)
+  - e9de26d5 fix(onboarding): align MemoryStep layout with Settings MemoryBackendSection (#1445)
+  - 426d5657 auto-claude: subtask-1-1 - Add metadata?.requireReviewBeforeCoding check (#1460)
+  - c5a0f042 fix: use API profile environment variables for task title generation (#1471)
+  - 6e28fc32 Add i18n support for competitor analysis dialogs and feature card
+  - 12e78841 fix(auth): Long-lived OAuth authentication with multi-profile usage display (#1443)
+  - 6ff33cc9 update port in18
+  - fc27c633 persistencia de estado entre troca projetos
+  - 9fbe4401 init
+  - 5583ef9f .
+  - 25bbb32c Remove Card wrapper from empty states and darken card color
+  - 9a0547e9 feat(ui): redesign Settings page with 1Code-inspired style
+  - def6bef0 fix(ui): darken secondary color to match reference (28%)
+  - e0299890 fix(ui): balance secondary color for switches and keyboard shortcuts
+  - c31d9f88 fix(ui): drastically increase switch visibility in dark mode
+  - f0144452 Merge remote-tracking branch 'upstream/develop' into develop
+  - e6e738cb feat(ui): implement dark mode as default with 1Code-inspired design
+  - 0660f124 style: change primary color to muted gray-blue in dark mode
+  - cf5cfe10 chore: remove debug logs for dark mode migration
+  - c0aa1039 fix: add missing text color utilities and force dark mode inheritance
+  - 9f635d8a fix: use direct CSS classes instead of @utility for dark mode
+  - 9c2870d7 fix: add Tailwind v4 custom utilities for dark mode colors
+  - fa439ff9 debug: add logs to track theme application in App.tsx
+  - d2f67a67 debug: add console logs to track dark mode migration
+  - dbf11e6c fix: dark mode migration now handles undefined theme
+  - 739dc14c feat: migrate existing users from system theme to dark mode
+  - fd2423ea fix: export design system components and set dark mode as default
+  - e2507cce docs(phase-08): complete dark mode system polish and documentation
+  - 692cc44e refactor(dark-mode): verify and document component dark mode compatibility
+  - bba63a4a docs(dark-mode): add comprehensive dark mode system documentation
+  - 9967c16b feat(dark-mode): add smooth theme transitions with animation tokens
+  - 0b48b44b docs(phase-08): create plan for dark mode system polish and documentation
+  - 214a029b docs(07-01): complete Motion & Animation System plan
+  - e942034a docs(motion): add comprehensive animation system documentation
+  - 6239c695 feat(motion): add optional Motion variants to Dialog and Tabs
+  - e27b1031 feat(motion): add animation duration and easing tokens
+  - 100c1b2c docs(phase-07): create plan for motion and animation system
+  - 1b6176e1 docs(phase-06): complete phase execution
+  - f6e9b388 docs(06-01): update STATE.md and create SUMMARY.md
+  - 37e5d455 docs(navigation): add comprehensive navigation and utility components documentation
+  - 9857b7e9 refactor(navigation): document spacing token integration
+  - 77b68740 feat(navigation): add size and variant options to Progress component
+  - 8ed96140 feat(navigation): add size and variant options to Tabs component
+  - c142bb37 docs(phase-06): create plan for navigation and utility components modernization
+  - 8239d08b docs(phase-05): complete phase execution
+  - bdf8c963 docs(05-01): add plan summary and update project state
+  - 9840d769 docs(overlays): add comprehensive overlay components documentation
+  - a7eed348 refactor(overlays): document spacing token integration
+  - b5f5749f feat(overlays): add intent variants to AlertDialog component
+  - 14cf585c feat(overlays): add width variants to Popover component
+  - 82f1cd80 feat(overlays): add size variants to Select component
+  - 7ca40931 feat(overlays): add size variants to Dialog component
+  - ad74d2d3 docs(phase-05): create plan for overlay components modernization
+  - edd6f63f docs(04-01): complete form components modernization plan
+  - 211da0dc docs(04-01): add comprehensive form components documentation
+  - ffdf6d08 feat(04-01): create FormField wrapper component
+  - b20dc243 feat(04-01): add orientation and spacing variants to RadioGroup
+  - 980d31b8 feat(04-01): add size and resize variants to Textarea component
+  - 1edf30fa feat(04-01): migrate Label to Radix UI primitive
+  - 40fb70df feat(04-01): add size and validation variants to Input component
+  - dbd56ade docs(phase-04): create plan for form components modernization
+  - 025cb6e1 docs(phase-03): complete phase execution
+  - fa74199b docs: update STATE.md with Phase 03 completion
+  - 2d6ccc79 docs(spacing): add comprehensive spacing and layout system documentation
+  - cdb4e566 feat(spacing): add Container, Stack, and Grid layout components
+  - 6a4f5ecc feat(spacing): add spacing scale and container width tokens
+  - aeeebb85 docs(03): create phase plan
+  - 08c2f89f docs(phase-02): complete phase execution
+  - 926b59c4 docs(state): update project state after completing plan 02-01
+  - 85e03461 docs(typography): add comprehensive typography system documentation
+  - 5ac16522 feat(typography): add Text and Heading components
+  - 085a3b8d feat(typography): add font size, weight, and line height tokens
+  - 56f88b58 docs(02): create phase plan
+  - 314490f5 docs(phase-01): complete phase execution
+  - e1ae1d4d docs(state): update project state after plan 01-01 completion
+  - 718008c6 docs(design-tokens): create plan 01-01 summary
+  - 626608f6 docs(design-tokens): create comprehensive token documentation
+  - 16498ec5 refactor(design-tokens): simplify globals.css to HSL system
+  - ece32eae docs(01): create phase plan
+  - 0cacfcd8 docs: create roadmap for UI/UX modernization
+  - 525b2450 docs: initialize Auto-Claude UI/UX Modernization
+  - 82b53797 docs: map existing codebase
+  - 1a2a1b1f feat: Add screenshot capture to task creation modal (#1429)
+  - 33acc143 fix: prevent queue settings modal from disappearing when tasks change (#1430)
+  - 3b87e24d feat: Queue System v2 with Auto-Promotion and Smart Task Management (#1203)
+  - f6ba70d6 hotfix: remove broken node_modules symlink causing dev build failure
+  - cfe7dedd feat: Add API profile providers usage endpoints support (#1279)
+  - 7479577a fix(ci): use PAT_TOKEN for README update to bypass branch protection
+  - 7763fbc6 Merge branch 'AndyMik90:develop' into develop
+  - 5a625690 add port
+  - 9dbbc17d add idioma port
+
+- Sync result: no-upstream-updates
+- Last synced upstream commit: 5745cb14
+
+## 2026-02-17T06:11:55Z
+
+- Branch: develop
+- HEAD: 212e0af6
+- Upstream base: upstream/develop
+- Previous synced upstream commit (from changelog): 5745cb14
+- Target upstream commit for this run: 635b53ee
+- Private commits: 126
+- Commit list:
+  - 212e0af6 Adjust UI spacing and styling for better compactness
+  - 376f4e9c Merge branch 'develop' of https://github.com/guilhermexp/Auto-Claude into develop
+  - e12b9719 fix: resolve task execution failures and improve API profile support
+  - 4d206401 Simplify AbortSignal handling in profile API
+  - 5d22f403 fix: macOS auto-update code signing with self-signed certificate
+  - 523cc90d chore: bump version to 2.7.11
+  - ab416b85 Optimize performance with debouncing and deduplication
+  - 3c88a245 feat: adicionar script de release automatizado
+  - 66abe100 chore: remover build de Linux - apenas macOS e Windows
+  - 52679a0d chore: bump version to 2.7.10
+  - 6cb3cbc6 fix: remover notarização para forks sem certificados Apple
+  - fca3a048 chore: bump version to 2.7.9
+  - 9a2611d0 fix: desabilitar code signing para forks sem certificados
+  - e345d7a8 chore: bump version to 2.7.8
+  - 1cbc043e chore: atualizar referências do .github para fork guilhermexp
+  - d4cafc32 chore: bump version to 2.7.7
+  - 8b08f10a Update repository links and ownership to guilhermexp
+  - 265967f4 Atualizar badge e ocultar alerta
+  - 33b4712f Padronizar cores e componentes das p
+  - 0c64f4bb Ajusta layout footer sidebar
+  - af1d25b5 Slim sidebar and clean chat labels
+  - 58a90c48 Record fork-safe-upstream-sync run
+  - 92c714ea test: align font and theme expectations with current defaults
+  - 54e43216 chore(sync): merge upstream/main preserving local customizations (no tree changes)
+  - 8e3024f3 Flatten UI: minimal tabs, lighter cards, compact buttons
+  - 29c2c636 Improve theme UI responsiveness
+  - 8730ff87 Melhora UI e desempenho tema
+  - e3538b6e Update app buttons to ShadCN
+  - 48985ae6 Update application icons with new design
+  - b2926b8c Update UI themes to match NEW-UI
+  - 0fbdb904 Update theme handling flow
+  - 02dd4051 Documentar tokens e temas UI
+  - 90332d74 Documenta leyalt tokens y modo
+  - 39783911 Update TaskDetailModal styling
+  - dc5baec2 Padronizar bordas dos componentes
+  - c4969b04 Remove chat panel borders
+  - 53774a6c Ajustar cores do modo escuro
+  - 82b451fd Update auth.py
+  - 83f9c1c9 Update models.py
+  - 657cc3eb Add retry limit for unclassified errors and stderr auth detection
+  - b340b272 Refactor initialization and logging
+  - 5bbed62c Refactor: Improve task state management and agent handling
+  - 1ef683ee test: update tests to use semantic token for auth badges
+  - 6cd0aff4 chore: update claude opus model to 4-6-20251101
+  - 07f861ed chore(sync): merge upstream/develop preserving local customizations
+  - 5745cb14 docs: update README to v2.7.6-beta.1 [skip ci]
+  - 6e28fc32 Add i18n support for competitor analysis dialogs and feature card
+  - 6ff33cc9 update port in18
+  - fc27c633 persistencia de estado entre troca projetos
+  - 9fbe4401 init
+  - 5583ef9f .
+  - 25bbb32c Remove Card wrapper from empty states and darken card color
+  - 9a0547e9 feat(ui): redesign Settings page with 1Code-inspired style
+  - def6bef0 fix(ui): darken secondary color to match reference (28%)
+  - e0299890 fix(ui): balance secondary color for switches and keyboard shortcuts
+  - c31d9f88 fix(ui): drastically increase switch visibility in dark mode
+  - f0144452 Merge remote-tracking branch 'upstream/develop' into develop
+  - e6e738cb feat(ui): implement dark mode as default with 1Code-inspired design
+  - 0660f124 style: change primary color to muted gray-blue in dark mode
+  - cf5cfe10 chore: remove debug logs for dark mode migration
+  - c0aa1039 fix: add missing text color utilities and force dark mode inheritance
+  - 9f635d8a fix: use direct CSS classes instead of @utility for dark mode
+  - 9c2870d7 fix: add Tailwind v4 custom utilities for dark mode colors
+  - fa439ff9 debug: add logs to track theme application in App.tsx
+  - d2f67a67 debug: add console logs to track dark mode migration
+  - dbf11e6c fix: dark mode migration now handles undefined theme
+  - 739dc14c feat: migrate existing users from system theme to dark mode
+  - fd2423ea fix: export design system components and set dark mode as default
+  - e2507cce docs(phase-08): complete dark mode system polish and documentation
+  - 692cc44e refactor(dark-mode): verify and document component dark mode compatibility
+  - bba63a4a docs(dark-mode): add comprehensive dark mode system documentation
+  - 9967c16b feat(dark-mode): add smooth theme transitions with animation tokens
+  - 0b48b44b docs(phase-08): create plan for dark mode system polish and documentation
+  - 214a029b docs(07-01): complete Motion & Animation System plan
+  - e942034a docs(motion): add comprehensive animation system documentation
+  - 6239c695 feat(motion): add optional Motion variants to Dialog and Tabs
+  - e27b1031 feat(motion): add animation duration and easing tokens
+  - 100c1b2c docs(phase-07): create plan for motion and animation system
+  - 1b6176e1 docs(phase-06): complete phase execution
+  - f6e9b388 docs(06-01): update STATE.md and create SUMMARY.md
+  - 37e5d455 docs(navigation): add comprehensive navigation and utility components documentation
+  - 9857b7e9 refactor(navigation): document spacing token integration
+  - 77b68740 feat(navigation): add size and variant options to Progress component
+  - 8ed96140 feat(navigation): add size and variant options to Tabs component
+  - c142bb37 docs(phase-06): create plan for navigation and utility components modernization
+  - 8239d08b docs(phase-05): complete phase execution
+  - bdf8c963 docs(05-01): add plan summary and update project state
+  - 9840d769 docs(overlays): add comprehensive overlay components documentation
+  - a7eed348 refactor(overlays): document spacing token integration
+  - b5f5749f feat(overlays): add intent variants to AlertDialog component
+  - 14cf585c feat(overlays): add width variants to Popover component
+  - 82f1cd80 feat(overlays): add size variants to Select component
+  - 7ca40931 feat(overlays): add size variants to Dialog component
+  - ad74d2d3 docs(phase-05): create plan for overlay components modernization
+  - edd6f63f docs(04-01): complete form components modernization plan
+  - 211da0dc docs(04-01): add comprehensive form components documentation
+  - ffdf6d08 feat(04-01): create FormField wrapper component
+  - b20dc243 feat(04-01): add orientation and spacing variants to RadioGroup
+  - 980d31b8 feat(04-01): add size and resize variants to Textarea component
+  - 1edf30fa feat(04-01): migrate Label to Radix UI primitive
+  - 40fb70df feat(04-01): add size and validation variants to Input component
+  - dbd56ade docs(phase-04): create plan for form components modernization
+  - 025cb6e1 docs(phase-03): complete phase execution
+  - fa74199b docs: update STATE.md with Phase 03 completion
+  - 2d6ccc79 docs(spacing): add comprehensive spacing and layout system documentation
+  - cdb4e566 feat(spacing): add Container, Stack, and Grid layout components
+  - 6a4f5ecc feat(spacing): add spacing scale and container width tokens
+  - aeeebb85 docs(03): create phase plan
+  - 08c2f89f docs(phase-02): complete phase execution
+  - 926b59c4 docs(state): update project state after completing plan 02-01
+  - 85e03461 docs(typography): add comprehensive typography system documentation
+  - 5ac16522 feat(typography): add Text and Heading components
+  - 085a3b8d feat(typography): add font size, weight, and line height tokens
+  - 56f88b58 docs(02): create phase plan
+  - 314490f5 docs(phase-01): complete phase execution
+  - e1ae1d4d docs(state): update project state after plan 01-01 completion
+  - 718008c6 docs(design-tokens): create plan 01-01 summary
+  - 626608f6 docs(design-tokens): create comprehensive token documentation
+  - 16498ec5 refactor(design-tokens): simplify globals.css to HSL system
+  - ece32eae docs(01): create phase plan
+  - 0cacfcd8 docs: create roadmap for UI/UX modernization
+  - 525b2450 docs: initialize Auto-Claude UI/UX Modernization
+  - 82b53797 docs: map existing codebase
+  - 7763fbc6 Merge branch 'AndyMik90:develop' into develop
+  - 5a625690 add port
+  - 9dbbc17d add idioma port
+
+- Sync result: merged
+- Last synced upstream commit: 635b53ee
+

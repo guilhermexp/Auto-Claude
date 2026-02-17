@@ -47,7 +47,11 @@ import type {
   TaskLogStreamChunk,
   ImageAttachment,
   ReviewReason,
-  MergeProgress
+  MergeProgress,
+  ReviewMergeOptions,
+  ReviewMergeResult,
+  ReviewMergeProgressData,
+  ReviewMergeLogEntry
 } from './task';
 import type {
   TerminalCreateOptions,
@@ -220,6 +224,10 @@ export interface ElectronAPI {
   mergeWorktree: (taskId: string, options?: { noCommit?: boolean }) => Promise<IPCResult<WorktreeMergeResult>>;
   mergeWorktreePreview: (taskId: string) => Promise<IPCResult<WorktreeMergeResult>>;
   createWorktreePR: (taskId: string, options?: WorktreeCreatePROptions) => Promise<IPCResult<WorktreeCreatePRResult>>;
+  reviewAndMergeWorktree: (taskId: string, options?: ReviewMergeOptions) => Promise<IPCResult<ReviewMergeResult>>;
+  onReviewMergeProgress: (callback: (taskId: string, progress: ReviewMergeProgressData) => void) => () => void;
+  onReviewMergeLog: (callback: (taskId: string, entry: ReviewMergeLogEntry) => void) => () => void;
+  cancelReviewMerge: (taskId: string) => Promise<IPCResult<{ cancelled: boolean }>>;
   discardWorktree: (taskId: string, skipStatusChange?: boolean) => Promise<IPCResult<WorktreeDiscardResult>>;
   discardOrphanedWorktree: (projectId: string, specName: string) => Promise<IPCResult<WorktreeDiscardResult>>;
   clearStagedState: (taskId: string) => Promise<IPCResult<{ cleared: boolean }>>;

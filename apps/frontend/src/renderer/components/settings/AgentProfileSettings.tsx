@@ -36,8 +36,6 @@ const iconMap: Record<string, React.ElementType> = {
   Settings2
 };
 
-const PHASE_KEYS: Array<keyof PhaseModelConfig> = ['spec', 'planning', 'coding', 'qa'];
-
 interface AgentProfileSettingsProps {
   onSave?: () => void;
   isSaving?: boolean;
