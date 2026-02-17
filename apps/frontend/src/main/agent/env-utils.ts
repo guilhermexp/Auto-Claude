@@ -3,6 +3,19 @@
  */
 
 /**
+ * Variables to DELETE from the environment to allow nested Claude CLI execution.
+ *
+ * When running Auto-Claude from within Claude Code, the CLAUDECODE environment
+ * variable is set. This causes the Claude CLI to reject nested sessions with:
+ * "Claude Code cannot be launched inside another Claude Code session."
+ *
+ * These variables must be DELETED from the environment (not just set to empty string)
+ * because the Claude CLI checks for the existence of the variable, not its value.
+ * Setting to undefined in the spread will remove it from the final env object.
+ */
+export const NESTED_SESSION_VARS_TO_DELETE: string[] = ['CLAUDECODE'];
+
+/**
  * Get environment variables to clear ANTHROPIC_* vars when in OAuth mode
  *
  * When switching from API Profile mode to OAuth mode, residual ANTHROPIC_*

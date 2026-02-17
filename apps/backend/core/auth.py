@@ -947,6 +947,14 @@ def get_sdk_env_vars() -> dict[str, str]:
     # The empty string ensures Python doesn't add any extra paths to sys.path.
     env["PYTHONPATH"] = ""
 
+    # Explicitly unset CLAUDECODE to allow nested Claude CLI execution.
+    # When running Auto-Claude from within Claude Code, the CLAUDECODE
+    # environment variable is set, causing the Claude CLI to reject nested
+    # sessions with: "Claude Code cannot be launched inside another Claude Code session."
+    # Setting to empty string bypasses this check and allows the SDK to spawn
+    # Claude CLI subprocesses.
+    env["CLAUDECODE"] = ""
+
     return env
 
 

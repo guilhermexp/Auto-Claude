@@ -22,7 +22,7 @@ import { pythonEnvManager, getConfiguredPythonPath } from '../python-env-manager
 import { buildMemoryEnvVars } from '../memory-env-builder';
 import { readSettingsFile } from '../settings-utils';
 import type { AppSettings } from '../../shared/types/settings';
-import { getOAuthModeClearVars } from './env-utils';
+import { getOAuthModeClearVars, NESTED_SESSION_VARS_TO_DELETE } from './env-utils';
 import { getAugmentedEnv } from '../env-utils';
 import { getToolInfo, getClaudeCliPathForSdk } from '../cli-tool-manager';
 import { killProcessGracefully, isWindows } from '../platform';
@@ -205,7 +205,8 @@ export class AgentProcessManager {
     const ghCliEnv = this.detectAndSetCliPath('gh');
     const glabCliEnv = this.detectAndSetCliPath('glab');
 
-    return {
+    // Build the environment object
+    const env: NodeJS.ProcessEnv = {
       ...augmentedEnv,
       ...gitBashEnv,
       ...claudeCliEnv,
@@ -216,7 +217,16 @@ export class AgentProcessManager {
       PYTHONUNBUFFERED: '1',
       PYTHONIOENCODING: 'utf-8',
       PYTHONUTF8: '1'
-    } as NodeJS.ProcessEnv;
+    };
+
+    // DELETE variables that would block nested Claude CLI execution
+    // These must be deleted (not just set to empty) because Claude CLI checks
+    // for the existence of the variable, not its value
+    for (const varName of NESTED_SESSION_VARS_TO_DELETE) {
+      delete env[varName];
+    }
+
+    return env;
   }
 
   private handleProcessFailure(

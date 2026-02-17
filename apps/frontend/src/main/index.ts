@@ -75,6 +75,45 @@ const WINDOW_SCREEN_MARGIN: number = 20;
 const DEFAULT_SCREEN_WIDTH: number = 1920;
 const DEFAULT_SCREEN_HEIGHT: number = 1080;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Window bounds persistence
+// ─────────────────────────────────────────────────────────────────────────────
+const WINDOW_BOUNDS_FILE = 'window-bounds.json';
+
+interface WindowBounds {
+  width: number;
+  height: number;
+  x?: number;
+  y?: number;
+  isMaximized?: boolean;
+}
+
+function getWindowBoundsPath(): string {
+  return join(app.getPath('userData'), WINDOW_BOUNDS_FILE);
+}
+
+function saveWindowBounds(bounds: WindowBounds): void {
+  try {
+    const boundsPath = getWindowBoundsPath();
+    writeFileSync(boundsPath, JSON.stringify(bounds, null, 2));
+  } catch (error) {
+    console.warn('[main] Failed to save window bounds:', error);
+  }
+}
+
+function loadWindowBounds(): WindowBounds | null {
+  try {
+    const boundsPath = getWindowBoundsPath();
+    if (existsSync(boundsPath)) {
+      const data = readFileSync(boundsPath, 'utf-8');
+      return JSON.parse(data) as WindowBounds;
+    }
+  } catch (error) {
+    console.warn('[main] Failed to load window bounds:', error);
+  }
+  return null;
+}
+
 // Setup error logging early (captures uncaught exceptions)
 setupErrorLogging();
 
@@ -150,6 +189,9 @@ let terminalManager: TerminalManager | null = null;
 let isQuitting = false;
 
 function createWindow(): void {
+  // Try to load saved window bounds
+  const savedBounds = loadWindowBounds();
+
   // Get the primary display's work area (accounts for taskbar, dock, etc.)
   // Wrapped in try/catch to handle potential failures with fallback to safe defaults
   let workAreaSize: { width: number; height: number };
@@ -180,9 +222,26 @@ function createWindow(): void {
   const availableWidth: number = workAreaSize.width - WINDOW_SCREEN_MARGIN;
   const availableHeight: number = workAreaSize.height - WINDOW_SCREEN_MARGIN;
 
-  // Calculate actual dimensions (preferred, but capped to margin-adjusted available space)
-  const width: number = Math.min(WINDOW_PREFERRED_WIDTH, availableWidth);
-  const height: number = Math.min(WINDOW_PREFERRED_HEIGHT, availableHeight);
+  // Use saved bounds if available and valid, otherwise use defaults
+  let width: number;
+  let height: number;
+  let x: number | undefined;
+  let y: number | undefined;
+
+  if (savedBounds && savedBounds.width >= WINDOW_MIN_WIDTH && savedBounds.height >= WINDOW_MIN_HEIGHT) {
+    // Use saved dimensions, but cap to available space
+    width = Math.min(savedBounds.width, availableWidth);
+    height = Math.min(savedBounds.height, availableHeight);
+    // Use saved position if provided
+    if (savedBounds.x !== undefined && savedBounds.y !== undefined) {
+      x = savedBounds.x;
+      y = savedBounds.y;
+    }
+  } else {
+    // Calculate actual dimensions (preferred, but capped to margin-adjusted available space)
+    width = Math.min(WINDOW_PREFERRED_WIDTH, availableWidth);
+    height = Math.min(WINDOW_PREFERRED_HEIGHT, availableHeight);
+  }
 
   // Ensure minimum dimensions don't exceed the actual initial window size
   const minWidth: number = Math.min(WINDOW_MIN_WIDTH, width);
@@ -192,6 +251,8 @@ function createWindow(): void {
   mainWindow = new BrowserWindow({
     width,
     height,
+    x,
+    y,
     minWidth,
     minHeight,
     show: false,
@@ -208,6 +269,30 @@ function createWindow(): void {
       spellcheck: true // Enable spell check for text inputs
     }
   });
+
+  // Restore maximized state if was maximized
+  if (savedBounds?.isMaximized) {
+    mainWindow.maximize();
+  }
+
+  // Save window bounds on resize, move, and maximize/unmaximize
+  const saveBoundsHandler = () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      const bounds = mainWindow.getBounds();
+      saveWindowBounds({
+        width: bounds.width,
+        height: bounds.height,
+        x: bounds.x,
+        y: bounds.y,
+        isMaximized: mainWindow.isMaximized()
+      });
+    }
+  };
+
+  mainWindow.on('resize', saveBoundsHandler);
+  mainWindow.on('move', saveBoundsHandler);
+  mainWindow.on('maximize', saveBoundsHandler);
+  mainWindow.on('unmaximize', saveBoundsHandler);
 
   // Show window when ready to avoid visual flash
   mainWindow.on('ready-to-show', () => {

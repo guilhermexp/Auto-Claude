@@ -107,6 +107,15 @@ def resolve_model_id(model: str) -> str:
         Full Claude model ID
     """
     # Check for environment variable override (from API Profile custom model mappings)
+    # Priority: ANTHROPIC_MODEL > ANTHROPIC_DEFAULT_*_MODEL > MODEL_ID_MAP
+    
+    # First check if ANTHROPIC_MODEL is set (generic override)
+    anthropic_model = os.environ.get("ANTHROPIC_MODEL")
+    if anthropic_model:
+        print(f"[DEBUG resolve_model_id] Using ANTHROPIC_MODEL: {anthropic_model}")
+        return anthropic_model
+    
+    # Then check for specific model type overrides
     if model in MODEL_ID_MAP:
         env_var_map = {
             "haiku": "ANTHROPIC_DEFAULT_HAIKU_MODEL",
@@ -117,12 +126,15 @@ def resolve_model_id(model: str) -> str:
         if env_var:
             env_value = os.environ.get(env_var)
             if env_value:
+                print(f"[DEBUG resolve_model_id] Using {env_var}: {env_value}")
                 return env_value
 
         # Fall back to hardcoded mapping
+        print(f"[DEBUG resolve_model_id] Using hardcoded mapping: {MODEL_ID_MAP[model]}")
         return MODEL_ID_MAP[model]
 
     # Already a full model ID or unknown shorthand
+    print(f"[DEBUG resolve_model_id] Using model as-is: {model}")
     return model
 
 

@@ -252,6 +252,17 @@ export function registerTaskExecutionHandlers(
       if (needsSpecCreation) {
         // No spec file - need to run spec_runner.py to create the spec
         const taskDescription = task.description || task.title;
+        
+        // Ensure spec directory exists before starting spec creation
+        // This is necessary because the directory might not exist if the task was imported
+        // or if the directory was deleted
+        console.error('[TASK_START] CHECKING spec directory:', specDir, 'exists:', existsSync(specDir));
+        if (!existsSync(specDir)) {
+          console.error('[TASK_START] Spec directory does not exist, CREATING:', specDir);
+          mkdirSync(specDir, { recursive: true });
+          console.error('[TASK_START] Spec directory CREATED:', specDir);
+        }
+        
         console.warn('[TASK_START] Starting spec creation for:', task.specId, 'in:', specDir, 'baseBranch:', baseBranch);
 
         // Start spec creation process - pass the existing spec directory
@@ -744,6 +755,13 @@ export function registerTaskExecutionHandlers(
           if (needsSpecCreation) {
             // No spec file - need to run spec_runner.py to create the spec
             const taskDescription = task.description || task.title;
+            
+            // Ensure spec directory exists before starting spec creation
+            if (!existsSync(specDir)) {
+              console.warn('[TASK_UPDATE_STATUS] Spec directory does not exist, creating:', specDir);
+              mkdirSync(specDir, { recursive: true });
+            }
+            
             console.warn('[TASK_UPDATE_STATUS] Starting spec creation for:', task.specId);
             agentManager.startSpecCreation(taskId, project.path, taskDescription, specDir, task.metadata, baseBranchForUpdate, project.id);
           } else if (needsImplementation) {
@@ -1196,6 +1214,13 @@ export function registerTaskExecutionHandlers(
             if (needsSpecCreation) {
               // No spec file - need to run spec_runner.py to create the spec
               const taskDescription = task.description || task.title;
+              
+              // Ensure spec directory exists before starting spec creation
+              if (!existsSync(specDirForWatcher)) {
+                console.warn(`[Recovery] Spec directory does not exist, creating: ${specDirForWatcher}`);
+                mkdirSync(specDirForWatcher, { recursive: true });
+              }
+              
               console.warn(`[Recovery] Starting spec creation for: ${task.specId}`);
               agentManager.startSpecCreation(taskId, project.path, taskDescription, specDirForWatcher, task.metadata, baseBranchForRecovery, project.id);
             } else {
