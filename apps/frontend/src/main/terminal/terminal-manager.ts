@@ -229,6 +229,10 @@ export class TerminalManager {
   async resumeClaudeAsync(id: string, sessionId?: string, options?: { migratedSession?: boolean }): Promise<void> {
     const terminal = this.terminals.get(id);
     if (!terminal) {
+      // Clean up stale migratedSessionFlags if terminal no longer exists
+      if (options?.migratedSession && sessionId) {
+        this.migratedSessionFlags.delete(sessionId);
+      }
       return;
     }
 

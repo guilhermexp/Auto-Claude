@@ -108,6 +108,7 @@ export const terminalMachine = createMachine(
           },
           SWAP_RESUME_COMPLETE: {
             target: 'claude_active',
+            guard: 'isResumingPhase',
             actions: 'applySwapComplete',
           },
           SWAP_FAILED: {
@@ -142,6 +143,7 @@ export const terminalMachine = createMachine(
       isCapturingPhase: ({ context }) => context.swapPhase === 'capturing',
       isMigratingPhase: ({ context }) => context.swapPhase === 'migrating',
       isRecreatingPhase: ({ context }) => context.swapPhase === 'recreating',
+      isResumingPhase: ({ context }) => context.swapPhase === 'resuming',
     },
     actions: {
       setProfileId: assign({

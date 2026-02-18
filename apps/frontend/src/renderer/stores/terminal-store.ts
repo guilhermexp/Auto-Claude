@@ -417,7 +417,7 @@ export const useTerminalStore = create<TerminalState>((set, get) => ({
           ? {
               ...t,
               isClaudeMode,
-              status: isClaudeMode ? 'claude-active' : 'running',
+              status: isClaudeMode ? 'claude-active' : (t.status === 'exited' ? 'exited' : 'running'),
               // Reset busy state and naming flag when leaving Claude mode
               isClaudeBusy: isClaudeMode ? t.isClaudeBusy : undefined,
               claudeNamedOnce: isClaudeMode ? t.claudeNamedOnce : undefined
