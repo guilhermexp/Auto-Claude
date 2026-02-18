@@ -26,6 +26,7 @@ import {
   FileSearch,
   Wrench,
   CheckCircle2,
+  Monitor,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -68,6 +69,7 @@ const PIPELINE_STEPS = [
   { key: 'planning' as const, icon: SearchCheck },
   { key: 'building' as const, icon: Wrench },
   { key: 'verifying' as const, icon: RefreshCw },
+  { key: 'e2e_testing' as const, icon: Monitor },
   { key: 'creating_pr' as const, icon: GitPullRequest },
   { key: 'merging' as const, icon: GitMerge },
 ];
@@ -78,9 +80,10 @@ const STAGE_TO_STEP_INDEX: Record<string, number> = {
   planning: 2,
   building: 3,
   verifying: 4,
-  creating_pr: 5,
-  merging: 6,
-  complete: 7, // all done
+  e2e_testing: 5,
+  creating_pr: 6,
+  merging: 7,
+  complete: 8, // all done
 };
 
 function ReviewMergeTimeline({ stage, isRunning }: {

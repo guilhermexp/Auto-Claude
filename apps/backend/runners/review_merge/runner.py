@@ -27,8 +27,11 @@ import io
 import json
 import os
 import re
+import signal
 import shutil
 import subprocess
+import time
+import urllib.request
 from collections import deque
 from pathlib import Path
 
@@ -195,6 +198,7 @@ class ReviewMergeRunner:
         pr_title: str | None = None,
         pr_draft: bool = False,
         skip_merge: bool = False,
+        skip_e2e: bool = False,
     ):
         self.project_dir = project_dir.resolve()
         self.spec_name = spec_name
@@ -205,6 +209,7 @@ class ReviewMergeRunner:
         self.pr_title = pr_title
         self.pr_draft = pr_draft
         self.skip_merge = skip_merge
+        self.skip_e2e = skip_e2e
 
         self.spec_dir = self.project_dir / ".auto-claude" / "specs" / spec_name
         self.worktree_mgr = WorktreeManager(
@@ -830,6 +835,247 @@ Rules:
                 client, prompt, "building"
             )
 
+    # ── E2E Smoke Testing ──
+
+    def _should_run_e2e(self) -> bool:
+        """Determine if E2E smoke testing should run."""
+        if self.skip_e2e:
+            emit_review_merge_log("info", content="E2E testing skipped (--skip-e2e flag)", stage="e2e_testing")
+            return False
+
+        # Check that playwright-cli is available
+        if not shutil.which("playwright-cli") and not shutil.which("npx"):
+            emit_review_merge_log("info", content="E2E testing skipped (playwright-cli not available)", stage="e2e_testing")
+            return False
+
+        server_info = self._detect_dev_server_command()
+        if not server_info:
+            emit_review_merge_log("info", content="E2E testing skipped (no web dev server detected)", stage="e2e_testing")
+            return False
+
+        return True
+
+    def _detect_dev_server_command(self) -> tuple[str, int] | None:
+        """Detect dev server command and port from package.json.
+
+        Returns (command, port) or None if not a web project.
+        Skips Electron projects automatically.
+        """
+        package_json_path = self.worktree_path / "package.json"
+        if not package_json_path.exists():
+            return None
+
+        try:
+            with open(package_json_path, encoding="utf-8") as f:
+                pkg = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            return None
+
+        scripts = pkg.get("scripts", {})
+        if not scripts:
+            return None
+
+        # Priority order for dev server scripts
+        script_priority = ["dev", "start", "serve"]
+
+        for script_name in script_priority:
+            cmd = scripts.get(script_name, "")
+            if not cmd:
+                continue
+            # Skip Electron scripts
+            if "electron" in cmd.lower():
+                continue
+
+            # Detect port from command
+            port = 3000  # default
+            port_match = re.search(r"--port\s+(\d+)", cmd)
+            if port_match:
+                port = int(port_match.group(1))
+            elif "vite" in cmd.lower():
+                port = 5173
+            elif "next" in cmd.lower():
+                port = 3000
+
+            # Use npm/npx to run the script
+            run_cmd = f"npm run {script_name}"
+            return (run_cmd, port)
+
+        return None
+
+    def _start_dev_server(self, cmd: str, port: int) -> tuple[str, subprocess.Popen]:
+        """Start dev server and wait for it to be ready.
+
+        Returns (url, process).
+        Raises TimeoutError if server doesn't start within 60s.
+        """
+        emit_review_merge_log("info", content=f"Starting dev server: {cmd} (port {port})", stage="e2e_testing")
+
+        env = os.environ.copy()
+        env["PORT"] = str(port)
+        env["BROWSER"] = "none"  # Don't auto-open browser
+
+        # Start process in its own process group for clean shutdown
+        kwargs: dict = {
+            "cwd": str(self.worktree_path),
+            "stdout": subprocess.DEVNULL,
+            "stderr": subprocess.DEVNULL,
+            "env": env,
+            "shell": True,
+        }
+        if os.name != "nt":
+            kwargs["preexec_fn"] = os.setsid
+
+        process = subprocess.Popen(cmd, **kwargs)
+
+        # Poll until server is ready
+        url = f"http://localhost:{port}"
+        timeout = 60
+        start_time = time.time()
+
+        while time.time() - start_time < timeout:
+            try:
+                req = urllib.request.Request(url, method="HEAD")
+                with urllib.request.urlopen(req, timeout=2):
+                    emit_review_merge_log("success", content=f"Dev server ready at {url}", stage="e2e_testing")
+                    return (url, process)
+            except Exception:
+                pass
+
+            # Check if process died
+            if process.poll() is not None:
+                raise RuntimeError(f"Dev server exited with code {process.returncode}")
+
+            time.sleep(2)
+
+        raise TimeoutError(f"Dev server did not start within {timeout}s")
+
+    def _stop_dev_server(self, process: subprocess.Popen) -> None:
+        """Stop the dev server process and its children."""
+        try:
+            if os.name != "nt":
+                os.killpg(process.pid, signal.SIGTERM)
+            else:
+                subprocess.run(
+                    ["taskkill", "/T", "/F", "/PID", str(process.pid)],
+                    capture_output=True,
+                    timeout=10,
+                )
+            process.wait(timeout=5)
+        except (OSError, subprocess.TimeoutExpired, ProcessLookupError):
+            try:
+                if os.name != "nt":
+                    os.killpg(process.pid, signal.SIGKILL)
+                process.wait(timeout=3)
+            except Exception:
+                pass
+        except Exception:
+            pass
+
+    async def _run_e2e_smoke_test(self, dev_server_url: str) -> tuple[bool, str]:
+        """Run E2E smoke test agent against the dev server.
+
+        Returns (passed, error_summary).
+        """
+        changed_files = self._get_changed_files()
+        files_list = "\n".join(f"- {f}" for f in changed_files[:30])
+
+        # Load prompt template
+        prompt_path = Path(__file__).parent.parent.parent / "prompts" / "review_merge_e2e_tester.md"
+        try:
+            prompt_template = prompt_path.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            prompt_template = ""
+
+        prompt = prompt_template.replace("{{url}}", dev_server_url).replace("{{changed_files}}", files_list)
+        if not prompt.strip():
+            # Fallback inline prompt if template not found
+            prompt = f"""You are an E2E smoke test agent. Use playwright-cli via Bash to test a running web app.
+
+Steps:
+1. Run: playwright-cli open {dev_server_url}
+2. Run: playwright-cli console  (check for JS errors)
+3. Run: playwright-cli snapshot  (identify navigation links by ref)
+4. Click links: playwright-cli click <ref>
+5. After each click: playwright-cli console
+6. Test at most 10 pages
+7. Run: playwright-cli close
+8. Output results as JSON
+
+Changed files:
+{files_list}
+
+Output ONLY valid JSON on the last line:
+{{"passed": true|false, "pages_tested": N, "errors": [{{"page": "/path", "type": "console_error", "message": "...", "severity": "high"}}]}}
+"""
+
+        qa_model = get_phase_model(self.spec_dir, "qa", self.model)
+        qa_betas = get_phase_model_betas(self.spec_dir, "qa", qa_model)
+        fast_mode = get_fast_mode(self.spec_dir)
+        qa_thinking_kwargs = get_phase_client_thinking_kwargs(
+            self.spec_dir, "qa", qa_model, self.thinking_level
+        )
+
+        emit_review_merge_log("info", content=f"E2E testing with model: {qa_model}", stage="e2e_testing")
+
+        client = create_client(
+            self.project_dir,
+            self.spec_dir,
+            qa_model,
+            agent_type="review_merge_e2e_tester",
+            betas=qa_betas,
+            fast_mode=fast_mode,
+            **qa_thinking_kwargs,
+        )
+
+        async with client:
+            _status, response = await self._run_agent_with_tools(
+                client, prompt, "e2e_testing"
+            )
+
+        # Parse JSON result from last line
+        return self._parse_e2e_result(response)
+
+    def _parse_e2e_result(self, response: str) -> tuple[bool, str]:
+        """Parse E2E smoke test agent response.
+
+        Returns (passed, error_summary).
+        """
+        # Try to find JSON in the response (last JSON object)
+        json_text = ""
+        for line in reversed(response.strip().splitlines()):
+            line = line.strip()
+            if line.startswith("{"):
+                json_text = line
+                break
+
+        # Also try extracting from markdown code blocks
+        if not json_text and "```" in response:
+            parts = response.split("```")
+            for part in parts:
+                stripped = part.strip()
+                if stripped.startswith("json"):
+                    stripped = stripped[4:].strip()
+                if stripped.startswith("{"):
+                    json_text = stripped.split("\n")[0] if "\n" in stripped else stripped
+                    break
+
+        if not json_text:
+            # Try full response as JSON
+            json_text = response.strip()
+
+        try:
+            result = json.loads(json_text)
+            passed = result.get("passed", False)
+            errors = result.get("errors", [])
+            if errors:
+                error_msgs = [f"{e.get('page', '?')}: {e.get('message', '?')}" for e in errors[:5]]
+                return (passed, "; ".join(error_msgs))
+            return (passed, "")
+        except (json.JSONDecodeError, ValueError):
+            # If we can't parse, assume failure with the response as summary
+            debug_warning("review_merge", "Failed to parse E2E test result JSON")
+            return (False, "Could not parse E2E test results")
+
     async def run(self) -> ReviewMergeResult:
         """Execute the complete review-merge pipeline."""
         debug_section("review_merge", "Starting Review & Merge Pipeline")
@@ -999,9 +1245,92 @@ Rules:
                 # Continue to PR creation even with remaining issues
                 # The user can decide to merge or not
 
+        # ── PHASE 3.5: E2E SMOKE TESTING (web projects only) ──
+        if self._should_run_e2e():
+            emit_review_merge_progress("e2e_testing", "Starting E2E smoke test...", percent=55)
+            emit_phase(ExecutionPhase.QA_REVIEW, "Running E2E smoke test")
+            dev_server_process = None
+            try:
+                server_info = self._detect_dev_server_command()
+                if server_info:
+                    cmd, port = server_info
+                    url, dev_server_process = self._start_dev_server(cmd, port)
+
+                    for e2e_iter in range(1, self.max_iterations + 1):
+                        percent = 55 + int((e2e_iter / self.max_iterations) * 20)
+                        emit_review_merge_progress(
+                            "e2e_testing",
+                            f"E2E test iteration {e2e_iter}/{self.max_iterations}",
+                            iteration=e2e_iter,
+                            max_iterations=self.max_iterations,
+                            percent=percent,
+                        )
+
+                        passed, error_summary = await self._run_e2e_smoke_test(url)
+                        if passed:
+                            emit_review_merge_log("success", content="E2E smoke test passed", stage="e2e_testing")
+                            break
+
+                        # Failed — fix and retry
+                        emit_review_merge_log(
+                            "error",
+                            content=f"E2E issues found: {error_summary}",
+                            stage="e2e_testing",
+                        )
+
+                        emit_review_merge_progress(
+                            "planning",
+                            f"Fixing E2E issues (iteration {e2e_iter})",
+                            iteration=e2e_iter,
+                            max_iterations=self.max_iterations,
+                            percent=percent,
+                        )
+
+                        e2e_findings = ReviewFindings(
+                            findings=[
+                                ReviewFinding(
+                                    file="",
+                                    severity="high",
+                                    description=f"E2E smoke test failure: {error_summary}",
+                                )
+                            ]
+                        )
+                        plan = await self._plan_fixes(e2e_findings, [])
+
+                        emit_review_merge_progress(
+                            "building",
+                            f"Applying E2E fixes (iteration {e2e_iter})",
+                            iteration=e2e_iter,
+                            max_iterations=self.max_iterations,
+                            percent=percent + 5,
+                        )
+                        await self._apply_fixes(plan)
+
+                        # Restart dev server to pick up changes
+                        self._stop_dev_server(dev_server_process)
+                        url, dev_server_process = self._start_dev_server(cmd, port)
+                    else:
+                        emit_review_merge_log(
+                            "error",
+                            content="E2E issues remain after max iterations — continuing to PR",
+                            stage="e2e_testing",
+                        )
+            except Exception as e:
+                debug_error("review_merge", f"E2E testing failed: {e}")
+                capture_exception(e)
+                emit_review_merge_log(
+                    "error",
+                    content=f"E2E testing failed: {e} — continuing to PR",
+                    stage="e2e_testing",
+                )
+                # Non-fatal — continue to PR creation
+            finally:
+                if dev_server_process:
+                    self._stop_dev_server(dev_server_process)
+
         # ── PHASE 4: CREATE PR ──
         emit_review_merge_progress(
-            "creating_pr", "Pushing branch and creating PR...", percent=75
+            "creating_pr", "Pushing branch and creating PR...", percent=78
         )
         emit_phase(ExecutionPhase.CODING, "Creating pull request")
         emit_review_merge_log("tool_start", tool_name="Bash", tool_input=f"git push + gh pr create --base {self.pr_target or self.base_branch}", stage="creating_pr")
@@ -1194,6 +1523,11 @@ def main():
         action="store_true",
         help="Skip the merge step (only review + PR)",
     )
+    parser.add_argument(
+        "--skip-e2e",
+        action="store_true",
+        help="Skip E2E smoke testing",
+    )
 
     args = parser.parse_args()
 
@@ -1212,6 +1546,7 @@ def main():
             pr_title=args.pr_title,
             pr_draft=args.pr_draft,
             skip_merge=args.skip_merge,
+            skip_e2e=args.skip_e2e,
         )
 
         result = asyncio.run(runner.run())

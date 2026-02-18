@@ -512,6 +512,7 @@ export type ReviewMergeStage =
   | 'planning'
   | 'building'
   | 'verifying'
+  | 'e2e_testing'
   | 'creating_pr'
   | 'merging'
   | 'complete'
@@ -525,6 +526,7 @@ export interface ReviewMergeOptions {
   prTitle?: string;
   prDraft?: boolean;
   skipMerge?: boolean;
+  skipE2e?: boolean;
 }
 
 export interface ReviewMergeProgressData {

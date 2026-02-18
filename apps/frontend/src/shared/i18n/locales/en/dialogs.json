@@ -92,6 +92,7 @@
     "reviewMergeStage_planning": "Planning fixes...",
     "reviewMergeStage_building": "Applying fixes...",
     "reviewMergeStage_verifying": "Verifying fixes...",
+    "reviewMergeStage_e2e_testing": "Running E2E smoke test...",
     "reviewMergeStage_creating_pr": "Creating pull request...",
     "reviewMergeStage_merging": "Merging worktree...",
     "reviewMergeStage_complete": "Complete!",
@@ -128,6 +129,7 @@
     "reviewMergeStep_planning": "Plan",
     "reviewMergeStep_building": "Build",
     "reviewMergeStep_verifying": "Verify",
+    "reviewMergeStep_e2e_testing": "E2E Test",
     "reviewMergeStep_creating_pr": "PR",
     "reviewMergeStep_merging": "Merge"
   },

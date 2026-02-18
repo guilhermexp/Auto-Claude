@@ -101,7 +101,7 @@ FRAMEWORK_COMMANDS: dict[str, set[str]] = {
     "mocha": {"mocha"},
     "jasmine": {"jasmine"},
     "ava": {"ava"},
-    "playwright": {"playwright"},
+    "playwright": {"playwright", "playwright-cli"},
     "cypress": {"cypress"},
     "puppeteer": {"puppeteer"},
     "eslint": {"eslint"},

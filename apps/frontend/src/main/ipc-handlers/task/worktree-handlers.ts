@@ -3532,6 +3532,9 @@ export function registerWorktreeHandlers(
         if (options?.skipMerge) {
           args.push('--skip-merge');
         }
+        if (options?.skipE2e) {
+          args.push('--skip-e2e');
+        }
 
         // Add model settings
         const utilitySettings = getUtilitySettings();

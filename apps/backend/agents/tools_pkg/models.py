@@ -371,6 +371,12 @@ AGENT_CONFIGS = {
         "auto_claude_tools": [],
         "thinking_default": "medium",
     },
+    "review_merge_e2e_tester": {
+        "tools": BASE_READ_TOOLS + ["Bash"],
+        "mcp_servers": [],
+        "auto_claude_tools": [],
+        "thinking_default": "medium",
+    },
 }
 
 

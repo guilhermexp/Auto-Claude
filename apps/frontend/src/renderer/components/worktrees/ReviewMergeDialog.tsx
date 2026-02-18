@@ -21,6 +21,7 @@ import {
   Pencil,
   Info,
   Minimize2,
+  Monitor,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -60,6 +61,7 @@ const stageIconMap: Record<string, typeof FileSearch> = {
   planning: SearchCheck,
   building: Wrench,
   verifying: RefreshCw,
+  e2e_testing: Monitor,
   creating_pr: GitPullRequest,
   merging: GitMerge,
   complete: CheckCircle2,
