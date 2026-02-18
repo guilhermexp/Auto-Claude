@@ -75,6 +75,7 @@ export function ChatHistorySidebar({
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkArchiveOpen, setBulkArchiveOpen] = useState(false);
 
   // Clear selection when exiting selection mode
   const handleToggleSelectionMode = useCallback(() => {
@@ -155,11 +156,18 @@ export function ChatHistorySidebar({
     }
   };
 
-  const handleBulkArchive = async () => {
+  const handleBulkArchive = () => {
+    if (selectedIds.size > 0 && onArchiveSessions) {
+      setBulkArchiveOpen(true);
+    }
+  };
+
+  const handleBulkArchiveConfirmed = async () => {
     if (selectedIds.size > 0 && onArchiveSessions) {
       try {
         await onArchiveSessions(Array.from(selectedIds));
         setSelectedIds(new Set());
+        setBulkArchiveOpen(false);
       } catch (error) {
         console.error('Failed to archive sessions:', error);
       }
@@ -173,11 +181,11 @@ export function ChatHistorySidebar({
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
     if (diffDays === 0) {
-      return 'Today';
+      return t('insights.today');
     } else if (diffDays === 1) {
-      return 'Yesterday';
+      return t('insights.yesterday');
     } else if (diffDays < 7) {
-      return `${diffDays} days ago`;
+      return t('insights.daysAgo', { count: diffDays });
     } else {
       return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
     }
@@ -308,7 +316,9 @@ export function ChatHistorySidebar({
                     onEditTitleChange={setEditTitle}
                     onDelete={() => setDeleteSessionId(session.id)}
                     onArchive={onArchiveSession ? () => onArchiveSession(session.id) : undefined}
-                    onUnarchive={onUnarchiveSession ? () => onUnarchiveSession(session.id) : undefined}
+                    onUnarchive={
+                      onUnarchiveSession ? () => onUnarchiveSession(session.id) : undefined
+                    }
                     isArchived={!!session.archivedAt}
                     isSelectionMode={isSelectionMode}
                     isSelected={selectedIds.has(session.id)}
@@ -351,9 +361,9 @@ export function ChatHistorySidebar({
       <AlertDialog open={!!deleteSessionId} onOpenChange={() => setDeleteSessionId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('insights.bulkDeleteTitle')}</AlertDialogTitle>
+            <AlertDialogTitle>{t('insights.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('insights.bulkDeleteDescription', { count: 1 })}
+              {t('insights.deleteDescription')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -390,6 +400,24 @@ export function ChatHistorySidebar({
             <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleBulkDelete}>
               {t('insights.bulkDeleteConfirm', { count: selectedIds.size })}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk archive confirmation dialog */}
+      <AlertDialog open={bulkArchiveOpen} onOpenChange={setBulkArchiveOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('insights.archiveConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('insights.archiveConfirmDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleBulkArchiveConfirmed}>
+              {t('insights.archiveConfirmButton', { count: selectedIds.size })}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -481,7 +509,7 @@ function SessionItem({
     <div
       role={isSelectionMode ? 'checkbox' : 'button'}
       aria-checked={isSelectionMode ? isSelected : undefined}
-      tabIndex={isSelectionMode ? undefined : 0}
+      tabIndex={0}
       className={cn(
         'group relative cursor-pointer px-2 py-2 transition-colors hover:bg-muted',
         isActive && 'bg-primary/10 hover:bg-primary/15',
@@ -530,7 +558,7 @@ function SessionItem({
             )}
           </div>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            {session.messageCount} message{session.messageCount !== 1 ? 's' : ''}
+            {t('insights.messageCount', { count: session.messageCount })}
           </p>
         </div>
       </div>

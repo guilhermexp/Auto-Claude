@@ -444,8 +444,17 @@
     "archived": "Archivée",
     "conversationsToDelete": "Conversations à supprimer",
     "archiveConfirmDescription": "Êtes-vous sûr de vouloir archiver les conversations sélectionnées ?",
+    "archiveConfirmTitle": "Archiver les conversations",
+    "archiveConfirmButton": "Archiver {{count}} conversation(s)",
+    "deleteTitle": "Supprimer la conversation",
+    "deleteDescription": "Êtes-vous sûr de vouloir supprimer cette conversation ? Cette action est irréversible.",
     "selectMode": "Sélectionner",
-    "exitSelectMode": "Terminé"
+    "exitSelectMode": "Terminé",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "daysAgo": "Il y a {{count}} jours",
+    "messageCount": "{{count}} message",
+    "messageCount_other": "{{count}} messages"
   },
   "ideation": {
     "converting": "Conversion...",
