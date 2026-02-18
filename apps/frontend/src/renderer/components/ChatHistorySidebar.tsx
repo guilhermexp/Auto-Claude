@@ -149,9 +149,10 @@ export function ChatHistorySidebar({
       try {
         await onDeleteSessions(Array.from(selectedIds));
         setSelectedIds(new Set());
-        setBulkDeleteOpen(false);
       } catch (error) {
         console.error('Failed to delete sessions:', error);
+      } finally {
+        setBulkDeleteOpen(false);
       }
     }
   };
@@ -167,9 +168,10 @@ export function ChatHistorySidebar({
       try {
         await onArchiveSessions(Array.from(selectedIds));
         setSelectedIds(new Set());
-        setBulkArchiveOpen(false);
       } catch (error) {
         console.error('Failed to archive sessions:', error);
+      } finally {
+        setBulkArchiveOpen(false);
       }
     }
   };
@@ -367,7 +369,7 @@ export function ChatHistorySidebar({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogCancel>{t('buttons.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete}>{t('actions.delete')}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -397,7 +399,7 @@ export function ChatHistorySidebar({
             </div>
           )}
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogCancel>{t('buttons.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleBulkDelete}>
               {t('insights.bulkDeleteConfirm', { count: selectedIds.size })}
             </AlertDialogAction>
@@ -415,7 +417,7 @@ export function ChatHistorySidebar({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogCancel>{t('buttons.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleBulkArchiveConfirmed}>
               {t('insights.archiveConfirmButton', { count: selectedIds.size })}
             </AlertDialogAction>
@@ -530,6 +532,8 @@ function SessionItem({
             <Checkbox
               checked={isSelected}
               className="h-4 w-4"
+              aria-hidden
+              tabIndex={-1}
             />
           </div>
         ) : (

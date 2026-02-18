@@ -29,7 +29,7 @@ export class InsightsPaths {
    */
   private validateSessionId(sessionId: string): void {
     if (!/^session-\d{1,20}$/.test(sessionId)) {
-      throw new Error(`Invalid session ID format: ${sessionId}`);
+      throw new Error('Invalid session ID format');
     }
   }
 
