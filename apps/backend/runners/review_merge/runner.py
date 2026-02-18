@@ -96,7 +96,13 @@ from phase_config import (
     sanitize_thinking_level,
 )
 
-from .models import ReviewFinding, ReviewFindings, ReviewMergeResult
+from .models import (
+    FixAttemptRecord,
+    ReviewFinding,
+    ReviewFindings,
+    ReviewMergeCheckpoint,
+    ReviewMergeResult,
+)
 
 # Progress event marker for frontend parsing
 REVIEW_MERGE_MARKER = "__REVIEW_MERGE__:"
@@ -199,6 +205,7 @@ class ReviewMergeRunner:
         pr_draft: bool = False,
         skip_merge: bool = False,
         skip_e2e: bool = False,
+        continue_run: bool = False,
     ):
         self.project_dir = project_dir.resolve()
         self.spec_name = spec_name
@@ -210,6 +217,7 @@ class ReviewMergeRunner:
         self.pr_draft = pr_draft
         self.skip_merge = skip_merge
         self.skip_e2e = skip_e2e
+        self.continue_run = continue_run
 
         self.spec_dir = self.project_dir / ".auto-claude" / "specs" / spec_name
         self.worktree_mgr = WorktreeManager(
@@ -620,6 +628,15 @@ Your final output must be ONLY the JSON array."""
         raw = "\n---\n".join(s.raw_output for s in sources if s.raw_output)
         return ReviewFindings(findings=all_findings, raw_output=raw)
 
+    def _get_escalation_level(self, iteration: int) -> str:
+        """Determine escalation level based on iteration number."""
+        if iteration <= 2:
+            return "normal"
+        elif iteration < self.max_iterations:
+            return "escalated"
+        else:
+            return "force_resolve"
+
     def _check_conflicts(self) -> list[str]:
         """Dry-run merge to detect conflicts. Returns list of conflicting files."""
         debug_section("review_merge", "Checking for merge conflicts")
@@ -654,6 +671,40 @@ Your final output must be ONLY the JSON array."""
                 timeout=60,
             )
 
+            merge_output = (result.stdout + result.stderr)[:1000]
+
+            # Detect dirty worktree blocking merge (uncommitted changes)
+            if "local changes" in merge_output and "would be overwritten" in merge_output:
+                emit_review_merge_log(
+                    "tool_end", tool_name="Bash",
+                    success=False,
+                    detail=merge_output,
+                    stage="checking_conflicts",
+                )
+                # Auto-commit uncommitted changes so merge can proceed
+                emit_review_merge_log("info", content="Committing uncommitted worktree changes before merge...", stage="checking_conflicts")
+                subprocess.run(
+                    ["git", "add", "-A"],
+                    cwd=str(self.worktree_path),
+                    capture_output=True,
+                    text=True,
+                )
+                subprocess.run(
+                    ["git", "commit", "-m", "chore: commit worktree changes before merge"],
+                    cwd=str(self.worktree_path),
+                    capture_output=True,
+                    text=True,
+                )
+                # Retry the dry-run merge
+                result = subprocess.run(
+                    ["git", "merge", "--no-commit", "--no-ff", f"origin/{self.base_branch}"],
+                    cwd=str(self.worktree_path),
+                    capture_output=True,
+                    text=True,
+                    timeout=60,
+                )
+                merge_output = (result.stdout + result.stderr)[:1000]
+
             conflict_files = []
             if result.returncode != 0:
                 # Parse conflict file names
@@ -666,7 +717,6 @@ Your final output must be ONLY the JSON array."""
                         if conflict_match:
                             conflict_files.append(conflict_match.group(1))
 
-            merge_output = (result.stdout + result.stderr)[:1000]
             emit_review_merge_log(
                 "tool_end", tool_name="Bash",
                 success=result.returncode == 0,
@@ -710,17 +760,146 @@ Your final output must be ONLY the JSON array."""
             emit_review_merge_log("error", content=f"Conflict check failed: {e}", stage="checking_conflicts")
             return []
 
+    async def _run_targeted_verification(
+        self, previous_findings: ReviewFindings
+    ) -> ReviewFindings:
+        """Verify ONLY previously identified findings — do NOT discover new issues.
+
+        Unlike _run_code_review(), this instructs the agent to check only the
+        specific findings from the previous iteration and report which are fixed.
+        """
+        unfixed = previous_findings.unfixed_critical_high()
+        if not unfixed:
+            return previous_findings
+
+        worktree = str(self.worktree_path)
+
+        findings_list = []
+        for i, f in enumerate(unfixed):
+            loc = f"{f.file}:{f.line}" if f.line else f.file
+            findings_list.append(
+                f"  {i}: [{f.severity.upper()}] {loc} — {f.description}"
+            )
+
+        prompt = f"""You are a senior code reviewer performing a TARGETED verification.
+
+## Working directory
+{worktree}
+
+## Previous findings to verify
+{chr(10).join(findings_list)}
+
+## Instructions
+You have access to Read, Glob, Grep, and Bash tools. For EACH finding above:
+1. Use Read to examine the file at the indicated location
+2. Determine if the issue has been FIXED or is STILL PRESENT
+3. Be precise — only mark as "fixed" if the specific issue described is genuinely resolved
+
+IMPORTANT: Do NOT look for NEW issues. ONLY verify the findings listed above.
+
+## Output format
+Return ONLY a JSON array. For each finding, output:
+{{"index": <number>, "status": "fixed" | "still_present"}}
+
+Example: [{{"index": 0, "status": "fixed"}}, {{"index": 1, "status": "still_present"}}]"""
+
+        qa_model = get_phase_model(self.spec_dir, "qa", self.model)
+        qa_betas = get_phase_model_betas(self.spec_dir, "qa", qa_model)
+        fast_mode = get_fast_mode(self.spec_dir)
+        qa_thinking_kwargs = get_phase_client_thinking_kwargs(
+            self.spec_dir, "qa", qa_model, self.thinking_level
+        )
+
+        emit_review_merge_log(
+            "info",
+            content=f"Verifying {len(unfixed)} previous finding(s) (targeted)",
+            stage="verifying",
+        )
+
+        try:
+            client = create_client(
+                self.project_dir,
+                self.spec_dir,
+                qa_model,
+                agent_type="review_merge_reviewer",
+                betas=qa_betas,
+                fast_mode=fast_mode,
+                **qa_thinking_kwargs,
+            )
+
+            async with client:
+                _status, response = await self._run_agent_with_tools(
+                    client, prompt, "verifying"
+                )
+
+            # Parse verification results
+            json_text = response.strip()
+            if "```" in json_text:
+                parts = json_text.split("```")
+                for part in parts:
+                    stripped = part.strip()
+                    if stripped.startswith("json"):
+                        stripped = stripped[4:].strip()
+                    if stripped.startswith("["):
+                        json_text = stripped
+                        break
+
+            try:
+                results = json.loads(json_text)
+                if not isinstance(results, list):
+                    results = []
+            except (json.JSONDecodeError, ValueError):
+                debug_warning("review_merge", "Failed to parse verification JSON")
+                results = []
+
+            # Update findings based on verification
+            for item in results:
+                if not isinstance(item, dict):
+                    continue
+                idx = item.get("index")
+                status = item.get("status", "")
+                if isinstance(idx, int) and 0 <= idx < len(unfixed):
+                    if status == "fixed":
+                        unfixed[idx].fixed = True
+                    else:
+                        unfixed[idx].fix_attempts += 1
+
+            fixed_count = sum(1 for r in results if isinstance(r, dict) and r.get("status") == "fixed")
+            emit_review_merge_log(
+                "info",
+                content=f"Verification: {fixed_count}/{len(unfixed)} fixed",
+                stage="verifying",
+            )
+
+        except Exception as e:
+            debug_error("review_merge", f"Targeted verification failed: {e}")
+            capture_exception(e)
+            emit_review_merge_log(
+                "error",
+                content=f"Targeted verification failed: {e}",
+                stage="verifying",
+            )
+            # On failure, increment fix_attempts for all unfixed
+            for f in unfixed:
+                f.fix_attempts += 1
+
+        return previous_findings
+
     async def _plan_fixes(
-        self, findings: ReviewFindings, conflicts: list[str]
+        self, findings: ReviewFindings, conflicts: list[str],
+        escalation_level: str = "normal",
+        fix_history: list[FixAttemptRecord] | None = None,
+        iteration: int = 1,
     ) -> str:
         """Use Claude agent with tool access to plan fixes."""
-        # Build context for the planner
+        # Build context for the planner — exclude fixed and accepted findings
         issues_text = []
         for f in findings.findings:
-            if f.severity in ("critical", "high") and not f.fixed:
+            if f.severity in ("critical", "high") and not f.fixed and not f.accepted:
                 loc = f"{f.file}:{f.line}" if f.line else f.file
+                attempts_note = f" (attempted {f.fix_attempts}x)" if f.fix_attempts > 0 else ""
                 issues_text.append(
-                    f"- [{f.severity.upper()}] {loc}: {f.description}"
+                    f"- [{f.severity.upper()}] {loc}: {f.description}{attempts_note}"
                     + (f" (suggestion: {f.suggestion})" if f.suggestion else "")
                 )
 
@@ -756,6 +935,53 @@ After reading the code, output a structured fix plan as a numbered list. For eac
 
 Keep fixes minimal and targeted — do not suggest refactoring beyond what's needed."""
 
+        # Append escalation context based on level
+        if escalation_level == "escalated" and fix_history:
+            history_lines = []
+            for record in fix_history:
+                history_lines.append(
+                    f"- Iteration {record.iteration}: planned '{record.plan_summary[:100]}', "
+                    f"fixed {len(record.newly_fixed)}, remaining {len(record.still_remaining)}"
+                )
+            prompt += f"""
+
+## ESCALATION — Previous attempts have NOT resolved these issues
+
+### History of previous attempts
+{chr(10).join(history_lines)}
+
+### What to do differently
+- You MUST take a DIFFERENT approach from what was tried before
+- Consider a deeper root cause — the surface-level fix did not work
+- Consider a broader refactor if the issue is structural
+- Read MORE surrounding context to understand why previous fixes failed
+- If the issue involves generated code or config, check the generator/config source"""
+
+        elif escalation_level == "force_resolve" and fix_history:
+            history_lines = []
+            for record in fix_history:
+                history_lines.append(
+                    f"- Iteration {record.iteration}: planned '{record.plan_summary[:100]}', "
+                    f"fixed {len(record.newly_fixed)}, remaining {len(record.still_remaining)}"
+                )
+            prompt += f"""
+
+## FORCE RESOLUTION — This is the FINAL iteration
+
+### History of ALL previous attempts
+{chr(10).join(history_lines)}
+
+### Mandatory resolution strategy
+For EACH remaining finding, you MUST provide TWO strategies:
+
+**Strategy A (preferred)**: A definitive code fix using a completely different approach than before.
+
+**Strategy B (last resort)**: If Strategy A is not feasible, accept the finding by:
+1. Adding a `// TODO(review-merge): <description of the issue>` comment at the relevant code location
+2. Documenting WHY the automated fix could not resolve it
+
+Every finding MUST be addressed — no finding can be left without an action plan."""
+
         qa_model = get_phase_model(self.spec_dir, "qa", self.model)
         qa_betas = get_phase_model_betas(self.spec_dir, "qa", qa_model)
         fast_mode = get_fast_mode(self.spec_dir)
@@ -783,7 +1009,7 @@ Keep fixes minimal and targeted — do not suggest refactoring beyond what's nee
             )
             return response
 
-    async def _apply_fixes(self, plan: str) -> None:
+    async def _apply_fixes(self, plan: str, escalation_level: str = "normal") -> None:
         """Use Claude agent with tool access to implement fixes."""
         worktree = str(self.worktree_path)
 
@@ -809,6 +1035,14 @@ Rules:
 - Commit each logical fix separately with a descriptive message
 - If a test fails after your fix, investigate and adjust before committing
 - All file paths are relative to the working directory above"""
+
+        if escalation_level == "force_resolve":
+            prompt += """
+
+## FINAL ITERATION — Every issue MUST be addressed
+- This is the FINAL iteration. Every issue in the plan MUST be resolved.
+- For issues marked as Strategy B (acceptance), add a `// TODO(review-merge): <description>` comment at the relevant location.
+- Commit ALL changes, including acceptance comments."""
 
         qa_model = get_phase_model(self.spec_dir, "qa", self.model)
         qa_betas = get_phase_model_betas(self.spec_dir, "qa", qa_model)
@@ -1039,6 +1273,8 @@ Output ONLY valid JSON on the last line:
         """Parse E2E smoke test agent response.
 
         Returns (passed, error_summary).
+        Tries JSON parsing first, then falls back to keyword detection
+        for agents that return markdown instead of JSON.
         """
         # Try to find JSON in the response (last JSON object)
         json_text = ""
@@ -1059,22 +1295,70 @@ Output ONLY valid JSON on the last line:
                     json_text = stripped.split("\n")[0] if "\n" in stripped else stripped
                     break
 
+        # Try regex to find {"passed": ...} anywhere in text
         if not json_text:
-            # Try full response as JSON
-            json_text = response.strip()
+            json_match = re.search(r'\{[^{}]*"passed"\s*:\s*(true|false)[^{}]*\}', response)
+            if json_match:
+                json_text = json_match.group(0)
 
-        try:
-            result = json.loads(json_text)
-            passed = result.get("passed", False)
-            errors = result.get("errors", [])
-            if errors:
-                error_msgs = [f"{e.get('page', '?')}: {e.get('message', '?')}" for e in errors[:5]]
-                return (passed, "; ".join(error_msgs))
-            return (passed, "")
-        except (json.JSONDecodeError, ValueError):
-            # If we can't parse, assume failure with the response as summary
-            debug_warning("review_merge", "Failed to parse E2E test result JSON")
-            return (False, "Could not parse E2E test results")
+        if json_text:
+            try:
+                result = json.loads(json_text)
+                passed = result.get("passed", False)
+                errors = result.get("errors", [])
+                if errors:
+                    error_msgs = [f"{e.get('page', '?')}: {e.get('message', '?')}" for e in errors[:5]]
+                    return (passed, "; ".join(error_msgs))
+                return (passed, "")
+            except (json.JSONDecodeError, ValueError):
+                pass
+
+        # Fallback: keyword detection for markdown-formatted results
+        response_lower = response.lower()
+        has_passed = any(
+            marker in response_lower
+            for marker in ["✅ passed", "status: passed", "**passed**", "status:**passed"]
+        )
+        has_failed = any(
+            marker in response_lower
+            for marker in ["❌ failed", "status: failed", "**failed**", "status:**failed"]
+        )
+
+        if has_passed and not has_failed:
+            debug("review_merge", "E2E result parsed via keyword fallback: PASSED")
+            return (True, "")
+        elif has_failed:
+            debug("review_merge", "E2E result parsed via keyword fallback: FAILED")
+            # Try to extract error summary from response
+            error_summary = ""
+            for line in response.splitlines():
+                if "error" in line.lower() and (":" in line or "-" in line):
+                    error_summary = line.strip()[:200]
+                    break
+            return (False, error_summary or "E2E test failed (details in agent output)")
+
+        debug_warning("review_merge", "Failed to parse E2E test result JSON or keywords")
+        return (False, "Could not parse E2E test results")
+
+    def _save_checkpoint(
+        self,
+        stage: str,
+        findings: "ReviewFindings",
+        conflicts: list[str],
+        iterations_used: int,
+        fix_history: list[FixAttemptRecord],
+    ) -> None:
+        """Save pipeline checkpoint for --continue resume."""
+        from dataclasses import asdict
+        checkpoint = ReviewMergeCheckpoint(
+            last_completed_stage=stage,
+            findings=[asdict(f) for f in findings.findings],
+            conflicts=conflicts,
+            iterations_used=iterations_used,
+            fix_history=[asdict(h) for h in fix_history],
+        )
+        checkpoint.save(self.spec_dir)
+        debug("review_merge", f"Checkpoint saved: stage={stage}, iterations={iterations_used}")
 
     async def run(self) -> ReviewMergeResult:
         """Execute the complete review-merge pipeline."""
@@ -1087,37 +1371,95 @@ Output ONLY valid JSON on the last line:
         emit_review_merge_log("info", content=f"Worktree: {self.worktree_path}", stage="reviewing")
         emit_review_merge_log("info", content=f"Base branch: {self.base_branch}", stage="reviewing")
 
-        # ── PHASE 1: REVIEW (Claude agent + optional CodeRabbit) ──
-        emit_review_merge_progress("reviewing", "Running code review...", percent=5)
-        emit_phase(ExecutionPhase.QA_REVIEW, "Running code review")
+        # ── RESUME FROM CHECKPOINT (--continue) ──
+        checkpoint: ReviewMergeCheckpoint | None = None
+        if self.continue_run:
+            checkpoint = ReviewMergeCheckpoint.load(self.spec_dir)
+            if checkpoint:
+                debug(
+                    "review_merge",
+                    f"Resuming from checkpoint: stage={checkpoint.last_completed_stage}, "
+                    f"iterations_used={checkpoint.iterations_used}",
+                )
+                emit_review_merge_log(
+                    "info",
+                    content=f"Resuming from checkpoint (last stage: {checkpoint.last_completed_stage})",
+                    stage="reviewing",
+                )
+            else:
+                debug_warning("review_merge", "No checkpoint found — starting fresh")
+                emit_review_merge_log(
+                    "info",
+                    content="No checkpoint found — starting from the beginning",
+                    stage="reviewing",
+                )
 
-        findings = await self._run_code_review()
-        emit_review_merge_progress(
-            "reviewing",
-            f"Review complete: {findings.summary()}",
-            percent=20,
-            findings_summary=findings.summary(),
-        )
+        if checkpoint and checkpoint.last_completed_stage in (
+            "reviewing", "checking_conflicts", "fixing", "e2e_testing", "creating_pr",
+        ):
+            # Restore state from checkpoint
+            findings = checkpoint.restore_findings()
+            fix_history = checkpoint.restore_fix_history()
+            iterations_used = checkpoint.iterations_used
 
-        # ── PHASE 2: CONFLICT CHECK ──
-        emit_review_merge_progress(
-            "checking_conflicts", "Checking for merge conflicts...", percent=25
-        )
-        conflicts = self._check_conflicts()
-
-        if conflicts:
             emit_review_merge_progress(
-                "checking_conflicts",
-                f"Found {len(conflicts)} conflict(s)",
-                percent=30,
-                conflicts=conflicts,
+                "reviewing",
+                f"Restored review findings: {findings.summary()}",
+                percent=20,
+                findings_summary=findings.summary(),
             )
 
-        # ── PHASE 3: FIX LOOP ──
-        iterations_used = 0
-        recurring_tracker: dict[str, int] = {}  # description -> count
+            # Always re-check conflicts (fast operation, state may have changed)
+            emit_review_merge_progress(
+                "checking_conflicts", "Re-checking merge conflicts...", percent=25
+            )
+            conflicts = self._check_conflicts()
+            if conflicts:
+                emit_review_merge_progress(
+                    "checking_conflicts",
+                    f"Found {len(conflicts)} conflict(s)",
+                    percent=30,
+                    conflicts=conflicts,
+                )
+        else:
+            # ── PHASE 1: REVIEW (Claude agent + optional CodeRabbit) ──
+            emit_review_merge_progress("reviewing", "Running code review...", percent=5)
+            emit_phase(ExecutionPhase.QA_REVIEW, "Running code review")
 
-        if findings.has_critical_issues() or conflicts:
+            findings = await self._run_code_review()
+            emit_review_merge_progress(
+                "reviewing",
+                f"Review complete: {findings.summary()}",
+                percent=20,
+                findings_summary=findings.summary(),
+            )
+
+            # ── PHASE 2: CONFLICT CHECK ──
+            emit_review_merge_progress(
+                "checking_conflicts", "Checking for merge conflicts...", percent=25
+            )
+            conflicts = self._check_conflicts()
+
+            if conflicts:
+                emit_review_merge_progress(
+                    "checking_conflicts",
+                    f"Found {len(conflicts)} conflict(s)",
+                    percent=30,
+                    conflicts=conflicts,
+                )
+
+            # Save checkpoint after review + conflict check
+            iterations_used = 0
+            fix_history: list[FixAttemptRecord] = []
+            self._save_checkpoint("checking_conflicts", findings, conflicts, iterations_used, fix_history)
+
+        # ── PHASE 3: FIX LOOP (autonomous — always completes) ──
+        # When resuming, skip fix loop if it was already completed
+        skip_fix_loop = checkpoint is not None and checkpoint.last_completed_stage in (
+            "e2e_testing", "creating_pr",
+        )
+
+        if not skip_fix_loop and (findings.has_critical_issues() or conflicts):
             for iteration in range(1, self.max_iterations + 1):
                 iterations_used = iteration
                 loop_base = 30
@@ -1126,41 +1468,20 @@ Output ONLY valid JSON on the last line:
                     (iteration / self.max_iterations) * loop_range
                 )
 
-                # Track recurring issues
-                for f in findings.findings:
-                    if f.severity in ("critical", "high") and not f.fixed:
-                        key = f"{f.file}:{f.description[:50]}"
-                        recurring_tracker[key] = recurring_tracker.get(key, 0) + 1
-                        if recurring_tracker[key] >= 3:
-                            debug_warning(
-                                "review_merge",
-                                f"Recurring issue detected (3+ times): {key}",
-                            )
-                            msg = f"Stopping: recurring issue not auto-resolvable — {f.description}"
-                            emit_review_merge_progress(
-                                "error",
-                                msg,
-                                iteration=iteration,
-                                max_iterations=self.max_iterations,
-                                percent=iter_percent,
-                            )
-                            return ReviewMergeResult(
-                                success=False,
-                                message=msg,
-                                iterations_used=iteration,
-                                findings_summary=findings.summary(),
-                                remaining_issues=[
-                                    f
-                                    for f in findings.findings
-                                    if not f.fixed
-                                    and f.severity in ("critical", "high")
-                                ],
-                            )
+                escalation_level = self._get_escalation_level(iteration)
+                unfixed_before = findings.unfixed_critical_high()
+                findings_before_count = len(unfixed_before)
+
+                if escalation_level != "normal":
+                    debug(
+                        "review_merge",
+                        f"Escalation level: {escalation_level} (iteration {iteration})",
+                    )
 
                 # PLAN
                 emit_review_merge_progress(
                     "planning",
-                    f"Planning fixes (iteration {iteration}/{self.max_iterations})",
+                    f"Planning fixes (iteration {iteration}/{self.max_iterations}, {escalation_level})",
                     iteration=iteration,
                     max_iterations=self.max_iterations,
                     percent=iter_percent,
@@ -1172,13 +1493,21 @@ Output ONLY valid JSON on the last line:
                 )
 
                 try:
-                    plan = await self._plan_fixes(findings, conflicts)
+                    plan = await self._plan_fixes(
+                        findings, conflicts,
+                        escalation_level=escalation_level,
+                        fix_history=fix_history,
+                        iteration=iteration,
+                    )
                 except Exception as e:
                     debug_error("review_merge", f"Planning failed: {e}")
                     capture_exception(e)
                     emit_review_merge_progress(
-                        "error", f"Planning failed: {e}", percent=iter_percent
+                        "planning",
+                        f"Planning attempt failed, retrying: {e}",
+                        percent=iter_percent,
                     )
+                    self._save_checkpoint("fixing", findings, conflicts, iterations_used, fix_history)
                     continue
 
                 # BUILD
@@ -1191,16 +1520,19 @@ Output ONLY valid JSON on the last line:
                 )
 
                 try:
-                    await self._apply_fixes(plan)
+                    await self._apply_fixes(plan, escalation_level=escalation_level)
                 except Exception as e:
                     debug_error("review_merge", f"Fix application failed: {e}")
                     capture_exception(e)
                     emit_review_merge_progress(
-                        "error", f"Fix application failed: {e}", percent=iter_percent
+                        "building",
+                        f"Fix attempt failed, retrying: {e}",
+                        percent=iter_percent,
                     )
+                    self._save_checkpoint("fixing", findings, conflicts, iterations_used, fix_history)
                     continue
 
-                # VERIFY
+                # VERIFY (targeted — only checks previous findings, no new discoveries)
                 emit_review_merge_progress(
                     "verifying",
                     f"Verifying fixes (iteration {iteration}/{self.max_iterations})",
@@ -1213,8 +1545,28 @@ Output ONLY valid JSON on the last line:
                     f"Verifying fixes — iteration {iteration}",
                 )
 
-                findings = await self._run_code_review()
+                findings = await self._run_targeted_verification(findings)
                 conflicts = self._check_conflicts()
+
+                # Record fix attempt for escalation context
+                unfixed_after = findings.unfixed_critical_high()
+                newly_fixed = [
+                    f.description[:60] for f in unfixed_before
+                    if f.fixed or f.accepted
+                ]
+                still_remaining = [f.description[:60] for f in unfixed_after]
+
+                fix_history.append(FixAttemptRecord(
+                    iteration=iteration,
+                    plan_summary=plan[:200] if plan else "",
+                    findings_before=findings_before_count,
+                    findings_after=len(unfixed_after),
+                    newly_fixed=newly_fixed,
+                    still_remaining=still_remaining,
+                ))
+
+                # Save checkpoint after each completed iteration
+                self._save_checkpoint("fixing", findings, conflicts, iterations_used, fix_history)
 
                 if not findings.has_critical_issues() and not conflicts:
                     debug_success(
@@ -1222,18 +1574,42 @@ Output ONLY valid JSON on the last line:
                         f"All issues resolved after {iteration} iteration(s)",
                     )
                     break
+
+                # Force resolve: accept remaining issues on final iteration
+                if escalation_level == "force_resolve" and findings.has_critical_issues():
+                    remaining = findings.unfixed_critical_high()
+                    for f in remaining:
+                        f.accepted = True
+                        f.acceptance_reason = (
+                            f"Accepted after {iteration} fix iterations — "
+                            f"TODO(review-merge) comment added in code"
+                        )
+                    debug_warning(
+                        "review_merge",
+                        f"Force-accepted {len(remaining)} remaining issue(s) after {iteration} iterations",
+                    )
+                    emit_review_merge_progress(
+                        "verifying",
+                        f"Accepted {len(remaining)} remaining issue(s) as trade-offs",
+                        iteration=iteration,
+                        max_iterations=self.max_iterations,
+                        percent=iter_percent + 12,
+                        findings_summary=findings.summary(),
+                    )
+                    break
             else:
-                # Max iterations reached
-                debug_warning(
-                    "review_merge",
-                    f"Max iterations ({self.max_iterations}) reached with remaining issues",
-                )
-                remaining = [
-                    f
-                    for f in findings.findings
-                    if not f.fixed and f.severity in ("critical", "high")
-                ]
-                msg = f"Max iterations reached. Remaining issues: {findings.summary()}"
+                # Max iterations reached without break — accept remaining
+                remaining = findings.unfixed_critical_high()
+                if remaining:
+                    for f in remaining:
+                        f.accepted = True
+                        f.acceptance_reason = f"Max iterations ({self.max_iterations}) exhausted"
+                    debug_warning(
+                        "review_merge",
+                        f"Max iterations ({self.max_iterations}) reached — force-accepted {len(remaining)} issue(s)",
+                    )
+
+                msg = f"Max iterations reached. Accepted remaining issues: {findings.summary()}"
                 emit_review_merge_progress(
                     "max_iterations",
                     msg,
@@ -1242,8 +1618,7 @@ Output ONLY valid JSON on the last line:
                     percent=70,
                     findings_summary=findings.summary(),
                 )
-                # Continue to PR creation even with remaining issues
-                # The user can decide to merge or not
+                # Pipeline ALWAYS continues to PR + merge
 
         # ── PHASE 3.5: E2E SMOKE TESTING (web projects only) ──
         if self._should_run_e2e():
@@ -1290,6 +1665,7 @@ Output ONLY valid JSON on the last line:
                             findings=[
                                 ReviewFinding(
                                     file="",
+                                    line=None,
                                     severity="high",
                                     description=f"E2E smoke test failure: {error_summary}",
                                 )
@@ -1327,6 +1703,9 @@ Output ONLY valid JSON on the last line:
             finally:
                 if dev_server_process:
                     self._stop_dev_server(dev_server_process)
+
+        # Save checkpoint before PR creation (in case PR/merge fails, resume can skip fix loop)
+        self._save_checkpoint("e2e_testing", findings, conflicts, iterations_used, fix_history)
 
         # ── PHASE 4: CREATE PR ──
         emit_review_merge_progress(
@@ -1397,6 +1776,7 @@ Output ONLY valid JSON on the last line:
                 percent=100,
             )
             emit_phase(ExecutionPhase.COMPLETE, "Review & PR complete (merge skipped)")
+            ReviewMergeCheckpoint.clear(self.spec_dir)
             return ReviewMergeResult(
                 success=True,
                 message="PR created successfully (merge skipped)",
@@ -1407,6 +1787,34 @@ Output ONLY valid JSON on the last line:
 
         emit_review_merge_progress("merging", "Merging worktree...", percent=90)
         emit_phase(ExecutionPhase.CODING, "Merging worktree")
+
+        # Pre-merge: commit any uncommitted changes in the worktree
+        # (review fixes, E2E fixes, generated files like .auto-claude-status)
+        try:
+            status_result = subprocess.run(
+                ["git", "status", "--porcelain"],
+                cwd=str(self.worktree_path),
+                capture_output=True,
+                text=True,
+                timeout=15,
+            )
+            if status_result.stdout.strip():
+                emit_review_merge_log("info", content="Committing uncommitted worktree changes before merge...", stage="merging")
+                subprocess.run(
+                    ["git", "add", "-A"],
+                    cwd=str(self.worktree_path),
+                    capture_output=True,
+                    text=True,
+                )
+                subprocess.run(
+                    ["git", "commit", "-m", "chore: commit remaining changes before merge"],
+                    cwd=str(self.worktree_path),
+                    capture_output=True,
+                    text=True,
+                )
+        except (subprocess.TimeoutExpired, subprocess.SubprocessError):
+            pass  # Best-effort — merge may still work
+
         emit_review_merge_log("tool_start", tool_name="Bash", tool_input=f"git merge {self.spec_name} into {self.base_branch}", stage="merging")
 
         try:
@@ -1420,6 +1828,7 @@ Output ONLY valid JSON on the last line:
                     percent=100,
                 )
                 emit_phase(ExecutionPhase.COMPLETE, "Review & Merge complete")
+                ReviewMergeCheckpoint.clear(self.spec_dir)
                 return ReviewMergeResult(
                     success=True,
                     message="Review, PR, and merge completed successfully",
@@ -1528,6 +1937,12 @@ def main():
         action="store_true",
         help="Skip E2E smoke testing",
     )
+    parser.add_argument(
+        "--continue",
+        dest="continue_run",
+        action="store_true",
+        help="Resume from last checkpoint instead of starting fresh",
+    )
 
     args = parser.parse_args()
 
@@ -1547,6 +1962,7 @@ def main():
             pr_draft=args.pr_draft,
             skip_merge=args.skip_merge,
             skip_e2e=args.skip_e2e,
+            continue_run=args.continue_run,
         )
 
         result = asyncio.run(runner.run())

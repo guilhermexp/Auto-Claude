@@ -256,7 +256,7 @@ async function runTriage(
 
   debugLog('Spawning triage process', { args, model, thinkingLevel });
 
-  const subprocessEnv = await getRunnerEnv();
+  const subprocessEnv = await getRunnerEnv('githubIssues');
 
   const { promise } = runPythonSubprocess<TriageResult[]>({
     pythonPath: getPythonPath(backendPath),

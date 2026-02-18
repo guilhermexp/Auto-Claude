@@ -15,10 +15,14 @@ import {
 } from '../../../shared/constants';
 import type {
   AppSettings,
+  AuthRoutingMode,
+  ClaudeProfile,
+  FeatureAuthProfileConfig,
   FeatureModelConfig,
   ModelTypeShort,
   ThinkingLevel,
-  ToolDetectionResult
+  ToolDetectionResult,
+  APIProfile
 } from '../../../shared/types';
 
 interface GeneralSettingsProps {
@@ -29,6 +33,35 @@ interface GeneralSettingsProps {
   isSaving?: boolean;
   error?: string | null;
 }
+
+type AuthFeatureKey = keyof FeatureAuthProfileConfig;
+
+interface AccountOption {
+  id: string;
+  label: string;
+}
+
+const FEATURE_AUTH_LABELS: Record<AuthFeatureKey, { label: string; description: string }> = {
+  tasks: { label: 'Tasks', description: 'Kanban task pipeline (spec/planning/coding/qa)' },
+  insights: { label: 'Insights Chat', description: 'Ask questions about your codebase' },
+  ideation: { label: 'Ideation', description: 'Generate feature ideas and improvements' },
+  roadmap: { label: 'Roadmap', description: 'Create strategic feature roadmaps' },
+  githubIssues: { label: 'GitHub Issues', description: 'Automated issue triage and labeling' },
+  githubPrs: { label: 'GitHub PR Review', description: 'AI-powered pull request reviews' },
+  utility: { label: 'Utility', description: 'Commit messages and merge conflict resolution' },
+};
+
+const FEATURE_AUTH_KEYS: AuthFeatureKey[] = [
+  'tasks',
+  'insights',
+  'ideation',
+  'roadmap',
+  'githubIssues',
+  'githubPrs',
+  'utility',
+];
+
+const USE_GLOBAL_AUTH_OPTION = '__use_global_auth_default__';
 
 /**
  * Helper component to display auto-detected CLI tool information
@@ -102,6 +135,7 @@ export function GeneralSettings({ settings, onSettingsChange, section, onSave, i
     claude: ToolDetectionResult;
   } | null>(null);
   const [isLoadingTools, setIsLoadingTools] = useState(false);
+  const [authAccountOptions, setAuthAccountOptions] = useState<AccountOption[]>([]);
 
   // Fetch CLI tools detection info when component mounts (paths section only)
   useEffect(() => {
@@ -121,6 +155,64 @@ export function GeneralSettings({ settings, onSettingsChange, section, onSave, i
           setIsLoadingTools(false);
         });
     }
+  }, [section]);
+
+  useEffect(() => {
+    if (section !== 'agent') return;
+
+    const loadAuthAccountOptions = async () => {
+      try {
+        const [claudeProfilesResult, apiProfilesResult] = await Promise.all([
+          window.electronAPI.getClaudeProfiles(),
+          window.electronAPI.getAPIProfiles(),
+        ]);
+
+        const options: AccountOption[] = [];
+        const pushOAuthOptions = (profiles: ClaudeProfile[]) => {
+          for (const profile of profiles) {
+            options.push({
+              id: `oauth-${profile.id}`,
+              label: `${profile.name} (OAuth)`,
+            });
+          }
+        };
+        const pushAPIOptions = (profiles: APIProfile[]) => {
+          for (const profile of profiles) {
+            options.push({
+              id: `api-${profile.id}`,
+              label: `${profile.name} (API)`,
+            });
+          }
+        };
+
+        if (claudeProfilesResult.success && claudeProfilesResult.data) {
+          const profiles = claudeProfilesResult.data.profiles || [];
+          const activeId = claudeProfilesResult.data.activeProfileId;
+          if (activeId) {
+            const active = profiles.find((p) => p.id === activeId);
+            if (active) pushOAuthOptions([active]);
+          }
+          pushOAuthOptions(profiles.filter((p) => p.id !== activeId));
+        }
+
+        if (apiProfilesResult.success && apiProfilesResult.data) {
+          const profiles = apiProfilesResult.data.profiles || [];
+          const activeId = apiProfilesResult.data.activeProfileId;
+          if (activeId) {
+            const active = profiles.find((p) => p.id === activeId);
+            if (active) pushAPIOptions([active]);
+          }
+          pushAPIOptions(profiles.filter((p) => p.id !== activeId));
+        }
+
+        setAuthAccountOptions(options);
+      } catch (loadError) {
+        console.error('Failed to load auth account options:', loadError);
+        setAuthAccountOptions([]);
+      }
+    };
+
+    loadAuthAccountOptions();
   }, [section]);
 
   if (section === 'agent') {
@@ -234,6 +326,96 @@ export function GeneralSettings({ settings, onSettingsChange, section, onSave, i
                             {THINKING_LEVELS.map((level) => (
                               <SelectItem key={level.value} value={level.value}>
                                 {level.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Authentication Routing Configuration */}
+            <div className="space-y-4 pt-4 border-t border-border/30">
+              <div className="space-y-1">
+                <Label className="text-sm font-medium text-foreground">Authentication routing</Label>
+                <p className="text-sm text-muted-foreground">
+                  Choose one global account for all features, or set specific accounts per feature.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 max-w-md">
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Mode</Label>
+                  <Select
+                    value={settings.authRoutingMode || 'global'}
+                    onValueChange={(value) => {
+                      const mode = value as AuthRoutingMode;
+                      onSettingsChange({
+                        ...settings,
+                        authRoutingMode: mode,
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="global">Global (current behavior)</SelectItem>
+                      <SelectItem value="per_feature">Custom by feature</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {FEATURE_AUTH_KEYS.map((featureKey) => {
+                const featureProfiles = settings.featureAuthProfiles || {};
+                const selectedAccountId = featureProfiles[featureKey] || USE_GLOBAL_AUTH_OPTION;
+                const customModeEnabled = (settings.authRoutingMode || 'global') === 'per_feature';
+
+                return (
+                  <div key={featureKey} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium text-foreground">
+                        {FEATURE_AUTH_LABELS[featureKey].label}
+                      </Label>
+                      <span className="text-xs text-muted-foreground">
+                        {FEATURE_AUTH_LABELS[featureKey].description}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 max-w-md">
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">Authentication profile</Label>
+                        <Select
+                          value={selectedAccountId}
+                          disabled={!customModeEnabled}
+                          onValueChange={(value) => {
+                            const nextFeatureAuthProfiles: FeatureAuthProfileConfig = {
+                              ...(settings.featureAuthProfiles || {}),
+                            };
+
+                            if (value === USE_GLOBAL_AUTH_OPTION) {
+                              delete nextFeatureAuthProfiles[featureKey];
+                            } else {
+                              nextFeatureAuthProfiles[featureKey] = value;
+                            }
+
+                            onSettingsChange({
+                              ...settings,
+                              featureAuthProfiles: nextFeatureAuthProfiles,
+                            });
+                          }}
+                        >
+                          <SelectTrigger className="h-9">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value={USE_GLOBAL_AUTH_OPTION}>Use global default</SelectItem>
+                            {authAccountOptions.map((option) => (
+                              <SelectItem key={option.id} value={option.id}>
+                                {option.label}
                               </SelectItem>
                             ))}
                           </SelectContent>

@@ -1,9 +1,7 @@
-import { getOAuthModeClearVars } from '../../../agent/env-utils';
-import { getAPIProfileEnv } from '../../../services/profile';
-import { getBestAvailableProfileEnv } from '../../../rate-limit-detector';
 import { pythonEnvManager } from '../../../python-env-manager';
 import { getGitHubTokenForSubprocess } from '../utils';
 import { getSentryEnvForSubprocess } from '../../../sentry';
+import { resolveAuthEnvForFeature } from '../../../auth-profile-routing';
 
 /**
  * Get environment variables for Python runner subprocesses.
@@ -30,14 +28,16 @@ import { getSentryEnvForSubprocess } from '../../../sentry';
  * from the gh CLI on each call to ensure account changes are reflected immediately.
  */
 export async function getRunnerEnv(
-  extraEnv?: Record<string, string>
+  featureOrExtraEnv?: 'githubIssues' | 'githubPrs' | 'utility' | Record<string, string>,
+  extraEnvParam?: Record<string, string>
 ): Promise<Record<string, string>> {
+  const featureKey = typeof featureOrExtraEnv === 'string' ? featureOrExtraEnv : 'utility';
+  const extraEnv = typeof featureOrExtraEnv === 'string' ? extraEnvParam : featureOrExtraEnv;
   const pythonEnv = pythonEnvManager.getPythonEnv();
-  const apiProfileEnv = await getAPIProfileEnv();
-  const oauthModeClearVars = getOAuthModeClearVars(apiProfileEnv);
-  // Get best available Claude profile environment (automatically handles rate limits)
-  const profileResult = getBestAvailableProfileEnv();
-  const profileEnv = profileResult.env;
+  const authResolution = await resolveAuthEnvForFeature(featureKey);
+  const apiProfileEnv = authResolution.apiProfileEnv;
+  const oauthModeClearVars = authResolution.oauthModeClearVars;
+  const profileEnv = authResolution.profileEnv;
 
   // Fetch fresh GitHub token from gh CLI (no caching to reflect account changes)
   const githubToken = await getGitHubTokenForSubprocess();

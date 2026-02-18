@@ -106,7 +106,9 @@
     "reviewMergeStep_verifying": "Vérifier",
     "reviewMergeStep_e2e_testing": "Test E2E",
     "reviewMergeStep_creating_pr": "PR",
-    "reviewMergeStep_merging": "Fusion"
+    "reviewMergeStep_merging": "Fusion",
+    "reviewMergeRecover": "Récupérer",
+    "reviewMergeRecovering": "Récupération..."
   },
   "worktreeCleanup": {
     "title": "Terminer la tâche",

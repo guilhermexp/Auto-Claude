@@ -9,7 +9,7 @@ import { homedir } from 'os';
 import { projectStore } from '../../project-store';
 import { getConfiguredPythonPath, PythonEnvManager, pythonEnvManager as pythonEnvManagerSingleton } from '../../python-env-manager';
 import { getEffectiveSourcePath } from '../../updater/path-resolver';
-import { getBestAvailableProfileEnv } from '../../rate-limit-detector';
+import { resolveAuthEnvForFeature } from '../../auth-profile-routing';
 import { findTaskAndProject } from './shared';
 import { updateRoadmapFeatureOutcome } from '../../utils/roadmap-utils';
 import { parsePythonCommand } from '../../python-detector';
@@ -2038,11 +2038,13 @@ export function registerWorktreeHandlers(
         debug('Working directory:', sourcePath);
 
         // Get profile environment with OAuth token for AI merge resolution
-        const profileResult = getBestAvailableProfileEnv();
-        const profileEnv = profileResult.env;
+        const authResolution = await resolveAuthEnvForFeature('tasks');
+        const profileEnv = authResolution.profileEnv;
         debug('Profile env for merge:', {
           hasOAuthToken: !!profileEnv.CLAUDE_CODE_OAUTH_TOKEN,
-          hasConfigDir: !!profileEnv.CLAUDE_CONFIG_DIR
+          hasConfigDir: !!profileEnv.CLAUDE_CONFIG_DIR,
+          hasApiProfile: Object.keys(authResolution.apiProfileEnv).length > 0,
+          resolvedAccountId: authResolution.resolvedAccountId
         });
 
         return new Promise((resolve) => {
@@ -2064,6 +2066,8 @@ export function registerWorktreeHandlers(
             env: {
               ...getIsolatedGitEnv(),
               ...pythonEnv,
+              ...authResolution.apiProfileEnv,
+              ...authResolution.oauthModeClearVars,
               ...profileEnv,
               PYTHONUNBUFFERED: '1',
               PYTHONUTF8: '1',
@@ -2620,8 +2624,8 @@ export function registerWorktreeHandlers(
         console.warn('[IPC] Running merge preview:', pythonPath, args.join(' '));
 
         // Get profile environment for consistency
-        const previewProfileResult = getBestAvailableProfileEnv();
-        const previewProfileEnv = previewProfileResult.env;
+        const previewAuthResolution = await resolveAuthEnvForFeature('tasks');
+        const previewProfileEnv = previewAuthResolution.profileEnv;
         // Get Python environment for bundled packages
         const previewPythonEnv = pythonEnvManagerSingleton.getPythonEnv();
 
@@ -2630,7 +2634,16 @@ export function registerWorktreeHandlers(
           const [pythonCommand, pythonBaseArgs] = parsePythonCommand(pythonPath);
           const previewProcess = spawn(pythonCommand, [...pythonBaseArgs, ...args], {
             cwd: sourcePath,
-            env: { ...getIsolatedGitEnv(), ...previewPythonEnv, ...previewProfileEnv, PYTHONUNBUFFERED: '1', PYTHONUTF8: '1', DEBUG: 'true' }
+            env: {
+              ...getIsolatedGitEnv(),
+              ...previewPythonEnv,
+              ...previewAuthResolution.apiProfileEnv,
+              ...previewAuthResolution.oauthModeClearVars,
+              ...previewProfileEnv,
+              PYTHONUNBUFFERED: '1',
+              PYTHONUTF8: '1',
+              DEBUG: 'true'
+            }
           });
 
           let stdout = '';
@@ -3258,8 +3271,8 @@ export function registerWorktreeHandlers(
         debug('Working directory:', sourcePath);
 
         // Get profile environment with OAuth token
-        const profileResult = getBestAvailableProfileEnv();
-        const profileEnv = profileResult.env;
+        const authResolution = await resolveAuthEnvForFeature('tasks');
+        const profileEnv = authResolution.profileEnv;
 
         return new Promise((resolve) => {
           let timeoutId: NodeJS.Timeout | null = null;
@@ -3278,6 +3291,8 @@ export function registerWorktreeHandlers(
             env: {
               ...getIsolatedGitEnv(),
               ...pythonEnv,
+              ...authResolution.apiProfileEnv,
+              ...authResolution.oauthModeClearVars,
               ...profileEnv,
               GITHUB_CLI_PATH: ghCliPath,
               PYTHONUNBUFFERED: '1',
@@ -3535,6 +3550,9 @@ export function registerWorktreeHandlers(
         if (options?.skipE2e) {
           args.push('--skip-e2e');
         }
+        if (options?.resume) {
+          args.push('--continue');
+        }
 
         // Add model settings
         const utilitySettings = getUtilitySettings();
@@ -3546,8 +3564,8 @@ export function registerWorktreeHandlers(
         const pythonPath = getConfiguredPythonPath();
         const [pythonCommand, pythonBaseArgs] = parsePythonCommand(pythonPath);
         const pythonEnv = pythonEnvManagerSingleton.getPythonEnv();
-        const profileResult = getBestAvailableProfileEnv();
-        const profileEnv = profileResult.env;
+        const authResolution = await resolveAuthEnvForFeature('tasks');
+        const profileEnv = authResolution.profileEnv;
 
         debug('Running review-merge:', pythonCommand, [...pythonBaseArgs, ...args].join(' '));
 
@@ -3561,6 +3579,8 @@ export function registerWorktreeHandlers(
             env: {
               ...getIsolatedGitEnv(),
               ...pythonEnv,
+              ...authResolution.apiProfileEnv,
+              ...authResolution.oauthModeClearVars,
               ...profileEnv,
               PYTHONUNBUFFERED: '1',
               PYTHONUTF8: '1',

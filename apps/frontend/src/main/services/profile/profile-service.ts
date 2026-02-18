@@ -267,6 +267,41 @@ export async function getAPIProfileEnv(): Promise<Record<string, string>> {
   // Find active profile by activeProfileId
   const profile = file.profiles.find((p) => p.id === file.activeProfileId);
 
+  return buildAPIProfileEnv(profile);
+}
+
+/**
+ * Get environment variables for a specific API profile by ID.
+ *
+ * @param profileId - Target API profile ID, or null/undefined for OAuth mode
+ * @returns Promise<Record<string, string>> Environment variables for selected profile
+ */
+export async function getAPIProfileEnvForProfileId(profileId?: string | null): Promise<Record<string, string>> {
+  if (!profileId) {
+    return {};
+  }
+
+  const file = await loadProfilesFile();
+  const profile = file.profiles.find((p) => p.id === profileId);
+  return buildAPIProfileEnv(profile);
+}
+
+/**
+ * List all API profiles and active profile metadata.
+ */
+export async function getAPIProfilesSnapshot(): Promise<{
+  profiles: APIProfile[];
+  activeProfileId: string | null;
+}> {
+  const file = await loadProfilesFile();
+  return {
+    profiles: file.profiles,
+    activeProfileId: file.activeProfileId
+  };
+}
+
+function buildAPIProfileEnv(profile?: APIProfile): Record<string, string> {
+
   // If profile not found, return empty object (shouldn't happen with valid data)
   if (!profile) {
     return {};

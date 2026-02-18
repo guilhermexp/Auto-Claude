@@ -527,6 +527,7 @@ export interface ReviewMergeOptions {
   prDraft?: boolean;
   skipMerge?: boolean;
   skipE2e?: boolean;
+  resume?: boolean;
 }
 
 export interface ReviewMergeProgressData {

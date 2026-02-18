@@ -185,6 +185,18 @@ export function registerSettingsHandlers(
         needsSave = true;
       }
 
+      // Migration: initialize auth routing defaults for per-feature account selection
+      if (!settings._migratedFeatureAuthRouting) {
+        if (!settings.authRoutingMode) {
+          settings.authRoutingMode = 'global';
+        }
+        if (!settings.featureAuthProfiles) {
+          settings.featureAuthProfiles = {};
+        }
+        settings._migratedFeatureAuthRouting = true;
+        needsSave = true;
+      }
+
       // Migration: Clear CLI tool paths that are from a different platform
       // Fixes issue where Windows paths persisted on macOS (and vice versa)
       // when settings were synced/transferred between platforms

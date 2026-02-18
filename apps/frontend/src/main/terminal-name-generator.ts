@@ -2,10 +2,11 @@ import path from 'path';
 import { existsSync, readFileSync } from 'fs';
 import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
-import { detectRateLimit, createSDKRateLimitInfo, getBestAvailableProfileEnv } from './rate-limit-detector';
+import { detectRateLimit, createSDKRateLimitInfo } from './rate-limit-detector';
 import { parsePythonCommand } from './python-detector';
 import { pythonEnvManager } from './python-env-manager';
 import { getEffectiveSourcePath } from './updater/path-resolver';
+import { resolveAuthEnvForFeature } from './auth-profile-routing';
 
 /**
  * Debug logging - only logs when DEBUG=true or in development mode
@@ -139,17 +140,10 @@ export class TerminalNameGenerator extends EventEmitter {
       hasOAuthToken: !!autoBuildEnv.CLAUDE_CODE_OAUTH_TOKEN
     });
 
-    // Use centralized function that automatically handles rate limits and capacity
-    const profileResult = getBestAvailableProfileEnv();
-    const profileEnv = profileResult.env;
-
-    if (profileResult.wasSwapped) {
-      debug('Using alternative profile for terminal name generation:', {
-        originalProfile: profileResult.originalProfile?.name,
-        selectedProfile: profileResult.profileName,
-        reason: profileResult.swapReason
-      });
-    }
+    const authResolution = await resolveAuthEnvForFeature('utility');
+    const profileEnv = authResolution.profileEnv;
+    const apiProfileEnv = authResolution.apiProfileEnv;
+    const oauthModeClearVars = authResolution.oauthModeClearVars;
 
     return new Promise((resolve) => {
       // Use the venv Python where claude_agent_sdk is installed
@@ -159,6 +153,8 @@ export class TerminalNameGenerator extends EventEmitter {
         env: {
           ...process.env,
           ...autoBuildEnv,
+          ...apiProfileEnv,
+          ...oauthModeClearVars,
           ...profileEnv, // Include active Claude profile config
           PYTHONUNBUFFERED: '1',
           PYTHONIOENCODING: 'utf-8',

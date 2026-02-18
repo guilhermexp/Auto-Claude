@@ -11,10 +11,11 @@ import type {
 import { buildChangelogPrompt, buildGitPrompt, createGenerationScript } from './formatter';
 import { extractChangelog } from './parser';
 import { getCommits, getBranchDiffCommits } from './git-integration';
-import { detectRateLimit, createSDKRateLimitInfo, getBestAvailableProfileEnv } from '../rate-limit-detector';
+import { detectRateLimit, createSDKRateLimitInfo } from '../rate-limit-detector';
 import { parsePythonCommand } from '../python-detector';
 import { getAugmentedEnv } from '../env-utils';
 import { isWindows } from '../platform';
+import { resolveAuthEnvForFeature } from '../auth-profile-routing';
 
 /**
  * Core changelog generation logic
@@ -141,7 +142,7 @@ export class ChangelogGenerator extends EventEmitter {
     this.debug('Spawning Python process...');
 
     // Build environment with explicit critical variables
-    const spawnEnv = this.buildSpawnEnvironment();
+    const spawnEnv = await this.buildSpawnEnvironment();
 
     // Parse Python command to handle space-separated commands like "py -3"
     const [pythonCommand, pythonBaseArgs] = parsePythonCommand(this.pythonPath);
@@ -286,27 +287,31 @@ export class ChangelogGenerator extends EventEmitter {
   /**
    * Build spawn environment with proper PATH and auth settings
    */
-  private buildSpawnEnvironment(): Record<string, string> {
+  private async buildSpawnEnvironment(): Promise<Record<string, string>> {
     const homeDir = os.homedir();
 
     // Use getAugmentedEnv() to ensure common tool paths are available
     // even when app is launched from Finder/Dock
     const augmentedEnv = getAugmentedEnv();
 
-    // Get best available Claude profile environment (automatically handles rate limits)
-    const profileResult = getBestAvailableProfileEnv();
-    const profileEnv = profileResult.env;
+    const authResolution = await resolveAuthEnvForFeature('utility');
+    const profileEnv = authResolution.profileEnv;
+    const apiProfileEnv = authResolution.apiProfileEnv;
+    const oauthModeClearVars = authResolution.oauthModeClearVars;
     this.debug('Active profile environment', {
       hasOAuthToken: !!profileEnv.CLAUDE_CODE_OAUTH_TOKEN,
       hasConfigDir: !!profileEnv.CLAUDE_CONFIG_DIR,
-      authMethod: profileEnv.CLAUDE_CODE_OAUTH_TOKEN ? 'oauth-token' : (profileEnv.CLAUDE_CONFIG_DIR ? 'config-dir' : 'default'),
-      wasSwapped: profileResult.wasSwapped,
-      selectedProfile: profileResult.profileName
+      hasApiProfile: Object.keys(apiProfileEnv).length > 0,
+      authRoutingMode: authResolution.authRoutingMode,
+      resolvedAccountId: authResolution.resolvedAccountId,
+      fallbackUsed: authResolution.fallbackUsed
     });
 
     const spawnEnv: Record<string, string> = {
       ...augmentedEnv,
       ...this.autoBuildEnv,
+      ...apiProfileEnv,
+      ...oauthModeClearVars,
       ...profileEnv, // Include active Claude profile config
       // Ensure critical env vars are set for claude CLI
       // Use USERPROFILE on Windows, HOME on Unix

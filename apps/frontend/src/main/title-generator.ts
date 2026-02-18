@@ -2,11 +2,10 @@ import path from 'path';
 import { existsSync, readFileSync } from 'fs';
 import { spawn } from 'child_process';
 import { EventEmitter } from 'events';
-import { detectRateLimit, createSDKRateLimitInfo, getBestAvailableProfileEnv } from './rate-limit-detector';
+import { detectRateLimit, createSDKRateLimitInfo } from './rate-limit-detector';
 import { parsePythonCommand, getValidatedPythonPath } from './python-detector';
 import { pythonEnvManager, getConfiguredPythonPath } from './python-env-manager';
-import { getAPIProfileEnv } from './services/profile';
-import { getOAuthModeClearVars } from './agent/env-utils';
+import { resolveAuthEnvForFeature } from './auth-profile-routing';
 import { getEffectiveSourcePath } from './updater/path-resolver';
 import { getSentryEnvForSubprocess, safeBreadcrumb, safeCaptureException } from './sentry';
 import { maskUserPaths } from '../shared/utils/sentry-privacy';
@@ -155,35 +154,19 @@ export class TitleGenerator extends EventEmitter {
       hasOAuthToken: !!autoBuildEnv.CLAUDE_CODE_OAUTH_TOKEN
     });
 
-    // Get active API profile environment variables (ANTHROPIC_* vars)
-    const apiProfileEnv = await getAPIProfileEnv();
+    const authResolution = await resolveAuthEnvForFeature('utility');
+    const apiProfileEnv = authResolution.apiProfileEnv;
+    const profileEnv = authResolution.profileEnv;
+    const oauthModeClearVars = authResolution.oauthModeClearVars;
     const isApiProfileActive = Object.keys(apiProfileEnv).length > 0;
 
-    // Only get OAuth profile env if no API profile is active to avoid conflicts
-    let profileEnv: Record<string, string> = {};
-    if (!isApiProfileActive) {
-      // Use centralized function that automatically handles rate limits and capacity
-      const profileResult = getBestAvailableProfileEnv();
-      profileEnv = profileResult.env;
-
-      if (profileResult.wasSwapped) {
-        debug('Using alternative profile for title generation:', {
-          originalProfile: profileResult.originalProfile?.name,
-          selectedProfile: profileResult.profileName,
-          reason: profileResult.swapReason
-        });
-      }
-    }
-
-    // Get OAuth mode clearing vars (clears stale ANTHROPIC_* vars when in OAuth mode)
-    const oauthModeClearVars = getOAuthModeClearVars(apiProfileEnv);
-
     // Debug: Log the final environment that will be used
-    // Note: profileEnv from getBestAvailableProfileEnv() already includes CLAUDE_CODE_OAUTH_TOKEN=''
-    // when CLAUDE_CONFIG_DIR is set, ensuring the subprocess uses the correct credentials
     debug('Final subprocess environment:', {
       profileEnvCLAUDE_CONFIG_DIR: profileEnv.CLAUDE_CONFIG_DIR,
-      profileEnvClearsOAuthToken: profileEnv.CLAUDE_CODE_OAUTH_TOKEN === ''
+      profileEnvClearsOAuthToken: profileEnv.CLAUDE_CODE_OAUTH_TOKEN === '',
+      authRoutingMode: authResolution.authRoutingMode,
+      resolvedAccountId: authResolution.resolvedAccountId,
+      fallbackUsed: authResolution.fallbackUsed
     });
 
     // Resolve Python path and check env readiness

@@ -1489,7 +1489,7 @@ async function runPRReview(
   const logCollector = new PRLogCollector(project, prNumber, repo, false, mainWindow);
 
   // Build environment with project settings
-  const subprocessEnv = await getRunnerEnv(getClaudeMdEnv(project));
+  const subprocessEnv = await getRunnerEnv('githubPrs', getClaudeMdEnv(project));
 
   // Create operation ID for this review
   const reviewKey = getReviewKey(project.id, prNumber);
@@ -3005,7 +3005,7 @@ export function registerPRHandlers(getMainWindow: () => BrowserWindow | null): v
           const logCollector = new PRLogCollector(project, prNumber, repo, true, mainWindow);
 
           // Build environment with project settings
-          const followupEnv = await getRunnerEnv(getClaudeMdEnv(project));
+          const followupEnv = await getRunnerEnv('githubPrs', getClaudeMdEnv(project));
 
           const { process: childProcess, promise } = runPythonSubprocess<PRReviewResult>({
             pythonPath: getPythonPath(backendPath),

@@ -13,8 +13,7 @@ import { AgentEvents } from './agent-events';
 import { ProcessType, ExecutionProgressData } from './types';
 import type { CompletablePhase } from '../../shared/constants/phase-protocol';
 import { parseTaskEvent } from './task-event-parser';
-import { detectRateLimit, createSDKRateLimitInfo, getBestAvailableProfileEnv, detectAuthFailure } from '../rate-limit-detector';
-import { getAPIProfileEnv } from '../services/profile';
+import { detectRateLimit, createSDKRateLimitInfo, detectAuthFailure } from '../rate-limit-detector';
 import { projectStore } from '../project-store';
 import { getClaudeProfileManager } from '../claude-profile-manager';
 import { parsePythonCommand, validatePythonPath } from '../python-detector';
@@ -22,11 +21,12 @@ import { pythonEnvManager, getConfiguredPythonPath } from '../python-env-manager
 import { buildMemoryEnvVars } from '../memory-env-builder';
 import { readSettingsFile } from '../settings-utils';
 import type { AppSettings } from '../../shared/types/settings';
-import { getOAuthModeClearVars, NESTED_SESSION_VARS_TO_DELETE } from './env-utils';
+import { NESTED_SESSION_VARS_TO_DELETE } from './env-utils';
 import { getAugmentedEnv } from '../env-utils';
 import { getToolInfo, getClaudeCliPathForSdk } from '../cli-tool-manager';
 import { killProcessGracefully, isWindows } from '../platform';
 import { debugLog } from '../../shared/utils/debug-logger';
+import { resolveAuthEnvForFeature } from '../auth-profile-routing';
 
 /**
  * Type for supported CLI tools
@@ -174,14 +174,10 @@ export class AgentProcessManager {
   }
 
   private setupProcessEnvironment(
-    extraEnv: Record<string, string>
+    extraEnv: Record<string, string>,
+    profileEnv: Record<string, string>
   ): NodeJS.ProcessEnv {
-    // Get best available Claude profile environment (automatically handles rate limits)
-    const profileResult = getBestAvailableProfileEnv();
-    const profileEnv = profileResult.env;
-
     debugLog('[AgentProcess:setupEnv] Profile result:', {
-      profileId: profileResult.profileId,
       hasOAuthToken: !!profileEnv.CLAUDE_CODE_OAUTH_TOKEN,
       hasApiKey: !!profileEnv.ANTHROPIC_API_KEY,
       hasConfigDir: !!profileEnv.CLAUDE_CONFIG_DIR,
@@ -632,22 +628,14 @@ export class AgentProcessManager {
       spawnId
     });
 
-    const env = this.setupProcessEnvironment(extraEnv);
+    const authResolution = await resolveAuthEnvForFeature('tasks');
+    const env = this.setupProcessEnvironment(extraEnv, authResolution.profileEnv);
 
     // Get Python environment (PYTHONPATH for bundled packages, etc.)
     const pythonEnv = pythonEnvManager.getPythonEnv();
 
-    // Get active API profile environment variables
-    let apiProfileEnv: Record<string, string> = {};
-    try {
-      apiProfileEnv = await getAPIProfileEnv();
-    } catch (error) {
-      console.error('[Agent Process] Failed to get API profile env:', error);
-      // Continue with empty profile env (falls back to OAuth mode)
-    }
-
-    // Get OAuth mode clearing vars (clears stale ANTHROPIC_* vars when in OAuth mode)
-    const oauthModeClearVars = getOAuthModeClearVars(apiProfileEnv);
+    const apiProfileEnv = authResolution.apiProfileEnv;
+    const oauthModeClearVars = authResolution.oauthModeClearVars;
 
     // Defensive cleanup: if a config dir is set, force SDK auth resolution via that dir.
     // getBestAvailableProfileEnv() already does this, but we keep a local guard here.

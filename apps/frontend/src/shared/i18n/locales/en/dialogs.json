@@ -131,7 +131,9 @@
     "reviewMergeStep_verifying": "Verify",
     "reviewMergeStep_e2e_testing": "E2E Test",
     "reviewMergeStep_creating_pr": "PR",
-    "reviewMergeStep_merging": "Merge"
+    "reviewMergeStep_merging": "Merge",
+    "reviewMergeRecover": "Recover",
+    "reviewMergeRecovering": "Recovering..."
   },
   "worktreeCleanup": {
     "title": "Complete Task",

@@ -55,6 +55,10 @@ export const DEFAULT_APP_SETTINGS = {
   globalOpenAIApiKey: undefined as string | undefined,
   // Selected agent profile - defaults to 'auto' for per-phase optimized model selection
   selectedAgentProfile: 'auto',
+  // Authentication routing mode - global keeps current behavior for all features
+  authRoutingMode: 'global' as const,
+  // Per-feature authentication account mapping (oauth-{id} or api-{id})
+  featureAuthProfiles: {},
   // Changelog preferences (persisted between sessions)
   changelogFormat: 'keep-a-changelog' as const,
   changelogAudience: 'user-facing' as const,

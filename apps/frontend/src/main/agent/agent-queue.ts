@@ -8,9 +8,7 @@ import { AgentProcessManager } from './agent-process';
 import { RoadmapConfig } from './types';
 import type { IdeationConfig, Idea } from '../../shared/types';
 import { AUTO_BUILD_PATHS } from '../../shared/constants';
-import { detectRateLimit, createSDKRateLimitInfo, getBestAvailableProfileEnv } from '../rate-limit-detector';
-import { getAPIProfileEnv } from '../services/profile';
-import { getOAuthModeClearVars } from './env-utils';
+import { detectRateLimit, createSDKRateLimitInfo } from '../rate-limit-detector';
 import { debugLog, debugError } from '../../shared/utils/debug-logger';
 import { stripAnsiCodes } from '../../shared/utils/ansi-sanitizer';
 import { parsePythonCommand } from '../python-detector';
@@ -21,6 +19,7 @@ import type { RawIdea } from '../ipc-handlers/ideation/types';
 import { getPathDelimiter } from '../platform';
 import { debounce } from '../utils/debounce';
 import { writeFileWithRetry } from '../utils/atomic-file';
+import { resolveAuthEnvForFeature } from '../auth-profile-routing';
 
 /** Maximum length for status messages displayed in progress UI */
 const STATUS_MESSAGE_MAX_LENGTH = 200;
@@ -351,15 +350,10 @@ export class AgentQueueManager {
     // Get combined environment variables
     const combinedEnv = this.processManager.getCombinedEnv(projectPath);
 
-    // Get best available Claude profile environment (automatically handles rate limits)
-    const profileResult = getBestAvailableProfileEnv();
-    const profileEnv = profileResult.env;
-
-    // Get active API profile environment variables
-    const apiProfileEnv = await getAPIProfileEnv();
-
-    // Get OAuth mode clearing vars (clears stale ANTHROPIC_* vars when in OAuth mode)
-    const oauthModeClearVars = getOAuthModeClearVars(apiProfileEnv);
+    const authResolution = await resolveAuthEnvForFeature('roadmap');
+    const profileEnv = authResolution.profileEnv;
+    const apiProfileEnv = authResolution.apiProfileEnv;
+    const oauthModeClearVars = authResolution.oauthModeClearVars;
 
     // Get Python path from process manager (uses venv if configured)
     const pythonPath = this.processManager.getPythonPath();
@@ -684,15 +678,10 @@ export class AgentQueueManager {
     // Get combined environment variables
     const combinedEnv = this.processManager.getCombinedEnv(projectPath);
 
-    // Get best available Claude profile environment (automatically handles rate limits)
-    const profileResult = getBestAvailableProfileEnv();
-    const profileEnv = profileResult.env;
-
-    // Get active API profile environment variables
-    const apiProfileEnv = await getAPIProfileEnv();
-
-    // Get OAuth mode clearing vars (clears stale ANTHROPIC_* vars when in OAuth mode)
-    const oauthModeClearVars = getOAuthModeClearVars(apiProfileEnv);
+    const authResolution = await resolveAuthEnvForFeature('ideation');
+    const profileEnv = authResolution.profileEnv;
+    const apiProfileEnv = authResolution.apiProfileEnv;
+    const oauthModeClearVars = authResolution.oauthModeClearVars;
 
     // Get Python path from process manager (uses venv if configured)
     const pythonPath = this.processManager.getPythonPath();

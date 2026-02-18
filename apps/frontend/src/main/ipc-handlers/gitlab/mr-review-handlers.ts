@@ -218,7 +218,7 @@ async function runMRReview(
   debugLog('Spawning MR review process', { args, model, thinkingLevel });
 
   // Get runner environment with PYTHONPATH for bundled packages (fixes #139)
-  const subprocessEnv = await getRunnerEnv();
+  const subprocessEnv = await getRunnerEnv('githubPrs');
 
   const { process: childProcess, promise } = runPythonSubprocess<MRReviewResult>({
     pythonPath: getPythonPath(backendPath),
@@ -831,7 +831,7 @@ export function registerMRReviewHandlers(
           debugLog('Spawning follow-up review process', { args, model, thinkingLevel });
 
           // Get runner environment with PYTHONPATH for bundled packages (fixes #139)
-          const followupSubprocessEnv = await getRunnerEnv();
+          const followupSubprocessEnv = await getRunnerEnv('githubPrs');
 
           const { process: childProcess, promise } = runPythonSubprocess<MRReviewResult>({
             pythonPath: getPythonPath(backendPath),

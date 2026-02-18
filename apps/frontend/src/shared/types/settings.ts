@@ -233,6 +233,18 @@ export interface FeatureThinkingConfig {
   utility: ThinkingLevel;
 }
 
+export type AuthRoutingMode = 'global' | 'per_feature';
+
+export interface FeatureAuthProfileConfig {
+  tasks?: string;
+  insights?: string;
+  ideation?: string;
+  roadmap?: string;
+  githubIssues?: string;
+  githubPrs?: string;
+  utility?: string;
+}
+
 // Agent profile for preset model/thinking configurations
 // All profiles have per-phase configuration (phaseModels/phaseThinking)
 export interface AgentProfile {
@@ -307,6 +319,10 @@ export interface AppSettings {
   // Feature-specific configuration (insights, ideation, roadmap)
   featureModels?: FeatureModelConfig;
   featureThinking?: FeatureThinkingConfig;
+  // Authentication routing configuration
+  authRoutingMode?: AuthRoutingMode;
+  // Unified account IDs: oauth-{claudeProfileId} | api-{apiProfileId}
+  featureAuthProfiles?: FeatureAuthProfileConfig;
   // Changelog preferences
   changelogFormat?: ChangelogFormat;
   changelogAudience?: ChangelogAudience;
@@ -321,6 +337,7 @@ export interface AppSettings {
   _migratedAgentProfileToAuto?: boolean;
   _migratedDefaultModelSync?: boolean;
   _migratedUltrathinkToHigh?: boolean;
+  _migratedFeatureAuthRouting?: boolean;
   // Language preference for UI (i18n)
   language?: SupportedLanguage;
   // Developer tools preferences

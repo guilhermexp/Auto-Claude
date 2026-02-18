@@ -1,13 +1,11 @@
 import path from 'path';
 import { existsSync, readFileSync } from 'fs';
-import { getBestAvailableProfileEnv } from '../rate-limit-detector';
-import { getAPIProfileEnv } from '../services/profile';
-import { getOAuthModeClearVars } from '../agent/env-utils';
 import { pythonEnvManager, getConfiguredPythonPath } from '../python-env-manager';
 import { getValidatedPythonPath } from '../python-detector';
 import { getAugmentedEnv } from '../env-utils';
 import { getEffectiveSourcePath } from '../updater/path-resolver';
 import { isWindows } from '../platform';
+import { resolveAuthEnvForFeature } from '../auth-profile-routing';
 
 /**
  * Configuration manager for insights service
@@ -109,11 +107,10 @@ export class InsightsConfig {
    */
   async getProcessEnv(): Promise<Record<string, string>> {
     const autoBuildEnv = this.loadAutoBuildEnv();
-    // Get best available Claude profile environment (automatically handles rate limits)
-    const profileResult = getBestAvailableProfileEnv();
-    const profileEnv = profileResult.env;
-    const apiProfileEnv = await getAPIProfileEnv();
-    const oauthModeClearVars = getOAuthModeClearVars(apiProfileEnv);
+    const authResolution = await resolveAuthEnvForFeature('insights');
+    const profileEnv = authResolution.profileEnv;
+    const apiProfileEnv = authResolution.apiProfileEnv;
+    const oauthModeClearVars = authResolution.oauthModeClearVars;
     const pythonEnv = pythonEnvManager.getPythonEnv();
     const autoBuildSource = this.getAutoBuildSourcePath();
     const pythonPathParts = (pythonEnv.PYTHONPATH ?? '')
