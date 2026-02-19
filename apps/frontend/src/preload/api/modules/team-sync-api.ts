@@ -4,6 +4,7 @@ import type { TeamSyncMember, TeamSyncStatus, TeamSyncTeam, TeamSyncUpdate } fro
 import { createIpcListener, invokeIpc, type IpcListenerCleanup } from './ipc-utils';
 
 export interface TeamSyncAPI {
+  initialize: () => Promise<IPCResult<TeamSyncStatus>>;
   signup: (email: string, name: string, password: string) => Promise<IPCResult>;
   signin: (email: string, password: string) => Promise<IPCResult>;
   signout: () => Promise<IPCResult>;
@@ -22,6 +23,8 @@ export interface TeamSyncAPI {
 }
 
 export const createTeamSyncAPI = (): TeamSyncAPI => ({
+  initialize: () =>
+    invokeIpc<IPCResult<TeamSyncStatus>>(IPC_CHANNELS.TEAM_SYNC_INITIALIZE),
   signup: (email: string, name: string, password: string) =>
     invokeIpc<IPCResult>(IPC_CHANNELS.TEAM_SYNC_SIGNUP, email, name, password),
   signin: (email: string, password: string) =>

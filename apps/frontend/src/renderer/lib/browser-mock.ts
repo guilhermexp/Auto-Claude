@@ -259,6 +259,16 @@ const browserMockAPI: ElectronAPI = {
   },
 
   teamSync: {
+    initialize: async () => ({
+      success: true,
+      data: {
+        connected: false,
+        authenticated: true,
+        syncedProjects: [],
+        pendingChanges: 0,
+        mode: 'disabled' as const
+      }
+    }),
     signup: async () => ({ success: true }),
     signin: async () => ({ success: true }),
     signout: async () => ({ success: true }),

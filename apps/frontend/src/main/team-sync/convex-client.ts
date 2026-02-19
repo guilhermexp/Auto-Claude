@@ -25,6 +25,8 @@ export class TeamSyncConvexClient {
   private connected = false;
   private authToken: string | undefined; // Better Auth session token (for HTTP auth requests)
   private convexJwt: string | undefined; // Convex JWT (for Convex SDK setAuth)
+  private jwtRefreshTimer: ReturnType<typeof setInterval> | null = null;
+  private static readonly JWT_REFRESH_INTERVAL_MS = 45 * 60 * 1000; // 45 minutes
 
   constructor(url?: string) {
     this.url = url || CONVEX_URL;
@@ -51,6 +53,10 @@ export class TeamSyncConvexClient {
   }
 
   async disconnect(): Promise<void> {
+    if (this.jwtRefreshTimer) {
+      clearInterval(this.jwtRefreshTimer);
+      this.jwtRefreshTimer = null;
+    }
     if (this.wsClient) {
       await this.wsClient.close();
       this.wsClient = null;
@@ -67,6 +73,10 @@ export class TeamSyncConvexClient {
     this.authToken = token;
     if (!token) {
       this.convexJwt = undefined;
+      if (this.jwtRefreshTimer) {
+        clearInterval(this.jwtRefreshTimer);
+        this.jwtRefreshTimer = null;
+      }
       if (this.wsClient) {
         this.wsClient.setAuth(() => Promise.resolve(null));
       }
@@ -81,13 +91,10 @@ export class TeamSyncConvexClient {
     if (!this.authToken) return;
 
     try {
-      const url = `${this.siteUrl}/api/auth/convex/token`;
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${this.authToken}`,
-        },
-      });
+      // Use authRequest to include Content-Type header — Better Auth's
+      // /api/auth/convex/token endpoint has requireHeaders: true which
+      // rejects requests without Content-Type or X-Better-Auth-Action.
+      const response = await this.authRequest("/api/auth/convex/token", undefined, "GET");
 
       if (!response.ok) {
         console.warn("[team-sync] Failed to fetch Convex token:", response.status, await response.text());
@@ -107,6 +114,13 @@ export class TeamSyncConvexClient {
       }
       if (this.httpClient) {
         this.httpClient.setAuth(this.convexJwt);
+      }
+
+      // Schedule periodic JWT refresh
+      if (!this.jwtRefreshTimer) {
+        this.jwtRefreshTimer = setInterval(() => {
+          void this.fetchAndSetConvexToken();
+        }, TeamSyncConvexClient.JWT_REFRESH_INTERVAL_MS);
       }
     } catch (error) {
       console.warn("[team-sync] Error fetching Convex token:", error);

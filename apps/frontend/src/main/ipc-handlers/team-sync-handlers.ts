@@ -27,6 +27,17 @@ export function registerTeamSyncHandlers(getMainWindow: () => BrowserWindow | nu
   };
   tryWireEvents();
 
+  ipcMain.handle(IPC_CHANNELS.TEAM_SYNC_INITIALIZE, async (): Promise<IPCResult<TeamSyncStatus>> => {
+    try {
+      const teamSync = requireService();
+      await teamSync.initialize();
+      tryWireEvents();
+      return { success: true, data: teamSync.getSyncStatus() };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to initialize' };
+    }
+  });
+
   ipcMain.handle(IPC_CHANNELS.TEAM_SYNC_SIGNUP, async (_, email: string, name: string, password: string): Promise<IPCResult> => {
     try {
       const teamSync = requireService();

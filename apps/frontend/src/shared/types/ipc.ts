@@ -957,6 +957,7 @@ export interface ElectronAPI {
 
   // Team Sync API
   teamSync: {
+    initialize: () => Promise<IPCResult<TeamSyncStatus>>;
     signup: (email: string, name: string, password: string) => Promise<IPCResult>;
     signin: (email: string, password: string) => Promise<IPCResult>;
     signout: () => Promise<IPCResult>;

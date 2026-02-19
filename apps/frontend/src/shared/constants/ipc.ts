@@ -612,5 +612,6 @@ export const IPC_CHANNELS = {
   TEAM_SYNC_DISABLE: 'team-sync:disable',
   TEAM_SYNC_FORCE_PUSH: 'team-sync:force-push',
   TEAM_SYNC_FORCE_PULL: 'team-sync:force-pull',
-  TEAM_SYNC_UPDATE: 'team-sync:update'
+  TEAM_SYNC_UPDATE: 'team-sync:update',
+  TEAM_SYNC_INITIALIZE: 'team-sync:initialize'
 } as const;

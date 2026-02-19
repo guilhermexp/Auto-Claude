@@ -68,5 +68,9 @@
   "events": {
     "title": "Últimos eventos",
     "noEvents": "Nenhum evento ainda."
+  },
+  "gate": {
+    "title": "Auto Claude",
+    "subtitle": "Entre na sua conta para continuar"
   }
 }

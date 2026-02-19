@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Users, CloudOff } from 'lucide-react';
 import {
@@ -9,22 +9,12 @@ import {
 } from './ui/tooltip';
 import { Button } from './ui/button';
 import { useTeamSyncStore } from '../stores/team-sync-store';
-import { useSettingsStore } from '../stores/settings-store';
 import { TeamSyncAuthModal } from './TeamSyncAuthModal';
 
 export function TeamSyncButton() {
   const { t } = useTranslation(['team', 'common']);
-  const { status, initialized, initialize } = useTeamSyncStore();
-  const teamSyncEnabled = useSettingsStore((s) => s.settings?.teamSyncEnabled);
+  const { status } = useTeamSyncStore();
   const [showAuthModal, setShowAuthModal] = useState(false);
-
-  useEffect(() => {
-    if (teamSyncEnabled && !initialized) {
-      initialize();
-    }
-  }, [teamSyncEnabled, initialized, initialize]);
-
-  if (!teamSyncEnabled) return null;
 
   const isAuthenticated = status.authenticated;
   const isConnected = status.connected;

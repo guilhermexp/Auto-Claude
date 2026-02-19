@@ -9,6 +9,7 @@ interface TeamSyncState {
   isLoading: boolean;
   error: string | null;
   initialized: boolean;
+  authChecked: boolean;
 
   initialize: () => Promise<void>;
   fetchStatus: () => Promise<void>;
@@ -44,6 +45,7 @@ export const useTeamSyncStore = create<TeamSyncState>((set, get) => ({
   isLoading: false,
   error: null,
   initialized: false,
+  authChecked: false,
 
   initialize: async () => {
     if (get().initialized) return;
@@ -56,7 +58,16 @@ export const useTeamSyncStore = create<TeamSyncState>((set, get) => ({
     });
 
     set({ initialized: true });
-    await get().fetchStatus();
+
+    // Call the main-process initialize which restores session from Keychain
+    const result = await window.electronAPI.teamSync.initialize();
+    if (result.success && result.data) {
+      set({ status: result.data, authChecked: true, error: null });
+    } else {
+      // Session restore failed or no session — mark as checked
+      set({ authChecked: true });
+      await get().fetchStatus();
+    }
   },
 
   fetchStatus: async () => {
@@ -90,7 +101,7 @@ export const useTeamSyncStore = create<TeamSyncState>((set, get) => ({
 
   signout: async () => {
     await window.electronAPI.teamSync.signout();
-    set({ status: EMPTY_STATUS, teams: [], members: [], error: null });
+    set({ status: EMPTY_STATUS, teams: [], members: [], error: null, authChecked: true });
   },
 
   createTeam: async (name) => {

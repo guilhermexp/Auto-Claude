@@ -91,6 +91,8 @@ export class TeamSyncService extends EventEmitter {
   async initialize(): Promise<void> {
     this.credentials = loadTeamSyncCredentials();
     if (this.credentials?.sessionToken) {
+      // Set auth token BEFORE calling get-session so the Authorization header is included
+      this.convex.setAuthToken(this.credentials.sessionToken);
       try {
         // Validate session against Better Auth
         const response = await this.convex.authRequest(
@@ -101,7 +103,6 @@ export class TeamSyncService extends EventEmitter {
         if (response.ok) {
           const session = await response.json() as { user?: { id: string; email: string; name?: string } };
           if (session?.user) {
-            this.convex.setAuthToken(this.credentials.sessionToken);
             await this.convex.fetchAndSetConvexToken();
             await this.convex.connect();
             this.status = {
@@ -124,7 +125,8 @@ export class TeamSyncService extends EventEmitter {
       } catch (error) {
         console.warn('[team-sync] Failed to restore session:', error);
       }
-      // Session invalid, clear it
+      // Session invalid, clear auth token and credentials
+      this.convex.setAuthToken(undefined);
       this.credentials.sessionToken = '';
       saveTeamSyncCredentials(this.credentials);
     }

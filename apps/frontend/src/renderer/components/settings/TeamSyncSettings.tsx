@@ -5,7 +5,6 @@ import { SettingsCard } from './SettingsCard';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import { Switch } from '../ui/switch';
 import { Badge } from '../ui/badge';
 import type { AppSettings } from '../../../shared/types';
 import { useTeamSyncStore } from '../../stores/team-sync-store';
@@ -62,7 +61,6 @@ export function TeamSyncSettings({ settings, onSettingsChange, onSave, isSaving,
 
   const rawError = syncError || error;
   const combinedError = rawError?.startsWith('team:') ? t(rawError) : rawError;
-  const isEnabled = settings.teamSyncEnabled ?? false;
   const isAuthenticated = status.authenticated;
 
   return (
@@ -74,23 +72,7 @@ export function TeamSyncSettings({ settings, onSettingsChange, onSave, isSaving,
       error={combinedError}
     >
       <div className="space-y-5">
-        {/* Feature flag toggle */}
-        <div className="flex items-center justify-between rounded-md border border-border/60 bg-card/40 p-3">
-          <div className="space-y-1">
-            <Label className="text-sm">{t('team:settings.featureFlag')}</Label>
-            <p className="text-xs text-muted-foreground">
-              {t('team:settings.featureFlagDescription')}
-            </p>
-          </div>
-          <Switch
-            checked={isEnabled}
-            onCheckedChange={(checked) => onSettingsChange({ ...settings, teamSyncEnabled: checked })}
-          />
-        </div>
-
-        {!isEnabled ? (
-          <p className="text-sm text-muted-foreground">{t('team:settings.disabledMessage')}</p>
-        ) : !isAuthenticated ? (
+        {!isAuthenticated ? (
           /* Not authenticated — prompt to sign in */
           <div className="flex flex-col items-center gap-4 rounded-md border border-border/60 bg-card/40 p-6">
             <Users className="h-10 w-10 text-muted-foreground" />
