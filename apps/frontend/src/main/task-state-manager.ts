@@ -11,6 +11,7 @@ import { findTaskWorktree } from './worktree-paths';
 import { getSpecsDir, AUTO_BUILD_PATHS } from '../shared/constants';
 import { existsSync } from 'fs';
 import path from 'path';
+import { getTeamSyncService } from './team-sync/team-sync-service';
 
 type TaskActor = ActorRefFrom<typeof taskMachine>;
 
@@ -305,6 +306,17 @@ export class TaskStateManager {
   ): void {
     const mainPlanPath = getPlanPath(project, task);
     persistPlanStatusAndReasonSync(mainPlanPath, status, reviewReason, project.id, xstateState, executionPhase);
+
+    // Push task status change to Team Sync
+    const teamSync = getTeamSyncService();
+    if (teamSync?.isSyncEnabled(project.id)) {
+      teamSync.pushTaskUpdate(project.id, task.specId, {
+        status,
+        reviewReason,
+        xstateState,
+        executionPhase,
+      }).catch(() => {});
+    }
 
     const worktreePath = findTaskWorktree(project.path, task.specId);
     if (!worktreePath) return;

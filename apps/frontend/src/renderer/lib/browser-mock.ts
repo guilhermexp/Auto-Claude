@@ -258,6 +258,40 @@ const browserMockAPI: ElectronAPI = {
     onQueueBlockedNoProfiles: () => () => {}
   },
 
+  teamSync: {
+    signup: async () => ({ success: true }),
+    signin: async () => ({ success: true }),
+    signout: async () => ({ success: true }),
+    getStatus: async () => ({
+      success: true,
+      data: {
+        connected: false,
+        authenticated: false,
+        syncedProjects: [],
+        pendingChanges: 0,
+        mode: 'disabled' as const
+      }
+    }),
+    createTeam: async (name: string) => ({
+      success: true,
+      data: {
+        id: `mock-team-${Date.now()}`,
+        name,
+        role: 'owner' as const
+      }
+    }),
+    joinTeam: async () => ({ success: true }),
+    getTeams: async () => ({ success: true, data: [] }),
+    getMembers: async () => ({ success: true, data: [] }),
+    removeMember: async () => ({ success: true }),
+    generateInviteCode: async () => ({ success: true, data: 'MOCK1234' }),
+    enable: async () => ({ success: true }),
+    disable: async () => ({ success: true }),
+    forcePush: async () => ({ success: true }),
+    forcePull: async () => ({ success: true }),
+    onUpdate: () => () => {}
+  },
+
   // Claude Code Operations
   checkClaudeCodeVersion: async () => ({
     success: true,

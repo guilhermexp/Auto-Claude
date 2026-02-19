@@ -1,0 +1,72 @@
+{
+  "settings": {
+    "title": "Team Sync",
+    "description": "Sincronização em tempo real com autenticação de equipe (Convex + Better Auth).",
+    "featureFlag": "Ativar Team Sync (feature flag)",
+    "featureFlagDescription": "Rollout progressivo: Tasks + Roadmap primeiro, depois Ideation/Insights.",
+    "disabledMessage": "Ative a flag para habilitar autenticação e sincronização de equipe.",
+    "signInRequired": "Faça login na sua conta Team Sync para criar ou entrar em um time e começar a sincronizar."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Senha",
+    "name": "Nome",
+    "signIn": "Entrar",
+    "signOut": "Sair",
+    "signUp": "Cadastrar",
+    "noAccount": "Ainda não tem conta?",
+    "hasAccount": "Já tem uma conta?"
+  },
+  "status": {
+    "connected": "Conectado",
+    "disconnected": "Desconectado",
+    "authenticated": "Autenticado",
+    "guest": "Visitante",
+    "team": "Time",
+    "projectsSynced": "Projetos sincronizados",
+    "pending": "Pendente",
+    "connectedToTeam": "Conectado a {{team}}"
+  },
+  "manage": {
+    "createTeam": "Criar time",
+    "teamName": "Nome do time",
+    "create": "Criar",
+    "joinTeam": "Entrar com código de convite",
+    "join": "Entrar",
+    "teams": "Times",
+    "noTeams": "Sem times conectados.",
+    "members": "Membros (time ativo)",
+    "noMembers": "Sem membros carregados."
+  },
+  "sync": {
+    "currentProject": "Projeto atual",
+    "selectProject": "Selecione um projeto para habilitar sync",
+    "enableSync": "Ativar Sync",
+    "disableSync": "Desativar",
+    "forcePush": "Force Push",
+    "forcePull": "Force Pull"
+  },
+  "errors": {
+    "loadStatus": "Falha ao carregar status do Team Sync",
+    "signup": "Falha ao cadastrar",
+    "signin": "Falha ao entrar",
+    "createTeam": "Falha ao criar time",
+    "joinTeam": "Falha ao entrar no time",
+    "loadTeams": "Falha ao carregar times",
+    "loadMembers": "Falha ao carregar membros",
+    "enableSync": "Falha ao ativar sincronização",
+    "disableSync": "Falha ao desativar sincronização",
+    "forcePush": "Falha ao executar force push",
+    "forcePull": "Falha ao executar force pull"
+  },
+  "mode": {
+    "disabled": "Desativado",
+    "idle": "Inativo",
+    "syncing": "Sincronizando",
+    "error": "Erro"
+  },
+  "events": {
+    "title": "Últimos eventos",
+    "noEvents": "Nenhum evento ainda."
+  }
+}

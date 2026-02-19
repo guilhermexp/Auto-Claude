@@ -144,6 +144,7 @@ import type {
   GitLabNewCommitsCheck
 } from './integrations';
 import type { APIProfile, ProfilesFile, TestConnectionResult, DiscoverModelsResult } from './profile';
+import type { TeamSyncMember, TeamSyncStatus, TeamSyncTeam, TeamSyncUpdate } from './team-sync';
 
 // ============================================
 // Branch Types
@@ -953,6 +954,25 @@ export interface ElectronAPI {
 
   // Queue Routing API (rate limit recovery)
   queue: import('../../preload/api/queue-api').QueueAPI;
+
+  // Team Sync API
+  teamSync: {
+    signup: (email: string, name: string, password: string) => Promise<IPCResult>;
+    signin: (email: string, password: string) => Promise<IPCResult>;
+    signout: () => Promise<IPCResult>;
+    getStatus: () => Promise<IPCResult<TeamSyncStatus>>;
+    createTeam: (name: string) => Promise<IPCResult<TeamSyncTeam>>;
+    joinTeam: (inviteCode: string) => Promise<IPCResult>;
+    getTeams: () => Promise<IPCResult<TeamSyncTeam[]>>;
+    getMembers: (teamId: string) => Promise<IPCResult<TeamSyncMember[]>>;
+    removeMember: (teamId: string, memberId: string) => Promise<IPCResult>;
+    generateInviteCode: (teamId: string) => Promise<IPCResult<string>>;
+    enable: (projectId: string, projectPath: string) => Promise<IPCResult>;
+    disable: (projectId: string) => Promise<IPCResult>;
+    forcePush: (projectId: string) => Promise<IPCResult>;
+    forcePull: (projectId: string) => Promise<IPCResult>;
+    onUpdate: (callback: (update: TeamSyncUpdate) => void) => () => void;
+  };
 }
 
 /** Platform information exposed via contextBridge for platform-specific behavior */

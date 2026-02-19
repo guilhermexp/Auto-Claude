@@ -18,6 +18,7 @@ import { findTaskWorktree } from "../worktree-paths";
 import { findTaskAndProject } from "./task/shared";
 import { safeSendToRenderer } from "./utils";
 import { getClaudeProfileManager } from "../claude-profile-manager";
+import { getTeamSyncService } from "../team-sync/team-sync-service";
 import { taskStateManager } from "../task-state-manager";
 
 /**
@@ -95,6 +96,17 @@ export function registerAgenteventsHandlers(
     const exitProjectId = exitProject?.id || projectId;
 
     taskStateManager.handleProcessExited(taskId, code, exitTask, exitProject);
+
+    // Push completion/error to Team Sync
+    if (exitProject) {
+      const teamSync = getTeamSyncService();
+      if (teamSync?.isSyncEnabled(exitProject.id) && exitTask) {
+        teamSync.pushTaskUpdate(exitProject.id, exitTask.specId, {
+          status: code === 0 ? 'review' : 'error',
+          executionPhase: code === 0 ? 'completed' : 'error',
+        }).catch(() => {});
+      }
+    }
 
     // Send final plan state to renderer BEFORE unwatching
     // This ensures the renderer has the final subtask data (fixes 0/0 subtask bug)

@@ -57,8 +57,10 @@ export const DEFAULT_APP_SETTINGS = {
   selectedAgentProfile: 'auto',
   // Authentication routing mode - global keeps current behavior for all features
   authRoutingMode: 'global' as const,
-  // Per-feature authentication account mapping (oauth-{id} or api-{id})
-  featureAuthProfiles: {},
+  // Per-feature auth profile mappings
+  featureAuthProfiles: {} as Record<string, string>,
+  // Team Sync rollout disabled by default
+  teamSyncEnabled: false,
   // Changelog preferences (persisted between sessions)
   changelogFormat: 'keep-a-changelog' as const,
   changelogAudience: 'user-facing' as const,

@@ -27,6 +27,7 @@ import { projectStore } from "../project-store";
 import { insightsService } from "../insights-service";
 import { safeSendToRenderer } from "./utils";
 import { TaskControlService } from "../services/task-control-service";
+import { getTeamSyncService } from "../team-sync/team-sync-service";
 
 /**
  * Read insights feature settings from the settings file
@@ -631,5 +632,18 @@ export function registerInsightsHandlers(
   // Forward session-updated events to renderer for real-time UI updates
   insightsService.on("session-updated", (projectId: string, session: unknown) => {
     safeSendToRenderer(getMainWindow, IPC_CHANNELS.INSIGHTS_SESSION_UPDATED, projectId, session);
+
+    // Push to Team Sync (strip sensitive modelConfig, limit message count)
+    const teamSync = getTeamSyncService();
+    if (teamSync?.isSyncEnabled(projectId) && session && typeof session === "object") {
+      const s = session as Record<string, unknown>;
+      const messages = Array.isArray(s.messages) ? (s.messages as unknown[]).slice(-50) : [];
+      teamSync.pushInsightsSession(projectId, {
+        sessionId: s.id || s.sessionId,
+        title: s.title,
+        messages,
+        pendingAction: s.pendingAction,
+      }).catch(() => {});
+    }
   });
 }

@@ -595,5 +595,22 @@ export const IPC_CHANNELS = {
   // Queue routing events (main -> renderer)
   QUEUE_PROFILE_SWAPPED: 'queue:profileSwapped',      // Task switched to different profile
   QUEUE_SESSION_CAPTURED: 'queue:sessionCaptured',    // Session ID captured from running task
-  QUEUE_BLOCKED_NO_PROFILES: 'queue:blockedNoProfiles' // All profiles unavailable
+  QUEUE_BLOCKED_NO_PROFILES: 'queue:blockedNoProfiles', // All profiles unavailable
+
+  // Team Sync
+  TEAM_SYNC_SIGNUP: 'team-sync:signup',
+  TEAM_SYNC_SIGNIN: 'team-sync:signin',
+  TEAM_SYNC_SIGNOUT: 'team-sync:signout',
+  TEAM_SYNC_STATUS: 'team-sync:status',
+  TEAM_SYNC_CREATE_TEAM: 'team-sync:create-team',
+  TEAM_SYNC_JOIN_TEAM: 'team-sync:join-team',
+  TEAM_SYNC_GET_TEAMS: 'team-sync:get-teams',
+  TEAM_SYNC_GET_MEMBERS: 'team-sync:get-members',
+  TEAM_SYNC_REMOVE_MEMBER: 'team-sync:remove-member',
+  TEAM_SYNC_GENERATE_INVITE: 'team-sync:generate-invite',
+  TEAM_SYNC_ENABLE: 'team-sync:enable',
+  TEAM_SYNC_DISABLE: 'team-sync:disable',
+  TEAM_SYNC_FORCE_PUSH: 'team-sync:force-push',
+  TEAM_SYNC_FORCE_PULL: 'team-sync:force-pull',
+  TEAM_SYNC_UPDATE: 'team-sync:update'
 } as const;

@@ -22,8 +22,12 @@
       "description": "Preferências de IDE e terminal"
     },
     "agent": {
-      "title": "Configurações do Agente",
-      "description": "Modelo padrão e framework"
+      "title": "Configurações de Agente",
+      "description": "Modelo e framework padrão"
+    },
+    "team-sync": {
+      "title": "Sincronização de Equipe",
+      "description": "Sincronização em tempo real e autenticação de equipe"
     },
     "paths": {
       "title": "Caminhos",

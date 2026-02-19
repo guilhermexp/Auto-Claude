@@ -56,6 +56,7 @@ import { initializeClaudeProfileManager, getClaudeProfileManager } from './claud
 import { isProfileAuthenticated } from './claude-profile/profile-utils';
 import { isMacOS, isWindows } from './platform';
 import { ptyDaemonClient } from './terminal/pty-daemon-client';
+import { initializeTeamSyncService, getTeamSyncService } from './team-sync/team-sync-service';
 import type { AppSettings, AuthFailureInfo } from '../shared/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -560,6 +561,11 @@ app.whenReady().then(() => {
   // Setup IPC handlers (pass pythonEnvManager for Python path management)
   setupIpcHandlers(agentManager, terminalManager, () => mainWindow, pythonEnvManager);
 
+  const teamSyncService = initializeTeamSyncService();
+  teamSyncService.initialize().catch((error) => {
+    console.warn('[main] Team Sync initialization failed:', error);
+  });
+
   // Create window
   createWindow();
 
@@ -726,6 +732,9 @@ app.on('before-quit', (event) => {
       // ensuring all kill commands reach PTY processes before the daemon disconnects
       ptyDaemonClient.shutdown();
       console.warn('[main] PTY daemon client shutdown complete');
+
+      await getTeamSyncService()?.shutdown();
+      console.warn('[main] Team Sync service shutdown complete');
     } catch (error) {
       console.error('[main] Error during pre-quit cleanup:', error);
     } finally {

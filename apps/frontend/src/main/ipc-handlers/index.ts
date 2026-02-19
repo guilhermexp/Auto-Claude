@@ -34,6 +34,7 @@ import { registerMcpHandlers } from './mcp-handlers';
 import { registerProfileHandlers } from './profile-handlers';
 import { registerScreenshotHandlers } from './screenshot-handlers';
 import { registerThemeHandlers } from './theme-handlers';
+import { registerTeamSyncHandlers } from './team-sync-handlers';
 import { registerTerminalWorktreeIpcHandlers } from './terminal';
 import { notificationService } from '../notification-service';
 import { setAgentManagerRef } from './utils';
@@ -130,6 +131,9 @@ export function setupIpcHandlers(
   // External theme discovery/import handlers
   registerThemeHandlers();
 
+  // Team Sync handlers
+  registerTeamSyncHandlers(getMainWindow);
+
   console.warn('[IPC] All handler modules registered successfully');
 }
 
@@ -158,5 +162,6 @@ export {
   registerMcpHandlers,
   registerProfileHandlers,
   registerScreenshotHandlers,
-  registerThemeHandlers
+  registerThemeHandlers,
+  registerTeamSyncHandlers
 };

@@ -250,9 +250,9 @@ export function AuthStatusIndicator() {
           <TooltipTrigger asChild>
             <Button
               type="button"
-              variant="secondary"
+              variant="ghost"
               size="sm"
-              className="project-tabbar-control h-8 gap-1.5 px-3 text-sm font-medium"
+              className="h-8 gap-1.5 px-3 text-sm font-medium text-muted-foreground hover:text-foreground"
               aria-label={t('common:usage.authenticationAriaLabel', { provider: badgeLabel })}
             >
               <Icon className="h-3.5 w-3.5" />

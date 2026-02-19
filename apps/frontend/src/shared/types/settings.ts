@@ -323,6 +323,8 @@ export interface AppSettings {
   authRoutingMode?: AuthRoutingMode;
   // Unified account IDs: oauth-{claudeProfileId} | api-{apiProfileId}
   featureAuthProfiles?: FeatureAuthProfileConfig;
+  // Team Sync rollout flag (MVP gate)
+  teamSyncEnabled?: boolean;
   // Changelog preferences
   changelogFormat?: ChangelogFormat;
   changelogAudience?: ChangelogAudience;

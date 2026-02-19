@@ -48,8 +48,8 @@ const getColorClass = (percent: number): string => {
  * Get background/border color classes for badges based on usage percentage
  */
 const getBadgeColorClasses = (percent: number): string => {
-  if (percent >= THRESHOLD_CRITICAL) return 'project-tabbar-control text-destructive';
-  return 'project-tabbar-control text-foreground';
+  if (percent >= THRESHOLD_CRITICAL) return 'text-destructive';
+  return 'text-muted-foreground hover:text-foreground';
 };
 
 /**
@@ -532,7 +532,7 @@ export function UsageIndicator() {
       <PopoverTrigger asChild>
         <Button
           type="button"
-          variant="secondary"
+          variant="ghost"
           size="sm"
           className={`h-8 gap-1.5 px-3 ${badgeColorClasses}`}
           aria-label={t('common:usage.usageStatusAriaLabel')}

@@ -197,6 +197,11 @@ export function registerSettingsHandlers(
         needsSave = true;
       }
 
+      if (typeof settings.teamSyncEnabled !== 'boolean') {
+        settings.teamSyncEnabled = false;
+        needsSave = true;
+      }
+
       // Migration: Clear CLI tool paths that are from a different platform
       // Fixes issue where Windows paths persisted on macOS (and vice versa)
       // when settings were synced/transferred between platforms

@@ -1,0 +1,72 @@
+{
+  "settings": {
+    "title": "Team Sync",
+    "description": "Synchronisation en temps réel avec authentification d'équipe (Convex + Better Auth).",
+    "featureFlag": "Activer Team Sync (feature flag)",
+    "featureFlagDescription": "Déploiement progressif : Tasks + Roadmap d'abord, puis Ideation/Insights.",
+    "disabledMessage": "Activez le flag pour activer l'authentification et la synchronisation d'équipe.",
+    "signInRequired": "Connectez-vous à votre compte Team Sync pour créer ou rejoindre une équipe et commencer la synchronisation."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Mot de passe",
+    "name": "Nom",
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter",
+    "signUp": "S'inscrire",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Déjà un compte ?"
+  },
+  "status": {
+    "connected": "Connecté",
+    "disconnected": "Déconnecté",
+    "authenticated": "Authentifié",
+    "guest": "Invité",
+    "team": "Équipe",
+    "projectsSynced": "Projets synchronisés",
+    "pending": "En attente",
+    "connectedToTeam": "Connecté à {{team}}"
+  },
+  "manage": {
+    "createTeam": "Créer une équipe",
+    "teamName": "Nom de l'équipe",
+    "create": "Créer",
+    "joinTeam": "Rejoindre avec un code d'invitation",
+    "join": "Rejoindre",
+    "teams": "Équipes",
+    "noTeams": "Aucune équipe connectée.",
+    "members": "Membres (équipe active)",
+    "noMembers": "Aucun membre chargé."
+  },
+  "sync": {
+    "currentProject": "Projet actuel",
+    "selectProject": "Sélectionnez un projet pour activer la synchronisation",
+    "enableSync": "Activer Sync",
+    "disableSync": "Désactiver",
+    "forcePush": "Forcer Push",
+    "forcePull": "Forcer Pull"
+  },
+  "errors": {
+    "loadStatus": "Échec du chargement du statut Team Sync",
+    "signup": "Échec de l'inscription",
+    "signin": "Échec de la connexion",
+    "createTeam": "Échec de la création d'équipe",
+    "joinTeam": "Échec de la jointure d'équipe",
+    "loadTeams": "Échec du chargement des équipes",
+    "loadMembers": "Échec du chargement des membres",
+    "enableSync": "Échec de l'activation de la synchronisation",
+    "disableSync": "Échec de la désactivation de la synchronisation",
+    "forcePush": "Échec du push forcé",
+    "forcePull": "Échec du pull forcé"
+  },
+  "mode": {
+    "disabled": "Désactivé",
+    "idle": "Inactif",
+    "syncing": "Synchronisation",
+    "error": "Erreur"
+  },
+  "events": {
+    "title": "Événements récents",
+    "noEvents": "Aucun événement pour le moment."
+  }
+}
