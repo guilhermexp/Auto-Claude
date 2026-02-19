@@ -23,7 +23,8 @@ export class TeamSyncConvexClient {
   private wsClient: ConvexClient | null = null;
   private httpClient: ConvexHttpClient | null = null;
   private connected = false;
-  private authToken: string | undefined;
+  private authToken: string | undefined; // Better Auth session token (for HTTP auth requests)
+  private convexJwt: string | undefined; // Convex JWT (for Convex SDK setAuth)
 
   constructor(url?: string) {
     this.url = url || CONVEX_URL;
@@ -38,9 +39,9 @@ export class TeamSyncConvexClient {
     try {
       this.wsClient = new ConvexClient(this.url);
       this.httpClient = new ConvexHttpClient(this.url);
-      if (this.authToken) {
-        this.wsClient.setAuth(() => Promise.resolve(this.authToken ?? null));
-        this.httpClient.setAuth(this.authToken);
+      if (this.convexJwt) {
+        this.wsClient.setAuth(() => Promise.resolve(this.convexJwt ?? null));
+        this.httpClient.setAuth(this.convexJwt);
       }
       this.connected = true;
     } catch (error) {
@@ -64,15 +65,51 @@ export class TeamSyncConvexClient {
 
   setAuthToken(token?: string): void {
     this.authToken = token;
-    if (this.wsClient) {
-      if (token) {
-        this.wsClient.setAuth(() => Promise.resolve(token));
-      } else {
+    if (!token) {
+      this.convexJwt = undefined;
+      if (this.wsClient) {
         this.wsClient.setAuth(() => Promise.resolve(null));
       }
     }
-    if (this.httpClient && token) {
-      this.httpClient.setAuth(token);
+  }
+
+  /**
+   * Exchange the Better Auth session token for a Convex JWT via /api/auth/convex/token,
+   * then set it on the Convex SDK clients.
+   */
+  async fetchAndSetConvexToken(): Promise<void> {
+    if (!this.authToken) return;
+
+    try {
+      const url = `${this.siteUrl}/api/auth/convex/token`;
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${this.authToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.warn("[team-sync] Failed to fetch Convex token:", response.status, await response.text());
+        return;
+      }
+
+      const data = await response.json() as { token?: string };
+      if (!data?.token) {
+        console.warn("[team-sync] No Convex JWT in token response");
+        return;
+      }
+
+      this.convexJwt = data.token;
+
+      if (this.wsClient) {
+        this.wsClient.setAuth(() => Promise.resolve(this.convexJwt ?? null));
+      }
+      if (this.httpClient) {
+        this.httpClient.setAuth(this.convexJwt);
+      }
+    } catch (error) {
+      console.warn("[team-sync] Error fetching Convex token:", error);
     }
   }
 

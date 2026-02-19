@@ -349,7 +349,7 @@ export const TaskCard = memo(function TaskCard({
   return (
     <Card
       className={cn(
-        'card-surface task-card-enhanced kanban-task-card cursor-pointer',
+        'card-surface task-card-enhanced kanban-task-card cursor-pointer dark:bg-[hsl(0_0%_25%)]',
         isRunning && !isStuck && 'ring-1 ring-primary/50 border-primary/50 task-running-pulse',
         isStuck && 'ring-1 ring-warning/50 border-warning/50 task-stuck-pulse',
         isArchived && 'opacity-60 hover:opacity-80',

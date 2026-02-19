@@ -102,6 +102,7 @@ export class TeamSyncService extends EventEmitter {
           const session = await response.json() as { user?: { id: string; email: string; name?: string } };
           if (session?.user) {
             this.convex.setAuthToken(this.credentials.sessionToken);
+            await this.convex.fetchAndSetConvexToken();
             await this.convex.connect();
             this.status = {
               ...this.status,
@@ -644,6 +645,7 @@ export class TeamSyncService extends EventEmitter {
     };
     saveTeamSyncCredentials(this.credentials);
     this.convex.setAuthToken(token);
+    await this.convex.fetchAndSetConvexToken();
     await this.convex.connect();
 
     this.status = {
