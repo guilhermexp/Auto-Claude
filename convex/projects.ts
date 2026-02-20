@@ -1,18 +1,18 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { requireAuthUserId, requireTeamMembership } from "./helpers";
+import { requireAuthUserId, requireTeamAccess } from "./helpers";
 
 /** Create or update a project for a team. */
 export const upsertProject = mutation({
   args: {
-    teamId: v.id("teams"),
+    teamId: v.string(), // Better Auth organization ID
     projectName: v.string(),
     projectHash: v.string(),
     settings: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
     const userId = await requireAuthUserId(ctx);
-    await requireTeamMembership(ctx, args.teamId);
+    await requireTeamAccess(ctx, args.teamId);
 
     const existing = await ctx.db
       .query("projects")
@@ -46,9 +46,9 @@ export const upsertProject = mutation({
 
 /** Get all projects for a team. */
 export const getTeamProjects = query({
-  args: { teamId: v.id("teams") },
+  args: { teamId: v.string() }, // Better Auth organization ID
   handler: async (ctx, args) => {
-    await requireTeamMembership(ctx, args.teamId);
+    await requireTeamAccess(ctx, args.teamId);
 
     return await ctx.db
       .query("projects")

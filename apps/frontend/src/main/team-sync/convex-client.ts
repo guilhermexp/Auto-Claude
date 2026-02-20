@@ -69,6 +69,10 @@ export class TeamSyncConvexClient {
     return this.connected;
   }
 
+  hasAuth(): boolean {
+    return !!this.convexJwt;
+  }
+
   setAuthToken(token?: string): void {
     this.authToken = token;
     if (!token) {
@@ -86,28 +90,35 @@ export class TeamSyncConvexClient {
   /**
    * Exchange the Better Auth session token for a Convex JWT via /api/auth/convex/token,
    * then set it on the Convex SDK clients.
+   * Returns true if the JWT was successfully obtained.
    */
-  async fetchAndSetConvexToken(): Promise<void> {
-    if (!this.authToken) return;
+  async fetchAndSetConvexToken(): Promise<boolean> {
+    if (!this.authToken) {
+      console.warn("[team-sync] Cannot fetch Convex token: no auth token set");
+      return false;
+    }
 
     try {
       // Use authRequest to include Content-Type header — Better Auth's
       // /api/auth/convex/token endpoint has requireHeaders: true which
       // rejects requests without Content-Type or X-Better-Auth-Action.
+      console.log("[team-sync] Exchanging session token for Convex JWT...");
       const response = await this.authRequest("/api/auth/convex/token", undefined, "GET");
 
       if (!response.ok) {
-        console.warn("[team-sync] Failed to fetch Convex token:", response.status, await response.text());
-        return;
+        const body = await response.text();
+        console.error("[team-sync] Failed to fetch Convex token:", response.status, body);
+        return false;
       }
 
       const data = await response.json() as { token?: string };
       if (!data?.token) {
-        console.warn("[team-sync] No Convex JWT in token response");
-        return;
+        console.error("[team-sync] No Convex JWT in token response:", JSON.stringify(data));
+        return false;
       }
 
       this.convexJwt = data.token;
+      console.log("[team-sync] Convex JWT obtained successfully");
 
       if (this.wsClient) {
         this.wsClient.setAuth(() => Promise.resolve(this.convexJwt ?? null));
@@ -122,8 +133,10 @@ export class TeamSyncConvexClient {
           void this.fetchAndSetConvexToken();
         }, TeamSyncConvexClient.JWT_REFRESH_INTERVAL_MS);
       }
+      return true;
     } catch (error) {
-      console.warn("[team-sync] Error fetching Convex token:", error);
+      console.error("[team-sync] Error fetching Convex token:", error);
+      return false;
     }
   }
 

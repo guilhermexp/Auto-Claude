@@ -2,32 +2,30 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  teams: defineTable({
-    name: v.string(),
-    ownerId: v.string(),
-    inviteCode: v.string(),
+  // Organization and member data is managed by Better Auth Organization plugin
+  // (stored in the @convex-dev/better-auth component tables).
+  // These app-level tables mirror membership for fast indexed access from
+  // Convex queries/mutations (component tables aren't directly queryable).
+
+  invite_codes: defineTable({
+    code: v.string(),
+    organizationId: v.string(),
     createdAt: v.number(),
   })
-    .index("by_invite_code", ["inviteCode"])
-    .index("by_owner", ["ownerId"]),
+    .index("by_code", ["code"])
+    .index("by_org", ["organizationId"]),
 
-  team_members: defineTable({
-    teamId: v.id("teams"),
+  org_memberships: defineTable({
+    organizationId: v.string(),
     userId: v.string(),
-    role: v.union(v.literal("owner"), v.literal("admin"), v.literal("member")),
-    status: v.union(
-      v.literal("active"),
-      v.literal("invited"),
-      v.literal("removed")
-    ),
+    role: v.string(),
     joinedAt: v.number(),
   })
-    .index("by_team", ["teamId"])
-    .index("by_user", ["userId"])
-    .index("by_team_user", ["teamId", "userId"]),
+    .index("by_org_user", ["organizationId", "userId"])
+    .index("by_user", ["userId"]),
 
   projects: defineTable({
-    teamId: v.id("teams"),
+    teamId: v.string(), // Better Auth organization ID
     projectName: v.string(),
     projectHash: v.string(),
     settings: v.optional(v.any()),
@@ -94,7 +92,7 @@ export default defineSchema({
   }).index("by_project", ["projectId"]),
 
   sync_events: defineTable({
-    teamId: v.id("teams"),
+    teamId: v.string(), // Better Auth organization ID
     userId: v.string(),
     deviceId: v.string(),
     resource: v.string(),

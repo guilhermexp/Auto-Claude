@@ -10,7 +10,8 @@ export async function requireAuthUserId(
   ctx: QueryCtx | MutationCtx
 ): Promise<string> {
   const user = await betterAuthClient.getAuthUser(ctx);
-  return user.id as string;
+  // Better Auth Convex adapter uses _id (Convex doc ID), not id
+  return (user._id ?? (user as Record<string, unknown>).id) as string;
 }
 
 /**
@@ -21,29 +22,31 @@ export async function getOptionalAuthUser(ctx: QueryCtx | MutationCtx) {
 }
 
 /**
- * Checks that the authenticated user is a member of the given team
- * with one of the allowed roles. Returns the membership document.
+ * Verifies the user is authenticated AND is a member of the given team.
+ * Checks the app-level org_memberships table (populated by our HTTP endpoints).
  */
-export async function requireTeamMembership(
+export async function requireTeamAccess(
   ctx: QueryCtx | MutationCtx,
-  teamId: Id<"teams">,
-  allowedRoles?: Array<"owner" | "admin" | "member">
-) {
+  teamId: string
+): Promise<string> {
+  if (!teamId) {
+    throw new Error("teamId is required");
+  }
+
   const userId = await requireAuthUserId(ctx);
+
   const membership = await ctx.db
-    .query("team_members")
-    .withIndex("by_team_user", (q) => q.eq("teamId", teamId).eq("userId", userId))
+    .query("org_memberships")
+    .withIndex("by_org_user", (q) =>
+      q.eq("organizationId", teamId).eq("userId", userId)
+    )
     .unique();
 
-  if (!membership || membership.status !== "active") {
+  if (!membership) {
     throw new Error("Not a member of this team");
   }
 
-  if (allowedRoles && !allowedRoles.includes(membership.role)) {
-    throw new Error(`Requires one of: ${allowedRoles.join(", ")}`);
-  }
-
-  return membership;
+  return userId;
 }
 
 /**
@@ -58,6 +61,6 @@ export async function requireProjectAccess(
   if (!project) {
     throw new Error("Project not found");
   }
-  await requireTeamMembership(ctx, project.teamId);
+  await requireTeamAccess(ctx, project.teamId);
   return project;
 }

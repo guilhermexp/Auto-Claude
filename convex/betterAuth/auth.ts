@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { organization } from "better-auth/plugins";
 import { convex } from "@convex-dev/better-auth/plugins";
 import { betterAuthClient } from "../auth";
 import authConfig from "../auth.config";
@@ -26,6 +27,7 @@ export const createAuth = (ctx: Ctx) => {
       process.env.CONVEX_SITE_URL ?? "",
     ],
     plugins: [
+      organization(),
       convex({ authConfig }),
     ],
   });

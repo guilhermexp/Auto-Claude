@@ -103,7 +103,24 @@ export class TeamSyncService extends EventEmitter {
         if (response.ok) {
           const session = await response.json() as { user?: { id: string; email: string; name?: string } };
           if (session?.user) {
-            await this.convex.fetchAndSetConvexToken();
+            const jwtOk = await this.convex.fetchAndSetConvexToken();
+            if (!jwtOk) {
+              console.error('[team-sync] Session valid but Convex JWT exchange failed');
+              // Still mark user info but flag as not fully authenticated
+              this.status = {
+                ...this.status,
+                authenticated: false,
+                connected: false,
+                mode: 'idle',
+                user: {
+                  id: session.user.id,
+                  email: session.user.email,
+                  name: session.user.name
+                }
+              };
+              this.emitUpdate('auth-changed', 'Session valid but JWT exchange failed — try signing out and back in');
+              return;
+            }
             await this.convex.connect();
             this.status = {
               ...this.status,
@@ -251,18 +268,36 @@ export class TeamSyncService extends EventEmitter {
       return { success: false, error: 'Team name is required' };
     }
 
+    if (!this.convex.hasAuth()) {
+      // Try refreshing the JWT before giving up
+      console.warn('[team-sync] No Convex JWT for createTeam, attempting refresh...');
+      const refreshed = await this.convex.fetchAndSetConvexToken();
+      if (!refreshed) {
+        return { success: false, error: 'Not authenticated with Convex. Please sign out and sign in again.' };
+      }
+    }
+
     try {
-      const result = await this.convex.mutation<{ teamId: string; inviteCode: string }>(
-        'teams:createTeam',
-        { name: name.trim() }
-      );
+      const trimmed = name.trim();
+
+      // Server-side invite code generation via our custom endpoint
+      const response = await this.convex.authRequest('/api/team-sync/create-team', {
+        name: trimmed,
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        return { success: false, error: `Failed to create team: ${body}` };
+      }
+
+      const org = await response.json() as { id: string; name: string; slug: string; inviteCode: string };
 
       const team: TeamSyncTeam = {
-        id: result.teamId,
-        name: name.trim(),
+        id: org.id,
+        name: trimmed,
         role: 'owner',
         memberCount: 1,
-        inviteCode: result.inviteCode,
+        inviteCode: org.inviteCode,
         createdAt: Date.now()
       };
 
@@ -287,21 +322,27 @@ export class TeamSyncService extends EventEmitter {
     }
 
     try {
-      const result = await this.convex.mutation<{ teamId: string }>(
-        'teams:joinTeam',
-        { inviteCode: inviteCode.trim().toUpperCase() }
-      );
+      const response = await this.convex.authRequest('/api/team-sync/join-by-code', {
+        inviteCode: inviteCode.trim().toUpperCase(),
+      });
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({ error: 'Failed to join team' })) as { error?: string };
+        return { success: false, error: body.error || 'Failed to join team' };
+      }
+
+      const result = await response.json() as { organizationId: string; name: string };
 
       // Refresh teams to get full details
       await this.refreshTeams();
 
-      const joinedTeam = this.knownTeams.find((t) => t.id === result.teamId);
+      const joinedTeam = this.knownTeams.find((t) => t.id === result.organizationId);
       if (joinedTeam) {
         this.status = { ...this.status, activeTeam: joinedTeam };
       }
 
       if (this.credentials) {
-        this.credentials.activeTeamId = result.teamId;
+        this.credentials.activeTeamId = result.organizationId;
         saveTeamSyncCredentials(this.credentials);
       }
 
@@ -323,21 +364,32 @@ export class TeamSyncService extends EventEmitter {
 
   async getTeamMembers(teamId: string): Promise<TeamSyncMember[]> {
     try {
-      const members = await this.convex.query<Array<{
-        _id: string;
-        userId: string;
-        role: 'owner' | 'admin' | 'member';
-        status: 'active' | 'invited' | 'removed';
-        joinedAt: number;
-      }>>('teams:getTeamMembers', { teamId });
+      const response = await this.convex.authRequest('/api/auth/organization/get-full-organization', {
+        organizationId: teamId,
+      });
 
-      return members.map((m) => ({
-        id: m._id,
+      if (!response.ok) {
+        console.warn('[team-sync] Failed to fetch org members:', response.status);
+        return [];
+      }
+
+      const data = await response.json() as {
+        members?: Array<{
+          id: string;
+          userId: string;
+          role: string;
+          createdAt: string;
+          user?: { email?: string; name?: string };
+        }>;
+      };
+
+      return (data.members || []).map((m) => ({
+        id: m.id,
         userId: m.userId,
-        email: m.userId, // Better Auth user ID — email comes from user lookup
-        role: m.role,
-        status: m.status,
-        joinedAt: m.joinedAt,
+        email: m.user?.email || m.userId,
+        role: m.role as 'owner' | 'admin' | 'member',
+        status: 'active' as const,
+        joinedAt: new Date(m.createdAt).getTime(),
       }));
     } catch (error) {
       console.warn('[team-sync] Failed to fetch members:', error);
@@ -347,8 +399,11 @@ export class TeamSyncService extends EventEmitter {
 
   async removeMember(teamId: string, memberId: string): Promise<{ success: boolean }> {
     try {
-      await this.convex.mutation('teams:removeMember', { teamId, memberId });
-      return { success: true };
+      const response = await this.convex.authRequest('/api/team-sync/remove-member', {
+        organizationId: teamId,
+        memberId,
+      });
+      return { success: response.ok };
     } catch {
       return { success: false };
     }
@@ -356,7 +411,12 @@ export class TeamSyncService extends EventEmitter {
 
   async generateInviteCode(teamId: string): Promise<string> {
     try {
-      return await this.convex.mutation<string>('teams:generateInviteCode', { teamId });
+      const response = await this.convex.authRequest('/api/team-sync/regenerate-invite-code', {
+        organizationId: teamId,
+      });
+      if (!response.ok) return 'ERROR';
+      const data = await response.json() as { inviteCode: string };
+      return data.inviteCode;
     } catch {
       return 'ERROR';
     }
@@ -638,7 +698,7 @@ export class TeamSyncService extends EventEmitter {
   private async handleAuthSuccess(
     token: string,
     user: { id: string; email: string; name?: string }
-  ): Promise<{ success: boolean }> {
+  ): Promise<{ success: boolean; error?: string }> {
     this.credentials = {
       email: user.email,
       sessionToken: token,
@@ -647,7 +707,19 @@ export class TeamSyncService extends EventEmitter {
     };
     saveTeamSyncCredentials(this.credentials);
     this.convex.setAuthToken(token);
-    await this.convex.fetchAndSetConvexToken();
+    const jwtOk = await this.convex.fetchAndSetConvexToken();
+    if (!jwtOk) {
+      console.error('[team-sync] Auth succeeded but Convex JWT exchange failed');
+      this.status = {
+        ...this.status,
+        connected: false,
+        authenticated: false,
+        mode: 'idle',
+        user: { id: user.id, email: user.email, name: user.name }
+      };
+      this.emitUpdate('auth-changed', 'JWT exchange failed — please try again');
+      return { success: false, error: 'Failed to exchange token with Convex. Please try again.' };
+    }
     await this.convex.connect();
 
     this.status = {
@@ -666,22 +738,30 @@ export class TeamSyncService extends EventEmitter {
 
   private async refreshTeams(): Promise<void> {
     try {
-      const teams = await this.convex.query<Array<{
-        _id: string;
+      // Use our custom endpoint that returns orgs with the user's actual role
+      const response = await this.convex.authRequest('/api/team-sync/my-teams', {});
+
+      if (!response.ok) {
+        console.warn('[team-sync] Failed to list teams:', response.status);
+        return;
+      }
+
+      const teams = await response.json() as Array<{
+        id: string;
         name: string;
-        role: 'owner' | 'admin' | 'member';
+        role: string;
         memberCount: number;
         inviteCode?: string;
-        createdAt: number;
-      }>>('teams:getMyTeams', {});
+        createdAt: string;
+      }>;
 
       this.knownTeams = teams.map((t) => ({
-        id: t._id,
+        id: t.id,
         name: t.name,
-        role: t.role,
+        role: t.role as 'owner' | 'admin' | 'member',
         memberCount: t.memberCount,
         inviteCode: t.inviteCode,
-        createdAt: t.createdAt
+        createdAt: new Date(t.createdAt).getTime(),
       }));
 
       // Restore active team from credentials
