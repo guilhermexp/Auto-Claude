@@ -34,10 +34,15 @@ import {
   newSession,
   switchSession,
   deleteSession,
+  deleteSessions,
   renameSession,
+  archiveSession,
+  archiveSessions,
+  unarchiveSession,
   updateModelConfig,
   createTaskFromSuggestion,
-  setupInsightsListeners
+  setupInsightsListeners,
+  loadInsightsSessions
 } from '../stores/insights-store';
 import { useImageUpload } from './task-form/useImageUpload';
 import { createThumbnail, generateImageId } from './ImageUpload';
@@ -112,6 +117,7 @@ export function Insights({ projectId }: InsightsProps) {
   const [creatingTask, setCreatingTask] = useState<Set<string>>(new Set());
   const [taskCreated, setTaskCreated] = useState<Set<string>>(new Set());
   const [showSidebar, setShowSidebar] = useState(true);
+  const showArchived = useInsightsStore((state) => state.showArchived);
   const [isUserAtBottom, setIsUserAtBottom] = useState(true);
   const [viewportEl, setViewportEl] = useState<HTMLElement | null>(null);
   const [screenshotOpen, setScreenshotOpen] = useState(false);
@@ -174,10 +180,22 @@ export function Insights({ projectId }: InsightsProps) {
 
   // Load session and set up listeners on mount
   useEffect(() => {
-    loadInsightsSession(projectId);
+    loadInsightsSession(projectId, showArchived);
     const cleanup = setupInsightsListeners();
     return cleanup;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: showArchived is handled by the dedicated effect below; including it here would cause duplicate loads
   }, [projectId]);
+
+  // Reload sessions when showArchived changes (skip first run to avoid duplicate load with mount effect)
+  const isFirstRun = useRef(true);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: projectId changes are handled by the mount effect above; this effect only reacts to showArchived toggles
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+    loadInsightsSessions(projectId, showArchived);
+  }, [showArchived]);
 
   // Smart auto-scroll: only scroll if user is already at bottom
   // This allows users to scroll up to read previous messages without being
@@ -262,11 +280,69 @@ export function Insights({ projectId }: InsightsProps) {
   };
 
   const handleDeleteSession = async (sessionId: string): Promise<boolean> => {
-    return await deleteSession(projectId, sessionId);
+    return await deleteSession(projectId, sessionId, showArchived);
   };
 
   const handleRenameSession = async (sessionId: string, newTitle: string): Promise<boolean> => {
     return await renameSession(projectId, sessionId, newTitle);
+  };
+
+  const handleArchiveSession = async (sessionId: string) => {
+    try {
+      await archiveSession(projectId, sessionId);
+      await loadInsightsSessions(projectId, showArchived);
+      // Reload current session in case backend switched to a different one
+      await loadInsightsSession(projectId, showArchived);
+    } catch (error) {
+      console.error(`Failed to archive session ${sessionId}:`, error);
+    }
+  };
+
+  const handleUnarchiveSession = async (sessionId: string) => {
+    try {
+      await unarchiveSession(projectId, sessionId);
+      await loadInsightsSessions(projectId, showArchived);
+      // Reload current session in case backend switched to a different one
+      await loadInsightsSession(projectId, showArchived);
+    } catch (error) {
+      console.error(`Failed to unarchive session ${sessionId}:`, error);
+    }
+  };
+
+  const handleDeleteSessions = async (sessionIds: string[]) => {
+    try {
+      const result = await deleteSessions(projectId, sessionIds);
+      await loadInsightsSessions(projectId, showArchived);
+      // Reload current session in case backend switched to a different one
+      await loadInsightsSession(projectId, showArchived);
+
+      // Log partial failures for debugging
+      if (result.failedIds && result.failedIds.length > 0) {
+        console.warn(`Failed to delete ${result.failedIds.length} session(s):`, result.failedIds);
+      }
+    } catch (error) {
+      console.error(`Failed to delete sessions ${sessionIds.join(', ')}:`, error);
+    }
+  };
+
+  const handleArchiveSessions = async (sessionIds: string[]) => {
+    try {
+      const result = await archiveSessions(projectId, sessionIds);
+      await loadInsightsSessions(projectId, showArchived);
+      // Reload current session in case backend switched to a different one
+      await loadInsightsSession(projectId, showArchived);
+
+      // Log partial failures for debugging
+      if (result.failedIds && result.failedIds.length > 0) {
+        console.warn(`Failed to archive ${result.failedIds.length} session(s):`, result.failedIds);
+      }
+    } catch (error) {
+      console.error(`Failed to archive sessions ${sessionIds.join(', ')}:`, error);
+    }
+  };
+
+  const handleToggleShowArchived = () => {
+    useInsightsStore.getState().setShowArchived(!showArchived);
   };
 
   const handleCreateTask = async (
@@ -319,6 +395,12 @@ export function Insights({ projectId }: InsightsProps) {
           onSelectSession={handleSelectSession}
           onDeleteSession={handleDeleteSession}
           onRenameSession={handleRenameSession}
+          onArchiveSession={handleArchiveSession}
+          onUnarchiveSession={handleUnarchiveSession}
+          onDeleteSessions={handleDeleteSessions}
+          onArchiveSessions={handleArchiveSessions}
+          showArchived={showArchived}
+          onToggleShowArchived={handleToggleShowArchived}
         />
       )}
 
