@@ -613,5 +613,8 @@ export const IPC_CHANNELS = {
   TEAM_SYNC_FORCE_PUSH: 'team-sync:force-push',
   TEAM_SYNC_FORCE_PULL: 'team-sync:force-pull',
   TEAM_SYNC_UPDATE: 'team-sync:update',
-  TEAM_SYNC_INITIALIZE: 'team-sync:initialize'
+  TEAM_SYNC_INITIALIZE: 'team-sync:initialize',
+  TEAM_SYNC_INVITE_MEMBER: 'team-sync:invite-member',
+  TEAM_SYNC_ACCEPT_INVITATION: 'team-sync:accept-invitation',
+  TEAM_SYNC_LIST_INVITATIONS: 'team-sync:list-invitations'
 } as const;

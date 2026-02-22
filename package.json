@@ -27,7 +27,8 @@
     "package:linux": "cd apps/frontend && npm run package:linux",
     "release": "./scripts/release.sh patch",
     "release:minor": "./scripts/release.sh minor",
-    "release:major": "./scripts/release.sh major"
+    "release:major": "./scripts/release.sh major",
+    "postinstall": "patch-package"
   },
   "engines": {
     "node": ">=24.0.0",
@@ -46,9 +47,11 @@
     "electron"
   ],
   "devDependencies": {
-    "jsdom": "^27.4.0"
+    "jsdom": "^27.4.0",
+    "patch-package": "^8.0.1"
   },
   "dependencies": {
+    "better-auth": "1.4.9",
     "convex": "^1.27.0",
     "lucide-react": "^0.562.0"
   },

@@ -9,7 +9,8 @@ import { Id } from "./_generated/dataModel";
 export async function requireAuthUserId(
   ctx: QueryCtx | MutationCtx
 ): Promise<string> {
-  const user = await betterAuthClient.getAuthUser(ctx);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const user = await betterAuthClient.getAuthUser(ctx as any);
   // Better Auth Convex adapter uses _id (Convex doc ID), not id
   return (user._id ?? (user as Record<string, unknown>).id) as string;
 }
@@ -18,7 +19,8 @@ export async function requireAuthUserId(
  * Validates the current session and returns the user or null.
  */
 export async function getOptionalAuthUser(ctx: QueryCtx | MutationCtx) {
-  return betterAuthClient.safeGetAuthUser(ctx);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return betterAuthClient.safeGetAuthUser(ctx as any);
 }
 
 /**

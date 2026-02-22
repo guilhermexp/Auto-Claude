@@ -15,7 +15,9 @@
     "signOut": "Sair",
     "signUp": "Cadastrar",
     "noAccount": "Ainda não tem conta?",
-    "hasAccount": "Já tem uma conta?"
+    "hasAccount": "Já tem uma conta?",
+    "inviteCode": "Código de convite",
+    "inviteCodeHint": "Se alguém te convidou para um time, cole o código aqui."
   },
   "status": {
     "connected": "Conectado",
@@ -27,6 +29,11 @@
     "pending": "Pendente",
     "connectedToTeam": "Conectado a {{team}}"
   },
+  "roles": {
+    "owner": "Proprietário",
+    "admin": "Admin",
+    "member": "Membro"
+  },
   "manage": {
     "createTeam": "Criar time",
     "teamName": "Nome do time",
@@ -35,8 +42,12 @@
     "join": "Entrar",
     "teams": "Times",
     "noTeams": "Sem times conectados.",
-    "members": "Membros (time ativo)",
-    "noMembers": "Sem membros carregados."
+    "members": "Membros",
+    "noMembers": "Sem membros carregados.",
+    "onlyYou": "Apenas você por enquanto. Convide membros acima.",
+    "you": "você",
+    "removeMember": "Remover membro",
+    "removed": "Membro removido"
   },
   "sync": {
     "currentProject": "Projeto atual",
@@ -54,6 +65,7 @@
     "joinTeam": "Falha ao entrar no time",
     "loadTeams": "Falha ao carregar times",
     "loadMembers": "Falha ao carregar membros",
+    "removeMember": "Falha ao remover membro",
     "enableSync": "Falha ao ativar sincronização",
     "disableSync": "Falha ao desativar sincronização",
     "forcePush": "Falha ao executar force push",
@@ -64,6 +76,29 @@
     "idle": "Inativo",
     "syncing": "Sincronizando",
     "error": "Erro"
+  },
+  "invitations": {
+    "title": "Convites",
+    "invite": "Convidar Membro",
+    "description": "Convide pessoas por email para acessar este time e colaborar.",
+    "email": "email@exemplo.com",
+    "role": "Função",
+    "send": "Convidar",
+    "pending": "Convites Pendentes",
+    "accept": "Aceitar Convite",
+    "tokenPlaceholder": "Cole o ID do convite",
+    "copyToken": "Copiar token do convite",
+    "token": "Token",
+    "sent": "Convite enviado!",
+    "accepted": "Convite aceito!",
+    "noInvitations": "Nenhum convite pendente",
+    "expiresAt": "expira em",
+    "expired": "Expirado",
+    "errors": {
+      "emailRequired": "Email é obrigatório",
+      "sendFailed": "Falha ao enviar convite",
+      "acceptFailed": "Falha ao aceitar convite"
+    }
   },
   "events": {
     "title": "Últimos eventos",

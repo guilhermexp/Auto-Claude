@@ -14,7 +14,8 @@ type Ctx = GenericQueryCtx<DataModel> | GenericMutationCtx<DataModel> | GenericA
  */
 export const createAuth = (ctx: Ctx) => {
   return betterAuth({
-    database: betterAuthClient.adapter(ctx),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    database: betterAuthClient.adapter(ctx as any),
     baseURL: process.env.CONVEX_SITE_URL,
     secret: process.env.BETTER_AUTH_SECRET,
     emailAndPassword: {

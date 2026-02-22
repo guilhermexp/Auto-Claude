@@ -144,7 +144,7 @@ import type {
   GitLabNewCommitsCheck
 } from './integrations';
 import type { APIProfile, ProfilesFile, TestConnectionResult, DiscoverModelsResult } from './profile';
-import type { TeamSyncMember, TeamSyncStatus, TeamSyncTeam, TeamSyncUpdate } from './team-sync';
+import type { TeamSyncInvitation, TeamSyncInviteResult, TeamSyncMember, TeamSyncStatus, TeamSyncTeam, TeamSyncUpdate } from './team-sync';
 
 // ============================================
 // Branch Types
@@ -972,6 +972,9 @@ export interface ElectronAPI {
     disable: (projectId: string) => Promise<IPCResult>;
     forcePush: (projectId: string) => Promise<IPCResult>;
     forcePull: (projectId: string) => Promise<IPCResult>;
+    inviteMember: (organizationId: string, email: string, role?: string) => Promise<IPCResult<TeamSyncInviteResult>>;
+    acceptInvitation: (invitationId: string) => Promise<IPCResult<{ organizationId: string; name: string }>>;
+    listInvitations: (organizationId: string) => Promise<IPCResult<TeamSyncInvitation[]>>;
     onUpdate: (callback: (update: TeamSyncUpdate) => void) => () => void;
   };
 }

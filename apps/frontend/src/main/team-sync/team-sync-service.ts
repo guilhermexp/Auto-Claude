@@ -14,6 +14,8 @@ import {
 } from './credential-utils';
 import type {
   ProjectIdentity,
+  TeamSyncInvitation,
+  TeamSyncInviteResult,
   TeamSyncMember,
   TeamSyncStatus,
   TeamSyncTeam,
@@ -86,9 +88,27 @@ export class TeamSyncService extends EventEmitter {
     this.watcher = new TeamSyncFileWatcher(async (event) => {
       await this.handleLocalFileChange(event);
     });
+
+    // Forward revision engine conflict events as sync updates
+    this.revisionEngine.on('conflict', (info: { resource: string; resourceId: string; remoteUpdatedBy: string }) => {
+      console.warn(`[team-sync] Sync conflict on ${info.resource}/${info.resourceId} — remote update by ${info.remoteUpdatedBy} was dropped (local is newer)`);
+      this.emitUpdate('sync-error', `Conflict: remote update to ${info.resource}/${info.resourceId} was dropped (local version is newer)`);
+    });
   }
 
   async initialize(): Promise<void> {
+    // Always start clean — clear any in-memory state from previous sessions
+    this.knownTeams = [];
+    this.status = {
+      connected: false,
+      authenticated: false,
+      activeTeam: undefined,
+      user: undefined,
+      syncedProjects: [],
+      pendingChanges: 0,
+      mode: 'idle',
+    };
+
     this.credentials = loadTeamSyncCredentials();
     if (this.credentials?.sessionToken) {
       // Set auth token BEFORE calling get-session so the Authorization header is included
@@ -106,12 +126,10 @@ export class TeamSyncService extends EventEmitter {
             const jwtOk = await this.convex.fetchAndSetConvexToken();
             if (!jwtOk) {
               console.error('[team-sync] Session valid but Convex JWT exchange failed');
-              // Still mark user info but flag as not fully authenticated
               this.status = {
                 ...this.status,
                 authenticated: false,
                 connected: false,
-                mode: 'idle',
                 user: {
                   id: session.user.id,
                   email: session.user.email,
@@ -126,7 +144,6 @@ export class TeamSyncService extends EventEmitter {
               ...this.status,
               authenticated: true,
               connected: true,
-              mode: 'idle',
               user: {
                 id: session.user.id,
                 email: session.user.email,
@@ -134,8 +151,9 @@ export class TeamSyncService extends EventEmitter {
               }
             };
             this.emitUpdate('auth-changed', 'Session restored from secure storage');
-            // Refresh teams list
+            // Refresh teams list, auto-create if none exist
             await this.refreshTeams();
+            await this.ensureDefaultTeam(session.user);
             return;
           }
         }
@@ -147,13 +165,6 @@ export class TeamSyncService extends EventEmitter {
       this.credentials.sessionToken = '';
       saveTeamSyncCredentials(this.credentials);
     }
-
-    this.status = {
-      ...this.status,
-      connected: false,
-      authenticated: false,
-      mode: 'idle'
-    };
   }
 
   async shutdown(): Promise<void> {
@@ -249,15 +260,17 @@ export class TeamSyncService extends EventEmitter {
 
     clearTeamSyncCredentials();
     this.credentials = null;
+    this.knownTeams = [];
     this.convex.setAuthToken(undefined);
     await this.disableAllSync();
 
     this.status = {
-      ...this.status,
-      authenticated: false,
       connected: false,
+      authenticated: false,
       activeTeam: undefined,
       user: undefined,
+      syncedProjects: [],
+      pendingChanges: 0,
       mode: 'idle'
     };
     this.emitUpdate('auth-changed', 'Signed out');
@@ -347,6 +360,10 @@ export class TeamSyncService extends EventEmitter {
       }
 
       this.emitUpdate('team-changed', `Joined team`);
+
+      // Auto-enable sync for the active project if one exists
+      await this.autoEnableSyncIfPossible();
+
       return { success: true };
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : 'Failed to join team' };
@@ -403,8 +420,15 @@ export class TeamSyncService extends EventEmitter {
         organizationId: teamId,
         memberId,
       });
+      if (!response.ok) {
+        const body = await response.text().catch(() => 'Unknown error');
+        console.error('[team-sync] Failed to remove member:', response.status, body);
+        this.emitUpdate('sync-error', `Failed to remove member: ${body}`);
+      }
       return { success: response.ok };
-    } catch {
+    } catch (error) {
+      console.error('[team-sync] Error removing member:', error);
+      this.emitUpdate('sync-error', `Error removing member: ${error instanceof Error ? error.message : String(error)}`);
       return { success: false };
     }
   }
@@ -414,12 +438,83 @@ export class TeamSyncService extends EventEmitter {
       const response = await this.convex.authRequest('/api/team-sync/regenerate-invite-code', {
         organizationId: teamId,
       });
-      if (!response.ok) return 'ERROR';
+      if (!response.ok) {
+        const body = await response.text().catch(() => 'Unknown error');
+        console.error('[team-sync] Failed to regenerate invite code:', response.status, body);
+        this.emitUpdate('sync-error', `Failed to regenerate invite code: ${body}`);
+        return 'ERROR';
+      }
       const data = await response.json() as { inviteCode: string };
       return data.inviteCode;
-    } catch {
+    } catch (error) {
+      console.error('[team-sync] Error regenerating invite code:', error);
+      this.emitUpdate('sync-error', `Error regenerating code: ${error instanceof Error ? error.message : String(error)}`);
       return 'ERROR';
     }
+  }
+
+  async inviteMember(organizationId: string, email: string, role?: string): Promise<TeamSyncInviteResult> {
+    const response = await this.convex.authRequest('/api/team-sync/invite-member', {
+      organizationId,
+      email,
+      role: role || 'member',
+    });
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({ error: 'Failed to invite member' })) as { error?: string };
+      throw new Error(body.error || 'Failed to invite member');
+    }
+
+    const data = await response.json() as TeamSyncInviteResult;
+    this.emitUpdate('team-changed', `Invitation sent to ${email}`);
+    return data;
+  }
+
+  async acceptInvitation(invitationId: string): Promise<{ organizationId: string; name: string }> {
+    const response = await this.convex.authRequest('/api/team-sync/accept-invitation', {
+      invitationId,
+    });
+
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({ error: 'Failed to accept invitation' })) as { error?: string };
+      throw new Error(body.error || 'Failed to accept invitation');
+    }
+
+    const result = await response.json() as { organizationId: string; name: string };
+
+    // Refresh teams to get the new team in the list
+    await this.refreshTeams();
+
+    const joinedTeam = this.knownTeams.find((t) => t.id === result.organizationId);
+    if (joinedTeam) {
+      this.status = { ...this.status, activeTeam: joinedTeam };
+    }
+
+    if (this.credentials) {
+      this.credentials.activeTeamId = result.organizationId;
+      saveTeamSyncCredentials(this.credentials);
+    }
+
+    this.emitUpdate('team-changed', `Invitation accepted`);
+
+    // Auto-enable sync for the active project if one exists
+    await this.autoEnableSyncIfPossible();
+
+    return result;
+  }
+
+  async listInvitations(organizationId: string): Promise<TeamSyncInvitation[]> {
+    const response = await this.convex.authRequest('/api/team-sync/list-invitations', {
+      organizationId,
+    });
+
+    if (!response.ok) {
+      console.warn('[team-sync] Failed to list invitations:', response.status);
+      return [];
+    }
+
+    const data = await response.json() as { invitations: TeamSyncInvitation[] };
+    return data.invitations || [];
   }
 
   async enableSync(projectId: string, projectPath: string): Promise<void> {
@@ -699,23 +794,32 @@ export class TeamSyncService extends EventEmitter {
     token: string,
     user: { id: string; email: string; name?: string }
   ): Promise<{ success: boolean; error?: string }> {
+    // Clear previous user's state completely before setting up new user
+    this.knownTeams = [];
+    const previousEmail = this.credentials?.email;
+    const isSameUser = previousEmail === user.email;
+
     this.credentials = {
       email: user.email,
       sessionToken: token,
-      activeTeamId: this.credentials?.activeTeamId,
+      // Only preserve activeTeamId if same user is re-signing in
+      activeTeamId: isSameUser ? this.credentials?.activeTeamId : undefined,
       deviceId: this.deviceId
     };
     saveTeamSyncCredentials(this.credentials);
     this.convex.setAuthToken(token);
+
     const jwtOk = await this.convex.fetchAndSetConvexToken();
     if (!jwtOk) {
       console.error('[team-sync] Auth succeeded but Convex JWT exchange failed');
       this.status = {
-        ...this.status,
         connected: false,
         authenticated: false,
+        activeTeam: undefined,
+        user: { id: user.id, email: user.email, name: user.name },
+        syncedProjects: [],
+        pendingChanges: 0,
         mode: 'idle',
-        user: { id: user.id, email: user.email, name: user.name }
       };
       this.emitUpdate('auth-changed', 'JWT exchange failed — please try again');
       return { success: false, error: 'Failed to exchange token with Convex. Please try again.' };
@@ -723,16 +827,19 @@ export class TeamSyncService extends EventEmitter {
     await this.convex.connect();
 
     this.status = {
-      ...this.status,
       connected: true,
       authenticated: true,
+      activeTeam: undefined,
+      user: { id: user.id, email: user.email, name: user.name },
+      syncedProjects: [],
+      pendingChanges: 0,
       mode: 'idle',
-      user: { id: user.id, email: user.email, name: user.name }
     };
     this.emitUpdate('auth-changed', 'Authenticated successfully');
 
-    // Refresh teams
+    // Refresh teams from server, then auto-create if none exist
     await this.refreshTeams();
+    await this.ensureDefaultTeam(user);
     return { success: true };
   }
 
@@ -742,7 +849,11 @@ export class TeamSyncService extends EventEmitter {
       const response = await this.convex.authRequest('/api/team-sync/my-teams', {});
 
       if (!response.ok) {
-        console.warn('[team-sync] Failed to list teams:', response.status);
+        const body = await response.text().catch(() => '');
+        console.warn('[team-sync] Failed to list teams:', response.status, body);
+        // On failure, ensure knownTeams is empty so ensureDefaultTeam can run
+        this.knownTeams = [];
+        this.status = { ...this.status, activeTeam: undefined };
         return;
       }
 
@@ -782,7 +893,47 @@ export class TeamSyncService extends EventEmitter {
       }
     } catch (error) {
       console.warn('[team-sync] Failed to refresh teams:', error);
+      // On error, clear teams so ensureDefaultTeam has a chance to create one
+      this.knownTeams = [];
+      this.status = { ...this.status, activeTeam: undefined };
     }
+  }
+
+  /**
+   * Auto-create a default team/organization for the user if they don't have one.
+   * Like PokerMarketing, each user automatically gets an organization.
+   */
+  private async ensureDefaultTeam(user: { id: string; email: string; name?: string }): Promise<void> {
+    if (this.knownTeams.length > 0) return; // Already has teams
+
+    const teamName = user.name || user.email.split('@')[0];
+    console.log(`[team-sync] No teams found, auto-creating team "${teamName}" for user`);
+
+    try {
+      const result = await this.createTeam(teamName);
+      if (result.success && result.data) {
+        console.log(`[team-sync] Auto-created team: ${result.data.name} (${result.data.id})`);
+        this.emitUpdate('team-changed', `Team "${result.data.name}" created automatically`);
+      } else {
+        console.error('[team-sync] Failed to auto-create team:', result.error);
+        this.emitUpdate('sync-error', `Failed to create default team: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('[team-sync] Error auto-creating team:', error);
+      this.emitUpdate('sync-error', `Error creating default team: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  /**
+   * Emit an update event so the UI knows a team-related action completed.
+   * This method is intentionally a no-op for auto-sync —
+   * the actual sync is triggered when the renderer calls enableSync() with a projectId,
+   * because this service doesn't track which project is active in the Electron UI.
+   */
+  private async autoEnableSyncIfPossible(): Promise<void> {
+    // The service doesn't have direct access to the active project from the renderer.
+    // Emit an event so the renderer can decide whether to enable sync.
+    this.emitUpdate('team-changed', 'Team joined — enable sync for your project in settings');
   }
 
   private async disableAllSync(): Promise<void> {

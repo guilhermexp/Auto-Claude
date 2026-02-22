@@ -8,16 +8,20 @@ import { useTeamSyncStore } from '../../stores/team-sync-store';
 
 export function LoginGate() {
   const { t } = useTranslation(['team', 'common']);
-  const { signin, signup, isLoading, error } = useTeamSyncStore();
+  const { signin, signup, joinTeam, isLoading, error } = useTeamSyncStore();
 
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
 
   const handleSubmit = async () => {
     if (mode === 'signup') {
-      await signup(email, name || email.split('@')[0], password);
+      const success = await signup(email, name || email.split('@')[0], password);
+      if (success && inviteCode.trim()) {
+        await joinTeam(inviteCode.trim());
+      }
     } else {
       await signin(email, password);
     }
@@ -86,6 +90,30 @@ export function LoginGate() {
               autoComplete={isSignUp ? 'new-password' : 'current-password'}
             />
           </div>
+
+          {isSignUp && (
+            <div className="space-y-2">
+              <Label htmlFor="gate-invite-code">
+                {t('team:auth.inviteCode')}
+                <span className="ml-1 text-xs text-muted-foreground font-normal">
+                  ({t('common:labels.optional')})
+                </span>
+              </Label>
+              <Input
+                id="gate-invite-code"
+                value={inviteCode}
+                onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                placeholder="ABCD1234"
+                disabled={isLoading}
+                autoComplete="off"
+                maxLength={8}
+                className="font-mono tracking-wider"
+              />
+              <p className="text-xs text-muted-foreground">
+                {t('team:auth.inviteCodeHint')}
+              </p>
+            </div>
+          )}
 
           {error && (
             <p className="text-sm text-destructive">{error}</p>

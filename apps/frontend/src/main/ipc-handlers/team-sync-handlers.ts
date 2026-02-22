@@ -2,7 +2,7 @@ import { ipcMain } from 'electron';
 import type { BrowserWindow } from 'electron';
 import { IPC_CHANNELS } from '../../shared/constants';
 import type { IPCResult } from '../../shared/types';
-import type { TeamSyncMember, TeamSyncStatus, TeamSyncTeam } from '../../shared/types/team-sync';
+import type { TeamSyncInvitation, TeamSyncInviteResult, TeamSyncMember, TeamSyncStatus, TeamSyncTeam } from '../../shared/types/team-sync';
 import { getTeamSyncService } from '../team-sync/team-sync-service';
 
 function requireService() {
@@ -187,6 +187,33 @@ export function registerTeamSyncHandlers(getMainWindow: () => BrowserWindow | nu
       return { success: true };
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : 'Failed to force pull' };
+    }
+  });
+
+  ipcMain.handle(IPC_CHANNELS.TEAM_SYNC_INVITE_MEMBER, async (_, organizationId: string, email: string, role?: string): Promise<IPCResult<TeamSyncInviteResult>> => {
+    try {
+      const data = await requireService().inviteMember(organizationId, email, role);
+      return { success: true, data };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to invite member' };
+    }
+  });
+
+  ipcMain.handle(IPC_CHANNELS.TEAM_SYNC_ACCEPT_INVITATION, async (_, invitationId: string): Promise<IPCResult<{ organizationId: string; name: string }>> => {
+    try {
+      const data = await requireService().acceptInvitation(invitationId);
+      return { success: true, data };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to accept invitation' };
+    }
+  });
+
+  ipcMain.handle(IPC_CHANNELS.TEAM_SYNC_LIST_INVITATIONS, async (_, organizationId: string): Promise<IPCResult<TeamSyncInvitation[]>> => {
+    try {
+      const data = await requireService().listInvitations(organizationId);
+      return { success: true, data };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to list invitations' };
     }
   });
 }

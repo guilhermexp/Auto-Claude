@@ -83,3 +83,19 @@ export interface TeamSyncAuthResult {
   user: TeamSyncUser;
   expiresAt?: string;
 }
+
+export interface TeamSyncInvitation {
+  id: string;
+  email: string;
+  role: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'canceled' | 'expired';
+  expiresAt?: string;
+  organizationId?: string;
+}
+
+export interface TeamSyncInviteResult {
+  invitationId: string;
+  email: string;
+  role: string;
+  status: string;
+}

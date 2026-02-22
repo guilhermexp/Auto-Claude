@@ -1,6 +1,6 @@
 import { IPC_CHANNELS } from '../../../shared/constants';
 import type { IPCResult } from '../../../shared/types';
-import type { TeamSyncMember, TeamSyncStatus, TeamSyncTeam, TeamSyncUpdate } from '../../../shared/types/team-sync';
+import type { TeamSyncInvitation, TeamSyncInviteResult, TeamSyncMember, TeamSyncStatus, TeamSyncTeam, TeamSyncUpdate } from '../../../shared/types/team-sync';
 import { createIpcListener, invokeIpc, type IpcListenerCleanup } from './ipc-utils';
 
 export interface TeamSyncAPI {
@@ -19,6 +19,9 @@ export interface TeamSyncAPI {
   disable: (projectId: string) => Promise<IPCResult>;
   forcePush: (projectId: string) => Promise<IPCResult>;
   forcePull: (projectId: string) => Promise<IPCResult>;
+  inviteMember: (organizationId: string, email: string, role?: string) => Promise<IPCResult<TeamSyncInviteResult>>;
+  acceptInvitation: (invitationId: string) => Promise<IPCResult<{ organizationId: string; name: string }>>;
+  listInvitations: (organizationId: string) => Promise<IPCResult<TeamSyncInvitation[]>>;
   onUpdate: (callback: (update: TeamSyncUpdate) => void) => IpcListenerCleanup;
 }
 
@@ -41,6 +44,12 @@ export const createTeamSyncAPI = (): TeamSyncAPI => ({
   disable: (projectId: string) => invokeIpc<IPCResult>(IPC_CHANNELS.TEAM_SYNC_DISABLE, projectId),
   forcePush: (projectId: string) => invokeIpc<IPCResult>(IPC_CHANNELS.TEAM_SYNC_FORCE_PUSH, projectId),
   forcePull: (projectId: string) => invokeIpc<IPCResult>(IPC_CHANNELS.TEAM_SYNC_FORCE_PULL, projectId),
+  inviteMember: (organizationId: string, email: string, role?: string) =>
+    invokeIpc<IPCResult<TeamSyncInviteResult>>(IPC_CHANNELS.TEAM_SYNC_INVITE_MEMBER, organizationId, email, role),
+  acceptInvitation: (invitationId: string) =>
+    invokeIpc<IPCResult<{ organizationId: string; name: string }>>(IPC_CHANNELS.TEAM_SYNC_ACCEPT_INVITATION, invitationId),
+  listInvitations: (organizationId: string) =>
+    invokeIpc<IPCResult<TeamSyncInvitation[]>>(IPC_CHANNELS.TEAM_SYNC_LIST_INVITATIONS, organizationId),
   onUpdate: (callback: (update: TeamSyncUpdate) => void): IpcListenerCleanup =>
     createIpcListener<[TeamSyncUpdate]>(IPC_CHANNELS.TEAM_SYNC_UPDATE, callback)
 });

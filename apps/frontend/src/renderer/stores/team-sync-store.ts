@@ -1,10 +1,11 @@
 import { create } from 'zustand';
-import type { TeamSyncMember, TeamSyncStatus, TeamSyncTeam, TeamSyncUpdate } from '../../shared/types/team-sync';
+import type { TeamSyncInvitation, TeamSyncMember, TeamSyncStatus, TeamSyncTeam, TeamSyncUpdate } from '../../shared/types/team-sync';
 
 interface TeamSyncState {
   status: TeamSyncStatus;
   teams: TeamSyncTeam[];
   members: TeamSyncMember[];
+  invitations: TeamSyncInvitation[];
   updates: TeamSyncUpdate[];
   isLoading: boolean;
   error: string | null;
@@ -20,6 +21,10 @@ interface TeamSyncState {
   joinTeam: (inviteCode: string) => Promise<boolean>;
   fetchTeams: () => Promise<void>;
   fetchMembers: (teamId: string) => Promise<void>;
+  removeMember: (teamId: string, memberId: string) => Promise<boolean>;
+  inviteMember: (orgId: string, email: string, role?: string) => Promise<boolean>;
+  acceptInvitation: (invitationId: string) => Promise<boolean>;
+  loadInvitations: (orgId: string) => Promise<void>;
   enableSync: (projectId: string, projectPath: string) => Promise<boolean>;
   disableSync: (projectId: string) => Promise<boolean>;
   forcePush: (projectId: string) => Promise<boolean>;
@@ -41,6 +46,7 @@ export const useTeamSyncStore = create<TeamSyncState>((set, get) => ({
   status: EMPTY_STATUS,
   teams: [],
   members: [],
+  invitations: [],
   updates: [],
   isLoading: false,
   error: null,
@@ -149,6 +155,53 @@ export const useTeamSyncStore = create<TeamSyncState>((set, get) => ({
       return;
     }
     set({ members: result.data, error: null });
+  },
+
+  removeMember: async (teamId, memberId) => {
+    const result = await window.electronAPI.teamSync.removeMember(teamId, memberId);
+    if (!result.success) {
+      set({ error: result.error || 'team:errors.removeMember' });
+      return false;
+    }
+    set((state) => ({
+      members: state.members.filter((m) => m.id !== memberId),
+      error: null
+    }));
+    return true;
+  },
+
+  inviteMember: async (orgId, email, role) => {
+    set({ isLoading: true, error: null });
+    const result = await window.electronAPI.teamSync.inviteMember(orgId, email, role);
+    set({ isLoading: false });
+    if (!result.success) {
+      set({ error: result.error || 'team:invitations.errors.sendFailed' });
+      return false;
+    }
+    // Refresh invitations list
+    await get().loadInvitations(orgId);
+    return true;
+  },
+
+  acceptInvitation: async (invitationId) => {
+    set({ isLoading: true, error: null });
+    const result = await window.electronAPI.teamSync.acceptInvitation(invitationId);
+    set({ isLoading: false });
+    if (!result.success) {
+      set({ error: result.error || 'team:invitations.errors.acceptFailed' });
+      return false;
+    }
+    await Promise.all([get().fetchTeams(), get().fetchStatus()]);
+    return true;
+  },
+
+  loadInvitations: async (orgId) => {
+    const result = await window.electronAPI.teamSync.listInvitations(orgId);
+    if (!result.success || !result.data) {
+      set({ invitations: [] });
+      return;
+    }
+    set({ invitations: result.data, error: null });
   },
 
   enableSync: async (projectId, projectPath) => {

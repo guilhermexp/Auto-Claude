@@ -15,7 +15,9 @@
     "signOut": "Se déconnecter",
     "signUp": "S'inscrire",
     "noAccount": "Pas encore de compte ?",
-    "hasAccount": "Déjà un compte ?"
+    "hasAccount": "Déjà un compte ?",
+    "inviteCode": "Code d'invitation",
+    "inviteCodeHint": "Si quelqu'un vous a invité dans une équipe, collez le code ici."
   },
   "status": {
     "connected": "Connecté",
@@ -27,6 +29,11 @@
     "pending": "En attente",
     "connectedToTeam": "Connecté à {{team}}"
   },
+  "roles": {
+    "owner": "Propriétaire",
+    "admin": "Admin",
+    "member": "Membre"
+  },
   "manage": {
     "createTeam": "Créer une équipe",
     "teamName": "Nom de l'équipe",
@@ -35,8 +42,12 @@
     "join": "Rejoindre",
     "teams": "Équipes",
     "noTeams": "Aucune équipe connectée.",
-    "members": "Membres (équipe active)",
-    "noMembers": "Aucun membre chargé."
+    "members": "Membres",
+    "noMembers": "Aucun membre chargé.",
+    "onlyYou": "Juste vous pour le moment. Invitez des membres ci-dessus.",
+    "you": "vous",
+    "removeMember": "Retirer le membre",
+    "removed": "Membre retiré"
   },
   "sync": {
     "currentProject": "Projet actuel",
@@ -54,6 +65,7 @@
     "joinTeam": "Échec de la jointure d'équipe",
     "loadTeams": "Échec du chargement des équipes",
     "loadMembers": "Échec du chargement des membres",
+    "removeMember": "Échec de la suppression du membre",
     "enableSync": "Échec de l'activation de la synchronisation",
     "disableSync": "Échec de la désactivation de la synchronisation",
     "forcePush": "Échec du push forcé",
@@ -64,6 +76,29 @@
     "idle": "Inactif",
     "syncing": "Synchronisation",
     "error": "Erreur"
+  },
+  "invitations": {
+    "title": "Invitations",
+    "invite": "Inviter un membre",
+    "description": "Invitez des personnes par email pour accéder à cette équipe et collaborer.",
+    "email": "email@exemple.com",
+    "role": "Rôle",
+    "send": "Inviter",
+    "pending": "Invitations en attente",
+    "accept": "Accepter l'invitation",
+    "tokenPlaceholder": "Collez l'ID d'invitation",
+    "copyToken": "Copier le token d'invitation",
+    "token": "Token",
+    "sent": "Invitation envoyée !",
+    "accepted": "Invitation acceptée !",
+    "noInvitations": "Aucune invitation en attente",
+    "expiresAt": "expire le",
+    "expired": "Expirée",
+    "errors": {
+      "emailRequired": "L'email est requis",
+      "sendFailed": "Échec de l'envoi de l'invitation",
+      "acceptFailed": "Échec de l'acceptation de l'invitation"
+    }
   },
   "events": {
     "title": "Événements récents",

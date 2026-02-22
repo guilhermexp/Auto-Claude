@@ -299,6 +299,9 @@ const browserMockAPI: ElectronAPI = {
     disable: async () => ({ success: true }),
     forcePush: async () => ({ success: true }),
     forcePull: async () => ({ success: true }),
+    inviteMember: async () => ({ success: true, data: { invitationId: 'mock-inv', email: '', role: 'member', status: 'pending' } }),
+    acceptInvitation: async () => ({ success: true, data: { organizationId: 'mock-org', name: 'Mock Org' } }),
+    listInvitations: async () => ({ success: true, data: [] }),
     onUpdate: () => () => {}
   },
 

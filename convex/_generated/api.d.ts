@@ -13,10 +13,11 @@ import type * as helpers from "../helpers.js";
 import type * as http from "../http.js";
 import type * as ideation from "../ideation.js";
 import type * as insights from "../insights.js";
+import type * as inviteCodes from "../inviteCodes.js";
+import type * as orgMemberships from "../orgMemberships.js";
 import type * as projects from "../projects.js";
 import type * as roadmap from "../roadmap.js";
 import type * as tasks from "../tasks.js";
-import type * as teams from "../teams.js";
 
 import type {
   ApiFromModules,
@@ -30,10 +31,11 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   ideation: typeof ideation;
   insights: typeof insights;
+  inviteCodes: typeof inviteCodes;
+  orgMemberships: typeof orgMemberships;
   projects: typeof projects;
   roadmap: typeof roadmap;
   tasks: typeof tasks;
-  teams: typeof teams;
 }>;
 
 /**

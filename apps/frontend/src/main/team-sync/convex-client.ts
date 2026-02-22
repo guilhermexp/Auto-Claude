@@ -141,25 +141,39 @@ export class TeamSyncConvexClient {
   }
 
   /**
-   * Execute a Convex query (one-shot).
+   * Execute a Convex query (one-shot) with automatic JWT retry on auth errors.
    */
   async query<T = unknown>(name: string, args: Record<string, unknown> = {}): Promise<T> {
     if (!this.httpClient) {
       await this.connect();
     }
     const ref = buildFunctionRef(name, "query");
-    return await this.httpClient!.query(ref, args) as T;
+    try {
+      return await this.httpClient!.query(ref, args) as T;
+    } catch (error) {
+      if (this.isAuthError(error)) {
+        return await this.retryWithAuth(() => this.httpClient!.query(ref, args) as Promise<T>);
+      }
+      throw error;
+    }
   }
 
   /**
-   * Execute a Convex mutation.
+   * Execute a Convex mutation with automatic JWT retry on auth errors.
    */
   async mutation<T = unknown>(name: string, args: Record<string, unknown> = {}): Promise<T> {
     if (!this.wsClient) {
       await this.connect();
     }
     const ref = buildFunctionRef(name, "mutation");
-    return await this.wsClient!.mutation(ref, args) as T;
+    try {
+      return await this.wsClient!.mutation(ref, args) as T;
+    } catch (error) {
+      if (this.isAuthError(error)) {
+        return await this.retryWithAuth(() => this.wsClient!.mutation(ref, args) as Promise<T>);
+      }
+      throw error;
+    }
   }
 
   /**
@@ -211,26 +225,65 @@ export class TeamSyncConvexClient {
   }
 
   /**
-   * Call a Better Auth HTTP endpoint directly.
+   * Call a Better Auth HTTP endpoint directly with automatic retry on 401.
    */
   async authRequest(
     path: string,
     body?: Record<string, unknown>,
     method: "GET" | "POST" = "POST"
   ): Promise<Response> {
-    const url = `${this.siteUrl}${path}`;
-    const headers: Record<string, string> = {
-      "Content-Type": "application/json",
+    const doFetch = () => {
+      const url = `${this.siteUrl}${path}`;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (this.authToken) {
+        headers["Authorization"] = `Bearer ${this.authToken}`;
+      }
+
+      return fetch(url, {
+        method,
+        headers,
+        body: method === "POST" ? JSON.stringify(body) : undefined,
+      });
     };
-    if (this.authToken) {
-      headers["Authorization"] = `Bearer ${this.authToken}`;
+
+    const response = await doFetch();
+
+    // Retry once on 401 by refreshing the Convex JWT
+    if (response.status === 401 && this.authToken) {
+      console.warn(`[team-sync] Got 401 on ${path}, attempting JWT refresh and retry...`);
+      const refreshed = await this.fetchAndSetConvexToken();
+      if (refreshed) {
+        return doFetch();
+      }
+      console.error(`[team-sync] JWT refresh failed, returning original 401 response`);
     }
 
-    return fetch(url, {
-      method,
-      headers,
-      body: method === "POST" ? JSON.stringify(body) : undefined,
-    });
+    return response;
+  }
+
+  /**
+   * Check if an error is an auth/unauthorized error.
+   */
+  private isAuthError(error: unknown): boolean {
+    if (error instanceof Error) {
+      const msg = error.message.toLowerCase();
+      return msg.includes("unauthenticated") || msg.includes("unauthorized") || msg.includes("401");
+    }
+    return false;
+  }
+
+  /**
+   * Retry an operation after refreshing the JWT token.
+   */
+  private async retryWithAuth<T>(operation: () => Promise<T>): Promise<T> {
+    console.warn("[team-sync] Auth error detected, refreshing JWT and retrying...");
+    const refreshed = await this.fetchAndSetConvexToken();
+    if (!refreshed) {
+      throw new Error("Authentication failed: unable to refresh token. Please sign out and sign in again.");
+    }
+    return operation();
   }
 }
 
