@@ -21,6 +21,7 @@ import { writeFileAtomicSync } from '../../utils/atomic-file';
 import { findTaskWorktree } from '../../worktree-paths';
 import { projectStore } from '../../project-store';
 import { getIsolatedGitEnv, detectWorktreeBranch } from '../../utils/git-isolation';
+import { getTeamSyncService } from '../../team-sync/team-sync-service';
 
 /**
  * Safe file read that handles missing files without TOCTOU issues.
@@ -136,6 +137,25 @@ export function registerTaskExecutionHandlers(
           'Task or project not found'
         );
         return;
+      }
+
+      // Team Sync preflight: avoid continuing outdated tasks when local repo/specs changed
+      // after the last sync baseline.
+      const teamSync = getTeamSyncService();
+      if (teamSync) {
+        const syncStatus = teamSync.getSyncStatus();
+        const isProjectSynced = teamSync.isSyncEnabled(project.id);
+        if (syncStatus.authenticated && isProjectSynced) {
+          const alignment = teamSync.checkProjectAlignment(project.path);
+          if (!alignment.aligned) {
+            mainWindow.webContents.send(
+              IPC_CHANNELS.TASK_ERROR,
+              taskId,
+              `Projeto desalinhado com o baseline de sync. ${alignment.reason} Execute a reanálise e ajuste a tarefa antes de continuar.`
+            );
+            return;
+          }
+        }
       }
 
       // Check git status - Auto Claude requires git for worktree-based builds

@@ -302,6 +302,17 @@ const browserMockAPI: ElectronAPI = {
     inviteMember: async () => ({ success: true, data: { invitationId: 'mock-inv', email: '', role: 'member', status: 'pending' } }),
     acceptInvitation: async () => ({ success: true, data: { organizationId: 'mock-org', name: 'Mock Org' } }),
     listInvitations: async () => ({ success: true, data: [] }),
+    checkAlignment: async () => ({
+      success: true,
+      data: {
+        aligned: true,
+        reason: 'Mock aligned',
+        changedFiles: [],
+        checkedAt: new Date().toISOString()
+      }
+    }),
+    markAligned: async () => ({ success: true }),
+    clearLocalState: async () => ({ success: true }),
     onUpdate: () => () => {}
   },
 

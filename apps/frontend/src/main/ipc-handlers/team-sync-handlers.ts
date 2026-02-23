@@ -2,7 +2,7 @@ import { ipcMain } from 'electron';
 import type { BrowserWindow } from 'electron';
 import { IPC_CHANNELS } from '../../shared/constants';
 import type { IPCResult } from '../../shared/types';
-import type { TeamSyncInvitation, TeamSyncInviteResult, TeamSyncMember, TeamSyncStatus, TeamSyncTeam } from '../../shared/types/team-sync';
+import type { TeamSyncAlignmentCheck, TeamSyncInvitation, TeamSyncInviteResult, TeamSyncMember, TeamSyncStatus, TeamSyncTeam } from '../../shared/types/team-sync';
 import { getTeamSyncService } from '../team-sync/team-sync-service';
 
 function requireService() {
@@ -214,6 +214,33 @@ export function registerTeamSyncHandlers(getMainWindow: () => BrowserWindow | nu
       return { success: true, data };
     } catch (error) {
       return { success: false, error: error instanceof Error ? error.message : 'Failed to list invitations' };
+    }
+  });
+
+  ipcMain.handle(IPC_CHANNELS.TEAM_SYNC_CHECK_ALIGNMENT, async (_, projectPath: string): Promise<IPCResult<TeamSyncAlignmentCheck>> => {
+    try {
+      const data = requireService().checkProjectAlignment(projectPath);
+      return { success: true, data };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to check alignment' };
+    }
+  });
+
+  ipcMain.handle(IPC_CHANNELS.TEAM_SYNC_MARK_ALIGNED, async (_, projectPath: string): Promise<IPCResult> => {
+    try {
+      requireService().markProjectAligned(projectPath);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to mark aligned' };
+    }
+  });
+
+  ipcMain.handle(IPC_CHANNELS.TEAM_SYNC_CLEAR_LOCAL_STATE, async (_, projectPaths?: string[]): Promise<IPCResult> => {
+    try {
+      await requireService().clearLocalState(projectPaths || []);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error instanceof Error ? error.message : 'Failed to clear local state' };
     }
   });
 }

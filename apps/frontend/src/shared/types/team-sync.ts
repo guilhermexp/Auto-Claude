@@ -99,3 +99,12 @@ export interface TeamSyncInviteResult {
   role: string;
   status: string;
 }
+
+export interface TeamSyncAlignmentCheck {
+  aligned: boolean;
+  reason: string;
+  gitHead?: string;
+  previousGitHead?: string;
+  changedFiles: string[];
+  checkedAt: string;
+}

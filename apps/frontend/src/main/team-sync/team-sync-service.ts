@@ -1,7 +1,7 @@
 import { EventEmitter } from 'node:events';
 import { basename, join } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, readdirSync, statSync, rmSync } from 'node:fs';
 import { TeamSyncConvexClient } from './convex-client';
 import { TeamSyncFileWatcher, type TeamSyncFileEvent } from './file-watcher';
 import { TeamSyncRevisionEngine } from './sync-engine';
@@ -16,6 +16,7 @@ import type {
   ProjectIdentity,
   TeamSyncInvitation,
   TeamSyncInviteResult,
+  TeamSyncAlignmentCheck,
   TeamSyncMember,
   TeamSyncStatus,
   TeamSyncTeam,
@@ -32,6 +33,12 @@ interface ActiveProjectSync {
   projectPath: string;
   convexProjectId?: string; // Convex _id for the project document
   unsubscribers: Array<() => void>;
+}
+
+interface ProjectAlignmentSnapshot {
+  gitHead: string;
+  filesFingerprint: string;
+  updatedAt: string;
 }
 
 function canonicalizeRemote(remoteUrl: string): string {
@@ -626,6 +633,7 @@ export class TeamSyncService extends EventEmitter {
 
     try {
       await this.pushAllLocalData(sync);
+      this.markProjectAligned(sync.projectPath);
     } catch (error) {
       console.error('[team-sync] Force push failed:', error);
     }
@@ -671,6 +679,7 @@ export class TeamSyncService extends EventEmitter {
         { projectId: sync.convexProjectId }
       );
       this.handleRemoteIdeationUpdate(projectId, sync.projectPath, ideation);
+      this.markProjectAligned(sync.projectPath);
     } catch (error) {
       console.error('[team-sync] Force pull failed:', error);
     }
@@ -786,6 +795,94 @@ export class TeamSyncService extends EventEmitter {
     } catch {
       return null;
     }
+  }
+
+  checkProjectAlignment(projectPath: string): TeamSyncAlignmentCheck {
+    const checkedAt = new Date().toISOString();
+    const previous = this.readAlignmentSnapshot(projectPath);
+    const current = this.createAlignmentSnapshot(projectPath);
+
+    if (!current) {
+      return {
+        aligned: false,
+        reason: 'Não foi possível ler estado local do projeto para validar alinhamento',
+        changedFiles: [],
+        checkedAt
+      };
+    }
+
+    if (!previous) {
+      return {
+        aligned: false,
+        reason: 'Projeto sem baseline local de sync. Execute reanálise e sincronização inicial.',
+        gitHead: current.gitHead,
+        changedFiles: [],
+        checkedAt
+      };
+    }
+
+    const changedFiles: string[] = [];
+    if (previous.filesFingerprint !== current.filesFingerprint) {
+      changedFiles.push('.auto-claude/*');
+    }
+
+    if (previous.gitHead !== current.gitHead || changedFiles.length > 0) {
+      return {
+        aligned: false,
+        reason: 'Mudanças locais detectadas após último alinhamento. Reanalise antes de continuar tarefas antigas.',
+        gitHead: current.gitHead,
+        previousGitHead: previous.gitHead,
+        changedFiles,
+        checkedAt
+      };
+    }
+
+    return {
+      aligned: true,
+      reason: 'Projeto alinhado com baseline local',
+      gitHead: current.gitHead,
+      previousGitHead: previous.gitHead,
+      changedFiles,
+      checkedAt
+    };
+  }
+
+  markProjectAligned(projectPath: string): void {
+    const snapshot = this.createAlignmentSnapshot(projectPath);
+    if (!snapshot) return;
+    this.writeAlignmentSnapshot(projectPath, snapshot);
+  }
+
+  async clearLocalState(projectPaths: string[] = []): Promise<void> {
+    await this.watcher.closeAll();
+    await this.convex.disconnect();
+    clearTeamSyncCredentials();
+    this.credentials = null;
+    this.knownTeams = [];
+    this.activeSyncs.clear();
+    this.convex.setAuthToken(undefined);
+    this.status = {
+      connected: false,
+      authenticated: false,
+      activeTeam: undefined,
+      user: undefined,
+      syncedProjects: [],
+      pendingChanges: 0,
+      mode: 'idle'
+    };
+
+    for (const projectPath of projectPaths) {
+      const alignmentPath = this.getAlignmentSnapshotPath(projectPath);
+      if (existsSync(alignmentPath)) {
+        rmSync(alignmentPath, { force: true });
+      }
+      const teamSyncDir = join(projectPath, '.auto-claude', 'team-sync');
+      if (existsSync(teamSyncDir)) {
+        rmSync(teamSyncDir, { recursive: true, force: true });
+      }
+    }
+
+    this.emitUpdate('auth-changed', 'Team Sync local state cleared');
   }
 
   // --- Private methods ---
@@ -984,6 +1081,7 @@ export class TeamSyncService extends EventEmitter {
 
     try {
       await this.pushFileChange(sync, event);
+      this.markProjectAligned(sync.projectPath);
     } catch (error) {
       console.warn('[team-sync] Failed to push file change:', error);
     }
@@ -1315,6 +1413,82 @@ export class TeamSyncService extends EventEmitter {
   private writeRemoteFile(filePath: string, content: string): void {
     this.watcher.markRemoteWrite(filePath);
     writeFileSync(filePath, content, 'utf-8');
+  }
+
+  private getAlignmentSnapshotPath(projectPath: string): string {
+    return join(projectPath, '.auto-claude', 'team-sync', 'alignment-state.json');
+  }
+
+  private readAlignmentSnapshot(projectPath: string): ProjectAlignmentSnapshot | null {
+    const path = this.getAlignmentSnapshotPath(projectPath);
+    if (!existsSync(path)) return null;
+    try {
+      return JSON.parse(readFileSync(path, 'utf-8')) as ProjectAlignmentSnapshot;
+    } catch {
+      return null;
+    }
+  }
+
+  private writeAlignmentSnapshot(projectPath: string, snapshot: ProjectAlignmentSnapshot): void {
+    const path = this.getAlignmentSnapshotPath(projectPath);
+    this.ensureDir(join(projectPath, '.auto-claude', 'team-sync'));
+    writeFileSync(path, JSON.stringify(snapshot, null, 2), 'utf-8');
+  }
+
+  private createAlignmentSnapshot(projectPath: string): ProjectAlignmentSnapshot | null {
+    try {
+      const gitHead = this.getGitHead(projectPath);
+      const filesFingerprint = this.calculateProjectFingerprint(projectPath);
+      return {
+        gitHead,
+        filesFingerprint,
+        updatedAt: new Date().toISOString()
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  private getGitHead(projectPath: string): string {
+    try {
+      return execFileSync('git', ['-C', projectPath, 'rev-parse', 'HEAD'], {
+        encoding: 'utf-8',
+        timeout: 5000
+      }).trim();
+    } catch {
+      return 'no-git-head';
+    }
+  }
+
+  private calculateProjectFingerprint(projectPath: string): string {
+    const targets = [
+      join(projectPath, '.auto-claude', 'specs'),
+      join(projectPath, '.auto-claude', 'roadmap', 'roadmap.json'),
+      join(projectPath, '.auto-claude', 'ideation', 'ideation.json'),
+      join(projectPath, '.auto-claude', 'insights', 'sessions')
+    ];
+
+    const parts: string[] = [];
+    for (const target of targets) {
+      if (!existsSync(target)) continue;
+      const stat = statSync(target);
+      if (stat.isFile()) {
+        parts.push(`${target}:${stat.size}:${stat.mtimeMs}`);
+        continue;
+      }
+
+      if (stat.isDirectory()) {
+        const entries = readdirSync(target, { withFileTypes: true });
+        for (const entry of entries) {
+          const full = join(target, entry.name);
+          if (!entry.isFile()) continue;
+          const fileStat = statSync(full);
+          parts.push(`${full}:${fileStat.size}:${fileStat.mtimeMs}`);
+        }
+      }
+    }
+
+    return parts.sort().join('|');
   }
 }
 
