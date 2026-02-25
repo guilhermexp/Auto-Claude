@@ -374,7 +374,6 @@ export function Insights({ projectId }: InsightsProps) {
     textareaRef.current?.focus();
   };
 
-  const isLoading = status.phase === 'thinking' || status.phase === 'streaming';
   const messages = session?.messages || [];
   const translationEntries = useMemo(() => {
     if (!isPortugueseUi || !isTranslationEnabled) {

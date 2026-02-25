@@ -1,7 +1,8 @@
 import { pythonEnvManager } from '../../../python-env-manager';
 import { getGitHubTokenForSubprocess } from '../utils';
-import { getSentryEnvForSubprocess } from '../../../sentry';
+import { getSentryEnvForSubprocess, safeBreadcrumb } from '../../../sentry';
 import { resolveAuthEnvForFeature } from '../../../auth-profile-routing';
+import { getToolInfo } from '../../../cli-tool-manager';
 
 /**
  * Get environment variables for Python runner subprocesses.

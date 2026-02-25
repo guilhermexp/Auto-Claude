@@ -129,8 +129,8 @@ export function RoadmapTabs({
                           </Badge>
                         )}
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
               </Card>
             );

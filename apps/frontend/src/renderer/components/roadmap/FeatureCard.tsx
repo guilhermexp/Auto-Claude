@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { ExternalLink, Play, TrendingUp } from 'lucide-react';
+import { Archive, ExternalLink, Play, TrendingUp } from 'lucide-react';
 import { TaskOutcomeBadge, getTaskOutcomeColorClass } from './TaskOutcomeBadge';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
@@ -83,27 +83,14 @@ export function FeatureCard({
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                onGoToTask(feature.linkedSpecId!);
+                onConvertToSpec(feature);
               }}
             >
               <Play className="h-3 w-3 mr-1" />
               {t('featureCard.build')}
             </Button>
-          ) : (
-            feature.status !== 'done' && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onConvertToSpec(feature);
-                }}
-              >
-                <Play className="h-3 w-3 mr-1" />
-                {t('roadmap.build')}
-              </Button>
-            )
-          )}
+          )
+        )}
           {feature.status === 'done' && onArchive && (
             <Button
               variant="ghost"
@@ -119,7 +106,6 @@ export function FeatureCard({
             </Button>
           )}
         </div>
-      </div>
     </Card>
   );
 }

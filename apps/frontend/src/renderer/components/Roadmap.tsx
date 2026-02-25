@@ -338,16 +338,6 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
     ensureTranslations,
   } = useTextTranslation('pt');
 
-  const {
-    isEnabled: isTranslationEnabled,
-    isTranslating,
-    lastError,
-    toggleEnabled: toggleTranslation,
-    clearError: clearTranslationError,
-    getText: getTranslatedText,
-    ensureTranslations,
-  } = useTextTranslation('pt');
-
   // Custom hooks
   const { roadmap, competitorAnalysis, generationStatus } = useRoadmapData(projectId);
   const { convertFeatureToSpec } = useFeatureActions();

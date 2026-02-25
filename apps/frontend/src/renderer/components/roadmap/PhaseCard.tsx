@@ -169,7 +169,8 @@ export function PhaseCard({
                 </Button>
               )}
             </div>
-          ))}
+            );
+          })}
           {features.length > 5 && (
             <div className="text-sm text-muted-foreground text-center py-1">
               {t('phaseCard.moreFeatures', { count: features.length - 5 })}

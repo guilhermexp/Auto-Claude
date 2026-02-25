@@ -247,8 +247,8 @@ export function FeatureDetailPanel({
               {t('roadmap:featureDetail.convertToTask')}
             </Button>
           </div>
-        );
-      })()}
+        )
+      )}
 
       {/* Delete Confirmation */}
       {showDeleteConfirm && (
