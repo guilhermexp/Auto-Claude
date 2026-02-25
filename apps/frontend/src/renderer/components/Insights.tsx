@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, useDeferredValue } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Bot,
@@ -25,14 +25,22 @@ import {
   newSession,
   switchSession,
   deleteSession,
+  deleteSessions,
   renameSession,
+  archiveSession,
+  archiveSessions,
+  unarchiveSession,
   updateModelConfig,
   createTaskFromSuggestion,
+  confirmInsightsAction,
+  cancelInsightsAction,
   setupInsightsListeners
 } from '../stores/insights-store';
+import { useImageUpload } from './task-form/useImageUpload';
+import { createThumbnail, generateImageId } from './ImageUpload';
 import { loadTasks } from '../stores/task-store';
 import { ChatHistorySidebar } from './ChatHistorySidebar';
-import type { InsightsChatMessage, InsightsModelConfig } from '../../shared/types';
+import type { InsightsChatMessage, InsightsModelConfig, TaskMetadata } from '../../shared/types';
 import {
   MessageBubble,
   ToolIndicator,
@@ -94,6 +102,7 @@ export function Insights({ projectId }: InsightsProps) {
   const streamingContent = useInsightsStore((state) => state.streamingContent);
   const currentTool = useInsightsStore((state) => state.currentTool);
   const isLoadingSessions = useInsightsStore((state) => state.isLoadingSessions);
+  const pendingAction = useInsightsStore((state) => state.session?.pendingAction ?? null);
   const isPortugueseUi = i18n.resolvedLanguage === 'pt';
   const {
     isEnabled: isTranslationEnabled,
@@ -111,11 +120,12 @@ export function Insights({ projectId }: InsightsProps) {
   }), [t]);
 
   const [inputValue, setInputValue] = useState('');
-  const [creatingTask, setCreatingTask] = useState<string | null>(null);
+  const [creatingTask, setCreatingTask] = useState<Set<string>>(new Set());
   const [taskCreated, setTaskCreated] = useState<Set<string>>(new Set());
   const [isUserAtBottom, setIsUserAtBottom] = useState(true);
   const [viewportEl, setViewportEl] = useState<HTMLDivElement | null>(null);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
+  const [isSubmittingAction, setIsSubmittingAction] = useState(false);
 
   const project = useProjectStore((state) =>
     state.projects.find((item) => item.id === projectId)
@@ -123,6 +133,32 @@ export function Insights({ projectId }: InsightsProps) {
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const isUserAtBottomRef = useRef(true);
+  const scrollCheckRafRef = useRef<number | null>(null);
+
+  const isLoading = status.phase === 'thinking' || status.phase === 'streaming';
+
+  // Image upload hook
+  const {
+    isDragOver,
+    handlePaste,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    removeImage,
+    canAddMore
+  } = useImageUpload({
+    images: pendingImages,
+    onImagesChange: setPendingImages,
+    disabled: isLoading,
+    onError: setImageError,
+    errorMessages: {
+      maxImagesReached: t('insights.images.maxImagesReached'),
+      invalidImageType: t('insights.images.invalidType'),
+      processPasteFailed: t('insights.images.processFailed'),
+      processDropFailed: t('insights.images.processFailed')
+    }
+  });
 
   // Scroll threshold in pixels - user is considered "at bottom" if within this distance
   const SCROLL_BOTTOM_THRESHOLD = 100;
@@ -135,34 +171,64 @@ export function Insights({ projectId }: InsightsProps) {
 
   // Handle scroll events to track user position
   const handleScroll = useCallback(() => {
-    if (viewportEl) {
-      setIsUserAtBottom(checkIfAtBottom(viewportEl));
-    }
+    if (!viewportEl) return;
+    if (scrollCheckRafRef.current !== null) return;
+
+    scrollCheckRafRef.current = requestAnimationFrame(() => {
+      scrollCheckRafRef.current = null;
+      const nextIsAtBottom = checkIfAtBottom(viewportEl);
+      if (nextIsAtBottom === isUserAtBottomRef.current) return;
+      isUserAtBottomRef.current = nextIsAtBottom;
+      setIsUserAtBottom(nextIsAtBottom);
+    });
   }, [viewportEl, checkIfAtBottom]);
 
   // Set up scroll listener and check initial position when viewport becomes available
   useEffect(() => {
     if (viewportEl) {
       // Check initial scroll position
-      setIsUserAtBottom(checkIfAtBottom(viewportEl));
+      const nextIsAtBottom = checkIfAtBottom(viewportEl);
+      isUserAtBottomRef.current = nextIsAtBottom;
+      setIsUserAtBottom(nextIsAtBottom);
       viewportEl.addEventListener('scroll', handleScroll, { passive: true });
-      return () => viewportEl.removeEventListener('scroll', handleScroll);
+      return () => {
+        viewportEl.removeEventListener('scroll', handleScroll);
+        if (scrollCheckRafRef.current !== null) {
+          cancelAnimationFrame(scrollCheckRafRef.current);
+          scrollCheckRafRef.current = null;
+        }
+      };
     }
   }, [viewportEl, handleScroll, checkIfAtBottom]);
 
   // Load session and set up listeners on mount
   useEffect(() => {
-    loadInsightsSession(projectId);
+    loadInsightsSession(projectId, showArchived);
     const cleanup = setupInsightsListeners();
     return cleanup;
+  // biome-ignore lint/correctness/useExhaustiveDependencies: showArchived is handled by the dedicated effect below; including it here would cause duplicate loads
   }, [projectId]);
+
+  // Reload sessions when showArchived changes (skip first run to avoid duplicate load with mount effect)
+  const isFirstRun = useRef(true);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: projectId changes are handled by the mount effect above; this effect only reacts to showArchived toggles
+  useEffect(() => {
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
+    }
+    loadInsightsSessions(projectId, showArchived);
+  }, [showArchived]);
 
   // Smart auto-scroll: only scroll if user is already at bottom
   // This allows users to scroll up to read previous messages without being
   // yanked back down during streaming responses
   useEffect(() => {
     if (isUserAtBottom && viewportEl) {
-      viewportEl.scrollTop = viewportEl.scrollHeight;
+      requestAnimationFrame(() => {
+        if (!viewportEl) return;
+        viewportEl.scrollTop = viewportEl.scrollHeight;
+      });
     }
   }, [session?.messages?.length, streamingContent, currentTool, isUserAtBottom, viewportEl]);
 
@@ -171,17 +237,22 @@ export function Insights({ projectId }: InsightsProps) {
     textareaRef.current?.focus();
   }, []);
 
-  // Reset taskCreated when switching sessions
+  // Reset task creation state when switching sessions
+  // biome-ignore lint/correctness/useExhaustiveDependencies: session?.id is intentionally used as a trigger
   useEffect(() => {
     setTaskCreated(new Set());
   }, [session?.id]);
 
   const handleSend = () => {
     const message = inputValue.trim();
-    if (!message || status.phase === 'thinking' || status.phase === 'streaming') return;
+    const hasImages = pendingImages.length > 0;
+    if ((!message && !hasImages) || isLoading) return;
 
     setInputValue('');
-    sendMessage(projectId, message);
+    sendMessage(projectId, message, session?.modelConfig, hasImages ? pendingImages : undefined);
+    setPendingImages([]);
+    setImageError(null);
+    isUserAtBottomRef.current = true;
     setIsUserAtBottom(true); // Resume auto-scroll when user sends a message
   };
 
@@ -198,32 +269,117 @@ export function Insights({ projectId }: InsightsProps) {
   };
 
   const handleDeleteSession = async (sessionId: string): Promise<boolean> => {
-    return await deleteSession(projectId, sessionId);
+    return await deleteSession(projectId, sessionId, showArchived);
   };
 
   const handleRenameSession = async (sessionId: string, newTitle: string): Promise<boolean> => {
     return await renameSession(projectId, sessionId, newTitle);
   };
 
-  const handleCreateTask = async (message: InsightsChatMessage) => {
-    if (!message.suggestedTask) return;
+  const handleArchiveSession = async (sessionId: string) => {
+    try {
+      await archiveSession(projectId, sessionId);
+      await loadInsightsSessions(projectId, showArchived);
+      // Reload current session in case backend switched to a different one
+      await loadInsightsSession(projectId, showArchived);
+    } catch (error) {
+      console.error(`Failed to archive session ${sessionId}:`, error);
+    }
+  };
 
-    setCreatingTask(message.id);
+  const handleUnarchiveSession = async (sessionId: string) => {
+    try {
+      await unarchiveSession(projectId, sessionId);
+      await loadInsightsSessions(projectId, showArchived);
+      // Reload current session in case backend switched to a different one
+      await loadInsightsSession(projectId, showArchived);
+    } catch (error) {
+      console.error(`Failed to unarchive session ${sessionId}:`, error);
+    }
+  };
+
+  const handleDeleteSessions = async (sessionIds: string[]) => {
+    try {
+      const result = await deleteSessions(projectId, sessionIds);
+      await loadInsightsSessions(projectId, showArchived);
+      // Reload current session in case backend switched to a different one
+      await loadInsightsSession(projectId, showArchived);
+
+      // Log partial failures for debugging
+      if (result.failedIds && result.failedIds.length > 0) {
+        console.warn(`Failed to delete ${result.failedIds.length} session(s):`, result.failedIds);
+      }
+    } catch (error) {
+      console.error(`Failed to delete sessions ${sessionIds.join(', ')}:`, error);
+    }
+  };
+
+  const handleArchiveSessions = async (sessionIds: string[]) => {
+    try {
+      const result = await archiveSessions(projectId, sessionIds);
+      await loadInsightsSessions(projectId, showArchived);
+      // Reload current session in case backend switched to a different one
+      await loadInsightsSession(projectId, showArchived);
+
+      // Log partial failures for debugging
+      if (result.failedIds && result.failedIds.length > 0) {
+        console.warn(`Failed to archive ${result.failedIds.length} session(s):`, result.failedIds);
+      }
+    } catch (error) {
+      console.error(`Failed to archive sessions ${sessionIds.join(', ')}:`, error);
+    }
+  };
+
+  const handleToggleShowArchived = () => {
+    useInsightsStore.getState().setShowArchived(!showArchived);
+  };
+
+  const handleCreateTask = async (
+    messageId: string,
+    taskIndex: number,
+    taskData: { title: string; description: string; metadata?: TaskMetadata }
+  ) => {
+    const taskKey = `${messageId}-${taskIndex}`;
+    setCreatingTask(prev => new Set(prev).add(taskKey));
     try {
       const task = await createTaskFromSuggestion(
         projectId,
-        message.suggestedTask.title,
-        message.suggestedTask.description,
-        message.suggestedTask.metadata
+        taskData.title,
+        taskData.description,
+        taskData.metadata
       );
 
       if (task) {
-        setTaskCreated(prev => new Set(prev).add(message.id));
+        setTaskCreated(prev => new Set(prev).add(taskKey));
         // Reload tasks to show the new task in the kanban
         loadTasks(projectId);
       }
     } finally {
-      setCreatingTask(null);
+      setCreatingTask(prev => {
+        const next = new Set(prev);
+        next.delete(taskKey);
+        return next;
+      });
+    }
+  };
+
+  const handleConfirmPendingAction = async () => {
+    if (!session?.id || !pendingAction) return;
+    setIsSubmittingAction(true);
+    try {
+      await confirmInsightsAction(projectId, session.id, pendingAction.actionId);
+    } finally {
+      setIsSubmittingAction(false);
+    }
+  };
+
+  const handleCancelPendingAction = async () => {
+    if (!session?.id || !pendingAction) return;
+    setIsSubmittingAction(true);
+    try {
+      await cancelInsightsAction(projectId, session.id, pendingAction.actionId);
+    } finally {
+      setIsSubmittingAction(false);
     }
   };
 
@@ -239,14 +395,14 @@ export function Insights({ projectId }: InsightsProps) {
     textareaRef.current?.focus();
   };
 
-  const isLoading = status.phase === 'thinking' || status.phase === 'streaming';
   const messages = session?.messages || [];
+  const deferredMessages = useDeferredValue(messages);
   const translationEntries = useMemo(() => {
     if (!isPortugueseUi || !isTranslationEnabled) {
       return [];
     }
 
-    return messages.flatMap((message) => {
+    return deferredMessages.flatMap((message) => {
       if (message.role !== 'assistant') {
         return [];
       }
@@ -255,23 +411,20 @@ export function Insights({ projectId }: InsightsProps) {
         { key: `${message.id}:content`, text: message.content },
       ];
 
-      if (message.suggestedTask?.title) {
+      message.suggestedTasks?.forEach((task, index) => {
         entries.push({
-          key: `${message.id}:suggestedTaskTitle`,
-          text: message.suggestedTask.title,
+          key: `${message.id}:suggestedTaskTitle:${index}`,
+          text: task.title,
         });
-      }
-
-      if (message.suggestedTask?.description) {
         entries.push({
-          key: `${message.id}:suggestedTaskDescription`,
-          text: message.suggestedTask.description,
+          key: `${message.id}:suggestedTaskDescription:${index}`,
+          text: task.description,
         });
-      }
+      });
 
       return entries;
     });
-  }, [isPortugueseUi, isTranslationEnabled, messages]);
+  }, [isPortugueseUi, isTranslationEnabled, deferredMessages]);
 
   useEffect(() => {
     if (!isTranslationEnabled) {
@@ -296,10 +449,10 @@ export function Insights({ projectId }: InsightsProps) {
 
   const displayedMessages = useMemo(() => {
     if (!isTranslationEnabled) {
-      return messages;
+      return deferredMessages;
     }
 
-    return messages.map((message) => {
+    return deferredMessages.map((message) => {
       if (message.role !== 'assistant') {
         return message;
       }
@@ -307,22 +460,20 @@ export function Insights({ projectId }: InsightsProps) {
       return {
         ...message,
         content: getTranslatedText(`${message.id}:content`, message.content),
-        suggestedTask: message.suggestedTask
-          ? {
-              ...message.suggestedTask,
-              title: getTranslatedText(
-                `${message.id}:suggestedTaskTitle`,
-                message.suggestedTask.title
-              ),
-              description: getTranslatedText(
-                `${message.id}:suggestedTaskDescription`,
-                message.suggestedTask.description
-              ),
-            }
-          : undefined,
+        suggestedTasks: message.suggestedTasks?.map((task, index) => ({
+          ...task,
+          title: getTranslatedText(
+            `${message.id}:suggestedTaskTitle:${index}`,
+            task.title
+          ),
+          description: getTranslatedText(
+            `${message.id}:suggestedTaskDescription:${index}`,
+            task.description
+          ),
+        })),
       };
     });
-  }, [isTranslationEnabled, messages, getTranslatedText]);
+  }, [isTranslationEnabled, deferredMessages, getTranslatedText]);
 
   const isEmptySession = messages.length === 0 && !streamingContent;
   const greetingName = project?.name || t('insights:chat.defaultGreetingName', 'there');
@@ -482,11 +633,52 @@ export function Insights({ projectId }: InsightsProps) {
                       key={message.id}
                       message={message}
                       markdownComponents={markdownComponents}
-                      onCreateTask={() => handleCreateTask(message)}
-                      isCreatingTask={creatingTask === message.id}
-                      taskCreated={taskCreated.has(message.id)}
+                      onCreateTask={(taskIndex) => {
+                        const task = message.suggestedTasks?.[taskIndex];
+                        if (!task) return;
+                        void handleCreateTask(message.id, taskIndex, task);
+                      }}
+                      isCreatingTask={(taskIndex) =>
+                        creatingTask.has(`${message.id}-${taskIndex}`)
+                      }
+                      taskCreated={(taskIndex) =>
+                        taskCreated.has(`${message.id}-${taskIndex}`)
+                      }
                     />
                   ))}
+
+                  {pendingAction && pendingAction.requiresConfirmation && (
+                    <div className="rounded-lg border border-border bg-card p-4 space-y-3">
+                      <div className="text-sm font-medium">
+                        {t('insights:kanban.pendingAction.title', { intent: pendingAction.intent })}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {pendingAction.reason}
+                      </div>
+                      {pendingAction.resolvedSpecIds && pendingAction.resolvedSpecIds.length > 0 && (
+                        <div className="text-xs text-muted-foreground">
+                          {t('insights:kanban.pendingAction.ids', { ids: pendingAction.resolvedSpecIds.join(', ') })}
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={handleConfirmPendingAction}
+                          disabled={isSubmittingAction}
+                        >
+                          {isSubmittingAction ? <Loader2 className="h-4 w-4 animate-spin" /> : t('insights:kanban.pendingAction.confirm')}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleCancelPendingAction}
+                          disabled={isSubmittingAction}
+                        >
+                          {t('insights:kanban.pendingAction.cancel')}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Streaming message */}
                   {(streamingContent || currentTool) && (

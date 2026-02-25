@@ -8,7 +8,9 @@ import type {
   GitHubInvestigationResult,
   IPCResult,
   VersionSuggestion,
-  PaginatedIssuesResult
+  PaginatedIssuesResult,
+  PRStatusUpdate,
+  PollingMetadata
 } from '../../../shared/types';
 import { createIpcListener, invokeIpc, sendIpc, IpcListenerCleanup } from './ipc-utils';
 
@@ -283,6 +285,9 @@ export interface GitHubAPI {
   getPRReview: (projectId: string, prNumber: number) => Promise<PRReviewResult | null>;
   getPRReviewsBatch: (projectId: string, prNumbers: number[]) => Promise<Record<number, PRReviewResult | null>>;
 
+  // External review notification (renderer tells main process about external review completion/timeout)
+  notifyExternalReviewComplete: (projectId: string, prNumber: number, result: PRReviewResult | null) => Promise<void>;
+
   // Follow-up review operations
   checkNewCommits: (projectId: string, prNumber: number) => Promise<NewCommitsCheck>;
   checkMergeReadiness: (projectId: string, prNumber: number) => Promise<MergeReadiness>;
@@ -305,6 +310,26 @@ export interface GitHubAPI {
   ) => IpcListenerCleanup;
   onPRReviewError: (
     callback: (projectId: string, error: { prNumber: number; error: string }) => void
+  ) => IpcListenerCleanup;
+  onPRReviewStateChange: (
+    callback: (key: string, state: PRReviewStatePayload) => void
+  ) => IpcListenerCleanup;
+  onPRLogsUpdated: (
+    callback: (projectId: string, data: { prNumber: number; entryCount: number }) => void
+  ) => IpcListenerCleanup;
+
+  // PR status polling operations
+  /** Start background polling for PR status (CI checks, reviews, mergeability) */
+  startStatusPolling: (projectId: string, prNumbers: number[]) => Promise<boolean>;
+  /** Stop background polling for a project */
+  stopStatusPolling: (projectId: string) => Promise<boolean>;
+  /** Get current polling metadata (rate limits, errors, etc.) */
+  getPollingMetadata: (projectId: string) => Promise<PollingMetadata | null>;
+
+  // PR status polling event listener
+  /** Subscribe to PR status updates from background polling */
+  onPRStatusUpdate: (
+    callback: (update: PRStatusUpdate) => void
   ) => IpcListenerCleanup;
 }
 
@@ -357,6 +382,10 @@ export interface PRReviewFinding {
   endLine?: number;
   suggestedFix?: string;
   fixable: boolean;
+  validationStatus?: 'confirmed_valid' | 'dismissed_false_positive' | 'needs_human_review' | null;
+  validationExplanation?: string;
+  sourceAgents?: string[];
+  crossValidated?: boolean;
 }
 
 /**
@@ -368,7 +397,7 @@ export interface PRReviewResult {
   success: boolean;
   findings: PRReviewFinding[];
   summary: string;
-  overallStatus: 'approve' | 'request_changes' | 'comment';
+  overallStatus: 'approve' | 'request_changes' | 'comment' | 'in_progress';
   reviewId?: number;
   reviewedAt: string;
   error?: string;
@@ -384,6 +413,8 @@ export interface PRReviewResult {
   hasPostedFindings?: boolean;
   postedFindingIds?: string[];
   postedAt?: string;
+  // In-progress review tracking
+  inProgressSince?: string;
 }
 
 /**
@@ -429,6 +460,23 @@ export interface PRReviewProgress {
   prNumber: number;
   progress: number;
   message: string;
+}
+
+/**
+ * PR review state payload (emitted on state machine transitions)
+ */
+export interface PRReviewStatePayload {
+  state: string;
+  prNumber: number;
+  projectId: string;
+  isReviewing: boolean;
+  startedAt: string | null;
+  progress: PRReviewProgress | null;
+  result: PRReviewResult | null;
+  previousResult: PRReviewResult | null;
+  error: string | null;
+  isExternalReview: boolean;
+  isFollowup: boolean;
 }
 
 /**
@@ -715,6 +763,10 @@ export const createGitHubAPI = (): GitHubAPI => ({
   getPRReviewsBatch: (projectId: string, prNumbers: number[]): Promise<Record<number, PRReviewResult | null>> =>
     invokeIpc(IPC_CHANNELS.GITHUB_PR_GET_REVIEWS_BATCH, projectId, prNumbers),
 
+  // External review notification
+  notifyExternalReviewComplete: (projectId: string, prNumber: number, result: PRReviewResult | null): Promise<void> =>
+    invokeIpc(IPC_CHANNELS.GITHUB_PR_NOTIFY_EXTERNAL_REVIEW_COMPLETE, projectId, prNumber, result),
+
   // Follow-up review operations
   checkNewCommits: (projectId: string, prNumber: number): Promise<NewCommitsCheck> =>
     invokeIpc(IPC_CHANNELS.GITHUB_PR_CHECK_NEW_COMMITS, projectId, prNumber),
@@ -753,5 +805,31 @@ export const createGitHubAPI = (): GitHubAPI => ({
   onPRReviewError: (
     callback: (projectId: string, error: { prNumber: number; error: string }) => void
   ): IpcListenerCleanup =>
-    createIpcListener(IPC_CHANNELS.GITHUB_PR_REVIEW_ERROR, callback)
+    createIpcListener(IPC_CHANNELS.GITHUB_PR_REVIEW_ERROR, callback),
+
+  onPRReviewStateChange: (
+    callback: (key: string, state: PRReviewStatePayload) => void
+  ): IpcListenerCleanup =>
+    createIpcListener(IPC_CHANNELS.GITHUB_PR_REVIEW_STATE_CHANGE, callback),
+
+  onPRLogsUpdated: (
+    callback: (projectId: string, data: { prNumber: number; entryCount: number }) => void
+  ): IpcListenerCleanup =>
+    createIpcListener(IPC_CHANNELS.GITHUB_PR_LOGS_UPDATED, callback),
+
+  // PR status polling operations
+  startStatusPolling: (projectId: string, prNumbers: number[]): Promise<boolean> =>
+    invokeIpc(IPC_CHANNELS.GITHUB_PR_STATUS_POLL_START, { projectId, prNumbers }),
+
+  stopStatusPolling: (projectId: string): Promise<boolean> =>
+    invokeIpc(IPC_CHANNELS.GITHUB_PR_STATUS_POLL_STOP, { projectId }),
+
+  getPollingMetadata: (projectId: string): Promise<PollingMetadata | null> =>
+    invokeIpc(IPC_CHANNELS.GITHUB_PR_STATUS_UPDATE, projectId),
+
+  // PR status polling event listener
+  onPRStatusUpdate: (
+    callback: (update: PRStatusUpdate) => void
+  ): IpcListenerCleanup =>
+    createIpcListener(IPC_CHANNELS.GITHUB_PR_STATUS_UPDATE, callback)
 });

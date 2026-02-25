@@ -7,6 +7,8 @@ import { Progress } from '../ui/progress';
 import { ROADMAP_PRIORITY_COLORS } from '../../../shared/constants';
 import type { PhaseCardProps } from './types';
 
+const INITIAL_VISIBLE_COUNT = 5;
+
 export function PhaseCard({
   phase,
   features,
@@ -14,6 +16,7 @@ export function PhaseCard({
   onFeatureSelect,
   onConvertToSpec,
   onGoToTask,
+  onArchive,
 }: PhaseCardProps) {
   const { t } = useTranslation('roadmap');
   const completedCount = features.filter((f) => f.status === 'done').length;
@@ -89,13 +92,34 @@ export function PhaseCard({
       <div>
         <h4 className="text-sm font-medium mb-2">{t('phaseCard.featuresSection', { count: features.length })}</h4>
         <div className="grid gap-2">
-          {features.slice(0, 5).map((feature) => (
+          {visibleFeatures.map((feature) => {
+            const isDone = feature.status === 'done';
+            const archiveButton = isDone && onArchive && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2"
+                title={t('roadmap.archiveFeature')}
+                aria-label={t('accessibility.archiveFeatureAriaLabel')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onArchive(feature.id);
+                }}
+              >
+                <Archive className="h-3 w-3" />
+              </Button>
+            );
+            return (
             <div
               key={feature.id}
               className="flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors roadmap-kanban-card"
               onClick={() => onFeatureSelect(feature)}
             >
-              <div className="flex items-center gap-2 flex-1 min-w-0">
+              <button
+                type="button"
+                className="flex items-center gap-2 flex-1 min-w-0 text-left cursor-pointer rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                onClick={() => onFeatureSelect(feature)}
+              >
                 <Badge
                   variant="outline"
                   className={`text-xs ${ROADMAP_PRIORITY_COLORS[feature.priority]}`}
@@ -106,9 +130,17 @@ export function PhaseCard({
                 {feature.competitorInsightIds && feature.competitorInsightIds.length > 0 && (
                   <TrendingUp className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                 )}
-              </div>
-              {feature.status === 'done' ? (
-                <CheckCircle2 className="h-4 w-4 text-success flex-shrink-0" />
+              </button>
+              {feature.taskOutcome ? (
+                <span className="flex items-center gap-1 flex-shrink-0">
+                  <TaskOutcomeBadge outcome={feature.taskOutcome} size="lg" showLabel={false} />
+                  {archiveButton}
+                </span>
+              ) : isDone ? (
+                <span className="flex items-center gap-1 flex-shrink-0">
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                  {archiveButton}
+                </span>
               ) : feature.linkedSpecId ? (
                 <Button
                   variant="outline"
@@ -137,7 +169,8 @@ export function PhaseCard({
                 </Button>
               )}
             </div>
-          ))}
+            );
+          })}
           {features.length > 5 && (
             <div className="text-sm text-muted-foreground text-center py-1">
               {t('phaseCard.moreFeatures', { count: features.length - 5 })}

@@ -1,0 +1,111 @@
+{
+  "settings": {
+    "title": "Team Sync",
+    "description": "Synchronisation en temps réel avec authentification d'équipe (Convex + Better Auth).",
+    "featureFlag": "Activer Team Sync (feature flag)",
+    "featureFlagDescription": "Déploiement progressif : Tasks + Roadmap d'abord, puis Ideation/Insights.",
+    "disabledMessage": "Activez le flag pour activer l'authentification et la synchronisation d'équipe.",
+    "signInRequired": "Connectez-vous à votre compte Team Sync pour créer ou rejoindre une équipe et commencer la synchronisation."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Mot de passe",
+    "name": "Nom",
+    "signIn": "Se connecter",
+    "signOut": "Se déconnecter",
+    "signUp": "S'inscrire",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Déjà un compte ?",
+    "inviteCode": "Code d'invitation",
+    "inviteCodeHint": "Si quelqu'un vous a invité dans une équipe, collez le code ici."
+  },
+  "status": {
+    "connected": "Connecté",
+    "disconnected": "Déconnecté",
+    "authenticated": "Authentifié",
+    "guest": "Invité",
+    "team": "Équipe",
+    "projectsSynced": "Projets synchronisés",
+    "pending": "En attente",
+    "connectedToTeam": "Connecté à {{team}}"
+  },
+  "roles": {
+    "owner": "Propriétaire",
+    "admin": "Admin",
+    "member": "Membre"
+  },
+  "manage": {
+    "createTeam": "Créer une équipe",
+    "teamName": "Nom de l'équipe",
+    "create": "Créer",
+    "joinTeam": "Rejoindre avec un code d'invitation",
+    "join": "Rejoindre",
+    "teams": "Équipes",
+    "noTeams": "Aucune équipe connectée.",
+    "members": "Membres",
+    "noMembers": "Aucun membre chargé.",
+    "onlyYou": "Juste vous pour le moment. Invitez des membres ci-dessus.",
+    "you": "vous",
+    "removeMember": "Retirer le membre",
+    "removed": "Membre retiré"
+  },
+  "sync": {
+    "currentProject": "Projet actuel",
+    "selectProject": "Sélectionnez un projet pour activer la synchronisation",
+    "enableSync": "Activer Sync",
+    "disableSync": "Désactiver",
+    "forcePush": "Forcer Push",
+    "forcePull": "Forcer Pull"
+  },
+  "errors": {
+    "loadStatus": "Échec du chargement du statut Team Sync",
+    "signup": "Échec de l'inscription",
+    "signin": "Échec de la connexion",
+    "createTeam": "Échec de la création d'équipe",
+    "joinTeam": "Échec de la jointure d'équipe",
+    "loadTeams": "Échec du chargement des équipes",
+    "loadMembers": "Échec du chargement des membres",
+    "removeMember": "Échec de la suppression du membre",
+    "enableSync": "Échec de l'activation de la synchronisation",
+    "disableSync": "Échec de la désactivation de la synchronisation",
+    "forcePush": "Échec du push forcé",
+    "forcePull": "Échec du pull forcé"
+  },
+  "mode": {
+    "disabled": "Désactivé",
+    "idle": "Inactif",
+    "syncing": "Synchronisation",
+    "error": "Erreur"
+  },
+  "invitations": {
+    "title": "Invitations",
+    "invite": "Inviter un membre",
+    "description": "Invitez des personnes par email pour accéder à cette équipe et collaborer.",
+    "email": "email@exemple.com",
+    "role": "Rôle",
+    "send": "Inviter",
+    "pending": "Invitations en attente",
+    "accept": "Accepter l'invitation",
+    "tokenPlaceholder": "Collez l'ID d'invitation",
+    "copyToken": "Copier le token d'invitation",
+    "token": "Token",
+    "sent": "Invitation envoyée !",
+    "accepted": "Invitation acceptée !",
+    "noInvitations": "Aucune invitation en attente",
+    "expiresAt": "expire le",
+    "expired": "Expirée",
+    "errors": {
+      "emailRequired": "L'email est requis",
+      "sendFailed": "Échec de l'envoi de l'invitation",
+      "acceptFailed": "Échec de l'acceptation de l'invitation"
+    }
+  },
+  "events": {
+    "title": "Événements récents",
+    "noEvents": "Aucun événement pour le moment."
+  },
+  "gate": {
+    "title": "Auto Claude",
+    "subtitle": "Connectez-vous pour continuer"
+  }
+}

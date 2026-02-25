@@ -1,23 +1,26 @@
 # Fork Sync Report
 
 ## Execution
-- Timestamp (UTC): 2026-02-12T05:14:29Z
-- Repository: /Users/guilhermevarela/Documents/Projetos/Auto-Claude
-- Branch: develop
-- Head before: af1d25b5
-- Head after: af1d25b5
-- Upstream base: upstream/main
-- Upstream head synced: 5745cb14
-- Previous synced upstream commit (from changelog): 5745cb14
+- Timestamp (UTC): 2026-02-25T16:39:54Z
+- Repository: /Users/guilhermevarela/Documents/Projetos/Auto-Claude-sync-20260225-133045
+- Branch: codex/fork-sync-20260225-133045
+- Head before: dcce7a6ba
+- Head after: dcce7a6ba
+- Upstream base: upstream/develop
+- Upstream head synced: 60c489021
+- Previous synced upstream commit (from changelog): 60c489021
 - Merge status: no-upstream-updates
+- Local delta base: unknown
+- Local delta patch status: not-generated
 - Working tree: dirty
 
 ## Current Situation
-- Private commits vs upstream: 226
+- Private commits vs upstream: 143
 - Upstream commits detected: 0
 - Upstream files changed: 0
 - Conflicts auto-resolved with local priority: 0
 - Protected path files reapplied from local HEAD: 0
+- Files touched by local delta reapply: 0
 
 ## New From Upstream
 - No new upstream commits detected in this run.
@@ -32,60 +35,73 @@
 - Validation plan:
   - bun run test
   - bun run build
+- Functional gate command: bun run build
 - Executed commands:
   - bun run test
   - bun run build
-- Test status: passed
-- Test exit code: 0
+- Test status: failed
+- Functional status: passed
+- Test exit code: 1
+- Failed commands:
+  - bun run test
 - Test log file: fork_sync_report.tests.log
 
 ### Test Log Tail
-           ✓ should timeout after 10 seconds if CLI invocation hangs  10003ms
-           ✓ should timeout after 10 seconds if CLI invocation hangs  10006ms
+    rendering chunks...
+    ../../out/renderer/index.html                                    1.05 kB
+    ../../out/renderer/assets/index-BxInfSHS.css                   220.56 kB
+    ../../out/renderer/assets/webgl-context-manager-C-Mf8p5r.js    144.94 kB
+    ../../out/renderer/assets/index-4dLsZrqh.js                  6,535.33 kB
+    ✓ built in 6.44s
     
-     Test Files  116 passed (116)
-          Tests  2869 passed | 6 skipped (2875)
-       Start at  02:14:31
-       Duration  31.30s (transform 8.59s, setup 1.52s, import 15.50s, tests 65.98s, environment 18.23s)
-    
-    
-    === Validation step 2 ===
+    === Validation step 3 ===
+    Label: functional-gate
     Command: bun run build
     
     $ cd apps/frontend && bun run build
     $ electron-vite build
-    [dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+    [dotenv@17.2.4] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
     vite v7.3.1 building ssr environment for production...
     transforming...
     "Stats" is imported from external module "node:fs" but never used in "../../node_modules/chokidar/index.js".
-    ✓ 1590 modules transformed.
+    ✓ 1613 modules transformed.
     [plugin vite:reporter] 
-    (!) /Users/guilhermevarela/Documents/Projetos/Auto-Claude/apps/frontend/src/main/services/profile/profile-manager.ts is dynamically imported by /Users/guilhermevarela/Documents/Projetos/Auto-Claude/apps/frontend/src/main/claude-profile/usage-monitor.ts but also statically imported by /Users/guilhermevarela/Documents/Projetos/Auto-Claude/apps/frontend/src/main/claude-profile/usage-monitor.ts, /Users/guilhermevarela/Documents/Projetos/Auto-Claude/apps/frontend/src/main/services/profile/index.ts, /Users/guilhermevarela/Documents/Projetos/Auto-Claude/apps/frontend/src/main/services/profile/profile-service.ts, dynamic import will not move module into another chunk.
+    (!) /Users/guilhermevarela/Documents/Projetos/Auto-Claude-sync-20260225-133045/apps/frontend/src/main/ipc-handlers/gitlab/utils.ts is dynamically imported by /Users/guilhermevarela/Documents/Projetos/Auto-Claude-sync-20260225-133045/apps/frontend/src/main/ipc-handlers/gitlab/spec-utils.ts, /Users/guilhermevarela/Documents/Projetos/Auto-Claude-sync-20260225-133045/apps/frontend/src/main/ipc-handlers/gitlab/spec-utils.ts but also statically imported by /Users/guilhermevarela/Documents/Projetos/Auto-Claude-sync-20260225-133045/apps/frontend/src/main/ipc-handlers/gitlab/autofix-handlers.ts, /Users/guilhermevarela/Documents/Projetos/Auto-Claude-sync-20260225-133045/apps/frontend/src/main/ipc-handlers/gitlab/import-handlers.ts, /Users/guilhermevarela/Documents/Projetos/Auto-Claude-sync-20260225-133045/apps/frontend/src/main/ipc-handlers/gitlab/investigation-handlers.ts, /Users/guilhermevarela/Documents/Projetos/Auto-Claude-sync-20260225-133045/apps/frontend/src/main/ipc-handlers/gitlab/issue-handlers.ts, /Users/guilhermevarela/Documents/Projetos/Auto-Claude-sync-20260225-133045/apps/frontend/src/main/ipc-handlers/gitlab/merge-request-handlers.ts, /Users/guilhermevarela/Documents/Projetos/Auto-Claude-sync-20260225-133045/apps/frontend/src/main/ipc-handlers/gitlab/mr-review-handlers.ts, /Users/guilhermevarela/Documents/Projetos/Auto-Claude-sync-20260225-133045/apps/frontend/src/main/ipc-handlers/gitlab/release-handlers.ts, /Users/guilhermevarela/Documents/Projetos/Auto-Claude-sync-20260225-133045/apps/frontend/src/main/ipc-handlers/gitlab/repository-handlers.ts, /Users/guilhermevarela/Documents/Projetos/Auto-Claude-sync-20260225-133045/apps/frontend/src/main/ipc-handlers/gitlab/triage-handlers.ts, dynamic import will not move module into another chunk.
     
     rendering chunks...
-    out/main/index.js  3,416.95 kB
-    ✓ built in 2.86s
+    out/main/index.js  3,680.47 kB
+    ✓ built in 4.55s
     vite v7.3.1 building ssr environment for production...
     transforming...
-    ✓ 38 modules transformed.
+    ✓ 39 modules transformed.
     rendering chunks...
-    out/preload/index.mjs  103.52 kB
-    ✓ built in 44ms
+    out/preload/index.mjs  107.54 kB
+    ✓ built in 45ms
     vite v7.3.1 building client environment for production...
     transforming...
-    ✓ 3280 modules transformed.
+    ✓ 3318 modules transformed.
     rendering chunks...
-    ../../out/renderer/index.html                     1.05 kB
-    ../../out/renderer/assets/index-sVMq3YWF.css    217.22 kB
-    ../../out/renderer/assets/index-DmgDTcM1.js   6,235.58 kB
-    ✓ built in 4.56s
+    ../../out/renderer/index.html                                    1.05 kB
+    ../../out/renderer/assets/index-BxInfSHS.css                   220.56 kB
+    ../../out/renderer/assets/webgl-context-manager-C-Mf8p5r.js    144.94 kB
+    ../../out/renderer/assets/index-4dLsZrqh.js                  6,535.33 kB
+    ✓ built in 4.73s
     
 
 ## Origin Publish
 - Origin remote: origin
 - Push enabled: true
-- Push status: up-to-date
+- Push status: pushed
 - Push exit code: 0
-- Sync before push: local-ahead:0 remote-ahead:0
+- Sync before push: unknown
 - Sync after push: local-ahead:0 remote-ahead:0
+- Push log file: fork_sync_report.push.log
+
+### Push Log Tail
+    remote: 
+    remote: Create a pull request for 'codex/fork-sync-20260225-133045' on GitHub by visiting:        
+    remote:      https://github.com/guilhermexp/Auto-Claude/pull/new/codex/fork-sync-20260225-133045        
+    remote: 
+    To https://github.com/guilhermexp/Auto-Claude.git
+     * [new branch]          HEAD -> codex/fork-sync-20260225-133045
 

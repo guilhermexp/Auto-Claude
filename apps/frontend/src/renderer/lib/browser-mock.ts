@@ -63,6 +63,10 @@ const browserMockAPI: ElectronAPI = {
     success: true
   }),
 
+  saveCompetitorAnalysis: async () => ({
+    success: true
+  }),
+
   generateRoadmap: (_projectId: string, _enableCompetitorAnalysis?: boolean, _refreshCompetitorAnalysis?: boolean) => {
     console.warn('[Browser Mock] generateRoadmap called');
   },
@@ -215,6 +219,7 @@ const browserMockAPI: ElectronAPI = {
     markReviewPosted: async () => true,
     getPRReview: async () => null,
     getPRReviewsBatch: async () => ({}),
+    notifyExternalReviewComplete: async () => {},
     deletePRReview: async () => true,
     checkNewCommits: async () => ({ hasNewCommits: false, newCommitCount: 0 }),
     checkMergeReadiness: async () => ({ isDraft: false, mergeable: 'UNKNOWN' as const, isBehind: false, ciStatus: 'none' as const, blockers: [] }),
@@ -226,6 +231,8 @@ const browserMockAPI: ElectronAPI = {
     onPRReviewProgress: () => () => {},
     onPRReviewComplete: () => () => {},
     onPRReviewError: () => () => {},
+    onPRReviewStateChange: () => () => {},
+    onPRLogsUpdated: () => () => {},
     batchAutoFix: () => {},
     getBatches: async () => [],
     onBatchProgress: () => () => {},
@@ -236,19 +243,83 @@ const browserMockAPI: ElectronAPI = {
     approveBatches: async () => ({ success: true, batches: [] }),
     onAnalyzePreviewProgress: () => () => {},
     onAnalyzePreviewComplete: () => () => {},
-    onAnalyzePreviewError: () => () => {}
+    onAnalyzePreviewError: () => () => {},
+    // PR status polling
+    startStatusPolling: async () => true,
+    stopStatusPolling: async () => true,
+    getPollingMetadata: async () => null,
+    onPRStatusUpdate: () => () => {}
   },
 
   // Queue Routing API (rate limit recovery)
   queue: {
     getRunningTasksByProfile: async () => ({ success: true, data: { byProfile: {}, totalRunning: 0 } }),
     getBestProfileForTask: async () => ({ success: true, data: null }),
+    getBestUnifiedAccount: async () => ({ success: true, data: null }),
     assignProfileToTask: async () => ({ success: true }),
     updateTaskSession: async () => ({ success: true }),
     getTaskSession: async () => ({ success: true, data: null }),
     onQueueProfileSwapped: () => () => {},
     onQueueSessionCaptured: () => () => {},
     onQueueBlockedNoProfiles: () => () => {}
+  },
+
+  teamSync: {
+    initialize: async () => ({
+      success: true,
+      data: {
+        connected: false,
+        authenticated: true,
+        syncedProjects: [],
+        pendingChanges: 0,
+        mode: 'disabled' as const
+      }
+    }),
+    signup: async () => ({ success: true }),
+    signin: async () => ({ success: true }),
+    signout: async () => ({ success: true }),
+    getStatus: async () => ({
+      success: true,
+      data: {
+        connected: false,
+        authenticated: false,
+        syncedProjects: [],
+        pendingChanges: 0,
+        mode: 'disabled' as const
+      }
+    }),
+    createTeam: async (name: string) => ({
+      success: true,
+      data: {
+        id: `mock-team-${Date.now()}`,
+        name,
+        role: 'owner' as const
+      }
+    }),
+    joinTeam: async () => ({ success: true }),
+    getTeams: async () => ({ success: true, data: [] }),
+    getMembers: async () => ({ success: true, data: [] }),
+    removeMember: async () => ({ success: true }),
+    generateInviteCode: async () => ({ success: true, data: 'MOCK1234' }),
+    enable: async () => ({ success: true }),
+    disable: async () => ({ success: true }),
+    forcePush: async () => ({ success: true }),
+    forcePull: async () => ({ success: true }),
+    inviteMember: async () => ({ success: true, data: { invitationId: 'mock-inv', email: '', role: 'member', status: 'pending' } }),
+    acceptInvitation: async () => ({ success: true, data: { organizationId: 'mock-org', name: 'Mock Org' } }),
+    listInvitations: async () => ({ success: true, data: [] }),
+    checkAlignment: async () => ({
+      success: true,
+      data: {
+        aligned: true,
+        reason: 'Mock aligned',
+        changedFiles: [],
+        checkedAt: new Date().toISOString()
+      }
+    }),
+    markAligned: async () => ({ success: true }),
+    clearLocalState: async () => ({ success: true }),
+    onUpdate: () => () => {}
   },
 
   // Claude Code Operations
@@ -299,6 +370,12 @@ const browserMockAPI: ElectronAPI = {
   setClaudeCodeActivePath: async (cliPath: string) => ({
     success: true,
     data: { path: cliPath }
+  }),
+
+  // Worktree Change Detection
+  checkWorktreeChanges: async () => ({
+    success: true,
+    data: { hasChanges: false, changedFileCount: 0 }
   }),
 
   // Terminal Worktree Operations

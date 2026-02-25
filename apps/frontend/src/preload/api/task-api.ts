@@ -44,7 +44,7 @@ export interface TaskAPI {
   updateTaskStatus: (
     taskId: string,
     status: TaskStatus,
-    options?: { forceCleanup?: boolean }
+    options?: { forceCleanup?: boolean; keepWorktree?: boolean }
   ) => Promise<IPCResult & { worktreeExists?: boolean; worktreePath?: string }>;
   recoverStuckTask: (
     taskId: string,
@@ -52,6 +52,9 @@ export interface TaskAPI {
   ) => Promise<IPCResult<TaskRecoveryResult>>;
   checkTaskRunning: (taskId: string) => Promise<IPCResult<boolean>>;
   resumePausedTask: (taskId: string) => Promise<IPCResult>;
+
+  // Worktree Change Detection
+  checkWorktreeChanges: (taskId: string) => Promise<IPCResult<{ hasChanges: boolean; worktreePath?: string; changedFileCount?: number }>>;
 
   // Image Operations
   loadImageThumbnail: (projectPath: string, specId: string, imagePath: string) => Promise<IPCResult<string>>;
@@ -71,6 +74,12 @@ export interface TaskAPI {
   archiveTasks: (projectId: string, taskIds: string[], version?: string) => Promise<IPCResult<boolean>>;
   unarchiveTasks: (projectId: string, taskIds: string[]) => Promise<IPCResult<boolean>>;
   createWorktreePR: (taskId: string, options?: WorktreeCreatePROptions) => Promise<IPCResult<WorktreeCreatePRResult>>;
+
+  // Review & Merge
+  reviewAndMergeWorktree: (taskId: string, options?: import('../../shared/types').ReviewMergeOptions) => Promise<IPCResult<import('../../shared/types').ReviewMergeResult>>;
+  onReviewMergeProgress: (callback: (taskId: string, progress: import('../../shared/types').ReviewMergeProgressData) => void) => () => void;
+  onReviewMergeLog: (callback: (taskId: string, entry: import('../../shared/types').ReviewMergeLogEntry) => void) => () => void;
+  cancelReviewMerge: (taskId: string) => Promise<IPCResult<{ cancelled: boolean }>>;
 
   // Task Event Listeners
   // Note: projectId is optional for backward compatibility - events without projectId will still work
@@ -132,7 +141,7 @@ export const createTaskAPI = (): TaskAPI => ({
   updateTaskStatus: (
     taskId: string,
     status: TaskStatus,
-    options?: { forceCleanup?: boolean }
+    options?: { forceCleanup?: boolean; keepWorktree?: boolean }
   ): Promise<IPCResult & { worktreeExists?: boolean; worktreePath?: string }> =>
     ipcRenderer.invoke(IPC_CHANNELS.TASK_UPDATE_STATUS, taskId, status, options),
 
@@ -147,6 +156,10 @@ export const createTaskAPI = (): TaskAPI => ({
 
   resumePausedTask: (taskId: string): Promise<IPCResult> =>
     ipcRenderer.invoke(IPC_CHANNELS.TASK_RESUME_PAUSED, taskId),
+
+  // Worktree Change Detection
+  checkWorktreeChanges: (taskId: string): Promise<IPCResult<{ hasChanges: boolean; worktreePath?: string; changedFileCount?: number }>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.TASK_CHECK_WORKTREE_CHANGES, taskId),
 
   // Image Operations
   loadImageThumbnail: (projectPath: string, specId: string, imagePath: string): Promise<IPCResult<string>> =>
@@ -194,6 +207,45 @@ export const createTaskAPI = (): TaskAPI => ({
 
   createWorktreePR: (taskId: string, options?: WorktreeCreatePROptions): Promise<IPCResult<WorktreeCreatePRResult>> =>
     ipcRenderer.invoke(IPC_CHANNELS.TASK_WORKTREE_CREATE_PR, taskId, options),
+
+  // Review & Merge
+  reviewAndMergeWorktree: (taskId: string, options?: import('../../shared/types').ReviewMergeOptions): Promise<IPCResult<import('../../shared/types').ReviewMergeResult>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.TASK_WORKTREE_REVIEW_MERGE, taskId, options),
+
+  onReviewMergeProgress: (
+    callback: (taskId: string, progress: import('../../shared/types').ReviewMergeProgressData) => void
+  ): (() => void) => {
+    const handler = (
+      _event: Electron.IpcRendererEvent,
+      taskId: string,
+      progress: import('../../shared/types').ReviewMergeProgressData
+    ): void => {
+      callback(taskId, progress);
+    };
+    ipcRenderer.on(IPC_CHANNELS.TASK_REVIEW_MERGE_PROGRESS, handler);
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.TASK_REVIEW_MERGE_PROGRESS, handler);
+    };
+  },
+
+  onReviewMergeLog: (
+    callback: (taskId: string, entry: import('../../shared/types').ReviewMergeLogEntry) => void
+  ): (() => void) => {
+    const handler = (
+      _event: Electron.IpcRendererEvent,
+      taskId: string,
+      entry: import('../../shared/types').ReviewMergeLogEntry
+    ): void => {
+      callback(taskId, entry);
+    };
+    ipcRenderer.on(IPC_CHANNELS.TASK_REVIEW_MERGE_LOG, handler);
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.TASK_REVIEW_MERGE_LOG, handler);
+    };
+  },
+
+  cancelReviewMerge: (taskId: string): Promise<IPCResult<{ cancelled: boolean }>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.TASK_REVIEW_MERGE_CANCEL, taskId),
 
   // Task Event Listeners
   onTaskProgress: (

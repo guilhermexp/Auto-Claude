@@ -50,6 +50,7 @@ import { DevToolsSettings } from './DevToolsSettings';
 import { DebugSettings } from './DebugSettings';
 import { TerminalFontSettings } from './terminal-font-settings/TerminalFontSettings';
 import { AccountSettings } from './AccountSettings';
+import { TeamSyncSettings } from './TeamSyncSettings';
 import { ProjectSelector } from './ProjectSelector';
 import { ProjectSettingsContent, ProjectSettingsSection } from './ProjectSettingsContent';
 import { useProjectStore } from '../../stores/project-store';
@@ -64,7 +65,7 @@ interface AppSettingsDialogProps {
 }
 
 // App-level settings sections
-export type AppSection = 'appearance' | 'display' | 'language' | 'devtools' | 'terminal-fonts' | 'agent' | 'paths' | 'integrations' | 'accounts' | 'api-profiles' | 'updates' | 'notifications' | 'debug';
+export type AppSection = 'appearance' | 'display' | 'language' | 'devtools' | 'terminal-fonts' | 'agent' | 'team-sync' | 'paths' | 'integrations' | 'accounts' | 'api-profiles' | 'updates' | 'notifications' | 'debug';
 
 interface NavItemConfig<T extends string> {
   id: T;
@@ -78,6 +79,7 @@ const appNavItemsConfig: NavItemConfig<AppSection>[] = [
   { id: 'devtools', icon: Code },
   { id: 'terminal-fonts', icon: Terminal },
   { id: 'agent', icon: Bot },
+  { id: 'team-sync', icon: Users },
   { id: 'paths', icon: FolderOpen },
   { id: 'accounts', icon: Users },
   { id: 'updates', icon: Package },
@@ -235,6 +237,8 @@ export function AppSettingsDialog({ open, onOpenChange, initialSection, initialP
         return <TerminalFontSettings />;
       case 'agent':
         return <GeneralSettings settings={settings} onSettingsChange={setSettings} section="agent" {...saveProps} />;
+      case 'team-sync':
+        return <TeamSyncSettings settings={settings} onSettingsChange={setSettings} {...saveProps} />;
       case 'paths':
         return <GeneralSettings settings={settings} onSettingsChange={setSettings} section="paths" {...saveProps} />;
       case 'integrations':

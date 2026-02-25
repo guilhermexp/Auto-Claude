@@ -8,9 +8,13 @@ about a codebase. It can also suggest tasks based on the conversation.
 
 import argparse
 import asyncio
+import datetime
 import json
+import re
 import sys
+import time
 from pathlib import Path
+from typing import Dict, List, Optional
 
 # Add auto-claude to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -47,7 +51,7 @@ from debug import (
     debug_section,
     debug_success,
 )
-from phase_config import get_thinking_budget, resolve_model_id
+from phase_config import get_thinking_budget, resolve_model_id, sanitize_thinking_level
 
 
 def load_project_context(project_dir: str) -> str:
@@ -111,6 +115,107 @@ def load_project_context(project_dir: str) -> str:
     )
 
 
+ALLOWED_MIME_TYPES = frozenset(
+    ["image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp"]
+)
+
+MAX_IMAGE_FILE_SIZE = 10 * 1024 * 1024  # 10 MB (aligned with frontend MAX_IMAGE_SIZE)
+
+
+def load_images_from_manifest(manifest_path: str) -> list[dict]:
+    """Load images from a manifest JSON file.
+
+    The manifest contains an array of objects with 'path' and 'mimeType' fields.
+    Each image file is read as binary and encoded to base64.
+
+    Returns a list of dicts with 'media_type' and 'data' (base64-encoded) fields.
+    """
+    images = []
+    tmp_dir = Path(tempfile.gettempdir()).resolve()
+
+    try:
+        with open(manifest_path, encoding="utf-8") as f:
+            manifest = json.load(f)
+
+        for entry in manifest:
+            image_path = entry.get("path")
+            mime_type = entry.get("mimeType", "image/png")
+
+            if not image_path:
+                debug_error(
+                    "insights_runner",
+                    "Image entry missing path field",
+                )
+                continue
+
+            # Validate path is within temp directory before checking existence
+            try:
+                resolved = Path(image_path).resolve()
+                if not resolved.is_relative_to(tmp_dir):
+                    debug_error(
+                        "insights_runner",
+                        f"Image path outside temp directory, skipping: {image_path}",
+                    )
+                    continue
+            except (ValueError, OSError):
+                debug_error(
+                    "insights_runner",
+                    f"Invalid image path, skipping: {image_path}",
+                )
+                continue
+
+            if not resolved.exists():
+                debug_error(
+                    "insights_runner",
+                    f"Image file not found: {image_path}",
+                )
+                continue
+
+            # Validate MIME type against allowlist
+            if mime_type not in ALLOWED_MIME_TYPES:
+                debug_error(
+                    "insights_runner",
+                    f"Invalid MIME type '{mime_type}', skipping: {image_path}",
+                )
+                continue
+
+            # Validate file size
+            file_size = resolved.stat().st_size
+            if file_size > MAX_IMAGE_FILE_SIZE:
+                debug_error(
+                    "insights_runner",
+                    f"Image too large ({file_size} bytes), skipping: {image_path}",
+                )
+                continue
+
+            try:
+                with open(resolved, "rb") as img_f:
+                    image_data = base64.b64encode(img_f.read()).decode("utf-8")
+                images.append(
+                    {
+                        "media_type": mime_type,
+                        "data": image_data,
+                    }
+                )
+                debug(
+                    "insights_runner",
+                    "Loaded image",
+                    path=image_path,
+                    mime_type=mime_type,
+                    size_bytes=file_size,
+                )
+            except Exception as e:
+                debug_error(
+                    "insights_runner",
+                    f"Failed to read image {image_path}: {e}",
+                )
+
+    except (json.JSONDecodeError, OSError) as e:
+        debug_error("insights_runner", f"Failed to load images manifest: {e}")
+
+    return images
+
+
 def build_system_prompt(project_dir: str) -> str:
     """Build the system prompt for the insights agent."""
     context = load_project_context(project_dir)
@@ -125,6 +230,7 @@ Your capabilities:
 2. Suggest improvements, features, or bug fixes based on the code
 3. Help plan implementation of new features
 4. Provide code examples and explanations
+5. Operate as a Kanban board operator for the ACTIVE project only
 
 When the user asks you to create a task, wants to turn the conversation into a task, or when you believe creating a task would be helpful, output a task suggestion in this exact format on a SINGLE LINE:
 __TASK_SUGGESTION__:{{"title": "Task title here", "description": "Detailed description of what the task involves", "metadata": {{"category": "feature", "complexity": "medium", "impact": "medium"}}}}
@@ -133,8 +239,192 @@ Valid categories: feature, bug_fix, refactoring, documentation, security, perfor
 Valid complexity: trivial, small, medium, large, complex
 Valid impact: low, medium, high, critical
 
+When the user asks operational Kanban actions (status, queue counts, in-progress counts, list errors/review, start/stop/delete/review tasks),
+output a kanban proposal on a SINGLE LINE in this exact format:
+__KANBAN_ACTION__:{{"actionId":"act_123","intent":"status_summary","targets":{{"specIds":["003-login"],"filter":"queue","limit":3,"raw":"3 da fila"}},"resolvedSpecIds":["003-login"],"requiresConfirmation":false,"reason":"Short reason","createdAt":"2026-01-01T00:00:00Z"}}
+
+Rules for kanban proposal:
+- intents allowed: status_summary, list_human_review, list_errors, start_tasks, stop_tasks, delete_tasks, review_tasks, queue_count, in_progress_count
+- delete_tasks and stop_tasks must always set requiresConfirmation=true
+- if command is ambiguous, include best-effort targets and keep requiresConfirmation=true
+- always operate only on active project scope (never cross-project)
+- keep reason short and operational
+
 Be conversational and helpful. Focus on providing actionable insights and clear explanations.
 Keep responses concise but informative."""
+
+
+KANBAN_INTENTS = {
+    "status_summary",
+    "list_human_review",
+    "list_errors",
+    "start_tasks",
+    "stop_tasks",
+    "delete_tasks",
+    "review_tasks",
+    "queue_count",
+    "in_progress_count",
+}
+
+
+def _extract_limit(text: str) -> Optional[int]:
+    match = re.search(r"\b(\d{1,2})\b", text)
+    if not match:
+        return None
+    value = int(match.group(1))
+    if value < 1:
+        return None
+    return min(value, 20)
+
+
+def _extract_spec_ids(text: str) -> List[str]:
+    # Accept forms like "003" and "003-login-flow"
+    candidates = re.findall(r"\b\d{3}(?:-[a-z0-9][a-z0-9-]*)?\b", text)
+    return sorted(set(candidates))
+
+
+def _extract_filter(text: str) -> Optional[str]:
+    lowered = text.lower()
+    if "revis" in lowered and "human" in lowered:
+        return "human_review"
+    if "erro" in lowered or "falh" in lowered:
+        return "error"
+    if "andamento" in lowered or "in progress" in lowered:
+        return "in_progress"
+    if "fila" in lowered or "queue" in lowered:
+        return "queue"
+    if "todas" in lowered or "todos" in lowered:
+        return "all"
+    return None
+
+
+def _should_treat_as_kanban(lowered: str) -> bool:
+    if lowered.startswith("/kanban"):
+        return True
+    hints = [
+        "kanban",
+        "quadro",
+        "tarefa",
+        "tarefas",
+        "fila",
+        "em andamento",
+        "revisão humana",
+        "erro",
+    ]
+    return any(h in lowered for h in hints)
+
+
+def parse_kanban_action(message: str) -> Optional[Dict]:
+    lowered = message.strip().lower()
+    if not lowered:
+        return None
+    if not _should_treat_as_kanban(lowered):
+        return None
+
+    intent = None
+    raw_command = lowered
+
+    if lowered.startswith("/kanban"):
+        parts = lowered.split()
+        if len(parts) >= 2:
+            cmd = parts[1]
+            if cmd == "status":
+                intent = "status_summary"
+            elif cmd == "queue":
+                intent = "queue_count"
+            elif cmd in {"in-progress", "in_progress", "progress"}:
+                intent = "in_progress_count"
+            elif cmd == "errors":
+                intent = "list_errors"
+            elif cmd in {"review", "human-review", "human_review"}:
+                intent = "list_human_review"
+            elif cmd == "start":
+                intent = "start_tasks"
+            elif cmd == "stop":
+                intent = "stop_tasks"
+            elif cmd == "delete":
+                intent = "delete_tasks"
+            elif cmd in {"approve", "revisar"}:
+                intent = "review_tasks"
+    else:
+        if (
+            "como está meu quadro" in lowered
+            or "como esta meu quadro" in lowered
+            or "status do kanban" in lowered
+            or "resumo do kanban" in lowered
+        ):
+            intent = "status_summary"
+        elif ("quantas" in lowered or "qtd" in lowered) and "fila" in lowered:
+            intent = "queue_count"
+        elif ("quantas" in lowered or "qtd" in lowered) and (
+            "andamento" in lowered or "in progress" in lowered
+        ):
+            intent = "in_progress_count"
+        elif (
+            "analise humana" in lowered
+            or "análise humana" in lowered
+            or ("revis" in lowered and "human" in lowered)
+        ):
+            intent = "list_human_review"
+        elif "deu errado" in lowered or "com erro" in lowered or "falhou" in lowered:
+            intent = "list_errors"
+        elif any(v in lowered for v in ["inicia", "iniciar", "start", "executa", "rodar"]):
+            intent = "start_tasks"
+        elif any(v in lowered for v in ["parar", "pare", "stop", "pausar"]):
+            intent = "stop_tasks"
+        elif any(v in lowered for v in ["delet", "apagar", "excluir", "remover"]):
+            intent = "delete_tasks"
+        elif any(v in lowered for v in ["aprovar", "revisar"]):
+            intent = "review_tasks"
+
+    if intent not in KANBAN_INTENTS:
+        return None
+
+    spec_ids = _extract_spec_ids(lowered)
+    target_filter = _extract_filter(lowered)
+    limit = _extract_limit(lowered)
+
+    targets = {}
+    if spec_ids:
+        targets["specIds"] = spec_ids
+    if target_filter:
+        targets["filter"] = target_filter
+    if limit:
+        targets["limit"] = limit
+    if raw_command:
+        targets["raw"] = raw_command
+
+    requires_confirmation = intent in {"stop_tasks", "delete_tasks"}
+    if intent in {"start_tasks", "review_tasks"} and not spec_ids and not target_filter:
+        # Keep safe behavior for ambiguous bulk actions.
+        requires_confirmation = True
+
+    return {
+        "actionId": f"act_{int(time.time() * 1000)}",
+        "intent": intent,
+        "targets": targets if targets else {"raw": raw_command},
+        "resolvedSpecIds": spec_ids if spec_ids else None,
+        "requiresConfirmation": requires_confirmation,
+        "reason": "Comando operacional de kanban detectado",
+        "createdAt": "",  # Filled in maybe_emit_kanban_action.
+    }
+
+
+def maybe_emit_kanban_action(message: str) -> bool:
+    proposal = parse_kanban_action(message)
+    if not proposal:
+        return False
+
+    # Normalize timestamp to ISO in a single place.
+    proposal["createdAt"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+    intent = proposal["intent"]
+    requires_confirmation = proposal["requiresConfirmation"]
+    target_ids = proposal.get("resolvedSpecIds") or []
+    target_preview = ", ".join(target_ids[:10]) if target_ids else "filtro do comando"
+
+    print(f"__KANBAN_ACTION__:{json.dumps(proposal, ensure_ascii=False)}", flush=True)
+    return True
 
 
 async def run_with_sdk(
@@ -143,11 +433,15 @@ async def run_with_sdk(
     history: list,
     model: str = "sonnet",  # Shorthand - resolved via API Profile if configured
     thinking_level: str = "medium",
+    images: list[dict] | None = None,
 ) -> None:
     """Run the chat using Claude SDK with streaming."""
+    if maybe_emit_kanban_action(message):
+        return
+
     if not SDK_AVAILABLE:
         print("Claude SDK not available, falling back to simple mode", file=sys.stderr)
-        run_simple(project_dir, message, history)
+        run_simple(project_dir, message, history, images)
         return
 
     if not get_auth_token():
@@ -155,7 +449,7 @@ async def run_with_sdk(
             "No authentication token found, falling back to simple mode",
             file=sys.stderr,
         )
-        run_simple(project_dir, message, history)
+        run_simple(project_dir, message, history, images)
         return
 
     # Ensure SDK can find the token
@@ -190,7 +484,6 @@ Current question: {message}"""
     )
 
     try:
-        # Build options dict - only include max_thinking_tokens if not None
         options_kwargs = {
             "model": resolve_model_id(model),  # Resolve via API Profile if configured
             "system_prompt": system_prompt,
@@ -199,17 +492,31 @@ Current question: {message}"""
             "cwd": str(project_path),
         }
 
-        # Only add thinking tokens if the thinking level is not "none"
-        if max_thinking_tokens is not None:
-            options_kwargs["max_thinking_tokens"] = max_thinking_tokens
+        options_kwargs["max_thinking_tokens"] = max_thinking_tokens
 
         # Create Claude SDK client with appropriate settings for insights
         client = ClaudeSDKClient(options=ClaudeAgentOptions(**options_kwargs))
 
         # Use async context manager pattern
         async with client:
-            # Send the query
-            await client.query(full_prompt)
+            # Build the query - images are stored for reference but SDK doesn't support multi-modal input yet
+            if images:
+                debug(
+                    "insights_runner",
+                    "Images attached but SDK does not support multi-modal input",
+                    image_count=len(images),
+                )
+
+                # TODO: When the SDK adds support for multi-modal content blocks, update this.
+                image_note = f"\n\n[Note: The user attached {len(images)} image(s), but the current SDK version does not support multi-modal input. Please ask the user to describe the image content instead.]"
+                print(
+                    "Warning: Image attachments cannot be sent to the model in SDK mode. Sending text-only query.",
+                    file=sys.stderr,
+                )
+                await client.query(full_prompt + image_note)
+            else:
+                # Send the query as plain text
+                await client.query(full_prompt)
 
             # Stream the response
             response_text = ""
@@ -283,12 +590,17 @@ Current question: {message}"""
         import traceback
 
         traceback.print_exc(file=sys.stderr)
-        run_simple(project_dir, message, history)
+        run_simple(project_dir, message, history, images)
 
 
-def run_simple(project_dir: str, message: str, history: list) -> None:
+def run_simple(
+    project_dir: str, message: str, history: list, images: list[dict] | None = None
+) -> None:
     """Simple fallback mode without SDK - uses subprocess to call claude CLI."""
     import subprocess
+
+    if maybe_emit_kanban_action(message):
+        return
 
     system_prompt = build_system_prompt(project_dir)
 
@@ -356,10 +668,16 @@ def main():
     parser.add_argument(
         "--thinking-level",
         default="medium",
-        choices=["none", "low", "medium", "high", "ultrathink"],
-        help="Thinking level for extended reasoning (default: medium)",
+        help="Thinking level for extended reasoning (low, medium, high)",
+    )
+    parser.add_argument(
+        "--images-file",
+        help="Path to JSON manifest file listing image file paths and MIME types",
     )
     args = parser.parse_args()
+
+    # Validate and sanitize thinking level (handles legacy values like 'ultrathink')
+    args.thinking_level = sanitize_thinking_level(args.thinking_level)
 
     debug_section("insights_runner", "Starting Insights Chat")
 
@@ -399,9 +717,25 @@ def main():
         debug_error("insights_runner", f"Failed to load history: {e}")
         history = []
 
+    # Load images from manifest file if provided
+    images = None
+    if args.images_file:
+        debug("insights_runner", "Loading images from manifest", file=args.images_file)
+        images = load_images_from_manifest(args.images_file)
+        if images:
+            debug(
+                "insights_runner",
+                "Loaded images for multi-modal query",
+                image_count=len(images),
+            )
+        else:
+            debug("insights_runner", "No valid images loaded from manifest")
+
     # Run the async SDK function
     debug("insights_runner", "Running SDK query")
-    asyncio.run(run_with_sdk(project_dir, user_message, history, model, thinking_level))
+    asyncio.run(
+        run_with_sdk(project_dir, user_message, history, model, thinking_level, images)
+    )
     debug_success("insights_runner", "Query completed")
 
 

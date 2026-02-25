@@ -1,0 +1,111 @@
+{
+  "settings": {
+    "title": "Team Sync",
+    "description": "Real-time synchronization with team authentication (Convex + Better Auth).",
+    "featureFlag": "Enable Team Sync (feature flag)",
+    "featureFlagDescription": "Progressive rollout: Tasks + Roadmap first, then Ideation/Insights.",
+    "disabledMessage": "Enable the flag to activate team authentication and synchronization.",
+    "signInRequired": "Sign in to your Team Sync account to create or join a team and start syncing."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "signUp": "Sign Up",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "inviteCode": "Invite code",
+    "inviteCodeHint": "If someone invited you to a team, paste the code here."
+  },
+  "status": {
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "authenticated": "Authenticated",
+    "guest": "Guest",
+    "team": "Team",
+    "projectsSynced": "Projects synced",
+    "pending": "Pending",
+    "connectedToTeam": "Connected to {{team}}"
+  },
+  "roles": {
+    "owner": "Owner",
+    "admin": "Admin",
+    "member": "Member"
+  },
+  "manage": {
+    "createTeam": "Create team",
+    "teamName": "Team name",
+    "create": "Create",
+    "joinTeam": "Join with invite code",
+    "join": "Join",
+    "teams": "Teams",
+    "noTeams": "No teams connected.",
+    "members": "Members",
+    "noMembers": "No members loaded.",
+    "onlyYou": "Only you for now. Invite members above.",
+    "you": "you",
+    "removeMember": "Remove member",
+    "removed": "Member removed"
+  },
+  "sync": {
+    "currentProject": "Current project",
+    "selectProject": "Select a project to enable sync",
+    "enableSync": "Enable Sync",
+    "disableSync": "Disable",
+    "forcePush": "Force Push",
+    "forcePull": "Force Pull"
+  },
+  "errors": {
+    "loadStatus": "Failed to load Team Sync status",
+    "signup": "Failed to sign up",
+    "signin": "Failed to sign in",
+    "createTeam": "Failed to create team",
+    "joinTeam": "Failed to join team",
+    "loadTeams": "Failed to load teams",
+    "loadMembers": "Failed to load members",
+    "removeMember": "Failed to remove member",
+    "enableSync": "Failed to enable sync",
+    "disableSync": "Failed to disable sync",
+    "forcePush": "Failed to run force push",
+    "forcePull": "Failed to run force pull"
+  },
+  "mode": {
+    "disabled": "Disabled",
+    "idle": "Idle",
+    "syncing": "Syncing",
+    "error": "Error"
+  },
+  "invitations": {
+    "title": "Invitations",
+    "invite": "Invite Member",
+    "description": "Invite people by email to access this team and collaborate.",
+    "email": "email@example.com",
+    "role": "Role",
+    "send": "Invite",
+    "pending": "Pending Invitations",
+    "accept": "Accept Invitation",
+    "tokenPlaceholder": "Paste invitation ID",
+    "copyToken": "Copy invitation token",
+    "token": "Token",
+    "sent": "Invitation sent!",
+    "accepted": "Invitation accepted!",
+    "noInvitations": "No pending invitations",
+    "expiresAt": "expires",
+    "expired": "Expired",
+    "errors": {
+      "emailRequired": "Email is required",
+      "sendFailed": "Failed to send invitation",
+      "acceptFailed": "Failed to accept invitation"
+    }
+  },
+  "events": {
+    "title": "Recent events",
+    "noEvents": "No events yet."
+  },
+  "gate": {
+    "title": "Auto Claude",
+    "subtitle": "Sign in to your account to continue"
+  }
+}

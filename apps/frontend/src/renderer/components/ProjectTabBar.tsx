@@ -2,10 +2,10 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { Button } from './ui/button';
 import { SortableProjectTab } from './SortableProjectTab';
 import { UsageIndicator } from './UsageIndicator';
 import { AuthStatusIndicator } from './AuthStatusIndicator';
+import { TeamSyncButton } from './TeamSyncButton';
 import type { Project } from '../../shared/types';
 
 export type ProjectTabActivityState = 'idle' | 'running' | 'ready';
@@ -94,8 +94,8 @@ export function ProjectTabBar({
       'overflow-visible',
       className
     )}>
-      <div className="min-w-0 flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent px-1">
-        <div className="flex items-end min-w-max gap-0 h-full">
+      <div className="min-w-0 flex-1 overflow-x-auto scrollbar-thin scrollbar-thumb-border/30 scrollbar-track-transparent">
+        <div className="flex items-stretch h-full">
           {projects.map((project, index) => {
             const isActiveTab = activeProjectId === project.id;
             return (
@@ -119,18 +119,19 @@ export function ProjectTabBar({
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 px-3 border-l border-border/14 project-tabbar-right-divider">
+      <div className="flex items-center gap-1.5 px-2 flex-shrink-0">
+        <TeamSyncButton />
         <AuthStatusIndicator />
         <UsageIndicator />
-        <button
-          type="button"
-          className="project-tabbar-control h-8 px-2.5 flex items-center justify-center text-muted-foreground transition-colors"
-          onClick={onAddProject}
-          aria-label={t('projectTab.addProjectAriaLabel')}
-        >
-          <Plus className="h-3.5 w-3.5" />
-        </button>
       </div>
+      <button
+        type="button"
+        className="flex items-center justify-center px-4 border-l border-border/14 text-muted-foreground hover:text-foreground hover:bg-muted/20 transition-colors flex-shrink-0 h-full project-tabbar-right-divider"
+        onClick={onAddProject}
+        aria-label={t('projectTab.addProjectAriaLabel')}
+      >
+        <Plus className="h-4 w-4" />
+      </button>
     </div>
   );
 }

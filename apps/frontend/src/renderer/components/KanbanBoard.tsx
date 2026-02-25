@@ -29,9 +29,9 @@ import { SortableTaskCard } from './SortableTaskCard';
 import { QueueSettingsModal } from './QueueSettingsModal';
 import { TASK_STATUS_COLUMNS, TASK_STATUS_LABELS } from '../../shared/constants';
 import { cn } from '../lib/utils';
-import { persistTaskStatus, forceCompleteTask, archiveTasks, deleteTasks, useTaskStore } from '../stores/task-store';
+import { persistTaskStatus, forceCompleteTask, archiveTasks, deleteTasks, useTaskStore, isQueueAtCapacity, DEFAULT_MAX_PARALLEL_TASKS } from '../stores/task-store';
 import { updateProjectSettings, useProjectStore } from '../stores/project-store';
-import { useKanbanSettingsStore, COLLAPSED_COLUMN_WIDTH, DEFAULT_COLUMN_WIDTH, MIN_COLUMN_WIDTH, MAX_COLUMN_WIDTH } from '../stores/kanban-settings-store';
+import { useKanbanSettingsStore, DEFAULT_COLUMN_WIDTH, MIN_COLUMN_WIDTH, MAX_COLUMN_WIDTH, COLLAPSED_COLUMN_WIDTH_REM, MIN_COLUMN_WIDTH_REM, MAX_COLUMN_WIDTH_REM, BASE_FONT_SIZE, pxToRem } from '../stores/kanban-settings-store';
 import { useToast } from '../hooks/use-toast';
 import { WorktreeCleanupDialog } from './WorktreeCleanupDialog';
 import { BulkPRDialog } from './BulkPRDialog';
@@ -174,43 +174,43 @@ const getEmptyStateContent = (status: TaskStatus, t: (key: string) => string): {
   switch (status) {
     case 'backlog':
       return {
-        icon: <Inbox className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <Inbox className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyBacklog'),
         subtext: t('kanban.emptyBacklogHint')
       };
     case 'queue':
       return {
-        icon: <Loader2 className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <Loader2 className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyQueue'),
         subtext: t('kanban.emptyQueueHint')
       };
     case 'in_progress':
       return {
-        icon: <Loader2 className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <Loader2 className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyInProgress'),
         subtext: t('kanban.emptyInProgressHint')
       };
     case 'ai_review':
       return {
-        icon: <Eye className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <Eye className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyAiReview'),
         subtext: t('kanban.emptyAiReviewHint')
       };
     case 'human_review':
       return {
-        icon: <Eye className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <Eye className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyHumanReview'),
         subtext: t('kanban.emptyHumanReviewHint')
       };
     case 'done':
       return {
-        icon: <CheckCircle2 className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <CheckCircle2 className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyDone'),
         subtext: t('kanban.emptyDoneHint')
       };
     default:
       return {
-        icon: <Inbox className="h-6 w-6 text-muted-foreground/50" />,
+        icon: <Inbox className="h-5 w-5 text-muted-foreground/50" />,
         message: t('kanban.emptyDefault')
       };
   }
@@ -323,7 +323,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
           getColumnBorderColor(),
           isOver && 'drop-zone-highlight'
         )}
-        style={{ width: COLLAPSED_COLUMN_WIDTH, minWidth: COLLAPSED_COLUMN_WIDTH, maxWidth: COLLAPSED_COLUMN_WIDTH }}
+        style={{ width: COLLAPSED_COLUMN_WIDTH_REM, minWidth: COLLAPSED_COLUMN_WIDTH_REM, maxWidth: COLLAPSED_COLUMN_WIDTH_REM }}
       >
         {/* Expand button at top */}
         <div className="flex justify-center p-2 kanban-column-header">
@@ -366,7 +366,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
   return (
     <div
       className="relative flex"
-      style={columnWidth ? { width: columnWidth, minWidth: MIN_COLUMN_WIDTH, maxWidth: MAX_COLUMN_WIDTH, flexShrink: 0 } : undefined}
+      style={columnWidth ? { width: pxToRem(columnWidth), minWidth: MIN_COLUMN_WIDTH_REM, maxWidth: MAX_COLUMN_WIDTH_REM, flexShrink: 0 } : undefined}
     >
       <div
         ref={setNodeRef}
@@ -378,8 +378,8 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
         )}
       >
         {/* Column header - enhanced styling */}
-        <div className="flex items-center justify-between p-4 kanban-column-header">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center justify-between p-3 px-3.5 kanban-column-header">
+        <div className="flex items-center gap-2">
           {/* Collapse button */}
           {onToggleCollapsed && (
             <Tooltip delayDuration={200}>
@@ -434,7 +434,7 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
             </span>
           )}
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           {/* Lock toggle button - available for all columns */}
           {onToggleLocked && (
             <Tooltip delayDuration={200}>
@@ -540,22 +540,22 @@ const DroppableColumn = memo(function DroppableColumn({ status, tasks, onTaskCli
 
       {/* Task list */}
       <div className="flex-1 min-h-0">
-        <ScrollArea className="h-full px-3 pb-3 pt-2">
+        <ScrollArea className="h-full px-2.5 pb-2.5 pt-1.5">
           <SortableContext
             items={taskIds}
             strategy={verticalListSortingStrategy}
           >
-            <div className="space-y-3 min-h-[120px]">
+            <div className="space-y-2 min-h-[80px]">
               {tasks.length === 0 ? (
                 <div
                   className={cn(
-                    'empty-column-dropzone flex flex-col items-center justify-center py-6',
+                    'empty-column-dropzone flex flex-col items-center justify-center py-4',
                     isOver && 'active'
                   )}
                 >
                   {isOver ? (
                     <>
-                      <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center mb-2">
+                      <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center mb-2">
                         <Plus className="h-4 w-4 text-primary" />
                       </div>
                       <span className="text-sm font-medium text-primary">{t('kanban.dropHere')}</span>
@@ -641,13 +641,16 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
   const [resizingColumn, setResizingColumn] = useState<typeof TASK_STATUS_COLUMNS[number] | null>(null);
   const resizeStartX = useRef<number>(0);
   const resizeStartWidth = useRef<number>(0);
+  const resizeScaleFactor = useRef<number>(1);
+  const resizePendingClientX = useRef<number | null>(null);
+  const resizeRafId = useRef<number | null>(null);
   // Capture projectId at resize start to avoid stale closure if project changes during resize
   const resizeProjectIdRef = useRef<string | null>(null);
 
   // Get projectId from first task
   const projectId = tasks[0]?.projectId;
   const project = projectId ? projects.find((p) => p.id === projectId) : undefined;
-  const maxParallelTasks = project?.settings?.maxParallelTasks ?? 3;
+  const maxParallelTasks = project?.settings?.maxParallelTasks ?? DEFAULT_MAX_PARALLEL_TASKS;
 
   // Queue settings modal state
   const [showQueueSettings, setShowQueueSettings] = useState(false);
@@ -924,8 +927,23 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
    * Handle status change with worktree cleanup dialog support
    * Consolidated handler that accepts an optional task object for the dialog title
    */
-  const handleStatusChange = async (taskId: string, newStatus: TaskStatus, providedTask?: Task) => {
+  const handleStatusChange = async (taskId: string, requestedStatus: TaskStatus, providedTask?: Task) => {
     const task = providedTask || tasks.find(t => t.id === taskId);
+    let newStatus = requestedStatus;
+
+    // ============================================
+    // QUEUE SYSTEM: Enforce parallel task limit
+    // Called from both the dropdown menu and the drag-and-drop handler.
+    // Excludes the task itself from the count to handle re-entry (e.g., redundant
+    // status change or race with auto-promotion). processQueue auto-promotion
+    // calls persistTaskStatus directly, never this function.
+    // ============================================
+    if (newStatus === 'in_progress' && isQueueAtCapacity(taskId)) {
+      console.log('[Queue] In Progress full, redirecting task to Queue');
+      newStatus = 'queue';
+    }
+
+    const oldStatus = task?.status;
     const result = await persistTaskStatus(taskId, newStatus);
 
     if (!result.success) {
@@ -948,6 +966,9 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
         });
       }
     }
+    // Note: queue auto-promotion when a task leaves in_progress is handled by the
+    // useEffect task status change listener (registerTaskStatusChangeListener), so
+    // no explicit processQueue() call is needed here.
   };
 
   /**
@@ -1184,20 +1205,40 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
     const currentWidth = columnPreferences?.[status]?.width ?? DEFAULT_COLUMN_WIDTH;
     resizeStartX.current = startX;
     resizeStartWidth.current = currentWidth;
+    resizeScaleFactor.current = parseFloat(getComputedStyle(document.documentElement).fontSize) / BASE_FONT_SIZE;
     // Capture projectId at resize start to ensure we save to the correct project
     resizeProjectIdRef.current = projectId ?? null;
     setResizingColumn(status);
   }, [columnPreferences, projectId]);
 
-  const handleResizeMove = useCallback((clientX: number) => {
-    if (!resizingColumn) return;
+  const applyPendingResize = useCallback(() => {
+    resizeRafId.current = null;
+    if (!resizingColumn || resizePendingClientX.current === null) return;
 
-    const deltaX = clientX - resizeStartX.current;
+    const deltaX = (resizePendingClientX.current - resizeStartX.current) / resizeScaleFactor.current;
     const newWidth = Math.max(MIN_COLUMN_WIDTH, Math.min(MAX_COLUMN_WIDTH, resizeStartWidth.current + deltaX));
     setColumnWidth(resizingColumn, newWidth);
   }, [resizingColumn, setColumnWidth]);
 
+  const handleResizeMove = useCallback((clientX: number) => {
+    if (!resizingColumn) return;
+    resizePendingClientX.current = clientX;
+    if (resizeRafId.current !== null) return;
+    resizeRafId.current = requestAnimationFrame(applyPendingResize);
+  }, [resizingColumn, applyPendingResize]);
+
   const handleResizeEnd = useCallback(() => {
+    if (resizeRafId.current !== null) {
+      cancelAnimationFrame(resizeRafId.current);
+      resizeRafId.current = null;
+    }
+    if (resizePendingClientX.current !== null && resizingColumn) {
+      const deltaX = (resizePendingClientX.current - resizeStartX.current) / resizeScaleFactor.current;
+      const newWidth = Math.max(MIN_COLUMN_WIDTH, Math.min(MAX_COLUMN_WIDTH, resizeStartWidth.current + deltaX));
+      setColumnWidth(resizingColumn, newWidth);
+      resizePendingClientX.current = null;
+    }
+
     // Use the projectId captured at resize start to avoid saving to wrong project
     const savedProjectId = resizeProjectIdRef.current;
     if (resizingColumn && savedProjectId) {
@@ -1205,7 +1246,7 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
     }
     setResizingColumn(null);
     resizeProjectIdRef.current = null;
-  }, [resizingColumn, saveKanbanPreferences]);
+  }, [resizingColumn, saveKanbanPreferences, setColumnWidth]);
 
   // Document-level event listeners for resize dragging
   useEffect(() => {
@@ -1234,12 +1275,17 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
     document.addEventListener('touchend', handleTouchEnd);
 
     return () => {
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
+      if (resizeRafId.current !== null) {
+        cancelAnimationFrame(resizeRafId.current);
+        resizeRafId.current = null;
+      }
+      resizePendingClientX.current = null;
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('touchmove', handleTouchMove);
@@ -1361,40 +1407,10 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
 
     if (!newStatus || newStatus === oldStatus) return;
 
-    // ============================================
-    // QUEUE SYSTEM: Enforce parallel task limit
-    // ============================================
-    if (newStatus === 'in_progress') {
-      // Get CURRENT state from store directly to avoid stale prop/memo issues during rapid dragging
-      const currentTasks = useTaskStore.getState().tasks;
-      const inProgressCount = currentTasks.filter((t) =>
-        t.status === 'in_progress' && !t.metadata?.archivedAt
-      ).length;
-
-      // If limit reached, move to queue instead
-      if (inProgressCount >= maxParallelTasks) {
-        // Only bypass the capacity check if coming from queue AND queue is NOT being processed
-        // This prevents race condition where both auto-promotion and manual drag exceed the limit
-        const isAutoPromotionInProgress = oldStatus === 'queue' && isProcessingQueueRef.current;
-
-        if (!isAutoPromotionInProgress) {
-          console.log(`[Queue] In Progress full (${inProgressCount}/${maxParallelTasks}), moving task to Queue`);
-          newStatus = 'queue';
-        }
-      }
-    }
-
-    // Persist status change to file and update local state
-    // Use handleStatusChange to properly handle worktree cleanup dialog
+    // Persist status change via handleStatusChange which enforces queue capacity,
+    // handles worktree cleanup dialogs, and calls processQueue() when a task
+    // leaves in_progress.
     await handleStatusChange(activeTaskId, newStatus, task);
-
-    // ============================================
-    // QUEUE SYSTEM: Auto-process queue when slot opens
-    // ============================================
-    if (oldStatus === 'in_progress' && newStatus !== 'in_progress') {
-      // A task left In Progress - check if we can promote from queue
-      await processQueue();
-    }
   };
 
   return (
@@ -1440,7 +1456,7 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex flex-1 gap-4 overflow-x-auto p-6">
+        <div className="flex flex-1 gap-3 overflow-x-auto p-4">
           {TASK_STATUS_COLUMNS.map((status) => (
             <DroppableColumn
               key={status}

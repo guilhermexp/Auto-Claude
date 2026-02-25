@@ -9,6 +9,7 @@ import {
   AlertDialogTitle,
 } from './ui/alert-dialog';
 import { Button } from './ui/button';
+import { AddCompetitorDialog } from './AddCompetitorDialog';
 
 interface ExistingCompetitorAnalysisDialogProps {
   open: boolean;
@@ -16,7 +17,9 @@ interface ExistingCompetitorAnalysisDialogProps {
   onUseExisting: () => void;
   onRunNew: () => void;
   onSkip: () => void;
+  onCompetitorAdded?: (competitorId: string) => void;
   analysisDate?: Date;
+  projectId: string;
 }
 
 export function ExistingCompetitorAnalysisDialog({
@@ -25,7 +28,9 @@ export function ExistingCompetitorAnalysisDialog({
   onUseExisting,
   onRunNew,
   onSkip,
+  onCompetitorAdded,
   analysisDate,
+  projectId,
 }: ExistingCompetitorAnalysisDialogProps) {
   const { t, i18n } = useTranslation('dialogs');
   const handleUseExisting = () => {

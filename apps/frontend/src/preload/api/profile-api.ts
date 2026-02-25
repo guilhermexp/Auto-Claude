@@ -76,27 +76,13 @@ export const createProfileAPI = (): ProfileAPI => ({
   testConnection: (
     baseUrl: string,
     apiKey: string,
-    signal?: AbortSignal
+    _signal?: AbortSignal
   ): Promise<IPCResult<TestConnectionResult>> => {
     const requestId = ++testConnectionRequestId;
 
-    // Check if already aborted before initiating request
-    if (signal?.aborted) {
-      return Promise.reject(new DOMException('The operation was aborted.', 'AbortError'));
-    }
-
-    // Setup abort listener AFTER checking aborted status to avoid race condition
-    if (signal && typeof signal.addEventListener === 'function') {
-      try {
-        signal.addEventListener('abort', () => {
-          ipcRenderer.send(IPC_CHANNELS.PROFILES_TEST_CONNECTION_CANCEL, requestId);
-        }, { once: true });
-      } catch (err) {
-        console.error('[preload/profile-api] Error adding abort listener:', err);
-      }
-    } else if (signal) {
-      console.warn('[preload/profile-api] signal provided but addEventListener not available - signal may have been serialized');
-    }
+    // Note: AbortSignal cannot be passed via IPC (gets serialized and loses methods)
+    // Cancellation is handled via PROFILES_TEST_CONNECTION_CANCEL channel
+    // The _signal parameter is kept for API compatibility but not used here
 
     return ipcRenderer.invoke(IPC_CHANNELS.PROFILES_TEST_CONNECTION, baseUrl, apiKey, requestId);
   },
@@ -105,25 +91,13 @@ export const createProfileAPI = (): ProfileAPI => ({
   discoverModels: (
     baseUrl: string,
     apiKey: string,
-    signal?: AbortSignal
+    _signal?: AbortSignal
   ): Promise<IPCResult<DiscoverModelsResult>> => {
     const requestId = ++discoverModelsRequestId;
 
-    // Check if already aborted before initiating request
-    if (signal?.aborted) {
-      return Promise.reject(new DOMException('The operation was aborted.', 'AbortError'));
-    }
-
-    // Setup abort listener AFTER checking aborted status to avoid race condition
-    if (signal && typeof signal.addEventListener === 'function') {
-      try {
-        signal.addEventListener('abort', () => {
-          ipcRenderer.send(IPC_CHANNELS.PROFILES_DISCOVER_MODELS_CANCEL, requestId);
-        }, { once: true });
-      } catch (err) {
-        console.error('[preload/profile-api] Error adding abort listener:', err);
-      }
-    }
+    // Note: AbortSignal cannot be passed via IPC (gets serialized and loses methods)
+    // Cancellation is handled via PROFILES_DISCOVER_MODELS_CANCEL channel
+    // The _signal parameter is kept for API compatibility but not used here
 
     return ipcRenderer.invoke(IPC_CHANNELS.PROFILES_DISCOVER_MODELS, baseUrl, apiKey, requestId);
   }

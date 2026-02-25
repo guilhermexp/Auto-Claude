@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useReviewMergeStore } from '../stores/review-merge-store';
 import { useTranslation } from 'react-i18next';
 import {
   GitBranch,
@@ -19,7 +20,15 @@ import {
   Terminal,
   CheckSquare2,
   CheckSquare,
-  Square
+  Square,
+  SearchCheck,
+  Maximize2,
+  XCircle,
+  FileSearch,
+  Wrench,
+  CheckCircle2,
+  Monitor,
+  RotateCcw,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
@@ -47,9 +56,96 @@ import {
 import { useProjectStore } from '../stores/project-store';
 import { useTaskStore } from '../stores/task-store';
 import { useToast } from '../hooks/use-toast';
-import type { WorktreeListItem, WorktreeMergeResult, TerminalWorktreeConfig, WorktreeStatus, Task, WorktreeCreatePROptions, WorktreeCreatePRResult } from '../../shared/types';
+import type { WorktreeListItem, WorktreeMergeResult, TerminalWorktreeConfig, WorktreeStatus, Task, WorktreeCreatePROptions, WorktreeCreatePRResult, ReviewMergeResult, ReviewMergeStage } from '../../shared/types';
+import { cn } from '../lib/utils';
+import { Progress } from './ui/progress';
 import { CreatePRDialog } from './task-detail/task-review/CreatePRDialog';
+import { ReviewMergeDialog } from './worktrees/ReviewMergeDialog';
 import { debugError, debugLog, debugWarn } from '../../shared/utils/debug-logger';
+
+// ── Review & Merge Timeline Stepper ──
+
+const PIPELINE_STEPS = [
+  { key: 'reviewing' as const, icon: FileSearch },
+  { key: 'checking_conflicts' as const, icon: GitMerge },
+  { key: 'planning' as const, icon: SearchCheck },
+  { key: 'building' as const, icon: Wrench },
+  { key: 'verifying' as const, icon: RefreshCw },
+  { key: 'e2e_testing' as const, icon: Monitor },
+  { key: 'creating_pr' as const, icon: GitPullRequest },
+  { key: 'merging' as const, icon: GitMerge },
+];
+
+const STAGE_TO_STEP_INDEX: Record<string, number> = {
+  reviewing: 0,
+  checking_conflicts: 1,
+  planning: 2,
+  building: 3,
+  verifying: 4,
+  e2e_testing: 5,
+  creating_pr: 6,
+  merging: 7,
+  complete: 8, // all done
+};
+
+function ReviewMergeTimeline({ stage, isRunning }: {
+  stage: ReviewMergeStage | null;
+  isRunning: boolean;
+}) {
+  const { t } = useTranslation(['dialogs']);
+
+  const activeIndex = stage ? (STAGE_TO_STEP_INDEX[stage] ?? -1) : -1;
+  const isError = stage === 'error' || stage === 'max_iterations';
+
+  return (
+    <div className="flex items-center gap-0.5 py-2 px-1 overflow-x-auto">
+      {PIPELINE_STEPS.map((step, i) => {
+        const isDone = activeIndex > i;
+        const isActive = !isDone && activeIndex === i;
+        const isPending = !isDone && !isActive;
+
+        const StepIcon = isDone ? CheckCircle2 : (isActive && isError) ? XCircle : step.icon;
+
+        return (
+          <div key={step.key} className="flex items-center">
+            {/* Step */}
+            <div className="flex flex-col items-center gap-0.5 min-w-[40px]">
+              <StepIcon
+                className={cn(
+                  'h-3.5 w-3.5',
+                  isDone && 'text-success',
+                  isActive && !isError && 'animate-pulse text-primary',
+                  isActive && isError && 'text-destructive',
+                  isPending && 'text-muted-foreground/40',
+                )}
+              />
+              <span
+                className={cn(
+                  'text-[9px] leading-tight whitespace-nowrap',
+                  isDone && 'text-success',
+                  isActive && !isError && 'text-primary font-medium',
+                  isActive && isError && 'text-destructive font-medium',
+                  isPending && 'text-muted-foreground/40',
+                )}
+              >
+                {t(`dialogs:worktrees.reviewMergeStep_${step.key}`)}
+              </span>
+            </div>
+            {/* Connector line */}
+            {i < PIPELINE_STEPS.length - 1 && (
+              <div
+                className={cn(
+                  'h-px w-3 mx-0.5 mt-[-8px]',
+                  isDone ? 'bg-success' : (isActive && isRunning) ? 'bg-primary' : 'bg-border',
+                )}
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 // Prefix constants for worktree ID parsing
 const TASK_PREFIX = 'task:';
@@ -94,6 +190,22 @@ export function Worktrees({ projectId }: WorktreesProps) {
   const [showCreatePRDialog, setShowCreatePRDialog] = useState(false);
   const [prWorktree, setPrWorktree] = useState<WorktreeListItem | null>(null);
   const [prTask, setPrTask] = useState<Task | null>(null);
+
+  // Review & Merge state — persisted in Zustand store across navigation
+  const showReviewMergeDialog = useReviewMergeStore(s => s.dialogOpen);
+  const reviewMergeWorktree = useReviewMergeStore(s => s.worktree);
+  const reviewMergeTaskId = useReviewMergeStore(s => s.taskId);
+  const rmProgress = useReviewMergeStore(s => s.progress);
+  const rmLogEntries = useReviewMergeStore(s => s.logEntries);
+  const rmIsRunning = useReviewMergeStore(s => s.isRunning);
+  const rmIsCancelling = useReviewMergeStore(s => s.isCancelling);
+  const rmResult = useReviewMergeStore(s => s.result);
+  const rmOpenDialog = useReviewMergeStore(s => s.openDialog);
+  const rmStartProcess = useReviewMergeStore(s => s.startProcess);
+  const rmResumeProcess = useReviewMergeStore(s => s.resumeProcess);
+  const handleReviewMergeCancel = useReviewMergeStore(s => s.cancelProcess);
+  const handleReviewMergeDialogChange = useReviewMergeStore(s => s.setDialogOpen);
+  const handleReviewMergeDismiss = useReviewMergeStore(s => s.dismiss);
 
   // Selection state
   const [isSelectionMode, setIsSelectionMode] = useState(false);
@@ -176,8 +288,9 @@ export function Worktrees({ projectId }: WorktreesProps) {
       debugLog('[Worktrees] Task worktrees result:', taskResult);
       debugLog('[Worktrees] Terminal worktrees result:', terminalResult);
 
-      if (taskResult.success && taskResult.data) {
-        setWorktrees(taskResult.data.worktrees);
+      if (taskResult.success) {
+        // Always update state when successful, even if data is null/undefined
+        setWorktrees(taskResult.data?.worktrees || []);
       } else {
         setError(taskResult.error || t('common:errors.failedToLoadTaskWorktrees'));
       }
@@ -317,6 +430,39 @@ export function Worktrees({ projectId }: WorktreesProps) {
     setShowCreatePRDialog(true);
   };
 
+  const openReviewMergeDialog = (worktree: WorktreeListItem, task: Task) => {
+    rmOpenDialog(worktree, task.id);
+  };
+
+  // IPC listeners for review-merge events now live in the store (persist across navigation)
+
+  // Start the pipeline when dialog opens — store guards against double-start
+  useEffect(() => {
+    if (showReviewMergeDialog && reviewMergeTaskId) {
+      rmStartProcess();
+    }
+  }, [showReviewMergeDialog, reviewMergeTaskId, rmStartProcess]);
+
+  // React to process result for toast + worktree reload (store can't call these)
+  const prevRmResultRef = useRef<ReviewMergeResult | null>(null);
+  useEffect(() => {
+    if (rmResult && rmResult !== prevRmResultRef.current) {
+      prevRmResultRef.current = rmResult;
+      if (rmResult.success) {
+        toast({
+          title: t('dialogs:worktrees.reviewMergeSuccess'),
+          description: rmResult.prUrl
+            ? t('dialogs:worktrees.reviewMergePrLink', { url: rmResult.prUrl })
+            : rmResult.message,
+        });
+        loadWorktrees();
+      }
+    }
+  }, [rmResult, toast, t, loadWorktrees]);
+
+  // handleReviewMergeCancel, handleReviewMergeDialogChange, handleReviewMergeDismiss
+  // are now provided by useReviewMergeStore (declared above with other store selectors)
+
   // Handle Create PR
   const handleCreatePR = async (options: WorktreeCreatePROptions): Promise<WorktreeCreatePRResult | null> => {
     if (!prTask) return null;
@@ -448,6 +594,10 @@ export function Worktrees({ projectId }: WorktreesProps) {
       if (result.success) {
         // Refresh worktrees after successful delete
         await loadWorktrees();
+        toast({
+          title: t('common:actions.success'),
+          description: t('common:worktrees.deleteSuccess', { branch: terminalWorktreeToDelete.name }),
+        });
         setTerminalWorktreeToDelete(null);
       } else {
         setError(result.error || t('common:errors.failedToDeleteTerminalWorktree', { name: terminalWorktreeToDelete.name }));
@@ -557,6 +707,72 @@ export function Worktrees({ projectId }: WorktreesProps) {
         </div>
       )}
 
+      {/* Review & Merge inline progress (visible when dialog is minimized) */}
+      {reviewMergeWorktree && !showReviewMergeDialog && (rmIsRunning || rmResult) && (
+        <div className={`mb-4 rounded-lg border p-3 ${
+          rmResult?.success === false
+            ? 'border-destructive/50 bg-destructive/5'
+            : rmResult?.success
+              ? 'border-success/50 bg-success/5'
+              : 'border-primary/30 bg-primary/5'
+        }`}>
+          <div className="flex items-center gap-3">
+            <SearchCheck className={`h-4 w-4 shrink-0 ${
+              rmIsRunning ? 'animate-pulse text-primary' : rmResult?.success ? 'text-success' : 'text-destructive'
+            }`} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <span className="text-sm font-medium truncate">
+                  {t('dialogs:worktrees.reviewMergeTitle')} — {reviewMergeWorktree.specName || reviewMergeWorktree.branch}
+                </span>
+                <span className="text-xs text-muted-foreground shrink-0">
+                  {rmProgress?.percent ?? 0}%
+                </span>
+              </div>
+              <Progress
+                value={rmProgress?.percent ?? 0}
+                variant={
+                  rmProgress?.stage === 'error' || rmResult?.success === false
+                    ? 'destructive'
+                    : rmProgress?.stage === 'complete' || rmResult?.success
+                      ? 'success'
+                      : 'default'
+                }
+                size="sm"
+                animated={rmIsRunning}
+              />
+              <p className="text-xs text-muted-foreground mt-1 truncate">
+                {rmResult
+                  ? rmResult.message
+                  : rmProgress?.message || t('common:labels.loading')}
+              </p>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => handleReviewMergeDialogChange(true)}
+                title={t('dialogs:worktrees.reviewMergeExpand')}
+              >
+                <Maximize2 className="h-3.5 w-3.5" />
+              </Button>
+              {!rmIsRunning && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                  onClick={handleReviewMergeDismiss}
+                  title={t('dialogs:worktrees.reviewMergeClose')}
+                >
+                  <XCircle className="h-3.5 w-3.5" />
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Loading state */}
       {isLoading && worktrees.length === 0 && terminalWorktrees.length === 0 && (
         <div className="flex h-full items-center justify-center">
@@ -648,6 +864,14 @@ export function Worktrees({ projectId }: WorktreesProps) {
                           <span className="font-mono worktrees-branch-target">{worktree.isOrphaned ? t('common:labels.orphaned') : worktree.branch}</span>
                         </div>
 
+                        {/* Pipeline timeline — visible when Review & Merge is active for this worktree */}
+                        {reviewMergeWorktree?.specName === worktree.specName && (rmIsRunning || rmResult) && (
+                          <ReviewMergeTimeline
+                            stage={rmProgress?.stage ?? null}
+                            isRunning={rmIsRunning}
+                          />
+                        )}
+
                         {/* Actions */}
                         <div className="flex flex-wrap gap-2">
                           <Button
@@ -659,6 +883,37 @@ export function Worktrees({ projectId }: WorktreesProps) {
                             <GitMerge className="h-3.5 w-3.5 mr-1.5" />
                             {t('dialogs:worktrees.mergeTo', { branch: worktree.baseBranch })}
                           </Button>
+                          {task && (() => {
+                            const isThisWorktree = reviewMergeWorktree?.specName === worktree.specName;
+                            const isThisRunning = rmIsRunning && isThisWorktree;
+                            const isThisFailed = !rmIsRunning && isThisWorktree && rmResult?.success === false;
+                            return (
+                              <>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  onClick={() => openReviewMergeDialog(worktree, task)}
+                                  disabled={isThisRunning}
+                                >
+                                  {isThisRunning
+                                    ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                                    : <SearchCheck className="h-3.5 w-3.5 mr-1.5" />
+                                  }
+                                  {t('dialogs:worktrees.reviewAndMerge')}
+                                </Button>
+                                {isThisFailed && (
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => rmResumeProcess()}
+                                  >
+                                    <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+                                    {t('dialogs:worktrees.reviewMergeRecover')}
+                                  </Button>
+                                )}
+                              </>
+                            );
+                          })()}
                           {task && (
                             <Button
                               variant="info"
@@ -907,7 +1162,7 @@ export function Worktrees({ projectId }: WorktreesProps) {
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+      <AlertDialog open={showDeleteConfirm} onOpenChange={(open) => !open && !isDeleting && setShowDeleteConfirm(false)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('dialogs:worktrees.deleteTitle')}</AlertDialogTitle>
@@ -924,7 +1179,10 @@ export function Worktrees({ projectId }: WorktreesProps) {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>{t('common:buttons.cancel')}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
@@ -945,7 +1203,7 @@ export function Worktrees({ projectId }: WorktreesProps) {
       </AlertDialog>
 
       {/* Terminal Worktree Delete Confirmation Dialog */}
-      <AlertDialog open={!!terminalWorktreeToDelete} onOpenChange={(open) => !open && setTerminalWorktreeToDelete(null)}>
+      <AlertDialog open={!!terminalWorktreeToDelete} onOpenChange={(open) => !open && !isDeletingTerminal && setTerminalWorktreeToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('dialogs:worktrees.deleteTerminalTitle')}</AlertDialogTitle>
@@ -964,7 +1222,10 @@ export function Worktrees({ projectId }: WorktreesProps) {
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeletingTerminal}>{t('common:buttons.cancel')}</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDeleteTerminalWorktree}
+              onClick={(e) => {
+                e.preventDefault();
+                handleDeleteTerminalWorktree();
+              }}
               disabled={isDeletingTerminal}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
@@ -985,7 +1246,7 @@ export function Worktrees({ projectId }: WorktreesProps) {
       </AlertDialog>
 
       {/* Bulk Delete Confirmation Dialog */}
-      <AlertDialog open={showBulkDeleteConfirm} onOpenChange={setShowBulkDeleteConfirm}>
+      <AlertDialog open={showBulkDeleteConfirm} onOpenChange={(open) => !open && !isBulkDeleting && setShowBulkDeleteConfirm(false)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
@@ -1030,6 +1291,22 @@ export function Worktrees({ projectId }: WorktreesProps) {
           worktreeStatus={worktreeToStatus(prWorktree)}
           onOpenChange={setShowCreatePRDialog}
           onCreatePR={handleCreatePR}
+        />
+      )}
+
+      {/* Review & Merge Dialog */}
+      {reviewMergeWorktree && (
+        <ReviewMergeDialog
+          open={showReviewMergeDialog}
+          specName={reviewMergeWorktree.specName || reviewMergeWorktree.branch}
+          baseBranch={reviewMergeWorktree.baseBranch || 'main'}
+          progress={rmProgress}
+          logEntries={rmLogEntries}
+          isRunning={rmIsRunning}
+          isCancelling={rmIsCancelling}
+          result={rmResult}
+          onOpenChange={handleReviewMergeDialogChange}
+          onCancel={handleReviewMergeCancel}
         />
       )}
     </div>

@@ -33,6 +33,7 @@ export const IPC_CHANNELS = {
   TASK_CHECK_RUNNING: 'task:checkRunning',
   TASK_RESUME_PAUSED: 'task:resumePaused',  // Resume a rate-limited or auth-paused task
   TASK_LOAD_IMAGE_THUMBNAIL: 'task:loadImageThumbnail',
+  TASK_CHECK_WORKTREE_CHANGES: 'task:checkWorktreeChanges',
 
   // Workspace management (for human review)
   // Per-spec architecture: Each spec has its own worktree at .worktrees/{spec-name}/
@@ -46,6 +47,10 @@ export const IPC_CHANNELS = {
   TASK_WORKTREE_OPEN_IN_IDE: 'task:worktreeOpenInIDE',
   TASK_WORKTREE_OPEN_IN_TERMINAL: 'task:worktreeOpenInTerminal',
   TASK_WORKTREE_DETECT_TOOLS: 'task:worktreeDetectTools',  // Detect installed IDEs/terminals
+  TASK_WORKTREE_REVIEW_MERGE: 'task:worktreeReviewMerge',
+  TASK_REVIEW_MERGE_PROGRESS: 'task:reviewMergeProgress',
+  TASK_REVIEW_MERGE_LOG: 'task:reviewMergeLog',
+  TASK_REVIEW_MERGE_CANCEL: 'task:reviewMergeCancel',
   TASK_LIST_WORKTREES: 'task:listWorktrees',
   TASK_ARCHIVE: 'task:archive',
   TASK_UNARCHIVE: 'task:unarchive',
@@ -187,6 +192,7 @@ export const IPC_CHANNELS = {
   ROADMAP_STOP: 'roadmap:stop',
   ROADMAP_UPDATE_FEATURE: 'roadmap:updateFeature',
   ROADMAP_CONVERT_TO_SPEC: 'roadmap:convertToSpec',
+  COMPETITOR_ANALYSIS_SAVE: 'roadmap:competitorAnalysisSave',
 
   // Roadmap events (main -> renderer)
   ROADMAP_PROGRESS: 'roadmap:progress',
@@ -410,14 +416,22 @@ export const IPC_CHANNELS = {
   GITHUB_PR_CHECK_MERGE_READINESS: 'github:pr:checkMergeReadiness',
   GITHUB_PR_MARK_REVIEW_POSTED: 'github:pr:markReviewPosted',
   GITHUB_PR_UPDATE_BRANCH: 'github:pr:updateBranch',
+  GITHUB_PR_NOTIFY_EXTERNAL_REVIEW_COMPLETE: 'github:pr:notifyExternalReviewComplete',
 
   // GitHub PR Review events (main -> renderer)
   GITHUB_PR_REVIEW_PROGRESS: 'github:pr:reviewProgress',
   GITHUB_PR_REVIEW_COMPLETE: 'github:pr:reviewComplete',
   GITHUB_PR_REVIEW_ERROR: 'github:pr:reviewError',
+  GITHUB_PR_REVIEW_STATE_CHANGE: 'github:pr:reviewStateChange',
+  GITHUB_PR_LOGS_UPDATED: 'github:pr:logsUpdated',
 
   // GitHub PR Logs (for viewing AI review logs)
   GITHUB_PR_GET_LOGS: 'github:pr:getLogs',
+
+  // GitHub PR Status Polling (production system checks)
+  GITHUB_PR_STATUS_POLL_START: 'github:pr:statusPollStart',   // Start polling PR status
+  GITHUB_PR_STATUS_POLL_STOP: 'github:pr:statusPollStop',     // Stop polling PR status
+  GITHUB_PR_STATUS_UPDATE: 'github:pr:statusUpdate',          // Event: PR status updated (main -> renderer)
 
   // GitHub PR Memory operations (saves review insights to memory layer)
   GITHUB_PR_MEMORY_GET: 'github:pr:memory:get',        // Get PR review memories
@@ -492,8 +506,15 @@ export const IPC_CHANNELS = {
   INSIGHTS_NEW_SESSION: 'insights:newSession',
   INSIGHTS_SWITCH_SESSION: 'insights:switchSession',
   INSIGHTS_DELETE_SESSION: 'insights:deleteSession',
+  INSIGHTS_DELETE_SESSIONS: 'insights:deleteSessions',
+  INSIGHTS_ARCHIVE_SESSION: 'insights:archiveSession',
+  INSIGHTS_ARCHIVE_SESSIONS: 'insights:archiveSessions',
+  INSIGHTS_UNARCHIVE_SESSION: 'insights:unarchiveSession',
   INSIGHTS_RENAME_SESSION: 'insights:renameSession',
   INSIGHTS_UPDATE_MODEL_CONFIG: 'insights:updateModelConfig',
+  INSIGHTS_CONFIRM_ACTION: 'insights:confirmAction',
+  INSIGHTS_CANCEL_ACTION: 'insights:cancelAction',
+  INSIGHTS_GET_KANBAN_SNAPSHOT: 'insights:getKanbanSnapshot',
 
   // Insights events (main -> renderer)
   INSIGHTS_STREAM_CHUNK: 'insights:streamChunk',
@@ -573,6 +594,7 @@ export const IPC_CHANNELS = {
   // Queue routing (rate limit recovery)
   QUEUE_GET_RUNNING_TASKS_BY_PROFILE: 'queue:getRunningTasksByProfile',
   QUEUE_GET_BEST_PROFILE_FOR_TASK: 'queue:getBestProfileForTask',
+  QUEUE_GET_BEST_UNIFIED_ACCOUNT: 'queue:getBestUnifiedAccount', // Unified OAuth + API account selection
   QUEUE_ASSIGN_PROFILE_TO_TASK: 'queue:assignProfileToTask',
   QUEUE_UPDATE_TASK_SESSION: 'queue:updateTaskSession',
   QUEUE_GET_TASK_SESSION: 'queue:getTaskSession',
@@ -580,5 +602,29 @@ export const IPC_CHANNELS = {
   // Queue routing events (main -> renderer)
   QUEUE_PROFILE_SWAPPED: 'queue:profileSwapped',      // Task switched to different profile
   QUEUE_SESSION_CAPTURED: 'queue:sessionCaptured',    // Session ID captured from running task
-  QUEUE_BLOCKED_NO_PROFILES: 'queue:blockedNoProfiles' // All profiles unavailable
+  QUEUE_BLOCKED_NO_PROFILES: 'queue:blockedNoProfiles', // All profiles unavailable
+
+  // Team Sync
+  TEAM_SYNC_SIGNUP: 'team-sync:signup',
+  TEAM_SYNC_SIGNIN: 'team-sync:signin',
+  TEAM_SYNC_SIGNOUT: 'team-sync:signout',
+  TEAM_SYNC_STATUS: 'team-sync:status',
+  TEAM_SYNC_CREATE_TEAM: 'team-sync:create-team',
+  TEAM_SYNC_JOIN_TEAM: 'team-sync:join-team',
+  TEAM_SYNC_GET_TEAMS: 'team-sync:get-teams',
+  TEAM_SYNC_GET_MEMBERS: 'team-sync:get-members',
+  TEAM_SYNC_REMOVE_MEMBER: 'team-sync:remove-member',
+  TEAM_SYNC_GENERATE_INVITE: 'team-sync:generate-invite',
+  TEAM_SYNC_ENABLE: 'team-sync:enable',
+  TEAM_SYNC_DISABLE: 'team-sync:disable',
+  TEAM_SYNC_FORCE_PUSH: 'team-sync:force-push',
+  TEAM_SYNC_FORCE_PULL: 'team-sync:force-pull',
+  TEAM_SYNC_UPDATE: 'team-sync:update',
+  TEAM_SYNC_INITIALIZE: 'team-sync:initialize',
+  TEAM_SYNC_INVITE_MEMBER: 'team-sync:invite-member',
+  TEAM_SYNC_ACCEPT_INVITATION: 'team-sync:accept-invitation',
+  TEAM_SYNC_LIST_INVITATIONS: 'team-sync:list-invitations',
+  TEAM_SYNC_CHECK_ALIGNMENT: 'team-sync:check-alignment',
+  TEAM_SYNC_MARK_ALIGNED: 'team-sync:mark-aligned',
+  TEAM_SYNC_CLEAR_LOCAL_STATE: 'team-sync:clear-local-state'
 } as const;

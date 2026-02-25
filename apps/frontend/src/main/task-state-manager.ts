@@ -11,6 +11,7 @@ import { findTaskWorktree } from './worktree-paths';
 import { getSpecsDir, AUTO_BUILD_PATHS } from '../shared/constants';
 import { existsSync } from 'fs';
 import path from 'path';
+import { getTeamSyncService } from './team-sync/team-sync-service';
 
 type TaskActor = ActorRefFrom<typeof taskMachine>;
 
@@ -181,6 +182,18 @@ export class TaskStateManager {
     return this.getCurrentState(taskId) === 'plan_review';
   }
 
+  /**
+   * Reset tracking state for a task that is about to be restarted.
+   * Clears terminalEventSeen (so process exits aren't swallowed) and
+   * lastSequenceByTask (so events from the new process aren't dropped
+   * as duplicates). Does NOT stop or remove the XState actor, since
+   * the caller may still need to send events to it.
+   */
+  prepareForRestart(taskId: string): void {
+    this.terminalEventSeen.delete(taskId);
+    this.lastSequenceByTask.delete(taskId);
+  }
+
   clearTask(taskId: string): void {
     this.lastSequenceByTask.delete(taskId);
     this.lastStateByTask.delete(taskId);
@@ -305,6 +318,17 @@ export class TaskStateManager {
   ): void {
     const mainPlanPath = getPlanPath(project, task);
     persistPlanStatusAndReasonSync(mainPlanPath, status, reviewReason, project.id, xstateState, executionPhase);
+
+    // Push task status change to Team Sync
+    const teamSync = getTeamSyncService();
+    if (teamSync?.isSyncEnabled(project.id)) {
+      teamSync.pushTaskUpdate(project.id, task.specId, {
+        status,
+        reviewReason,
+        xstateState,
+        executionPhase,
+      }).catch(() => {});
+    }
 
     const worktreePath = findTaskWorktree(project.path, task.specId);
     if (!worktreePath) return;

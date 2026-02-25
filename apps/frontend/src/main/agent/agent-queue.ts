@@ -1,6 +1,6 @@
 import { spawn } from 'child_process';
 import path from 'path';
-import { existsSync, writeFileSync, mkdirSync, unlinkSync, promises as fsPromises } from 'fs';
+import { existsSync, mkdirSync, unlinkSync, promises as fsPromises } from 'fs';
 import { EventEmitter } from 'events';
 import { AgentState } from './agent-state';
 import { AgentEvents } from './agent-events';
@@ -8,9 +8,7 @@ import { AgentProcessManager } from './agent-process';
 import { RoadmapConfig } from './types';
 import type { IdeationConfig, Idea } from '../../shared/types';
 import { AUTO_BUILD_PATHS } from '../../shared/constants';
-import { detectRateLimit, createSDKRateLimitInfo, getBestAvailableProfileEnv } from '../rate-limit-detector';
-import { getAPIProfileEnv } from '../services/profile';
-import { getOAuthModeClearVars } from './env-utils';
+import { detectRateLimit, createSDKRateLimitInfo } from '../rate-limit-detector';
 import { debugLog, debugError } from '../../shared/utils/debug-logger';
 import { stripAnsiCodes } from '../../shared/utils/ansi-sanitizer';
 import { parsePythonCommand } from '../python-detector';
@@ -19,6 +17,9 @@ import { transformIdeaFromSnakeCase, transformSessionFromSnakeCase } from '../ip
 import { transformRoadmapFromSnakeCase } from '../ipc-handlers/roadmap/transformers';
 import type { RawIdea } from '../ipc-handlers/ideation/types';
 import { getPathDelimiter } from '../platform';
+import { debounce } from '../utils/debounce';
+import { writeFileWithRetry } from '../utils/atomic-file';
+import { resolveAuthEnvForFeature } from '../auth-profile-routing';
 
 /** Maximum length for status messages displayed in progress UI */
 const STATUS_MESSAGE_MAX_LENGTH = 200;
@@ -43,6 +44,15 @@ export class AgentQueueManager {
   private events: AgentEvents;
   private processManager: AgentProcessManager;
   private emitter: EventEmitter;
+  private debouncedPersistRoadmapProgress: (
+    projectPath: string,
+    phase: string,
+    progress: number,
+    message: string,
+    startedAt: string,
+    isRunning: boolean
+  ) => void;
+  private cancelPersistRoadmapProgress: () => void;
 
   constructor(
     state: AgentState,
@@ -54,6 +64,17 @@ export class AgentQueueManager {
     this.events = events;
     this.processManager = processManager;
     this.emitter = emitter;
+
+    // Create debounced version of persistRoadmapProgress (300ms, leading + trailing)
+    // This limits file writes to ~3-4 per second while ensuring immediate first write
+    // and final state persistence after burst of updates
+    const { fn: debouncedFn, cancel } = debounce(
+      this.persistRoadmapProgress.bind(this),
+      300,
+      { leading: true, trailing: true }
+    );
+    this.debouncedPersistRoadmapProgress = debouncedFn;
+    this.cancelPersistRoadmapProgress = cancel;
   }
 
   /**
@@ -90,14 +111,14 @@ export class AgentQueueManager {
    * @param startedAt - When generation started (ISO string)
    * @param isRunning - Whether generation is actively running
    */
-  private persistRoadmapProgress(
+  private async persistRoadmapProgress(
     projectPath: string,
     phase: string,
     progress: number,
     message: string,
     startedAt: string,
     isRunning: boolean
-  ): void {
+  ): Promise<void> {
     try {
       const roadmapDir = path.join(projectPath, AUTO_BUILD_PATHS.ROADMAP_DIR);
       const progressPath = path.join(roadmapDir, AUTO_BUILD_PATHS.GENERATION_PROGRESS);
@@ -116,7 +137,7 @@ export class AgentQueueManager {
         is_running: isRunning
       };
 
-      writeFileSync(progressPath, JSON.stringify(progressData, null, 2));
+      await writeFileWithRetry(progressPath, JSON.stringify(progressData, null, 2), { encoding: 'utf-8' });
       debugLog('[Agent Queue] Persisted roadmap progress:', { phase, progress });
     } catch (err) {
       debugError('[Agent Queue] Failed to persist roadmap progress:', err);
@@ -130,6 +151,9 @@ export class AgentQueueManager {
    * @param projectPath - The project directory path
    */
   private clearRoadmapProgress(projectPath: string): void {
+    // Cancel any pending debounced write to prevent re-creating the file after deletion
+    this.cancelPersistRoadmapProgress();
+
     try {
       const progressPath = path.join(
         projectPath,
@@ -326,15 +350,10 @@ export class AgentQueueManager {
     // Get combined environment variables
     const combinedEnv = this.processManager.getCombinedEnv(projectPath);
 
-    // Get best available Claude profile environment (automatically handles rate limits)
-    const profileResult = getBestAvailableProfileEnv();
-    const profileEnv = profileResult.env;
-
-    // Get active API profile environment variables
-    const apiProfileEnv = await getAPIProfileEnv();
-
-    // Get OAuth mode clearing vars (clears stale ANTHROPIC_* vars when in OAuth mode)
-    const oauthModeClearVars = getOAuthModeClearVars(apiProfileEnv);
+    const authResolution = await resolveAuthEnvForFeature('roadmap');
+    const profileEnv = authResolution.profileEnv;
+    const apiProfileEnv = authResolution.apiProfileEnv;
+    const oauthModeClearVars = authResolution.oauthModeClearVars;
 
     // Get Python path from process manager (uses venv if configured)
     const pythonPath = this.processManager.getPythonPath();
@@ -371,6 +390,12 @@ export class AgentQueueManager {
       PYTHONUNBUFFERED: '1',
       PYTHONUTF8: '1'
     };
+
+    // Normalize PATH key to a single uppercase 'PATH' entry.
+    // On Windows, process.env spread produces 'Path' while pythonEnv may write 'PATH',
+    // resulting in duplicate keys in the final object. Without normalization the child
+    // process inherits both keys, which can cause tool-not-found errors (#1661).
+    normalizeEnvPathKey(finalEnv as Record<string, string | undefined>);
 
     // Debug: Show OAuth token source (token values intentionally omitted for security - AC4)
     const tokenSource = profileEnv['CLAUDE_CODE_OAUTH_TOKEN']
@@ -659,15 +684,10 @@ export class AgentQueueManager {
     // Get combined environment variables
     const combinedEnv = this.processManager.getCombinedEnv(projectPath);
 
-    // Get best available Claude profile environment (automatically handles rate limits)
-    const profileResult = getBestAvailableProfileEnv();
-    const profileEnv = profileResult.env;
-
-    // Get active API profile environment variables
-    const apiProfileEnv = await getAPIProfileEnv();
-
-    // Get OAuth mode clearing vars (clears stale ANTHROPIC_* vars when in OAuth mode)
-    const oauthModeClearVars = getOAuthModeClearVars(apiProfileEnv);
+    const authResolution = await resolveAuthEnvForFeature('ideation');
+    const profileEnv = authResolution.profileEnv;
+    const apiProfileEnv = authResolution.apiProfileEnv;
+    const oauthModeClearVars = authResolution.oauthModeClearVars;
 
     // Get Python path from process manager (uses venv if configured)
     const pythonPath = this.processManager.getPythonPath();
@@ -705,6 +725,12 @@ export class AgentQueueManager {
       PYTHONUTF8: '1'
     };
 
+    // Normalize PATH key to a single uppercase 'PATH' entry.
+    // On Windows, process.env spread produces 'Path' while pythonEnv may write 'PATH',
+    // resulting in duplicate keys in the final object. Without normalization the child
+    // process inherits both keys, which can cause tool-not-found errors (#1661).
+    normalizeEnvPathKey(finalEnv as Record<string, string | undefined>);
+
     // Debug: Show OAuth token source (token values intentionally omitted for security - AC4)
     const tokenSource = profileEnv['CLAUDE_CODE_OAUTH_TOKEN']
       ? 'Electron app profile'
@@ -739,8 +765,8 @@ export class AgentQueueManager {
     // Track startedAt timestamp for progress persistence
     const roadmapStartedAt = new Date().toISOString();
 
-    // Persist initial progress state
-    this.persistRoadmapProgress(
+    // Persist initial progress state (debounced - will execute immediately due to leading: true)
+    this.debouncedPersistRoadmapProgress(
       projectPath,
       progressPhase,
       progressPercent,
@@ -777,8 +803,8 @@ export class AgentQueueManager {
       // Get status message for display
       const statusMessage = formatStatusMessage(log);
 
-      // Persist progress to disk for recovery after restart
-      this.persistRoadmapProgress(
+      // Persist progress to disk for recovery after restart (debounced to limit writes)
+      this.debouncedPersistRoadmapProgress(
         projectPath,
         progressPhase,
         progressPercent,
@@ -805,8 +831,8 @@ export class AgentQueueManager {
 
       const statusMessage = formatStatusMessage(log);
 
-      // Persist progress to disk (also on stderr to show activity)
-      this.persistRoadmapProgress(
+      // Persist progress to disk (debounced - also on stderr to show activity)
+      this.debouncedPersistRoadmapProgress(
         projectPath,
         progressPhase,
         progressPercent,

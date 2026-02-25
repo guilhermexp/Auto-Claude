@@ -191,10 +191,10 @@ export interface ExternalThemeData {
 }
 
 // Thinking level for Claude model (budget token allocation)
-export type ThinkingLevel = 'none' | 'low' | 'medium' | 'high' | 'ultrathink';
+export type ThinkingLevel = 'low' | 'medium' | 'high';
 
 // Model type shorthand
-export type ModelTypeShort = 'haiku' | 'sonnet' | 'opus';
+export type ModelTypeShort = 'haiku' | 'sonnet' | 'opus' | 'opus-1m' | 'opus-4.5';
 
 // Phase-based model configuration for Auto profile
 // Each phase can use a different model optimized for that task type
@@ -231,6 +231,18 @@ export interface FeatureThinkingConfig {
   githubIssues: ThinkingLevel;
   githubPrs: ThinkingLevel;
   utility: ThinkingLevel;
+}
+
+export type AuthRoutingMode = 'global' | 'per_feature';
+
+export interface FeatureAuthProfileConfig {
+  tasks?: string;
+  insights?: string;
+  ideation?: string;
+  roadmap?: string;
+  githubIssues?: string;
+  githubPrs?: string;
+  utility?: string;
 }
 
 // Agent profile for preset model/thinking configurations
@@ -307,6 +319,12 @@ export interface AppSettings {
   // Feature-specific configuration (insights, ideation, roadmap)
   featureModels?: FeatureModelConfig;
   featureThinking?: FeatureThinkingConfig;
+  // Authentication routing configuration
+  authRoutingMode?: AuthRoutingMode;
+  // Unified account IDs: oauth-{claudeProfileId} | api-{apiProfileId}
+  featureAuthProfiles?: FeatureAuthProfileConfig;
+  // Team Sync rollout flag (MVP gate)
+  teamSyncEnabled?: boolean;
   // Changelog preferences
   changelogFormat?: ChangelogFormat;
   changelogAudience?: ChangelogAudience;
@@ -320,6 +338,8 @@ export interface AppSettings {
   // Migration flags (internal use)
   _migratedAgentProfileToAuto?: boolean;
   _migratedDefaultModelSync?: boolean;
+  _migratedUltrathinkToHigh?: boolean;
+  _migratedFeatureAuthRouting?: boolean;
   // Language preference for UI (i18n)
   language?: SupportedLanguage;
   // Developer tools preferences
@@ -340,6 +360,9 @@ export interface AppSettings {
   // Sidebar expanded width in pixels
   sidebarWidth?: number;
 }
+
+// GPU acceleration mode for terminal WebGL rendering
+export type GpuAcceleration = 'auto' | 'on' | 'off';
 
 // Auto-Claude Source Environment Configuration (for auto-claude repo .env)
 export interface SourceEnvConfig {

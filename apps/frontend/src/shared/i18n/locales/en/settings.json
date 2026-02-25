@@ -25,6 +25,10 @@
       "title": "Agent Settings",
       "description": "Default model and framework"
     },
+    "team-sync": {
+      "title": "Team Sync",
+      "description": "Real-time sync and team authentication"
+    },
     "paths": {
       "title": "Paths",
       "description": "CLI tools and framework paths"
@@ -190,6 +194,14 @@
     "description": "Choose how logs are displayed in the task detail view",
     "chronological": "Chronological (oldest first)",
     "reverseChronological": "Reverse-chronological (newest first)"
+  },
+  "gpuAcceleration": {
+    "label": "GPU Acceleration",
+    "description": "Use WebGL for terminal rendering (experimental, faster with many terminals)",
+    "auto": "Auto (use WebGL when supported)",
+    "on": "Always on",
+    "off": "Off (default)",
+    "helperText": "Changes apply to new terminals only"
   },
   "general": {
     "otherAgentSettings": "Other Agent Settings",
@@ -399,6 +411,10 @@
     "resetToProfileDefaults": "Reset to {{profile}} defaults",
     "customized": "Customized",
     "phaseConfigNote": "These settings will be used as defaults when creating new tasks with this profile. You can override them per-task in the task creation wizard.",
+    "adaptiveThinking": {
+      "badge": "Adaptive",
+      "tooltip": "Opus uses adaptive thinking — it dynamically decides how much to think within the budget cap set by the thinking level."
+    },
     "phases": {
       "spec": {
         "label": "Spec Creation",

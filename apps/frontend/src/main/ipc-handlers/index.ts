@@ -34,8 +34,10 @@ import { registerMcpHandlers } from './mcp-handlers';
 import { registerProfileHandlers } from './profile-handlers';
 import { registerScreenshotHandlers } from './screenshot-handlers';
 import { registerThemeHandlers } from './theme-handlers';
+import { registerTeamSyncHandlers } from './team-sync-handlers';
 import { registerTerminalWorktreeIpcHandlers } from './terminal';
 import { notificationService } from '../notification-service';
+import { setAgentManagerRef } from './utils';
 
 /**
  * Setup all IPC handlers across all domains
@@ -53,6 +55,9 @@ export function setupIpcHandlers(
 ): void {
   // Initialize notification service
   notificationService.initialize(getMainWindow);
+
+  // Wire up agent manager for circuit breaker cleanup
+  setAgentManagerRef(agentManager);
 
   // Project handlers (including Python environment setup)
   registerProjectHandlers(pythonEnvManager, agentManager, getMainWindow);
@@ -100,7 +105,7 @@ export function setupIpcHandlers(
   registerChangelogHandlers(getMainWindow);
 
   // Insights handlers
-  registerInsightsHandlers(getMainWindow);
+  registerInsightsHandlers(agentManager, getMainWindow);
 
   // Memory & infrastructure handlers (for Graphiti/LadybugDB)
   registerMemoryHandlers();
@@ -125,6 +130,9 @@ export function setupIpcHandlers(
 
   // External theme discovery/import handlers
   registerThemeHandlers();
+
+  // Team Sync handlers
+  registerTeamSyncHandlers(getMainWindow);
 
   console.warn('[IPC] All handler modules registered successfully');
 }
@@ -154,5 +162,6 @@ export {
   registerMcpHandlers,
   registerProfileHandlers,
   registerScreenshotHandlers,
-  registerThemeHandlers
+  registerThemeHandlers,
+  registerTeamSyncHandlers
 };

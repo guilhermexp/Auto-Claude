@@ -7,8 +7,10 @@
 // Terminal Timing Constants
 // ============================================
 
-/** Delay for DOM updates before terminal operations (refit, resize) */
-export const TERMINAL_DOM_UPDATE_DELAY_MS = 50;
+/** Delay for DOM updates before terminal operations (refit, resize).
+ * Must be long enough for dnd-kit CSS transitions to complete after drag-drop reorder.
+ * 50ms was too short, causing xterm to fit into containers with zero/invalid dimensions. */
+export const TERMINAL_DOM_UPDATE_DELAY_MS = 250;
 
 /** Grace period before cleaning up error panel constraints after panel removal */
 export const PANEL_CLEANUP_GRACE_PERIOD_MS = 150;
@@ -53,6 +55,12 @@ export const DEFAULT_APP_SETTINGS = {
   globalOpenAIApiKey: undefined as string | undefined,
   // Selected agent profile - defaults to 'auto' for per-phase optimized model selection
   selectedAgentProfile: 'auto',
+  // Authentication routing mode - global keeps current behavior for all features
+  authRoutingMode: 'global' as const,
+  // Per-feature auth profile mappings
+  featureAuthProfiles: {} as Record<string, string>,
+  // Team Sync rollout disabled by default
+  teamSyncEnabled: false,
   // Changelog preferences (persisted between sessions)
   changelogFormat: 'keep-a-changelog' as const,
   changelogAudience: 'user-facing' as const,
@@ -115,6 +123,7 @@ export const AUTO_BUILD_PATHS = {
   ROADMAP_FILE: 'roadmap.json',
   ROADMAP_DISCOVERY: 'roadmap_discovery.json',
   COMPETITOR_ANALYSIS: 'competitor_analysis.json',
+  MANUAL_COMPETITORS: 'manual_competitors.json',
   IDEATION_FILE: 'ideation.json',
   IDEATION_CONTEXT: 'ideation_context.json',
   PROJECT_INDEX: '.auto-claude/project_index.json',

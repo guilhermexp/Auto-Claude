@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { TrendingUp } from 'lucide-react';
 import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { PhaseCard } from './PhaseCard';
@@ -24,6 +25,7 @@ export function RoadmapTabs({
   onFeatureSelect,
   onConvertToSpec,
   onGoToTask,
+  onArchive,
   onSave,
 }: RoadmapTabsProps) {
   const { t } = useTranslation('roadmap');
@@ -44,6 +46,7 @@ export function RoadmapTabs({
           onFeatureClick={onFeatureSelect}
           onConvertToSpec={onConvertToSpec}
           onGoToTask={onGoToTask}
+          onArchive={onArchive}
           onSave={onSave}
         />
       </TabsContent>
@@ -60,6 +63,7 @@ export function RoadmapTabs({
               onFeatureSelect={onFeatureSelect}
               onConvertToSpec={onConvertToSpec}
               onGoToTask={onGoToTask}
+              onArchive={onArchive}
             />
           ))}
         </div>
@@ -75,6 +79,7 @@ export function RoadmapTabs({
               onClick={() => onFeatureSelect(feature)}
               onConvertToSpec={onConvertToSpec}
               onGoToTask={onGoToTask}
+              onArchive={onArchive}
               hasCompetitorInsight={hasCompetitorInsight(feature)}
             />
           ))}

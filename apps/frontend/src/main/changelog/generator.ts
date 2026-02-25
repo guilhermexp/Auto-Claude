@@ -11,10 +11,11 @@ import type {
 import { buildChangelogPrompt, buildGitPrompt, createGenerationScript } from './formatter';
 import { extractChangelog } from './parser';
 import { getCommits, getBranchDiffCommits } from './git-integration';
-import { detectRateLimit, createSDKRateLimitInfo, getBestAvailableProfileEnv } from '../rate-limit-detector';
+import { detectRateLimit, createSDKRateLimitInfo } from '../rate-limit-detector';
 import { parsePythonCommand } from '../python-detector';
 import { getAugmentedEnv } from '../env-utils';
 import { isWindows } from '../platform';
+import { resolveAuthEnvForFeature } from '../auth-profile-routing';
 
 /**
  * Core changelog generation logic
@@ -22,6 +23,7 @@ import { isWindows } from '../platform';
  */
 export class ChangelogGenerator extends EventEmitter {
   private generationProcesses: Map<string, ReturnType<typeof spawn>> = new Map();
+  private generationTimeouts: Map<string, NodeJS.Timeout> = new Map();
   private debugEnabled: boolean;
 
   constructor(
@@ -140,7 +142,7 @@ export class ChangelogGenerator extends EventEmitter {
     this.debug('Spawning Python process...');
 
     // Build environment with explicit critical variables
-    const spawnEnv = this.buildSpawnEnvironment();
+    const spawnEnv = await this.buildSpawnEnvironment();
 
     // Parse Python command to handle space-separated commands like "py -3"
     const [pythonCommand, pythonBaseArgs] = parsePythonCommand(this.pythonPath);
@@ -151,6 +153,25 @@ export class ChangelogGenerator extends EventEmitter {
 
     this.generationProcesses.set(projectId, childProcess);
     this.debug('Process spawned with PID:', childProcess.pid);
+
+    // Set 5-minute timeout
+    const TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+    const timeoutId = setTimeout(() => {
+      this.debug('Process timed out after 5 minutes');
+      this.generationTimeouts.delete(projectId);
+
+      // Kill the process
+      const proc = this.generationProcesses.get(projectId);
+      if (proc) {
+        proc.kill('SIGTERM');
+        this.generationProcesses.delete(projectId);
+      }
+
+      // Emit timeout error
+      this.emitError(projectId, 'Changelog generation timed out after 5 minutes');
+    }, TIMEOUT_MS);
+
+    this.generationTimeouts.set(projectId, timeoutId);
 
     let output = '';
     let errorOutput = '';
@@ -182,7 +203,18 @@ export class ChangelogGenerator extends EventEmitter {
         errorLength: errorOutput.length
       });
 
-      this.generationProcesses.delete(projectId);
+      // Clear timeout
+      const existingTimeout = this.generationTimeouts.get(projectId);
+      if (existingTimeout) {
+        clearTimeout(existingTimeout);
+        this.generationTimeouts.delete(projectId);
+      }
+
+      // Guard: if process was already removed (e.g. by timeout or cancel), skip
+      if (!this.generationProcesses.delete(projectId)) {
+        this.debug('Process already cleaned up (timeout or cancel), skipping exit handler');
+        return;
+      }
 
       if (code === 0 && output.trim()) {
         this.emitProgress(projectId, {
@@ -236,7 +268,18 @@ export class ChangelogGenerator extends EventEmitter {
 
     childProcess.on('error', (err: Error) => {
       this.debug('Process error', { error: err.message });
-      this.generationProcesses.delete(projectId);
+
+      // Clear timeout
+      const timeoutId = this.generationTimeouts.get(projectId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        this.generationTimeouts.delete(projectId);
+      }
+
+      if (!this.generationProcesses.delete(projectId)) {
+        this.debug('Process already cleaned up, skipping error handler');
+        return;
+      }
       this.emitError(projectId, err.message);
     });
   }
@@ -244,27 +287,31 @@ export class ChangelogGenerator extends EventEmitter {
   /**
    * Build spawn environment with proper PATH and auth settings
    */
-  private buildSpawnEnvironment(): Record<string, string> {
+  private async buildSpawnEnvironment(): Promise<Record<string, string>> {
     const homeDir = os.homedir();
 
     // Use getAugmentedEnv() to ensure common tool paths are available
     // even when app is launched from Finder/Dock
     const augmentedEnv = getAugmentedEnv();
 
-    // Get best available Claude profile environment (automatically handles rate limits)
-    const profileResult = getBestAvailableProfileEnv();
-    const profileEnv = profileResult.env;
+    const authResolution = await resolveAuthEnvForFeature('utility');
+    const profileEnv = authResolution.profileEnv;
+    const apiProfileEnv = authResolution.apiProfileEnv;
+    const oauthModeClearVars = authResolution.oauthModeClearVars;
     this.debug('Active profile environment', {
       hasOAuthToken: !!profileEnv.CLAUDE_CODE_OAUTH_TOKEN,
       hasConfigDir: !!profileEnv.CLAUDE_CONFIG_DIR,
-      authMethod: profileEnv.CLAUDE_CODE_OAUTH_TOKEN ? 'oauth-token' : (profileEnv.CLAUDE_CONFIG_DIR ? 'config-dir' : 'default'),
-      wasSwapped: profileResult.wasSwapped,
-      selectedProfile: profileResult.profileName
+      hasApiProfile: Object.keys(apiProfileEnv).length > 0,
+      authRoutingMode: authResolution.authRoutingMode,
+      resolvedAccountId: authResolution.resolvedAccountId,
+      fallbackUsed: authResolution.fallbackUsed
     });
 
     const spawnEnv: Record<string, string> = {
       ...augmentedEnv,
       ...this.autoBuildEnv,
+      ...apiProfileEnv,
+      ...oauthModeClearVars,
       ...profileEnv, // Include active Claude profile config
       // Ensure critical env vars are set for claude CLI
       // Use USERPROFILE on Windows, HOME on Unix
@@ -289,6 +336,13 @@ export class ChangelogGenerator extends EventEmitter {
    * Cancel ongoing generation
    */
   cancel(projectId: string): boolean {
+    // Clear timeout
+    const timeoutId = this.generationTimeouts.get(projectId);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      this.generationTimeouts.delete(projectId);
+    }
+
     const process = this.generationProcesses.get(projectId);
     if (process) {
       process.kill('SIGTERM');

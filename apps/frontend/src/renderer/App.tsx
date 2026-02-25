@@ -59,7 +59,7 @@ import { useTaskStore, loadTasks } from './stores/task-store';
 import { useSettingsStore, loadSettings, loadProfiles, saveSettings } from './stores/settings-store';
 import { useClaudeProfileStore, loadClaudeProfiles } from './stores/claude-profile-store';
 import { useTerminalStore, restoreTerminalSessions } from './stores/terminal-store';
-import { initializeGitHubListeners } from './stores/github';
+import { initializeGitHubListeners, cleanupGitHubListeners } from './stores/github';
 import { initDownloadProgressListener } from './stores/download-store';
 import { GlobalDownloadIndicator } from './components/GlobalDownloadIndicator';
 import { useIpcListeners } from './hooks/useIpc';
@@ -79,6 +79,8 @@ import { applyThemeVariables, removeThemeVariables } from './lib/themes/theme-ap
 import { ProjectTabBar, type ProjectTabActivityState } from './components/ProjectTabBar';
 import { AddProjectModal } from './components/AddProjectModal';
 import { ViewStateProvider } from './contexts/ViewStateContext';
+import { useTeamSyncStore } from './stores/team-sync-store';
+import { LoginGate } from './components/auth/LoginGate';
 
 // Version constant for version-specific warnings (e.g., reauthentication notices)
 const VERSION_WARNING_275 = '2.7.5';
@@ -129,6 +131,15 @@ export function App() {
 
   // Handle terminal profile change events (recreate terminals on profile switch)
   useTerminalProfileChange();
+
+  // Auth gate — must be before any conditional returns (React rules of hooks)
+  const teamSyncAuthChecked = useTeamSyncStore((s) => s.authChecked);
+  const teamSyncAuthenticated = useTeamSyncStore((s) => s.status.authenticated);
+  const teamSyncInitialize = useTeamSyncStore((s) => s.initialize);
+
+  useEffect(() => {
+    void teamSyncInitialize();
+  }, [teamSyncInitialize]);
 
   // Stores
   const projects = useProjectStore((state) => state.projects);
@@ -304,8 +315,10 @@ export function App() {
     });
   }, [getProjectRunningState]);
 
-  // Initial load
+  // Initial load — wait until user is authenticated before loading project data
   useEffect(() => {
+    if (!teamSyncAuthenticated) return;
+
     loadProjects();
     loadSettings();
     loadProfiles();
@@ -317,8 +330,9 @@ export function App() {
 
     return () => {
       cleanupDownloadListener();
+      cleanupGitHubListeners();
     };
-  }, []);
+  }, [teamSyncAuthenticated]);
 
   // Restore tab state and open tabs for loaded projects
   useEffect(() => {
@@ -1092,6 +1106,19 @@ export function App() {
       setSelectedTask(task);
     }
   };
+
+  // Auth gate — block the app until authentication is verified
+  if (!teamSyncAuthChecked) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary" />
+      </div>
+    );
+  }
+
+  if (!teamSyncAuthenticated) {
+    return <LoginGate />;
+  }
 
   return (
     <ViewStateProvider>

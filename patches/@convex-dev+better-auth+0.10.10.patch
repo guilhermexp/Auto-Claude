@@ -1,0 +1,132 @@
+diff --git a/node_modules/@convex-dev/better-auth/dist/auth-options.js b/node_modules/@convex-dev/better-auth/dist/auth-options.js
+index 406a0a6..4ee4b4b 100644
+--- a/node_modules/@convex-dev/better-auth/dist/auth-options.js
++++ b/node_modules/@convex-dev/better-auth/dist/auth-options.js
+@@ -1,4 +1,4 @@
+-import { anonymous, bearer, emailOTP, genericOAuth, jwt, magicLink, oidcProvider, oneTap, oneTimeToken, phoneNumber, twoFactor, username, } from "better-auth/plugins";
++import { anonymous, bearer, emailOTP, genericOAuth, jwt, magicLink, oidcProvider, oneTap, oneTimeToken, organization, phoneNumber, twoFactor, username, } from "better-auth/plugins";
+ import { passkey } from "@better-auth/passkey";
+ import { convex } from "./plugins/convex/index.js";
+ import { convexAdapter } from "./client/adapter.js";
+@@ -32,6 +32,7 @@ export const options = {
+         bearer(),
+         oneTimeToken(),
+         jwt(),
++        organization(),
+         convex({
+             authConfig: { providers: [{ applicationID: "convex", domain: "" }] },
+         }),
+diff --git a/node_modules/@convex-dev/better-auth/dist/component/schema.js b/node_modules/@convex-dev/better-auth/dist/component/schema.js
+index 54a6445..73fb4be 100644
+--- a/node_modules/@convex-dev/better-auth/dist/component/schema.js
++++ b/node_modules/@convex-dev/better-auth/dist/component/schema.js
+@@ -32,6 +32,7 @@ export const tables = {
+         ipAddress: v.optional(v.union(v.null(), v.string())),
+         userAgent: v.optional(v.union(v.null(), v.string())),
+         userId: v.string(),
++        activeOrganizationId: v.optional(v.union(v.null(), v.string())),
+     })
+         .index("expiresAt", ["expiresAt"])
+         .index("expiresAt_userId", ["expiresAt", "userId"])
+@@ -133,6 +134,34 @@ export const tables = {
+         count: v.optional(v.union(v.null(), v.number())),
+         lastRequest: v.optional(v.union(v.null(), v.number())),
+     }).index("key", ["key"]),
++    organization: defineTable({
++        name: v.string(),
++        slug: v.string(),
++        logo: v.optional(v.union(v.null(), v.string())),
++        metadata: v.optional(v.union(v.null(), v.string())),
++        createdAt: v.number(),
++    })
++        .index("slug", ["slug"]),
++    member: defineTable({
++        userId: v.string(),
++        organizationId: v.string(),
++        role: v.string(),
++        createdAt: v.number(),
++    })
++        .index("organizationId", ["organizationId"])
++        .index("userId", ["userId"])
++        .index("organizationId_userId", ["organizationId", "userId"]),
++    invitation: defineTable({
++        email: v.string(),
++        inviterId: v.string(),
++        organizationId: v.string(),
++        role: v.string(),
++        status: v.string(),
++        expiresAt: v.number(),
++        createdAt: v.number(),
++    })
++        .index("email", ["email"])
++        .index("organizationId", ["organizationId"]),
+ };
+ const schema = defineSchema(tables);
+ export default schema;
+diff --git a/node_modules/@convex-dev/better-auth/src/auth-options.ts b/node_modules/@convex-dev/better-auth/src/auth-options.ts
+index fa93b79..ca0ffe2 100644
+--- a/node_modules/@convex-dev/better-auth/src/auth-options.ts
++++ b/node_modules/@convex-dev/better-auth/src/auth-options.ts
+@@ -9,6 +9,7 @@ import {
+   oidcProvider,
+   oneTap,
+   oneTimeToken,
++  organization,
+   phoneNumber,
+   twoFactor,
+   username,
+@@ -47,6 +48,7 @@ export const options = {
+     bearer(),
+     oneTimeToken(),
+     jwt(),
++    organization(),
+     convex({
+       authConfig: { providers: [{ applicationID: "convex", domain: "" }] },
+     }),
+diff --git a/node_modules/@convex-dev/better-auth/src/component/schema.ts b/node_modules/@convex-dev/better-auth/src/component/schema.ts
+index 013f84d..ffd93a2 100644
+--- a/node_modules/@convex-dev/better-auth/src/component/schema.ts
++++ b/node_modules/@convex-dev/better-auth/src/component/schema.ts
+@@ -34,6 +34,7 @@ export const tables = {
+     ipAddress: v.optional(v.union(v.null(), v.string())),
+     userAgent: v.optional(v.union(v.null(), v.string())),
+     userId: v.string(),
++    activeOrganizationId: v.optional(v.union(v.null(), v.string())),
+   })
+     .index("expiresAt", ["expiresAt"])
+     .index("expiresAt_userId", ["expiresAt", "userId"])
+@@ -135,6 +136,34 @@ export const tables = {
+     count: v.optional(v.union(v.null(), v.number())),
+     lastRequest: v.optional(v.union(v.null(), v.number())),
+   }).index("key", ["key"]),
++  organization: defineTable({
++    name: v.string(),
++    slug: v.string(),
++    logo: v.optional(v.union(v.null(), v.string())),
++    metadata: v.optional(v.union(v.null(), v.string())),
++    createdAt: v.number(),
++  })
++    .index("slug", ["slug"]),
++  member: defineTable({
++    userId: v.string(),
++    organizationId: v.string(),
++    role: v.string(),
++    createdAt: v.number(),
++  })
++    .index("organizationId", ["organizationId"])
++    .index("userId", ["userId"])
++    .index("organizationId_userId", ["organizationId", "userId"]),
++  invitation: defineTable({
++    email: v.string(),
++    inviterId: v.string(),
++    organizationId: v.string(),
++    role: v.string(),
++    status: v.string(),
++    expiresAt: v.number(),
++    createdAt: v.number(),
++  })
++    .index("email", ["email"])
++    .index("organizationId", ["organizationId"]),
+ };
+ 
+ const schema = defineSchema(tables);

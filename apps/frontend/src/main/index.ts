@@ -49,13 +49,14 @@ import { initializeAppUpdater, stopPeriodicUpdates } from './app-updater';
 import { DEFAULT_APP_SETTINGS, IPC_CHANNELS, SPELL_CHECK_LANGUAGE_MAP, DEFAULT_SPELL_CHECK_LANGUAGE, ADD_TO_DICTIONARY_LABELS } from '../shared/constants';
 import { getAppLanguage, initAppLanguage } from './app-language';
 import { readSettingsFile } from './settings-utils';
-import { setupErrorLogging } from './app-logger';
+import { appLog, setupErrorLogging } from './app-logger';
 import { initSentryMain } from './sentry';
 import { preWarmToolCache } from './cli-tool-manager';
 import { initializeClaudeProfileManager, getClaudeProfileManager } from './claude-profile-manager';
 import { isProfileAuthenticated } from './claude-profile/profile-utils';
 import { isMacOS, isWindows } from './platform';
 import { ptyDaemonClient } from './terminal/pty-daemon-client';
+import { initializeTeamSyncService, getTeamSyncService } from './team-sync/team-sync-service';
 import type { AppSettings, AuthFailureInfo } from '../shared/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -74,6 +75,45 @@ const WINDOW_SCREEN_MARGIN: number = 20;
 /** Default screen dimensions used as fallback when screen.getPrimaryDisplay() fails */
 const DEFAULT_SCREEN_WIDTH: number = 1920;
 const DEFAULT_SCREEN_HEIGHT: number = 1080;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Window bounds persistence
+// ─────────────────────────────────────────────────────────────────────────────
+const WINDOW_BOUNDS_FILE = 'window-bounds.json';
+
+interface WindowBounds {
+  width: number;
+  height: number;
+  x?: number;
+  y?: number;
+  isMaximized?: boolean;
+}
+
+function getWindowBoundsPath(): string {
+  return join(app.getPath('userData'), WINDOW_BOUNDS_FILE);
+}
+
+function saveWindowBounds(bounds: WindowBounds): void {
+  try {
+    const boundsPath = getWindowBoundsPath();
+    writeFileSync(boundsPath, JSON.stringify(bounds, null, 2));
+  } catch (error) {
+    console.warn('[main] Failed to save window bounds:', error);
+  }
+}
+
+function loadWindowBounds(): WindowBounds | null {
+  try {
+    const boundsPath = getWindowBoundsPath();
+    if (existsSync(boundsPath)) {
+      const data = readFileSync(boundsPath, 'utf-8');
+      return JSON.parse(data) as WindowBounds;
+    }
+  } catch (error) {
+    console.warn('[main] Failed to load window bounds:', error);
+  }
+  return null;
+}
 
 // Setup error logging early (captures uncaught exceptions)
 setupErrorLogging();
@@ -143,6 +183,11 @@ let mainWindow: BrowserWindow | null = null;
 let agentManager: AgentManager | null = null;
 let terminalManager: TerminalManager | null = null;
 
+// Capture child process exits (renderer/GPU/utility) for crash diagnostics.
+app.on('child-process-gone', (_event, details) => {
+  appLog.error('[main] child-process-gone:', details);
+});
+
 // Re-entrancy guard for before-quit handler.
 // The first before-quit call pauses quit for async cleanup, then calls app.quit() again.
 // The second call sees isQuitting=true and allows quit to proceed immediately.
@@ -150,6 +195,9 @@ let terminalManager: TerminalManager | null = null;
 let isQuitting = false;
 
 function createWindow(): void {
+  // Try to load saved window bounds
+  const savedBounds = loadWindowBounds();
+
   // Get the primary display's work area (accounts for taskbar, dock, etc.)
   // Wrapped in try/catch to handle potential failures with fallback to safe defaults
   let workAreaSize: { width: number; height: number };
@@ -180,9 +228,26 @@ function createWindow(): void {
   const availableWidth: number = workAreaSize.width - WINDOW_SCREEN_MARGIN;
   const availableHeight: number = workAreaSize.height - WINDOW_SCREEN_MARGIN;
 
-  // Calculate actual dimensions (preferred, but capped to margin-adjusted available space)
-  const width: number = Math.min(WINDOW_PREFERRED_WIDTH, availableWidth);
-  const height: number = Math.min(WINDOW_PREFERRED_HEIGHT, availableHeight);
+  // Use saved bounds if available and valid, otherwise use defaults
+  let width: number;
+  let height: number;
+  let x: number | undefined;
+  let y: number | undefined;
+
+  if (savedBounds && savedBounds.width >= WINDOW_MIN_WIDTH && savedBounds.height >= WINDOW_MIN_HEIGHT) {
+    // Use saved dimensions, but cap to available space
+    width = Math.min(savedBounds.width, availableWidth);
+    height = Math.min(savedBounds.height, availableHeight);
+    // Use saved position if provided
+    if (savedBounds.x !== undefined && savedBounds.y !== undefined) {
+      x = savedBounds.x;
+      y = savedBounds.y;
+    }
+  } else {
+    // Calculate actual dimensions (preferred, but capped to margin-adjusted available space)
+    width = Math.min(WINDOW_PREFERRED_WIDTH, availableWidth);
+    height = Math.min(WINDOW_PREFERRED_HEIGHT, availableHeight);
+  }
 
   // Ensure minimum dimensions don't exceed the actual initial window size
   const minWidth: number = Math.min(WINDOW_MIN_WIDTH, width);
@@ -192,6 +257,8 @@ function createWindow(): void {
   mainWindow = new BrowserWindow({
     width,
     height,
+    x,
+    y,
     minWidth,
     minHeight,
     show: false,
@@ -209,9 +276,38 @@ function createWindow(): void {
     }
   });
 
+  // Restore maximized state if was maximized
+  if (savedBounds?.isMaximized) {
+    mainWindow.maximize();
+  }
+
+  // Save window bounds on resize, move, and maximize/unmaximize
+  const saveBoundsHandler = () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      const bounds = mainWindow.getBounds();
+      saveWindowBounds({
+        width: bounds.width,
+        height: bounds.height,
+        x: bounds.x,
+        y: bounds.y,
+        isMaximized: mainWindow.isMaximized()
+      });
+    }
+  };
+
+  mainWindow.on('resize', saveBoundsHandler);
+  mainWindow.on('move', saveBoundsHandler);
+  mainWindow.on('maximize', saveBoundsHandler);
+  mainWindow.on('unmaximize', saveBoundsHandler);
+
   // Show window when ready to avoid visual flash
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show();
+  });
+
+  // Capture renderer process crashes/termination reasons for diagnostics.
+  mainWindow.webContents.on('render-process-gone', (_event, details) => {
+    appLog.error('[main] render-process-gone:', details);
   });
 
   // Configure initial spell check languages with proper fallback logic
@@ -330,6 +426,10 @@ function createWindow(): void {
 
   // Clean up on close
   mainWindow.on('closed', () => {
+    // Kill all agents when window closes (prevents orphaned processes)
+    agentManager?.killAll?.()?.catch((err: unknown) => {
+      console.warn('[main] Error killing agents on window close:', err);
+    });
     mainWindow = null;
   });
 }
@@ -470,6 +570,11 @@ app.whenReady().then(() => {
 
   // Setup IPC handlers (pass pythonEnvManager for Python path management)
   setupIpcHandlers(agentManager, terminalManager, () => mainWindow, pythonEnvManager);
+
+  const teamSyncService = initializeTeamSyncService();
+  teamSyncService.initialize().catch((error) => {
+    console.warn('[main] Team Sync initialization failed:', error);
+  });
 
   // Create window
   createWindow();
@@ -637,6 +742,9 @@ app.on('before-quit', (event) => {
       // ensuring all kill commands reach PTY processes before the daemon disconnects
       ptyDaemonClient.shutdown();
       console.warn('[main] PTY daemon client shutdown complete');
+
+      await getTeamSyncService()?.shutdown();
+      console.warn('[main] Team Sync service shutdown complete');
     } catch (error) {
       console.error('[main] Error during pre-quit cleanup:', error);
     } finally {

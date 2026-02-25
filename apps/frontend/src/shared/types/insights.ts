@@ -2,7 +2,7 @@
  * Insights and ideation types
  */
 
-import type { TaskMetadata } from './task';
+import type { TaskMetadata, ImageAttachment } from './task';
 
 // ============================================
 // Ideation Types
@@ -27,7 +27,7 @@ export interface IdeationConfig {
   maxIdeasPerType: number;
   append?: boolean; // If true, append to existing ideas instead of replacing
   model?: string;          // Model shorthand (opus, sonnet, haiku)
-  thinkingLevel?: string;  // Thinking level (none, low, medium, high, ultrathink)
+  thinkingLevel?: string;  // Thinking level (low, medium, high)
 }
 
 export interface IdeaBase {
@@ -175,17 +175,80 @@ export interface InsightsToolUsage {
   timestamp: Date;
 }
 
+export type InsightsKanbanIntent =
+  | 'status_summary'
+  | 'list_human_review'
+  | 'list_errors'
+  | 'start_tasks'
+  | 'stop_tasks'
+  | 'delete_tasks'
+  | 'review_tasks'
+  | 'queue_count'
+  | 'in_progress_count';
+
+export interface InsightsKanbanTargetSelector {
+  specIds?: string[];
+  filter?: 'queue' | 'in_progress' | 'human_review' | 'error' | 'all';
+  limit?: number;
+  raw?: string;
+}
+
+export interface InsightsKanbanTaskSummary {
+  specId: string;
+  title: string;
+  status: string;
+  reviewReason?: string;
+}
+
+export interface InsightsKanbanSnapshot {
+  projectId: string;
+  asOf: string;
+  counts: Record<string, number>;
+  queue: InsightsKanbanTaskSummary[];
+  inProgress: InsightsKanbanTaskSummary[];
+  humanReview: InsightsKanbanTaskSummary[];
+  error: InsightsKanbanTaskSummary[];
+}
+
+export interface InsightsActionProposal {
+  actionId: string;
+  intent: InsightsKanbanIntent;
+  targets?: InsightsKanbanTargetSelector;
+  resolvedSpecIds?: string[];
+  requiresConfirmation: boolean;
+  reason: string;
+  createdAt: Date;
+}
+
+export interface InsightsActionFailure {
+  specId: string;
+  error: string;
+}
+
+export interface InsightsActionResult {
+  actionId: string;
+  intent: InsightsKanbanIntent;
+  success: boolean;
+  cancelled?: boolean;
+  summary: string;
+  executedSpecIds: string[];
+  failed: InsightsActionFailure[];
+  snapshot: InsightsKanbanSnapshot;
+}
+
 export interface InsightsChatMessage {
   id: string;
   role: InsightsChatRole;
   content: string;
   timestamp: Date;
   // For assistant messages that suggest task creation
-  suggestedTask?: {
+  suggestedTasks?: Array<{
     title: string;
     description: string;
     metadata?: TaskMetadata;
-  };
+  }>;
+  // Image attachments (screenshots, pasted images)
+  images?: ImageAttachment[];
   // Tools used during this response (assistant messages only)
   toolsUsed?: InsightsToolUsage[];
 }
@@ -195,9 +258,11 @@ export interface InsightsSession {
   projectId: string;
   title?: string; // Auto-generated from first message or user-set
   messages: InsightsChatMessage[];
+  pendingAction?: InsightsActionProposal | null;
   modelConfig?: InsightsModelConfig; // Per-session model configuration
   createdAt: Date;
   updatedAt: Date;
+  archivedAt?: Date;
 }
 
 // Summary of a session for the history list (without full messages)
@@ -209,6 +274,7 @@ export interface InsightsSessionSummary {
   modelConfig?: InsightsModelConfig; // For displaying model indicator in sidebar
   createdAt: Date;
   updatedAt: Date;
+  archivedAt?: Date;
 }
 
 export interface InsightsChatStatus {
@@ -218,13 +284,15 @@ export interface InsightsChatStatus {
 }
 
 export interface InsightsStreamChunk {
-  type: 'text' | 'task_suggestion' | 'tool_start' | 'tool_end' | 'done' | 'error';
+  type: 'text' | 'task_suggestion' | 'tool_start' | 'tool_end' | 'action_proposal' | 'action_result' | 'done' | 'error';
   content?: string;
-  suggestedTask?: {
+  suggestedTasks?: Array<{
     title: string;
     description: string;
     metadata?: TaskMetadata;
-  };
+  }>;
+  actionProposal?: InsightsActionProposal;
+  actionResult?: InsightsActionResult;
   tool?: {
     name: string;
     input?: string;  // Brief description of what's being searched/read

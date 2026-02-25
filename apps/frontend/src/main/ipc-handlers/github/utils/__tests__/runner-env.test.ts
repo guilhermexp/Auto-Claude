@@ -1,18 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const mockGetAPIProfileEnv = vi.fn();
-const mockGetOAuthModeClearVars = vi.fn();
+const mockResolveAuthEnvForFeature = vi.fn();
 const mockGetPythonEnv = vi.fn();
-const mockGetBestAvailableProfileEnv = vi.fn();
 const mockGetGitHubTokenForSubprocess = vi.fn();
-
-vi.mock('../../../../services/profile', () => ({
-  getAPIProfileEnv: (...args: unknown[]) => mockGetAPIProfileEnv(...args),
-}));
-
-vi.mock('../../../../agent/env-utils', () => ({
-  getOAuthModeClearVars: (...args: unknown[]) => mockGetOAuthModeClearVars(...args),
-}));
 
 vi.mock('../../../../python-env-manager', () => ({
   pythonEnvManager: {
@@ -20,14 +10,23 @@ vi.mock('../../../../python-env-manager', () => ({
   },
 }));
 
-vi.mock('../../../../rate-limit-detector', () => ({
-  getBestAvailableProfileEnv: () => mockGetBestAvailableProfileEnv(),
+vi.mock('../../../../auth-profile-routing', () => ({
+  resolveAuthEnvForFeature: (...args: unknown[]) => mockResolveAuthEnvForFeature(...args),
 }));
 
 // Mock getGitHubTokenForSubprocess to avoid calling gh CLI in tests
 // Path is relative to the module being mocked (runner-env.ts), which imports from '../utils'
 vi.mock('../../utils', () => ({
   getGitHubTokenForSubprocess: () => mockGetGitHubTokenForSubprocess(),
+}));
+
+vi.mock('../../../../cli-tool-manager', () => ({
+  getToolInfo: () => ({ found: false, path: undefined, source: undefined }),
+}));
+
+vi.mock('../../../../sentry', () => ({
+  getSentryEnvForSubprocess: () => ({}),
+  safeBreadcrumb: () => {},
 }));
 
 import { getRunnerEnv } from '../runner-env';
@@ -42,32 +41,37 @@ describe('getRunnerEnv', () => {
       PYTHONNOUSERSITE: '1',
       PYTHONPATH: '/bundled/site-packages',
     });
-    // Default mock for profile env - returns BestProfileEnvResult format
-    mockGetBestAvailableProfileEnv.mockReturnValue({
-      env: {},
-      profileId: 'default',
-      profileName: 'Default',
-      wasSwapped: false
+    mockResolveAuthEnvForFeature.mockResolvedValue({
+      profileEnv: {},
+      apiProfileEnv: {},
+      oauthModeClearVars: {},
+      sourceType: 'none',
+      resolutionSource: 'global',
+      authRoutingMode: 'global',
+      fallbackUsed: false
     });
     // Default mock for GitHub token - returns null (no token) by default
     mockGetGitHubTokenForSubprocess.mockResolvedValue(null);
   });
 
   it('merges Python env with API profile env and OAuth clear vars', async () => {
-    mockGetAPIProfileEnv.mockResolvedValue({
-      ANTHROPIC_AUTH_TOKEN: 'token',
-      ANTHROPIC_BASE_URL: 'https://api.example.com',
-    });
-    mockGetOAuthModeClearVars.mockReturnValue({
-      ANTHROPIC_AUTH_TOKEN: '',
+    mockResolveAuthEnvForFeature.mockResolvedValue({
+      profileEnv: {},
+      apiProfileEnv: {
+        ANTHROPIC_AUTH_TOKEN: 'token',
+        ANTHROPIC_BASE_URL: 'https://api.example.com',
+      },
+      oauthModeClearVars: {
+        ANTHROPIC_AUTH_TOKEN: '',
+      },
+      sourceType: 'api',
+      resolutionSource: 'global',
+      authRoutingMode: 'global',
+      fallbackUsed: false
     });
 
     const result = await getRunnerEnv();
 
-    expect(mockGetOAuthModeClearVars).toHaveBeenCalledWith({
-      ANTHROPIC_AUTH_TOKEN: 'token',
-      ANTHROPIC_BASE_URL: 'https://api.example.com',
-    });
     // Python env is included first, then overridden by OAuth clear vars
     expect(result).toMatchObject({
       PYTHONPATH: '/bundled/site-packages',
@@ -78,10 +82,17 @@ describe('getRunnerEnv', () => {
   });
 
   it('includes extra env values with highest precedence', async () => {
-    mockGetAPIProfileEnv.mockResolvedValue({
-      ANTHROPIC_AUTH_TOKEN: 'token',
+    mockResolveAuthEnvForFeature.mockResolvedValue({
+      profileEnv: {},
+      apiProfileEnv: {
+        ANTHROPIC_AUTH_TOKEN: 'token',
+      },
+      oauthModeClearVars: {},
+      sourceType: 'api',
+      resolutionSource: 'feature',
+      authRoutingMode: 'per_feature',
+      fallbackUsed: false
     });
-    mockGetOAuthModeClearVars.mockReturnValue({});
 
     const result = await getRunnerEnv({ USE_CLAUDE_MD: 'true' });
 
@@ -93,8 +104,15 @@ describe('getRunnerEnv', () => {
   });
 
   it('includes PYTHONPATH for bundled packages (fixes #139)', async () => {
-    mockGetAPIProfileEnv.mockResolvedValue({});
-    mockGetOAuthModeClearVars.mockReturnValue({});
+    mockResolveAuthEnvForFeature.mockResolvedValue({
+      profileEnv: {},
+      apiProfileEnv: {},
+      oauthModeClearVars: {},
+      sourceType: 'none',
+      resolutionSource: 'global',
+      authRoutingMode: 'global',
+      fallbackUsed: false
+    });
     mockGetPythonEnv.mockReturnValue({
       PYTHONPATH: '/app/Contents/Resources/python-site-packages',
     });
@@ -105,13 +123,14 @@ describe('getRunnerEnv', () => {
   });
 
   it('includes profileEnv for OAuth token (fixes #563)', async () => {
-    mockGetAPIProfileEnv.mockResolvedValue({});
-    mockGetOAuthModeClearVars.mockReturnValue({});
-    mockGetBestAvailableProfileEnv.mockReturnValue({
-      env: { CLAUDE_CODE_OAUTH_TOKEN: 'oauth-token-123' },
-      profileId: 'default',
-      profileName: 'Default',
-      wasSwapped: false
+    mockResolveAuthEnvForFeature.mockResolvedValue({
+      profileEnv: { CLAUDE_CODE_OAUTH_TOKEN: 'oauth-token-123' },
+      apiProfileEnv: {},
+      oauthModeClearVars: {},
+      sourceType: 'oauth',
+      resolutionSource: 'global',
+      authRoutingMode: 'global',
+      fallbackUsed: false
     });
 
     const result = await getRunnerEnv();
@@ -123,15 +142,14 @@ describe('getRunnerEnv', () => {
     mockGetPythonEnv.mockReturnValue({
       SHARED_VAR: 'from-python',
     });
-    mockGetAPIProfileEnv.mockResolvedValue({
-      SHARED_VAR: 'from-api-profile',
-    });
-    mockGetOAuthModeClearVars.mockReturnValue({});
-    mockGetBestAvailableProfileEnv.mockReturnValue({
-      env: { SHARED_VAR: 'from-profile' },
-      profileId: 'default',
-      profileName: 'Default',
-      wasSwapped: false
+    mockResolveAuthEnvForFeature.mockResolvedValue({
+      profileEnv: { SHARED_VAR: 'from-profile' },
+      apiProfileEnv: { SHARED_VAR: 'from-api-profile' },
+      oauthModeClearVars: {},
+      sourceType: 'oauth',
+      resolutionSource: 'feature',
+      authRoutingMode: 'per_feature',
+      fallbackUsed: false
     });
 
     const result = await getRunnerEnv({ SHARED_VAR: 'from-extra' });
@@ -141,8 +159,15 @@ describe('getRunnerEnv', () => {
   });
 
   it('includes GitHub token from gh CLI when available (fixes #151)', async () => {
-    mockGetAPIProfileEnv.mockResolvedValue({});
-    mockGetOAuthModeClearVars.mockReturnValue({});
+    mockResolveAuthEnvForFeature.mockResolvedValue({
+      profileEnv: {},
+      apiProfileEnv: {},
+      oauthModeClearVars: {},
+      sourceType: 'none',
+      resolutionSource: 'global',
+      authRoutingMode: 'global',
+      fallbackUsed: false
+    });
     mockGetGitHubTokenForSubprocess.mockResolvedValue('gh-token-123');
 
     const result = await getRunnerEnv();
@@ -151,8 +176,15 @@ describe('getRunnerEnv', () => {
   });
 
   it('omits GITHUB_TOKEN when gh CLI returns null', async () => {
-    mockGetAPIProfileEnv.mockResolvedValue({});
-    mockGetOAuthModeClearVars.mockReturnValue({});
+    mockResolveAuthEnvForFeature.mockResolvedValue({
+      profileEnv: {},
+      apiProfileEnv: {},
+      oauthModeClearVars: {},
+      sourceType: 'none',
+      resolutionSource: 'global',
+      authRoutingMode: 'global',
+      fallbackUsed: false
+    });
     mockGetGitHubTokenForSubprocess.mockResolvedValue(null);
 
     const result = await getRunnerEnv();

@@ -47,7 +47,11 @@ import type {
   TaskLogStreamChunk,
   ImageAttachment,
   ReviewReason,
-  MergeProgress
+  MergeProgress,
+  ReviewMergeOptions,
+  ReviewMergeResult,
+  ReviewMergeProgressData,
+  ReviewMergeLogEntry
 } from './task';
 import type {
   TerminalCreateOptions,
@@ -105,9 +109,11 @@ import type {
   InsightsSessionSummary,
   InsightsChatStatus,
   InsightsStreamChunk,
-  InsightsModelConfig
+  InsightsModelConfig,
+  InsightsKanbanSnapshot
 } from './insights';
 import type {
+  CompetitorAnalysis,
   Roadmap,
   RoadmapFeatureStatus,
   RoadmapGenerationStatus,
@@ -139,6 +145,7 @@ import type {
   GitLabNewCommitsCheck
 } from './integrations';
 import type { APIProfile, ProfilesFile, TestConnectionResult, DiscoverModelsResult } from './profile';
+import type { TeamSyncAlignmentCheck, TeamSyncInvitation, TeamSyncInviteResult, TeamSyncMember, TeamSyncStatus, TeamSyncTeam, TeamSyncUpdate } from './team-sync';
 
 // ============================================
 // Branch Types
@@ -210,6 +217,9 @@ export interface ElectronAPI {
   // Image operations
   loadImageThumbnail: (projectPath: string, specId: string, imagePath: string) => Promise<IPCResult<string>>;
 
+  // Worktree change detection
+  checkWorktreeChanges: (taskId: string) => Promise<IPCResult<{ hasChanges: boolean; worktreePath?: string; changedFileCount?: number }>>;
+
   // Workspace management (for human review)
   // Per-spec architecture: Each spec has its own worktree at .worktrees/{spec-name}/
   getWorktreeStatus: (taskId: string) => Promise<IPCResult<WorktreeStatus>>;
@@ -217,6 +227,10 @@ export interface ElectronAPI {
   mergeWorktree: (taskId: string, options?: { noCommit?: boolean }) => Promise<IPCResult<WorktreeMergeResult>>;
   mergeWorktreePreview: (taskId: string) => Promise<IPCResult<WorktreeMergeResult>>;
   createWorktreePR: (taskId: string, options?: WorktreeCreatePROptions) => Promise<IPCResult<WorktreeCreatePRResult>>;
+  reviewAndMergeWorktree: (taskId: string, options?: ReviewMergeOptions) => Promise<IPCResult<ReviewMergeResult>>;
+  onReviewMergeProgress: (callback: (taskId: string, progress: ReviewMergeProgressData) => void) => () => void;
+  onReviewMergeLog: (callback: (taskId: string, entry: ReviewMergeLogEntry) => void) => () => void;
+  cancelReviewMerge: (taskId: string) => Promise<IPCResult<{ cancelled: boolean }>>;
   discardWorktree: (taskId: string, skipStatusChange?: boolean) => Promise<IPCResult<WorktreeDiscardResult>>;
   discardOrphanedWorktree: (projectId: string, specName: string) => Promise<IPCResult<WorktreeDiscardResult>>;
   clearStagedState: (taskId: string) => Promise<IPCResult<{ cleared: boolean }>>;
@@ -250,7 +264,7 @@ export interface ElectronAPI {
   getTerminalSessions: (projectPath: string) => Promise<IPCResult<TerminalSession[]>>;
   restoreTerminalSession: (session: TerminalSession, cols?: number, rows?: number) => Promise<IPCResult<TerminalRestoreResult>>;
   clearTerminalSessions: (projectPath: string) => Promise<IPCResult>;
-  resumeClaudeInTerminal: (id: string, sessionId?: string) => void;
+  resumeClaudeInTerminal: (id: string, sessionId?: string, options?: { migratedSession?: boolean }) => void;
   activateDeferredClaudeResume: (id: string) => void;
   getTerminalSessionDates: (projectPath?: string) => Promise<IPCResult<SessionDateInfo[]>>;
   getTerminalSessionsForDate: (date: string, projectPath: string) => Promise<IPCResult<TerminalSession[]>>;
@@ -421,6 +435,7 @@ export interface ElectronAPI {
   getRoadmap: (projectId: string) => Promise<IPCResult<Roadmap | null>>;
   getRoadmapStatus: (projectId: string) => Promise<IPCResult<{ isRunning: boolean }>>;
   saveRoadmap: (projectId: string, roadmap: Roadmap) => Promise<IPCResult>;
+  saveCompetitorAnalysis: (projectId: string, competitorAnalysis: CompetitorAnalysis) => Promise<IPCResult>;
   generateRoadmap: (projectId: string, enableCompetitorAnalysis?: boolean, refreshCompetitorAnalysis?: boolean) => void;
   refreshRoadmap: (projectId: string, enableCompetitorAnalysis?: boolean, refreshCompetitorAnalysis?: boolean) => void;
   stopRoadmap: (projectId: string) => Promise<IPCResult>;
@@ -737,7 +752,7 @@ export interface ElectronAPI {
   // Changelog operations
   getChangelogDoneTasks: (projectId: string, tasks?: Task[]) => Promise<IPCResult<ChangelogTask[]>>;
   loadTaskSpecs: (projectId: string, taskIds: string[]) => Promise<IPCResult<TaskSpecContent[]>>;
-  generateChangelog: (request: ChangelogGenerationRequest) => void; // Async with progress events
+  generateChangelog: (request: ChangelogGenerationRequest) => Promise<IPCResult<void>>; // Async with progress events
   saveChangelog: (request: ChangelogSaveRequest) => Promise<IPCResult<ChangelogSaveResult>>;
   readExistingChangelog: (projectId: string) => Promise<IPCResult<ExistingChangelog>>;
   suggestChangelogVersion: (
@@ -780,7 +795,7 @@ export interface ElectronAPI {
 
   // Insights operations
   getInsightsSession: (projectId: string) => Promise<IPCResult<InsightsSession | null>>;
-  sendInsightsMessage: (projectId: string, message: string, modelConfig?: InsightsModelConfig) => void;
+  sendInsightsMessage: (projectId: string, message: string, modelConfig?: InsightsModelConfig, images?: ImageAttachment[]) => void;
   clearInsightsSession: (projectId: string) => Promise<IPCResult>;
   createTaskFromInsights: (
     projectId: string,
@@ -788,12 +803,28 @@ export interface ElectronAPI {
     description: string,
     metadata?: TaskMetadata
   ) => Promise<IPCResult<Task>>;
-  listInsightsSessions: (projectId: string) => Promise<IPCResult<InsightsSessionSummary[]>>;
+  listInsightsSessions: (projectId: string, includeArchived?: boolean) => Promise<IPCResult<InsightsSessionSummary[]>>;
   newInsightsSession: (projectId: string) => Promise<IPCResult<InsightsSession>>;
   switchInsightsSession: (projectId: string, sessionId: string) => Promise<IPCResult<InsightsSession | null>>;
   deleteInsightsSession: (projectId: string, sessionId: string) => Promise<IPCResult>;
+  deleteInsightsSessions: (projectId: string, sessionIds: string[]) => Promise<IPCResult<{ deletedIds: string[]; failedIds: string[] }>>;
+  archiveInsightsSession: (projectId: string, sessionId: string) => Promise<IPCResult>;
+  archiveInsightsSessions: (projectId: string, sessionIds: string[]) => Promise<IPCResult<{ archivedIds: string[]; failedIds: string[] }>>;
+  unarchiveInsightsSession: (projectId: string, sessionId: string) => Promise<IPCResult>;
   renameInsightsSession: (projectId: string, sessionId: string, newTitle: string) => Promise<IPCResult>;
   updateInsightsModelConfig: (projectId: string, sessionId: string, modelConfig: InsightsModelConfig) => Promise<IPCResult>;
+  confirmInsightsAction: (
+    projectId: string,
+    sessionId: string,
+    actionId: string,
+    confirmed: boolean
+  ) => Promise<IPCResult>;
+  cancelInsightsAction: (
+    projectId: string,
+    sessionId: string,
+    actionId: string
+  ) => Promise<IPCResult>;
+  getInsightsKanbanSnapshot: (projectId: string) => Promise<IPCResult<InsightsKanbanSnapshot>>;
 
   // Insights event listeners
   onInsightsStreamChunk: (
@@ -929,6 +960,32 @@ export interface ElectronAPI {
 
   // Queue Routing API (rate limit recovery)
   queue: import('../../preload/api/queue-api').QueueAPI;
+
+  // Team Sync API
+  teamSync: {
+    initialize: () => Promise<IPCResult<TeamSyncStatus>>;
+    signup: (email: string, name: string, password: string) => Promise<IPCResult>;
+    signin: (email: string, password: string) => Promise<IPCResult>;
+    signout: () => Promise<IPCResult>;
+    getStatus: () => Promise<IPCResult<TeamSyncStatus>>;
+    createTeam: (name: string) => Promise<IPCResult<TeamSyncTeam>>;
+    joinTeam: (inviteCode: string) => Promise<IPCResult>;
+    getTeams: () => Promise<IPCResult<TeamSyncTeam[]>>;
+    getMembers: (teamId: string) => Promise<IPCResult<TeamSyncMember[]>>;
+    removeMember: (teamId: string, memberId: string) => Promise<IPCResult>;
+    generateInviteCode: (teamId: string) => Promise<IPCResult<string>>;
+    enable: (projectId: string, projectPath: string) => Promise<IPCResult>;
+    disable: (projectId: string) => Promise<IPCResult>;
+    forcePush: (projectId: string) => Promise<IPCResult>;
+    forcePull: (projectId: string) => Promise<IPCResult>;
+    inviteMember: (organizationId: string, email: string, role?: string) => Promise<IPCResult<TeamSyncInviteResult>>;
+    acceptInvitation: (invitationId: string) => Promise<IPCResult<{ organizationId: string; name: string }>>;
+    listInvitations: (organizationId: string) => Promise<IPCResult<TeamSyncInvitation[]>>;
+    checkAlignment: (projectPath: string) => Promise<IPCResult<TeamSyncAlignmentCheck>>;
+    markAligned: (projectPath: string) => Promise<IPCResult>;
+    clearLocalState: (projectPaths?: string[]) => Promise<IPCResult>;
+    onUpdate: (callback: (update: TeamSyncUpdate) => void) => () => void;
+  };
 }
 
 /** Platform information exposed via contextBridge for platform-specific behavior */

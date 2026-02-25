@@ -1,0 +1,36 @@
+- generic [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - img "Logo" [ref=e7]
+        - heading "Entrar no Convex" [level=1] [ref=e8]
+      - generic [ref=e9]:
+        - generic [ref=e11]:
+          - generic [ref=e12]:
+            - generic [ref=e13]:
+              - generic [ref=e15]: E-mail
+              - textbox "E-mail" [ref=e17]:
+                - /placeholder: Seu endereço de e-mail
+            - button "Continuar com SSO" [ref=e18] [cursor=pointer]:
+              - generic [ref=e19]: Continuar com SSO
+          - generic [ref=e20]: OU
+          - generic [ref=e21]:
+            - link "Continuar com Google" [ref=e23] [cursor=pointer]:
+              - /url: api/login?provider=GoogleOAuth&state=%2Ft%2Fguilherme-varela%2Fauto-claude%2Fwoozy-manatee-748&redirect_uri=https%3A%2F%2Fdashboard.convex.dev%2Fapi%2Fauth%2Fcallback&client_id=client_01K0YV0SNPRYJ5AV4AS0VG7T1J&source=signin&authorization_session_id=01KHVQ8Q2TNQW0NPZY8ZDKS45A
+              - img [ref=e24]
+              - generic [ref=e30]: Continuar com Google
+            - link "Continuar com GitHub" [active] [ref=e32] [cursor=pointer]:
+              - /url: api/login?provider=GitHubOAuth&state=%2Ft%2Fguilherme-varela%2Fauto-claude%2Fwoozy-manatee-748&redirect_uri=https%3A%2F%2Fdashboard.convex.dev%2Fapi%2Fauth%2Fcallback&client_id=client_01K0YV0SNPRYJ5AV4AS0VG7T1J&source=signin&authorization_session_id=01KHVQ8Q2TNQW0NPZY8ZDKS45A
+              - img [ref=e33]
+              - generic [ref=e35]: Continuar com GitHub
+        - paragraph [ref=e36]:
+          - text: Não tem uma conta?
+          - link "Cadastrar-se" [ref=e37] [cursor=pointer]:
+            - /url: /sign-up?state=%2Ft%2Fguilherme-varela%2Fauto-claude%2Fwoozy-manatee-748&redirect_uri=https%3A%2F%2Fdashboard.convex.dev%2Fapi%2Fauth%2Fcallback&authorization_session_id=01KHVQ8Q2TNQW0NPZY8ZDKS45A
+    - generic [ref=e38]:
+      - link "Termos de Serviço" [ref=e39] [cursor=pointer]:
+        - /url: https://www.convex.dev/legal/tos/v2022-03-02
+      - text: e
+      - link "Política de Privacidade" [ref=e40] [cursor=pointer]:
+        - /url: https://www.convex.dev/legal/privacy/v2024-09-24
+  - alert [ref=e41]

@@ -403,13 +403,17 @@ export function AccountPriorityList({ accounts, onReorder, isLoading }: AccountP
       setItems((currentItems) => {
         const oldIndex = currentItems.findIndex((item) => item.id === active.id);
         const newIndex = currentItems.findIndex((item) => item.id === over.id);
-        const newItems = arrayMove(currentItems, oldIndex, newIndex);
-
-        // Notify parent of new order
-        onReorder(newItems.map(item => item.id));
-
-        return newItems;
+        return arrayMove(currentItems, oldIndex, newIndex);
       });
+
+      // Notify parent of new order after state update to avoid setState during render
+      // Use setTimeout to defer the callback to after the current render cycle
+      setTimeout(() => {
+        setItems((currentItems) => {
+          onReorder(currentItems.map(item => item.id));
+          return currentItems;
+        });
+      }, 0);
     }
   }, [onReorder]);
 

@@ -100,5 +100,13 @@
     "subtasksCompleted": "Sous-tâches Complétées",
     "expand": "Agrandir",
     "collapse": "Réduire"
+  },
+  "kanban": {
+    "pendingAction": {
+      "title": "Action en attente : {{intent}}",
+      "ids": "ID : {{ids}}",
+      "confirm": "Confirmer",
+      "cancel": "Annuler"
+    }
   }
 }

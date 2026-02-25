@@ -5,7 +5,9 @@ import { Button } from '../../ui/button';
 import { cn } from '../../../lib/utils';
 import type { PRData, PRReviewProgress, PRReviewResult } from '../hooks/useGitHubPRs';
 import type { NewCommitsCheck } from '../../../../preload/api/modules/github-api';
+import type { ChecksStatus, ReviewsStatus, MergeableState } from '../../../../shared/types/pr-status';
 import { useTranslation } from 'react-i18next';
+import { CompactStatusIndicator } from './StatusIndicator';
 
 /**
  * Status Flow Dots Component
@@ -161,6 +163,12 @@ interface PRReviewInfo {
   result: PRReviewResult | null;
   error: string | null;
   newCommitsCheck?: NewCommitsCheck | null;
+  /** CI checks status from polling */
+  checksStatus?: ChecksStatus | null;
+  /** Review status from polling */
+  reviewsStatus?: ReviewsStatus | null;
+  /** Mergeable state from polling */
+  mergeableState?: MergeableState | null;
 }
 
 interface PRListProps {
@@ -257,7 +265,7 @@ export function PRList({
               variant="ghost"
               onClick={() => onSelectPR(pr.number)}
               className={cn(
-                'w-full p-4 rounded-xl border text-left transition-colors github-pr-list-item',
+                'w-full h-auto whitespace-normal p-4 rounded-xl border text-left transition-colors github-pr-list-item',
                 selectedPRNumber === pr.number && 'github-pr-list-item-selected'
               )}
             >
@@ -266,7 +274,7 @@ export function PRList({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <span className="text-sm text-muted-foreground">#{pr.number}</span>
-                    <Badge variant="outline" className="text-xs github-pr-chip github-pr-chip-neutral">
+                    <Badge variant="outline" className="text-xs truncate max-w-[200px] github-pr-chip github-pr-chip-neutral" title={pr.headRefName}>
                       {pr.headRefName}
                     </Badge>
                     {/* Review status flow dots + label */}
@@ -294,7 +302,7 @@ export function PRList({
                     />
                   </div>
                   <h3 className="font-medium text-sm truncate">{pr.title}</h3>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
                     <span className="flex items-center gap-1">
                       <User className="h-3 w-3" />
                       {pr.author.login}
@@ -308,6 +316,13 @@ export function PRList({
                       <span className="text-success">+{pr.additions}</span>
                       <span className="text-destructive">-{pr.deletions}</span>
                     </span>
+                    {/* GitHub status indicators (CI, reviews, merge status) */}
+                    <CompactStatusIndicator
+                      checksStatus={reviewState?.checksStatus}
+                      reviewsStatus={reviewState?.reviewsStatus}
+                      mergeableState={reviewState?.mergeableState}
+                      showMergeStatus={false}
+                    />
                   </div>
                 </div>
               </div>

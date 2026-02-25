@@ -24,9 +24,11 @@ import {
 import { Button } from './ui/button';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '../stores/settings-store';
+import { useClaudeProfileStore } from '../stores/claude-profile-store';
 import { detectProvider, getProviderLabel, type ApiProvider } from '../../shared/utils/provider-detection';
 import { formatTimeRemaining, localizeUsageWindowLabel, hasHardcodedText } from '../../shared/utils/format-time';
 import type { ClaudeUsageSnapshot } from '../../shared/types/agent';
+import type { FeatureAuthProfileConfig } from '../../shared/types/settings';
 
 /**
  * Type-safe mapping from ApiProvider to translation keys
@@ -48,9 +50,33 @@ const OAUTH_FALLBACK = {
   providerLabel: 'Anthropic'
 } as const;
 
+type AuthFeatureKey = keyof FeatureAuthProfileConfig;
+
+const FEATURE_AUTH_LABELS: Record<AuthFeatureKey, string> = {
+  tasks: 'Tasks',
+  insights: 'Insights',
+  ideation: 'Ideation',
+  roadmap: 'Roadmap',
+  githubIssues: 'GitHub Issues',
+  githubPrs: 'GitHub PR Review',
+  utility: 'Utility',
+};
+
+const FEATURE_AUTH_KEYS: AuthFeatureKey[] = [
+  'tasks',
+  'insights',
+  'ideation',
+  'roadmap',
+  'githubIssues',
+  'githubPrs',
+  'utility',
+];
+
 export function AuthStatusIndicator() {
   // Subscribe to profile state from settings store
-  const { profiles, activeProfileId } = useSettingsStore();
+  const { profiles, activeProfileId, settings } = useSettingsStore();
+  const claudeProfiles = useClaudeProfileStore((state) => state.profiles);
+  const activeClaudeProfileId = useClaudeProfileStore((state) => state.activeProfileId);
   const { t } = useTranslation(['common']);
 
   // Track usage data for warning badge
@@ -155,6 +181,42 @@ export function AuthStatusIndicator() {
   // Badge label: "Claude Code" for OAuth, "API Key" for API profiles
   const badgeLabel = isOAuth ? t('common:usage.claudeCode') : t('common:usage.apiKey');
 
+  const activeApiProfile = useMemo(
+    () => (activeProfileId ? profiles.find((profile) => profile.id === activeProfileId) : undefined),
+    [activeProfileId, profiles]
+  );
+  const activeClaudeProfile = useMemo(
+    () => (activeClaudeProfileId ? claudeProfiles.find((profile) => profile.id === activeClaudeProfileId) : undefined),
+    [activeClaudeProfileId, claudeProfiles]
+  );
+  const globalDefaultAccountLabel = useMemo(() => {
+    if (activeApiProfile) return `${activeApiProfile.name} (API)`;
+    if (activeClaudeProfile) return `${activeClaudeProfile.name} (OAuth)`;
+    return 'OAuth (global)';
+  }, [activeApiProfile, activeClaudeProfile]);
+  const authRoutingMode = settings?.authRoutingMode || 'global';
+  const featureAuthProfiles = settings?.featureAuthProfiles || {};
+
+  const getAccountLabel = (accountId?: string): string => {
+    if (!accountId) {
+      return `Use global (${globalDefaultAccountLabel})`;
+    }
+
+    if (accountId.startsWith('api-')) {
+      const profileId = accountId.slice('api-'.length);
+      const apiProfile = profiles.find((profile) => profile.id === profileId);
+      return apiProfile ? `${apiProfile.name} (API)` : `API ${profileId.slice(0, 8)}`;
+    }
+
+    if (accountId.startsWith('oauth-')) {
+      const profileId = accountId.slice('oauth-'.length);
+      const oauthProfile = claudeProfiles.find((profile) => profile.id === profileId);
+      return oauthProfile ? `${oauthProfile.name} (OAuth)` : `OAuth ${profileId.slice(0, 8)}`;
+    }
+
+    return accountId;
+  };
+
   return (
     <div className="flex items-center gap-2">
       {/* Usage Warning Badge (shown when usage >= 90%) */}
@@ -188,9 +250,9 @@ export function AuthStatusIndicator() {
           <TooltipTrigger asChild>
             <Button
               type="button"
-              variant="secondary"
+              variant="ghost"
               size="sm"
-              className="project-tabbar-control h-8 gap-1.5 px-3 text-sm font-medium"
+              className="h-8 gap-1.5 px-3 text-sm font-medium text-muted-foreground hover:text-foreground"
               aria-label={t('common:usage.authenticationAriaLabel', { provider: badgeLabel })}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -269,6 +331,28 @@ export function AuthStatusIndicator() {
                     )}
                   </div>
               )}
+
+              {/* Feature-level auth routing summary */}
+              <div className="pt-2 border-t border-border/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-muted-foreground font-medium">Auth routing mode</span>
+                  <span className="font-medium text-[10px]">
+                    {authRoutingMode === 'per_feature' ? 'Custom by feature' : 'Global'}
+                  </span>
+                </div>
+                {authRoutingMode === 'per_feature' && (
+                  <div className="space-y-1.5">
+                    {FEATURE_AUTH_KEYS.map((featureKey) => (
+                      <div key={featureKey} className="flex items-center justify-between gap-2">
+                        <span className="text-[10px] text-muted-foreground">{FEATURE_AUTH_LABELS[featureKey]}</span>
+                        <span className="text-[10px] font-medium text-right break-all">
+                          {getAccountLabel(featureAuthProfiles[featureKey])}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </TooltipContent>
         </Tooltip>

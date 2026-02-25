@@ -525,6 +525,73 @@ def handle_list_worktrees_command(project_dir: Path) -> None:
     print()
 
 
+def handle_review_merge_command(
+    project_dir: Path,
+    spec_name: str,
+    base_branch: str | None = None,
+    model: str | None = None,
+    thinking_level: str | None = None,
+    pr_target: str | None = None,
+    pr_title: str | None = None,
+    pr_draft: bool = False,
+) -> bool:
+    """
+    Handle the --review-merge command.
+
+    Runs the complete pipeline: CodeRabbit review → AI fix loop → PR → merge.
+
+    Args:
+        project_dir: Project root directory
+        spec_name: Name of the spec
+        base_branch: Branch to compare against (default: auto-detect)
+        model: Claude model to use
+        thinking_level: Thinking level for AI agents
+        pr_target: Target branch for PR
+        pr_title: Custom PR title
+        pr_draft: Create PR as draft
+
+    Returns:
+        True if pipeline succeeded, False otherwise
+    """
+    import asyncio
+
+    from runners.review_merge.runner import ReviewMergeRunner
+    from ui import print_section
+
+    print_section("REVIEW & MERGE")
+
+    try:
+        runner = ReviewMergeRunner(
+            project_dir=project_dir,
+            spec_name=spec_name,
+            base_branch=base_branch,
+            model=model,
+            thinking_level=thinking_level,
+            pr_target=pr_target,
+            pr_title=pr_title,
+            pr_draft=pr_draft,
+        )
+
+        result = asyncio.run(runner.run())
+        print(json.dumps({
+            "success": result.success,
+            "message": result.message,
+            "pr_url": result.pr_url,
+            "iterations_used": result.iterations_used,
+            "findings_summary": result.findings_summary,
+        }, default=str))
+        return result.success
+
+    except FileNotFoundError as e:
+        print(f"\nError: {e}")
+        print(json.dumps({"success": False, "message": str(e)}))
+        return False
+    except Exception as e:
+        print(f"\nUnexpected error: {e}")
+        print(json.dumps({"success": False, "message": str(e)}))
+        return False
+
+
 def handle_cleanup_worktrees_command(project_dir: Path) -> None:
     """
     Handle the --cleanup-worktrees command.

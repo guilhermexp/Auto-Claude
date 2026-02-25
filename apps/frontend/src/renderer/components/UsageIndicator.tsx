@@ -24,6 +24,9 @@ import { useTranslation } from 'react-i18next';
 import { formatTimeRemaining, localizeUsageWindowLabel, hasHardcodedText } from '../../shared/utils/format-time';
 import type { ClaudeUsageSnapshot, ProfileUsageSummary } from '../../shared/types/agent';
 import type { AppSection } from './settings/AppSettings';
+import { useSettingsStore } from '../stores/settings-store';
+import { useClaudeProfileStore } from '../stores/claude-profile-store';
+import type { FeatureAuthProfileConfig } from '../../shared/types/settings';
 
 /**
  * Usage threshold constants for color coding
@@ -45,8 +48,8 @@ const getColorClass = (percent: number): string => {
  * Get background/border color classes for badges based on usage percentage
  */
 const getBadgeColorClasses = (percent: number): string => {
-  if (percent >= THRESHOLD_CRITICAL) return 'project-tabbar-control text-destructive';
-  return 'project-tabbar-control text-foreground';
+  if (percent >= THRESHOLD_CRITICAL) return 'text-destructive';
+  return 'text-muted-foreground hover:text-foreground';
 };
 
 /**
@@ -65,8 +68,35 @@ const getBarColorClass = (percent: number): string => {
   return 'bg-foreground/45';
 };
 
+type AuthFeatureKey = keyof FeatureAuthProfileConfig;
+
+const FEATURE_AUTH_LABELS: Record<AuthFeatureKey, string> = {
+  tasks: 'Tasks',
+  insights: 'Insights',
+  ideation: 'Ideation',
+  roadmap: 'Roadmap',
+  githubIssues: 'GitHub Issues',
+  githubPrs: 'GitHub PR Review',
+  utility: 'Utility',
+};
+
+const FEATURE_AUTH_KEYS: AuthFeatureKey[] = [
+  'tasks',
+  'insights',
+  'ideation',
+  'roadmap',
+  'githubIssues',
+  'githubPrs',
+  'utility',
+];
+
 export function UsageIndicator() {
   const { t, i18n } = useTranslation(['common']);
+  const settings = useSettingsStore((state) => state.settings);
+  const apiProfiles = useSettingsStore((state) => state.profiles);
+  const activeApiProfileId = useSettingsStore((state) => state.activeProfileId);
+  const claudeProfiles = useClaudeProfileStore((state) => state.profiles);
+  const activeClaudeProfileId = useClaudeProfileStore((state) => state.activeProfileId);
   const [usage, setUsage] = useState<ClaudeUsageSnapshot | null>(null);
   const [otherProfiles, setOtherProfiles] = useState<ProfileUsageSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -465,12 +495,44 @@ export function UsageIndicator() {
     maxUsage >= THRESHOLD_ELEVATED ? TrendingUp :
     Activity;
 
+  const activeApiProfile = activeApiProfileId
+    ? apiProfiles.find((profile) => profile.id === activeApiProfileId)
+    : undefined;
+  const activeClaudeProfile = activeClaudeProfileId
+    ? claudeProfiles.find((profile) => profile.id === activeClaudeProfileId)
+    : undefined;
+  const globalDefaultAccountLabel = activeApiProfile
+    ? `${activeApiProfile.name} (API)`
+    : activeClaudeProfile
+      ? `${activeClaudeProfile.name} (OAuth)`
+      : 'OAuth (global)';
+  const authRoutingMode = settings?.authRoutingMode || 'global';
+  const featureAuthProfiles = settings?.featureAuthProfiles || {};
+
+  const getAccountLabel = (accountId?: string): string => {
+    if (!accountId) return `Use global (${globalDefaultAccountLabel})`;
+
+    if (accountId.startsWith('api-')) {
+      const profileId = accountId.slice('api-'.length);
+      const apiProfile = apiProfiles.find((profile) => profile.id === profileId);
+      return apiProfile ? `${apiProfile.name} (API)` : `API ${profileId.slice(0, 8)}`;
+    }
+
+    if (accountId.startsWith('oauth-')) {
+      const profileId = accountId.slice('oauth-'.length);
+      const oauthProfile = claudeProfiles.find((profile) => profile.id === profileId);
+      return oauthProfile ? `${oauthProfile.name} (OAuth)` : `OAuth ${profileId.slice(0, 8)}`;
+    }
+
+    return accountId;
+  };
+
   return (
     <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button
           type="button"
-          variant="secondary"
+          variant="ghost"
           size="sm"
           className={`h-8 gap-1.5 px-3 ${badgeColorClasses}`}
           aria-label={t('common:usage.usageStatusAriaLabel')}
@@ -653,6 +715,28 @@ export function UsageIndicator() {
             {/* Chevron */}
             <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />
           </Button>
+
+          {/* Feature-level auth routing summary */}
+          <div className="pt-2 border-t border-border/30 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-muted-foreground font-medium">Auth routing mode</span>
+              <span className="font-medium text-[10px]">
+                {authRoutingMode === 'per_feature' ? 'Custom by feature' : 'Global'}
+              </span>
+            </div>
+            {authRoutingMode === 'per_feature' && (
+              <div className="space-y-1.5">
+                {FEATURE_AUTH_KEYS.map((featureKey) => (
+                  <div key={featureKey} className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] text-muted-foreground">{FEATURE_AUTH_LABELS[featureKey]}</span>
+                    <span className="text-[10px] font-medium text-right break-all">
+                      {getAccountLabel(featureAuthProfiles[featureKey])}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Other profiles section - sorted by availability */}
           {otherProfiles.length > 0 && (

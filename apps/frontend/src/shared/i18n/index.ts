@@ -17,6 +17,7 @@ import enRoadmap from './locales/en/roadmap.json';
 import enIdeation from './locales/en/ideation.json';
 import enChangelog from './locales/en/changelog.json';
 import enInsights from './locales/en/insights.json';
+import enTeam from './locales/en/team.json';
 
 // Import French translation resources
 import frCommon from './locales/fr/common.json';
@@ -34,6 +35,7 @@ import frRoadmap from './locales/fr/roadmap.json';
 import frIdeation from './locales/fr/ideation.json';
 import frChangelog from './locales/fr/changelog.json';
 import frInsights from './locales/fr/insights.json';
+import frTeam from './locales/fr/team.json';
 
 // Import Portuguese translation resources
 import ptCommon from './locales/pt/common.json';
@@ -51,6 +53,7 @@ import ptRoadmap from './locales/pt/roadmap.json';
 import ptIdeation from './locales/pt/ideation.json';
 import ptChangelog from './locales/pt/changelog.json';
 import ptInsights from './locales/pt/insights.json';
+import ptTeam from './locales/pt/team.json';
 
 export const defaultNS = 'common';
 
@@ -70,7 +73,8 @@ export const resources = {
     roadmap: enRoadmap,
     ideation: enIdeation,
     changelog: enChangelog,
-    insights: enInsights
+    insights: enInsights,
+    team: enTeam
   },
   fr: {
     common: frCommon,
@@ -87,7 +91,8 @@ export const resources = {
     roadmap: frRoadmap,
     ideation: frIdeation,
     changelog: frChangelog,
-    insights: frInsights
+    insights: frInsights,
+    team: frTeam
   },
   pt: {
     common: ptCommon,
@@ -104,7 +109,8 @@ export const resources = {
     roadmap: ptRoadmap,
     ideation: ptIdeation,
     changelog: ptChangelog,
-    insights: ptInsights
+    insights: ptInsights,
+    team: ptTeam
   }
 } as const;
 
@@ -115,7 +121,7 @@ i18n
     lng: 'en', // Default language (will be overridden by settings)
     fallbackLng: 'en',
     defaultNS,
-    ns: ['common', 'navigation', 'settings', 'tasks', 'welcome', 'onboarding', 'dialogs', 'gitlab', 'taskReview', 'terminal', 'errors', 'roadmap', 'ideation', 'changelog', 'insights'],
+    ns: ['common', 'navigation', 'settings', 'tasks', 'welcome', 'onboarding', 'dialogs', 'gitlab', 'taskReview', 'terminal', 'errors', 'roadmap', 'ideation', 'changelog', 'insights', 'team'],
     interpolation: {
       escapeValue: false // React already escapes values
     },

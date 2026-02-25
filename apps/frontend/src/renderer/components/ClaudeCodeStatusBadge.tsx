@@ -409,11 +409,9 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
 
       <PopoverContent
         side="top"
-        align="start"
-        alignOffset={-8}
+        align="center"
         sideOffset={8}
-        collisionPadding={12}
-        className="claude-cli-popover header-dropdown-panel w-[var(--radix-popover-trigger-width)] min-w-[248px] border-border/20 p-3 shadow-sm"
+        className="claude-cli-popover header-dropdown-panel w-[calc(var(--radix-popover-trigger-width)+1rem)] border-border/20 p-3 shadow-sm"
       >
         <div className="space-y-2.5">
           {/* Header */}

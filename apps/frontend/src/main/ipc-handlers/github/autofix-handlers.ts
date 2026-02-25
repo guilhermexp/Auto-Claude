@@ -297,7 +297,7 @@ async function checkNewIssues(
 
   const backendPath = validation.backendPath!;
   const args = buildRunnerArgs(getRunnerPath(backendPath), project.path, 'check-new');
-  const subprocessEnv = await getRunnerEnv();
+  const subprocessEnv = await getRunnerEnv('githubIssues');
 
   const { promise } = runPythonSubprocess<Array<{number: number}>>({
     pythonPath: getPythonPath(backendPath),
@@ -643,7 +643,7 @@ export function registerAutoFixHandlers(
           const backendPath = validation.backendPath!;
           const additionalArgs = issueNumbers && issueNumbers.length > 0 ? issueNumbers.map(n => n.toString()) : [];
           const args = buildRunnerArgs(getRunnerPath(backendPath), project.path, 'batch-issues', additionalArgs);
-          const subprocessEnv = await getRunnerEnv();
+          const subprocessEnv = await getRunnerEnv('githubIssues');
 
           debugLog('Spawning batch process', { args });
 
@@ -767,7 +767,7 @@ export function registerAutoFixHandlers(
           }
 
           const args = buildRunnerArgs(getRunnerPath(backendPath), project.path, 'analyze-preview', additionalArgs);
-          const subprocessEnv = await getRunnerEnv();
+          const subprocessEnv = await getRunnerEnv('githubIssues');
           debugLog('Spawning analyze-preview process', { args });
 
           const { promise } = runPythonSubprocess<AnalyzePreviewResult>({

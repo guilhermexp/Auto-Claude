@@ -29,7 +29,8 @@ import {
   JSON_ERROR_PREFIX,
   JSON_ERROR_TITLE_SUFFIX
 } from '../../shared/constants';
-import { startTask, stopTask, checkTaskRunning, recoverStuckTask, isIncompleteHumanReview, archiveTasks, hasRecentActivity } from '../stores/task-store';
+import { stopTask, checkTaskRunning, recoverStuckTask, isIncompleteHumanReview, archiveTasks, hasRecentActivity, startTaskOrQueue } from '../stores/task-store';
+import { useToast } from '../hooks/use-toast';
 import type { Task, TaskCategory, ReviewReason, TaskStatus } from '../../shared/types';
 
 // Category icon mapping
@@ -119,6 +120,7 @@ function taskCardPropsAreEqual(prevProps: TaskCardProps, nextProps: TaskCardProp
     prevTask.executionProgress?.phase === nextTask.executionProgress?.phase &&
     prevTask.executionProgress?.phaseProgress === nextTask.executionProgress?.phaseProgress &&
     prevTask.subtasks.length === nextTask.subtasks.length &&
+    prevTask.metadata?.fastMode === nextTask.metadata?.fastMode &&
     prevTask.metadata?.category === nextTask.metadata?.category &&
     prevTask.metadata?.complexity === nextTask.metadata?.complexity &&
     prevTask.metadata?.archivedAt === nextTask.metadata?.archivedAt &&
@@ -152,6 +154,7 @@ export const TaskCard = memo(function TaskCard({
   onToggleSelect
 }: TaskCardProps) {
   const { t } = useTranslation(['tasks', 'errors']);
+  const { toast } = useToast();
   const [isStuck, setIsStuck] = useState(false);
   const [isRecovering, setIsRecovering] = useState(false);
   const stuckIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -243,12 +246,23 @@ export const TaskCard = memo(function TaskCard({
     };
   }, [task.id, isRunning]);
 
-  const handleStartStop = (e: React.MouseEvent) => {
+  const handleStartStop = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isRunning && !isStuck) {
+    if (isRunning) {
+      // Allow stopping both running and stuck tasks
+      // User should be able to force-stop a stuck task
       stopTask(task.id);
     } else {
-      startTask(task.id);
+      const result = await startTaskOrQueue(task.id);
+      if (!result.success) {
+        toast({
+          title: t('tasks:wizard.errors.startFailed'),
+          description: result.error,
+          variant: 'destructive',
+        });
+      } else if (result.action === 'queued') {
+        toast({ title: t('tasks:queue.movedToQueue') });
+      }
     }
   };
 
@@ -337,7 +351,7 @@ export const TaskCard = memo(function TaskCard({
   return (
     <Card
       className={cn(
-        'card-surface task-card-enhanced kanban-task-card cursor-pointer',
+        'card-surface task-card-enhanced kanban-task-card cursor-pointer dark:bg-[hsl(0_0%_25%)]',
         isRunning && !isStuck && 'ring-1 ring-primary/50 border-primary/50 task-running-pulse',
         isStuck && 'ring-1 ring-warning/50 border-warning/50 task-stuck-pulse',
         isArchived && 'opacity-60 hover:opacity-80',
@@ -345,7 +359,7 @@ export const TaskCard = memo(function TaskCard({
       )}
       onClick={onClick}
     >
-      <CardContent className="p-3">
+      <CardContent className="p-2.5">
         <div className={isSelectable ? 'flex gap-3' : undefined}>
           {/* Checkbox for selectable mode - stops event propagation */}
           {isSelectable && (
@@ -370,14 +384,14 @@ export const TaskCard = memo(function TaskCard({
 
         {/* Description - sanitized to handle markdown content (memoized) */}
         {sanitizedDescription && (
-          <p className="mt-2 text-xs text-muted-foreground line-clamp-2">
+          <p className="mt-1.5 text-xs text-muted-foreground line-clamp-1">
             {sanitizedDescription}
           </p>
         )}
 
         {/* Metadata badges */}
         {(task.metadata || isStuck || isIncomplete || hasActiveExecution || reviewReasonInfo) && (
-          <div className="task-card-metadata mt-2.5 flex flex-wrap gap-1.5">
+          <div className="task-card-metadata mt-2 flex flex-wrap gap-1">
             {/* Stuck indicator - highest priority */}
             {isStuck && (
               <Badge
@@ -448,6 +462,16 @@ export const TaskCard = memo(function TaskCard({
                 {reviewReasonInfo.label}
               </Badge>
             )}
+            {/* Fast Mode badge */}
+            {task.metadata?.fastMode && (
+              <Badge
+                variant="outline"
+                className="text-[10px] px-1.5 py-0.5 flex items-center gap-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30"
+              >
+                <Zap className="h-2.5 w-2.5" />
+                {t('metadata.fastMode')}
+              </Badge>
+            )}
             {/* Category badge with icon */}
             {task.metadata?.category && (
               <Badge
@@ -507,7 +531,7 @@ export const TaskCard = memo(function TaskCard({
 
         {/* Progress section - Phase-aware with animations */}
         {(task.subtasks.length > 0 || hasActiveExecution || isRunning || isStuck) && (
-          <div className="mt-4">
+          <div className="mt-2.5">
             <PhaseProgressIndicator
               phase={executionPhase}
               subtasks={task.subtasks}
@@ -519,7 +543,7 @@ export const TaskCard = memo(function TaskCard({
         )}
 
         {/* Footer */}
-        <div className="task-card-footer mt-4 flex items-center justify-between">
+        <div className="task-card-footer mt-2.5 flex items-center justify-between">
           <div className="task-time-pill flex items-center gap-1.5 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
             <span>{relativeTime}</span>

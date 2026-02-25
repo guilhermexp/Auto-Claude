@@ -326,6 +326,7 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
   const [activeTab, setActiveTab] = useState('kanban');
   const [showAddFeatureDialog, setShowAddFeatureDialog] = useState(false);
   const [showCompetitorViewer, setShowCompetitorViewer] = useState(false);
+  const [pendingArchiveFeatureId, setPendingArchiveFeatureId] = useState<string | null>(null);
 
   const {
     isEnabled: isTranslationEnabled,
@@ -464,6 +465,22 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
     }
   };
 
+  const handleArchiveFeature = (featureId: string) => {
+    setPendingArchiveFeatureId(featureId);
+  };
+
+  const confirmArchiveFeature = async () => {
+    if (!pendingArchiveFeatureId) return;
+    try {
+      await deleteFeature(pendingArchiveFeatureId);
+      if (selectedFeature?.id === pendingArchiveFeatureId) {
+        setSelectedFeature(null);
+      }
+    } finally {
+      setPendingArchiveFeatureId(null);
+    }
+  };
+
   // Show generation progress
   if (generationStatus.phase !== 'idle' && generationStatus.phase !== 'complete') {
     return (
@@ -488,6 +505,7 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
           onOpenChange={setShowCompetitorDialog}
           onAccept={handleCompetitorDialogAccept}
           onDecline={handleCompetitorDialogDecline}
+          projectId={projectId}
         />
         {/* Dialog for projects WITH existing competitor analysis */}
         <ExistingCompetitorAnalysisDialog
@@ -497,6 +515,7 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
           onRunNew={handleRunNewAnalysis}
           onSkip={handleSkipAnalysis}
           analysisDate={competitorAnalysisDate}
+          projectId={projectId}
         />
       </>
     );
@@ -530,6 +549,7 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
           onConvertToSpec={handleConvertToSpec}
           onGoToTask={handleGoToTask}
           onSave={saveRoadmap}
+          onArchive={handleArchiveFeature}
         />
       </div>
 
@@ -551,6 +571,7 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
         onOpenChange={setShowCompetitorDialog}
         onAccept={handleCompetitorDialogAccept}
         onDecline={handleCompetitorDialogDecline}
+        projectId={projectId}
       />
 
       {/* Competitor Analysis Options Dialog (existing analysis) */}
@@ -561,6 +582,7 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
         onRunNew={handleRunNewAnalysis}
         onSkip={handleSkipAnalysis}
         analysisDate={competitorAnalysisDate}
+        projectId={projectId}
       />
 
       {/* Competitor Analysis Viewer */}
@@ -568,6 +590,7 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
         analysis={displayedCompetitorAnalysis}
         open={showCompetitorViewer}
         onOpenChange={setShowCompetitorViewer}
+        projectId={projectId}
       />
 
       {/* Add Feature Dialog */}
@@ -576,6 +599,34 @@ export function Roadmap({ projectId, onGoToTask }: RoadmapProps) {
         open={showAddFeatureDialog}
         onOpenChange={setShowAddFeatureDialog}
       />
+
+      {/* Archive Confirmation Dialog */}
+      <AlertDialog
+        open={!!pendingArchiveFeatureId}
+        onOpenChange={(open) => { if (!open) setPendingArchiveFeatureId(null); }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <div className="flex items-center gap-2">
+              <Archive className="h-5 w-5 text-muted-foreground" />
+              <AlertDialogTitle>{t('roadmap.archiveFeatureConfirmTitle')}</AlertDialogTitle>
+            </div>
+            <AlertDialogDescription>
+              {t('roadmap.archiveFeatureConfirmDescription', {
+                title: pendingArchiveFeatureId
+                  ? roadmap.features.find((f) => f.id === pendingArchiveFeatureId)?.title ?? ''
+                  : '',
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('buttons.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmArchiveFeature}>
+              {t('roadmap.archiveFeature')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

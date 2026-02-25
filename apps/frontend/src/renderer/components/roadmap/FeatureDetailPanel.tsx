@@ -10,7 +10,9 @@ import {
   ExternalLink,
   TrendingUp,
   Trash2,
+  Archive,
 } from 'lucide-react';
+import { TaskOutcomeBadge } from './TaskOutcomeBadge';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
@@ -29,6 +31,7 @@ export function FeatureDetailPanel({
   onConvertToSpec,
   onGoToTask,
   onDelete,
+  onArchive,
   competitorInsights = [],
 }: FeatureDetailPanelProps) {
   const { t } = useTranslation(['common', 'roadmap']);
@@ -36,6 +39,10 @@ export function FeatureDetailPanel({
   const complexityLabel = t(`roadmap:complexities.${feature.complexity}`, { defaultValue: feature.complexity });
   const impactLabel = t(`roadmap:impacts.${feature.impact}`, { defaultValue: feature.impact });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const handleArchive = () => {
+    onArchive?.(feature.id);
+  };
 
   const handleDelete = () => {
     if (onDelete) {

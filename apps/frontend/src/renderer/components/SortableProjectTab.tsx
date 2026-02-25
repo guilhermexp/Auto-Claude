@@ -59,11 +59,7 @@ export function SortableProjectTab({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group relative flex items-center min-w-0 project-tab-item',
-        // Responsive max-widths: smaller on mobile, larger on desktop
-        isActive
-          ? 'max-w-[220px] sm:max-w-[260px] md:max-w-[340px]'
-          : 'max-w-[150px] sm:max-w-[210px] md:max-w-[250px]',
+        'group relative flex items-center min-w-0 flex-1 project-tab-item',
         'touch-none transition-all duration-200',
         isDragging && 'opacity-60 scale-[0.98] shadow-lg'
       )}
@@ -74,10 +70,10 @@ export function SortableProjectTab({
         <button
           type="button"
           className={cn(
-            'flex-1 flex items-center gap-1.5 sm:gap-2',
-            'px-3 sm:px-3.5 md:px-4 py-2',
+            'flex-1 flex items-center justify-center gap-1.5',
+            'px-3 py-2',
             'text-sm rounded-none',
-            'min-w-0 truncate cursor-pointer',
+            'min-w-0 cursor-pointer',
             'border-b-2 transition-colors duration-150',
             'bg-transparent',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',

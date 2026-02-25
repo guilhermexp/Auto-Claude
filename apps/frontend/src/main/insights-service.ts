@@ -3,8 +3,11 @@ import type {
   InsightsSession,
   InsightsSessionSummary,
   InsightsChatMessage,
-  InsightsModelConfig
+  InsightsModelConfig,
+  InsightsActionProposal,
+  InsightsActionResult
 } from '../shared/types';
+import { MAX_IMAGES_PER_TASK } from '../shared/constants';
 import { InsightsConfig } from './insights/config';
 import { InsightsPaths } from './insights/paths';
 import { SessionStorage } from './insights/session-storage';
@@ -70,8 +73,8 @@ export class InsightsService extends EventEmitter {
   /**
    * List all sessions for a project
    */
-  listSessions(projectPath: string): InsightsSessionSummary[] {
-    return this.sessionManager.listSessions(projectPath);
+  listSessions(projectPath: string, includeArchived = false): InsightsSessionSummary[] {
+    return this.sessionManager.listSessions(projectPath, includeArchived);
   }
 
   /**
@@ -96,6 +99,34 @@ export class InsightsService extends EventEmitter {
   }
 
   /**
+   * Archive a session
+   */
+  archiveSession(projectId: string, projectPath: string, sessionId: string): boolean {
+    return this.sessionManager.archiveSession(projectId, projectPath, sessionId);
+  }
+
+  /**
+   * Unarchive a session
+   */
+  unarchiveSession(projectPath: string, sessionId: string): boolean {
+    return this.sessionManager.unarchiveSession(projectPath, sessionId);
+  }
+
+  /**
+   * Delete multiple sessions
+   */
+  deleteSessions(projectId: string, projectPath: string, sessionIds: string[]): { deletedIds: string[]; failedIds: string[] } {
+    return this.sessionManager.deleteSessions(projectId, projectPath, sessionIds);
+  }
+
+  /**
+   * Archive multiple sessions
+   */
+  archiveSessions(projectId: string, projectPath: string, sessionIds: string[]): { archivedIds: string[]; failedIds: string[] } {
+    return this.sessionManager.archiveSessions(projectId, projectPath, sessionIds);
+  }
+
+  /**
    * Rename a session
    */
   renameSession(projectPath: string, sessionId: string, newTitle: string): boolean {
@@ -116,7 +147,8 @@ export class InsightsService extends EventEmitter {
     projectId: string,
     projectPath: string,
     message: string,
-    modelConfig?: InsightsModelConfig
+    modelConfig?: InsightsModelConfig,
+    images?: ImageAttachment[]
   ): Promise<void> {
     // Cancel any existing session
     this.executor.cancelSession(projectId);
@@ -139,22 +171,45 @@ export class InsightsService extends EventEmitter {
       session.title = this.storage.generateTitle(message);
     }
 
-    // Add user message
+    // Guard: cap images to MAX_IMAGES_PER_TASK
+    if (images && images.length > MAX_IMAGES_PER_TASK) {
+      images = images.slice(0, MAX_IMAGES_PER_TASK);
+    }
+
+    // Add user message (store thumbnails only for persistence, strip full data)
+    const persistImages = images?.map(img => ({
+      ...img,
+      data: undefined
+    }));
     const userMessage: InsightsChatMessage = {
       id: `msg-${Date.now()}`,
       role: 'user',
       content: message,
-      timestamp: new Date()
+      timestamp: new Date(),
+      images: persistImages && persistImages.length > 0 ? persistImages : undefined
     };
     session.messages.push(userMessage);
+    session.pendingAction = null;
     session.updatedAt = new Date();
     this.sessionManager.saveSession(projectPath, session);
 
     // Build conversation history for context
-    const conversationHistory = session.messages.map(m => ({
-      role: m.role,
-      content: m.content
-    }));
+    // Add notation when images are present so the AI has context
+    // For historical messages (all but the last), use past tense to avoid confusion
+    const conversationHistory = session.messages.map((m, index) => {
+      const imageCount = m.images?.length ?? 0;
+      const isLastMessage = index === session.messages.length - 1;
+      let imageNotation = '';
+      if (imageCount > 0 && m.role === 'user') {
+        imageNotation = isLastMessage
+          ? `\n[User attached ${imageCount} image(s)]`
+          : `\n[User previously attached ${imageCount} image(s) - not visible in this context]`;
+      }
+      return {
+        role: m.role,
+        content: imageNotation ? m.content + imageNotation : m.content
+      };
+    });
 
     // Use provided modelConfig or fall back to session's config
     const configToUse = modelConfig || session.modelConfig;
@@ -166,7 +221,8 @@ export class InsightsService extends EventEmitter {
         projectPath,
         message,
         conversationHistory,
-        configToUse
+        configToUse,
+        images
       );
 
       // Add assistant message to session
@@ -175,11 +231,12 @@ export class InsightsService extends EventEmitter {
         role: 'assistant',
         content: result.fullResponse,
         timestamp: new Date(),
-        suggestedTask: result.suggestedTask,
+        suggestedTasks: result.suggestedTasks,
         toolsUsed: result.toolsUsed.length > 0 ? result.toolsUsed : undefined
       };
 
       session.messages.push(assistantMessage);
+      session.pendingAction = result.pendingAction ?? null;
       session.updatedAt = new Date();
       this.sessionManager.saveSession(projectPath, session);
 
@@ -196,6 +253,77 @@ export class InsightsService extends EventEmitter {
    */
   updateSessionModelConfig(projectPath: string, sessionId: string, modelConfig: InsightsModelConfig): boolean {
     return this.sessionManager.updateSessionModelConfig(projectPath, sessionId, modelConfig);
+  }
+
+  appendUserMessage(
+    projectId: string,
+    projectPath: string,
+    content: string
+  ): InsightsSession | null {
+    const session = this.sessionManager.loadSession(projectId, projectPath);
+    if (!session) return null;
+    session.messages.push({
+      id: `msg-${Date.now()}`,
+      role: 'user',
+      content,
+      timestamp: new Date()
+    });
+    session.updatedAt = new Date();
+    this.sessionManager.saveSession(projectPath, session);
+    this.emit('session-updated', projectId, session);
+    return session;
+  }
+
+  setPendingAction(
+    projectId: string,
+    projectPath: string,
+    action: InsightsActionProposal | null
+  ): InsightsSession | null {
+    const session = this.sessionManager.loadSession(projectId, projectPath);
+    if (!session) return null;
+    session.pendingAction = action;
+    session.updatedAt = new Date();
+    this.sessionManager.saveSession(projectPath, session);
+    console.log('[INSIGHTS_KANBAN] pending-action-updated', {
+      projectId,
+      sessionId: session.id,
+      actionId: action?.actionId ?? null,
+      intent: action?.intent ?? null,
+      requiresConfirmation: action?.requiresConfirmation ?? null
+    });
+    this.emit('session-updated', projectId, session);
+    return session;
+  }
+
+  appendActionResultMessage(
+    projectId: string,
+    projectPath: string,
+    actionResult: InsightsActionResult
+  ): InsightsSession | null {
+    const session = this.sessionManager.loadSession(projectId, projectPath);
+    if (!session) return null;
+
+    session.pendingAction = null;
+    session.messages.push({
+      id: `msg-${Date.now()}`,
+      role: 'assistant',
+      content: actionResult.summary,
+      timestamp: new Date()
+    });
+    session.updatedAt = new Date();
+    this.sessionManager.saveSession(projectPath, session);
+    console.log('[INSIGHTS_KANBAN] action-result-appended', {
+      projectId,
+      sessionId: session.id,
+      actionId: actionResult.actionId,
+      intent: actionResult.intent,
+      success: actionResult.success,
+      cancelled: Boolean(actionResult.cancelled),
+      executedCount: actionResult.executedSpecIds.length,
+      failedCount: actionResult.failed.length
+    });
+    this.emit('session-updated', projectId, session);
+    return session;
   }
 }
 
