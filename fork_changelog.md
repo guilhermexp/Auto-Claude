@@ -1136,3 +1136,469 @@ Tracks local/private fork changes against upstream.
   - 5a625690a add port
   - 9dbbc17d2 add idioma port
 
+## 2026-02-25T16:33:30Z
+
+- Branch: codex/fork-sync-20260225-133045
+- HEAD: 4f980a2c6
+- Upstream base: upstream/develop
+- Previous synced upstream commit (from changelog): 635b53ee
+- Target upstream commit for this run: 60c489021
+- Private commits: 142
+- Commit list:
+  - 4f980a2c6 docs(sync): record fork sync changelog snapshot
+  - 47f5785fb chore(sync): merge upstream/develop preserving local customizations
+  - 19100c0e6 Add team sync preflight check to prevent outdated task execution
+  - 6d9584d7b Add team invitation system to Team Sync feature
+  - d5647e183 Add Playwright CLI page snapshots for Convex login process
+  - 2a892d178 Migrate Team Sync to Better Auth Organization plugin
+  - 6070cdb8e Add team sync initialize handler
+  - a3696d111 Add Convex JWT token exchange for team sync authentication
+  - 71cd5a6ad feat: add Team Sync feature with Convex backend and review fixes
+  - ce5a556a9 Add per-feature authentication routing for Auto Claude
+  - 97b0dc7ad Add E2E smoke testing for Review Merge process with Playwright
+  - eac4463ab feat: add conversational Kanban operator to Insights chat
+  - 38d121e1a fix: resolve second-pass code review issues in Kanban operator feature
+  - 33f6fd321 fix: resolve code review issues in Kanban operator feature
+  - bd2a38452 feat: add Review & Merge pipeline with CodeRabbit integration and AI fix loop
+  - 44ad38353 fix: stabilize auth env cleanup and rate-limit reset parsing
+  - 4fb90a9d1 chore(sync): merge upstream/develop preserving local customizations
+  - 212e0af6c Adjust UI spacing and styling for better compactness
+  - 376f4e9ca Merge branch 'develop' of https://github.com/guilhermexp/Auto-Claude into develop
+  - e12b9719f fix: resolve task execution failures and improve API profile support
+  - 4d2064010 Simplify AbortSignal handling in profile API
+  - 5d22f4037 fix: macOS auto-update code signing with self-signed certificate
+  - 523cc90d3 chore: bump version to 2.7.11
+  - ab416b85a Optimize performance with debouncing and deduplication
+  - 3c88a2458 feat: adicionar script de release automatizado
+  - 66abe1003 chore: remover build de Linux - apenas macOS e Windows
+  - 52679a0d9 chore: bump version to 2.7.10
+  - 6cb3cbc61 fix: remover notarização para forks sem certificados Apple
+  - fca3a0483 chore: bump version to 2.7.9
+  - 9a2611d0a fix: desabilitar code signing para forks sem certificados
+  - e345d7a8a chore: bump version to 2.7.8
+  - 1cbc043ed chore: atualizar referências do .github para fork guilhermexp
+  - d4cafc32c chore: bump version to 2.7.7
+  - 8b08f10aa Update repository links and ownership to guilhermexp
+  - 265967f46 Atualizar badge e ocultar alerta
+  - 33b4712fb Padronizar cores e componentes das p
+  - 0c64f4bb9 Ajusta layout footer sidebar
+  - af1d25b55 Slim sidebar and clean chat labels
+  - 58a90c48f Record fork-safe-upstream-sync run
+  - 92c714ea2 test: align font and theme expectations with current defaults
+  - 54e432165 chore(sync): merge upstream/main preserving local customizations (no tree changes)
+  - 8e3024f3d Flatten UI: minimal tabs, lighter cards, compact buttons
+  - 29c2c6367 Improve theme UI responsiveness
+  - 8730ff870 Melhora UI e desempenho tema
+  - e3538b6ed Update app buttons to ShadCN
+  - 48985ae66 Update application icons with new design
+  - b2926b8ca Update UI themes to match NEW-UI
+  - 0fbdb9042 Update theme handling flow
+  - 02dd40515 Documentar tokens e temas UI
+  - 90332d74d Documenta leyalt tokens y modo
+  - 39783911e Update TaskDetailModal styling
+  - dc5baec27 Padronizar bordas dos componentes
+  - c4969b048 Remove chat panel borders
+  - 53774a6c5 Ajustar cores do modo escuro
+  - 82b451fd1 Update auth.py
+  - 83f9c1c9c Update models.py
+  - 657cc3eb4 Add retry limit for unclassified errors and stderr auth detection
+  - b340b2728 Refactor initialization and logging
+  - 5bbed62c5 Refactor: Improve task state management and agent handling
+  - 1ef683ee3 test: update tests to use semantic token for auth badges
+  - 6cd0aff4c chore: update claude opus model to 4-6-20251101
+  - 07f861edf chore(sync): merge upstream/develop preserving local customizations
+  - 6e28fc32d Add i18n support for competitor analysis dialogs and feature card
+  - 6ff33cc99 update port in18
+  - fc27c6334 persistencia de estado entre troca projetos
+  - 9fbe44018 init
+  - 5583ef9ff .
+  - 25bbb32c1 Remove Card wrapper from empty states and darken card color
+  - 9a0547e90 feat(ui): redesign Settings page with 1Code-inspired style
+  - def6bef0c fix(ui): darken secondary color to match reference (28%)
+  - e02998909 fix(ui): balance secondary color for switches and keyboard shortcuts
+  - c31d9f88d fix(ui): drastically increase switch visibility in dark mode
+  - f01444528 Merge remote-tracking branch 'upstream/develop' into develop
+  - e6e738cb8 feat(ui): implement dark mode as default with 1Code-inspired design
+  - 0660f124f style: change primary color to muted gray-blue in dark mode
+  - cf5cfe104 chore: remove debug logs for dark mode migration
+  - c0aa10390 fix: add missing text color utilities and force dark mode inheritance
+  - 9f635d8ab fix: use direct CSS classes instead of @utility for dark mode
+  - 9c2870d72 fix: add Tailwind v4 custom utilities for dark mode colors
+  - fa439ff9d debug: add logs to track theme application in App.tsx
+  - d2f67a67c debug: add console logs to track dark mode migration
+  - dbf11e6c8 fix: dark mode migration now handles undefined theme
+  - 739dc14c8 feat: migrate existing users from system theme to dark mode
+  - fd2423ea0 fix: export design system components and set dark mode as default
+  - e2507ccec docs(phase-08): complete dark mode system polish and documentation
+  - 692cc44e5 refactor(dark-mode): verify and document component dark mode compatibility
+  - bba63a4a8 docs(dark-mode): add comprehensive dark mode system documentation
+  - 9967c16b8 feat(dark-mode): add smooth theme transitions with animation tokens
+  - 0b48b44b7 docs(phase-08): create plan for dark mode system polish and documentation
+  - 214a029ba docs(07-01): complete Motion & Animation System plan
+  - e942034a3 docs(motion): add comprehensive animation system documentation
+  - 6239c6959 feat(motion): add optional Motion variants to Dialog and Tabs
+  - e27b10311 feat(motion): add animation duration and easing tokens
+  - 100c1b2c2 docs(phase-07): create plan for motion and animation system
+  - 1b6176e11 docs(phase-06): complete phase execution
+  - f6e9b3880 docs(06-01): update STATE.md and create SUMMARY.md
+  - 37e5d455b docs(navigation): add comprehensive navigation and utility components documentation
+  - 9857b7e96 refactor(navigation): document spacing token integration
+  - 77b68740b feat(navigation): add size and variant options to Progress component
+  - 8ed96140a feat(navigation): add size and variant options to Tabs component
+  - c142bb37a docs(phase-06): create plan for navigation and utility components modernization
+  - 8239d08bc docs(phase-05): complete phase execution
+  - bdf8c963c docs(05-01): add plan summary and update project state
+  - 9840d7694 docs(overlays): add comprehensive overlay components documentation
+  - a7eed3485 refactor(overlays): document spacing token integration
+  - b5f5749fc feat(overlays): add intent variants to AlertDialog component
+  - 14cf585c1 feat(overlays): add width variants to Popover component
+  - 82f1cd802 feat(overlays): add size variants to Select component
+  - 7ca409317 feat(overlays): add size variants to Dialog component
+  - ad74d2d32 docs(phase-05): create plan for overlay components modernization
+  - edd6f63f8 docs(04-01): complete form components modernization plan
+  - 211da0dc5 docs(04-01): add comprehensive form components documentation
+  - ffdf6d08d feat(04-01): create FormField wrapper component
+  - b20dc2438 feat(04-01): add orientation and spacing variants to RadioGroup
+  - 980d31b85 feat(04-01): add size and resize variants to Textarea component
+  - 1edf30fa1 feat(04-01): migrate Label to Radix UI primitive
+  - 40fb70df6 feat(04-01): add size and validation variants to Input component
+  - dbd56adec docs(phase-04): create plan for form components modernization
+  - 025cb6e11 docs(phase-03): complete phase execution
+  - fa74199b5 docs: update STATE.md with Phase 03 completion
+  - 2d6ccc79c docs(spacing): add comprehensive spacing and layout system documentation
+  - cdb4e5669 feat(spacing): add Container, Stack, and Grid layout components
+  - 6a4f5ecc2 feat(spacing): add spacing scale and container width tokens
+  - aeeebb854 docs(03): create phase plan
+  - 08c2f89f9 docs(phase-02): complete phase execution
+  - 926b59c44 docs(state): update project state after completing plan 02-01
+  - 85e03461d docs(typography): add comprehensive typography system documentation
+  - 5ac16522c feat(typography): add Text and Heading components
+  - 085a3b8dc feat(typography): add font size, weight, and line height tokens
+  - 56f88b587 docs(02): create phase plan
+  - 314490f52 docs(phase-01): complete phase execution
+  - e1ae1d4d5 docs(state): update project state after plan 01-01 completion
+  - 718008c64 docs(design-tokens): create plan 01-01 summary
+  - 626608f62 docs(design-tokens): create comprehensive token documentation
+  - 16498ec5c refactor(design-tokens): simplify globals.css to HSL system
+  - ece32eaea docs(01): create phase plan
+  - 0cacfcd88 docs: create roadmap for UI/UX modernization
+  - 525b2450f docs: initialize Auto-Claude UI/UX Modernization
+  - 82b537975 docs: map existing codebase
+  - 7763fbc66 Merge branch 'AndyMik90:develop' into develop
+  - 5a625690a add port
+  - 9dbbc17d2 add idioma port
+
+- Sync result: no-upstream-updates
+- Last synced upstream commit: 60c489021
+
+## 2026-02-25T16:34:14Z
+
+- Branch: codex/fork-sync-20260225-133045
+- HEAD: 4f980a2c6
+- Upstream base: upstream/develop
+- Previous synced upstream commit (from changelog): 60c489021
+- Target upstream commit for this run: 60c489021
+- Private commits: 142
+- Commit list:
+  - 4f980a2c6 docs(sync): record fork sync changelog snapshot
+  - 47f5785fb chore(sync): merge upstream/develop preserving local customizations
+  - 19100c0e6 Add team sync preflight check to prevent outdated task execution
+  - 6d9584d7b Add team invitation system to Team Sync feature
+  - d5647e183 Add Playwright CLI page snapshots for Convex login process
+  - 2a892d178 Migrate Team Sync to Better Auth Organization plugin
+  - 6070cdb8e Add team sync initialize handler
+  - a3696d111 Add Convex JWT token exchange for team sync authentication
+  - 71cd5a6ad feat: add Team Sync feature with Convex backend and review fixes
+  - ce5a556a9 Add per-feature authentication routing for Auto Claude
+  - 97b0dc7ad Add E2E smoke testing for Review Merge process with Playwright
+  - eac4463ab feat: add conversational Kanban operator to Insights chat
+  - 38d121e1a fix: resolve second-pass code review issues in Kanban operator feature
+  - 33f6fd321 fix: resolve code review issues in Kanban operator feature
+  - bd2a38452 feat: add Review & Merge pipeline with CodeRabbit integration and AI fix loop
+  - 44ad38353 fix: stabilize auth env cleanup and rate-limit reset parsing
+  - 4fb90a9d1 chore(sync): merge upstream/develop preserving local customizations
+  - 212e0af6c Adjust UI spacing and styling for better compactness
+  - 376f4e9ca Merge branch 'develop' of https://github.com/guilhermexp/Auto-Claude into develop
+  - e12b9719f fix: resolve task execution failures and improve API profile support
+  - 4d2064010 Simplify AbortSignal handling in profile API
+  - 5d22f4037 fix: macOS auto-update code signing with self-signed certificate
+  - 523cc90d3 chore: bump version to 2.7.11
+  - ab416b85a Optimize performance with debouncing and deduplication
+  - 3c88a2458 feat: adicionar script de release automatizado
+  - 66abe1003 chore: remover build de Linux - apenas macOS e Windows
+  - 52679a0d9 chore: bump version to 2.7.10
+  - 6cb3cbc61 fix: remover notarização para forks sem certificados Apple
+  - fca3a0483 chore: bump version to 2.7.9
+  - 9a2611d0a fix: desabilitar code signing para forks sem certificados
+  - e345d7a8a chore: bump version to 2.7.8
+  - 1cbc043ed chore: atualizar referências do .github para fork guilhermexp
+  - d4cafc32c chore: bump version to 2.7.7
+  - 8b08f10aa Update repository links and ownership to guilhermexp
+  - 265967f46 Atualizar badge e ocultar alerta
+  - 33b4712fb Padronizar cores e componentes das p
+  - 0c64f4bb9 Ajusta layout footer sidebar
+  - af1d25b55 Slim sidebar and clean chat labels
+  - 58a90c48f Record fork-safe-upstream-sync run
+  - 92c714ea2 test: align font and theme expectations with current defaults
+  - 54e432165 chore(sync): merge upstream/main preserving local customizations (no tree changes)
+  - 8e3024f3d Flatten UI: minimal tabs, lighter cards, compact buttons
+  - 29c2c6367 Improve theme UI responsiveness
+  - 8730ff870 Melhora UI e desempenho tema
+  - e3538b6ed Update app buttons to ShadCN
+  - 48985ae66 Update application icons with new design
+  - b2926b8ca Update UI themes to match NEW-UI
+  - 0fbdb9042 Update theme handling flow
+  - 02dd40515 Documentar tokens e temas UI
+  - 90332d74d Documenta leyalt tokens y modo
+  - 39783911e Update TaskDetailModal styling
+  - dc5baec27 Padronizar bordas dos componentes
+  - c4969b048 Remove chat panel borders
+  - 53774a6c5 Ajustar cores do modo escuro
+  - 82b451fd1 Update auth.py
+  - 83f9c1c9c Update models.py
+  - 657cc3eb4 Add retry limit for unclassified errors and stderr auth detection
+  - b340b2728 Refactor initialization and logging
+  - 5bbed62c5 Refactor: Improve task state management and agent handling
+  - 1ef683ee3 test: update tests to use semantic token for auth badges
+  - 6cd0aff4c chore: update claude opus model to 4-6-20251101
+  - 07f861edf chore(sync): merge upstream/develop preserving local customizations
+  - 6e28fc32d Add i18n support for competitor analysis dialogs and feature card
+  - 6ff33cc99 update port in18
+  - fc27c6334 persistencia de estado entre troca projetos
+  - 9fbe44018 init
+  - 5583ef9ff .
+  - 25bbb32c1 Remove Card wrapper from empty states and darken card color
+  - 9a0547e90 feat(ui): redesign Settings page with 1Code-inspired style
+  - def6bef0c fix(ui): darken secondary color to match reference (28%)
+  - e02998909 fix(ui): balance secondary color for switches and keyboard shortcuts
+  - c31d9f88d fix(ui): drastically increase switch visibility in dark mode
+  - f01444528 Merge remote-tracking branch 'upstream/develop' into develop
+  - e6e738cb8 feat(ui): implement dark mode as default with 1Code-inspired design
+  - 0660f124f style: change primary color to muted gray-blue in dark mode
+  - cf5cfe104 chore: remove debug logs for dark mode migration
+  - c0aa10390 fix: add missing text color utilities and force dark mode inheritance
+  - 9f635d8ab fix: use direct CSS classes instead of @utility for dark mode
+  - 9c2870d72 fix: add Tailwind v4 custom utilities for dark mode colors
+  - fa439ff9d debug: add logs to track theme application in App.tsx
+  - d2f67a67c debug: add console logs to track dark mode migration
+  - dbf11e6c8 fix: dark mode migration now handles undefined theme
+  - 739dc14c8 feat: migrate existing users from system theme to dark mode
+  - fd2423ea0 fix: export design system components and set dark mode as default
+  - e2507ccec docs(phase-08): complete dark mode system polish and documentation
+  - 692cc44e5 refactor(dark-mode): verify and document component dark mode compatibility
+  - bba63a4a8 docs(dark-mode): add comprehensive dark mode system documentation
+  - 9967c16b8 feat(dark-mode): add smooth theme transitions with animation tokens
+  - 0b48b44b7 docs(phase-08): create plan for dark mode system polish and documentation
+  - 214a029ba docs(07-01): complete Motion & Animation System plan
+  - e942034a3 docs(motion): add comprehensive animation system documentation
+  - 6239c6959 feat(motion): add optional Motion variants to Dialog and Tabs
+  - e27b10311 feat(motion): add animation duration and easing tokens
+  - 100c1b2c2 docs(phase-07): create plan for motion and animation system
+  - 1b6176e11 docs(phase-06): complete phase execution
+  - f6e9b3880 docs(06-01): update STATE.md and create SUMMARY.md
+  - 37e5d455b docs(navigation): add comprehensive navigation and utility components documentation
+  - 9857b7e96 refactor(navigation): document spacing token integration
+  - 77b68740b feat(navigation): add size and variant options to Progress component
+  - 8ed96140a feat(navigation): add size and variant options to Tabs component
+  - c142bb37a docs(phase-06): create plan for navigation and utility components modernization
+  - 8239d08bc docs(phase-05): complete phase execution
+  - bdf8c963c docs(05-01): add plan summary and update project state
+  - 9840d7694 docs(overlays): add comprehensive overlay components documentation
+  - a7eed3485 refactor(overlays): document spacing token integration
+  - b5f5749fc feat(overlays): add intent variants to AlertDialog component
+  - 14cf585c1 feat(overlays): add width variants to Popover component
+  - 82f1cd802 feat(overlays): add size variants to Select component
+  - 7ca409317 feat(overlays): add size variants to Dialog component
+  - ad74d2d32 docs(phase-05): create plan for overlay components modernization
+  - edd6f63f8 docs(04-01): complete form components modernization plan
+  - 211da0dc5 docs(04-01): add comprehensive form components documentation
+  - ffdf6d08d feat(04-01): create FormField wrapper component
+  - b20dc2438 feat(04-01): add orientation and spacing variants to RadioGroup
+  - 980d31b85 feat(04-01): add size and resize variants to Textarea component
+  - 1edf30fa1 feat(04-01): migrate Label to Radix UI primitive
+  - 40fb70df6 feat(04-01): add size and validation variants to Input component
+  - dbd56adec docs(phase-04): create plan for form components modernization
+  - 025cb6e11 docs(phase-03): complete phase execution
+  - fa74199b5 docs: update STATE.md with Phase 03 completion
+  - 2d6ccc79c docs(spacing): add comprehensive spacing and layout system documentation
+  - cdb4e5669 feat(spacing): add Container, Stack, and Grid layout components
+  - 6a4f5ecc2 feat(spacing): add spacing scale and container width tokens
+  - aeeebb854 docs(03): create phase plan
+  - 08c2f89f9 docs(phase-02): complete phase execution
+  - 926b59c44 docs(state): update project state after completing plan 02-01
+  - 85e03461d docs(typography): add comprehensive typography system documentation
+  - 5ac16522c feat(typography): add Text and Heading components
+  - 085a3b8dc feat(typography): add font size, weight, and line height tokens
+  - 56f88b587 docs(02): create phase plan
+  - 314490f52 docs(phase-01): complete phase execution
+  - e1ae1d4d5 docs(state): update project state after plan 01-01 completion
+  - 718008c64 docs(design-tokens): create plan 01-01 summary
+  - 626608f62 docs(design-tokens): create comprehensive token documentation
+  - 16498ec5c refactor(design-tokens): simplify globals.css to HSL system
+  - ece32eaea docs(01): create phase plan
+  - 0cacfcd88 docs: create roadmap for UI/UX modernization
+  - 525b2450f docs: initialize Auto-Claude UI/UX Modernization
+  - 82b537975 docs: map existing codebase
+  - 7763fbc66 Merge branch 'AndyMik90:develop' into develop
+  - 5a625690a add port
+  - 9dbbc17d2 add idioma port
+
+- Sync result: no-upstream-updates
+- Last synced upstream commit: 60c489021
+
+## 2026-02-25T16:39:54Z
+
+- Branch: codex/fork-sync-20260225-133045
+- HEAD: dcce7a6ba
+- Upstream base: upstream/develop
+- Previous synced upstream commit (from changelog): 60c489021
+- Target upstream commit for this run: 60c489021
+- Private commits: 143
+- Commit list:
+  - dcce7a6ba fix(sync): restore build after upstream merge
+  - 4f980a2c6 docs(sync): record fork sync changelog snapshot
+  - 47f5785fb chore(sync): merge upstream/develop preserving local customizations
+  - 19100c0e6 Add team sync preflight check to prevent outdated task execution
+  - 6d9584d7b Add team invitation system to Team Sync feature
+  - d5647e183 Add Playwright CLI page snapshots for Convex login process
+  - 2a892d178 Migrate Team Sync to Better Auth Organization plugin
+  - 6070cdb8e Add team sync initialize handler
+  - a3696d111 Add Convex JWT token exchange for team sync authentication
+  - 71cd5a6ad feat: add Team Sync feature with Convex backend and review fixes
+  - ce5a556a9 Add per-feature authentication routing for Auto Claude
+  - 97b0dc7ad Add E2E smoke testing for Review Merge process with Playwright
+  - eac4463ab feat: add conversational Kanban operator to Insights chat
+  - 38d121e1a fix: resolve second-pass code review issues in Kanban operator feature
+  - 33f6fd321 fix: resolve code review issues in Kanban operator feature
+  - bd2a38452 feat: add Review & Merge pipeline with CodeRabbit integration and AI fix loop
+  - 44ad38353 fix: stabilize auth env cleanup and rate-limit reset parsing
+  - 4fb90a9d1 chore(sync): merge upstream/develop preserving local customizations
+  - 212e0af6c Adjust UI spacing and styling for better compactness
+  - 376f4e9ca Merge branch 'develop' of https://github.com/guilhermexp/Auto-Claude into develop
+  - e12b9719f fix: resolve task execution failures and improve API profile support
+  - 4d2064010 Simplify AbortSignal handling in profile API
+  - 5d22f4037 fix: macOS auto-update code signing with self-signed certificate
+  - 523cc90d3 chore: bump version to 2.7.11
+  - ab416b85a Optimize performance with debouncing and deduplication
+  - 3c88a2458 feat: adicionar script de release automatizado
+  - 66abe1003 chore: remover build de Linux - apenas macOS e Windows
+  - 52679a0d9 chore: bump version to 2.7.10
+  - 6cb3cbc61 fix: remover notarização para forks sem certificados Apple
+  - fca3a0483 chore: bump version to 2.7.9
+  - 9a2611d0a fix: desabilitar code signing para forks sem certificados
+  - e345d7a8a chore: bump version to 2.7.8
+  - 1cbc043ed chore: atualizar referências do .github para fork guilhermexp
+  - d4cafc32c chore: bump version to 2.7.7
+  - 8b08f10aa Update repository links and ownership to guilhermexp
+  - 265967f46 Atualizar badge e ocultar alerta
+  - 33b4712fb Padronizar cores e componentes das p
+  - 0c64f4bb9 Ajusta layout footer sidebar
+  - af1d25b55 Slim sidebar and clean chat labels
+  - 58a90c48f Record fork-safe-upstream-sync run
+  - 92c714ea2 test: align font and theme expectations with current defaults
+  - 54e432165 chore(sync): merge upstream/main preserving local customizations (no tree changes)
+  - 8e3024f3d Flatten UI: minimal tabs, lighter cards, compact buttons
+  - 29c2c6367 Improve theme UI responsiveness
+  - 8730ff870 Melhora UI e desempenho tema
+  - e3538b6ed Update app buttons to ShadCN
+  - 48985ae66 Update application icons with new design
+  - b2926b8ca Update UI themes to match NEW-UI
+  - 0fbdb9042 Update theme handling flow
+  - 02dd40515 Documentar tokens e temas UI
+  - 90332d74d Documenta leyalt tokens y modo
+  - 39783911e Update TaskDetailModal styling
+  - dc5baec27 Padronizar bordas dos componentes
+  - c4969b048 Remove chat panel borders
+  - 53774a6c5 Ajustar cores do modo escuro
+  - 82b451fd1 Update auth.py
+  - 83f9c1c9c Update models.py
+  - 657cc3eb4 Add retry limit for unclassified errors and stderr auth detection
+  - b340b2728 Refactor initialization and logging
+  - 5bbed62c5 Refactor: Improve task state management and agent handling
+  - 1ef683ee3 test: update tests to use semantic token for auth badges
+  - 6cd0aff4c chore: update claude opus model to 4-6-20251101
+  - 07f861edf chore(sync): merge upstream/develop preserving local customizations
+  - 6e28fc32d Add i18n support for competitor analysis dialogs and feature card
+  - 6ff33cc99 update port in18
+  - fc27c6334 persistencia de estado entre troca projetos
+  - 9fbe44018 init
+  - 5583ef9ff .
+  - 25bbb32c1 Remove Card wrapper from empty states and darken card color
+  - 9a0547e90 feat(ui): redesign Settings page with 1Code-inspired style
+  - def6bef0c fix(ui): darken secondary color to match reference (28%)
+  - e02998909 fix(ui): balance secondary color for switches and keyboard shortcuts
+  - c31d9f88d fix(ui): drastically increase switch visibility in dark mode
+  - f01444528 Merge remote-tracking branch 'upstream/develop' into develop
+  - e6e738cb8 feat(ui): implement dark mode as default with 1Code-inspired design
+  - 0660f124f style: change primary color to muted gray-blue in dark mode
+  - cf5cfe104 chore: remove debug logs for dark mode migration
+  - c0aa10390 fix: add missing text color utilities and force dark mode inheritance
+  - 9f635d8ab fix: use direct CSS classes instead of @utility for dark mode
+  - 9c2870d72 fix: add Tailwind v4 custom utilities for dark mode colors
+  - fa439ff9d debug: add logs to track theme application in App.tsx
+  - d2f67a67c debug: add console logs to track dark mode migration
+  - dbf11e6c8 fix: dark mode migration now handles undefined theme
+  - 739dc14c8 feat: migrate existing users from system theme to dark mode
+  - fd2423ea0 fix: export design system components and set dark mode as default
+  - e2507ccec docs(phase-08): complete dark mode system polish and documentation
+  - 692cc44e5 refactor(dark-mode): verify and document component dark mode compatibility
+  - bba63a4a8 docs(dark-mode): add comprehensive dark mode system documentation
+  - 9967c16b8 feat(dark-mode): add smooth theme transitions with animation tokens
+  - 0b48b44b7 docs(phase-08): create plan for dark mode system polish and documentation
+  - 214a029ba docs(07-01): complete Motion & Animation System plan
+  - e942034a3 docs(motion): add comprehensive animation system documentation
+  - 6239c6959 feat(motion): add optional Motion variants to Dialog and Tabs
+  - e27b10311 feat(motion): add animation duration and easing tokens
+  - 100c1b2c2 docs(phase-07): create plan for motion and animation system
+  - 1b6176e11 docs(phase-06): complete phase execution
+  - f6e9b3880 docs(06-01): update STATE.md and create SUMMARY.md
+  - 37e5d455b docs(navigation): add comprehensive navigation and utility components documentation
+  - 9857b7e96 refactor(navigation): document spacing token integration
+  - 77b68740b feat(navigation): add size and variant options to Progress component
+  - 8ed96140a feat(navigation): add size and variant options to Tabs component
+  - c142bb37a docs(phase-06): create plan for navigation and utility components modernization
+  - 8239d08bc docs(phase-05): complete phase execution
+  - bdf8c963c docs(05-01): add plan summary and update project state
+  - 9840d7694 docs(overlays): add comprehensive overlay components documentation
+  - a7eed3485 refactor(overlays): document spacing token integration
+  - b5f5749fc feat(overlays): add intent variants to AlertDialog component
+  - 14cf585c1 feat(overlays): add width variants to Popover component
+  - 82f1cd802 feat(overlays): add size variants to Select component
+  - 7ca409317 feat(overlays): add size variants to Dialog component
+  - ad74d2d32 docs(phase-05): create plan for overlay components modernization
+  - edd6f63f8 docs(04-01): complete form components modernization plan
+  - 211da0dc5 docs(04-01): add comprehensive form components documentation
+  - ffdf6d08d feat(04-01): create FormField wrapper component
+  - b20dc2438 feat(04-01): add orientation and spacing variants to RadioGroup
+  - 980d31b85 feat(04-01): add size and resize variants to Textarea component
+  - 1edf30fa1 feat(04-01): migrate Label to Radix UI primitive
+  - 40fb70df6 feat(04-01): add size and validation variants to Input component
+  - dbd56adec docs(phase-04): create plan for form components modernization
+  - 025cb6e11 docs(phase-03): complete phase execution
+  - fa74199b5 docs: update STATE.md with Phase 03 completion
+  - 2d6ccc79c docs(spacing): add comprehensive spacing and layout system documentation
+  - cdb4e5669 feat(spacing): add Container, Stack, and Grid layout components
+  - 6a4f5ecc2 feat(spacing): add spacing scale and container width tokens
+  - aeeebb854 docs(03): create phase plan
+  - 08c2f89f9 docs(phase-02): complete phase execution
+  - 926b59c44 docs(state): update project state after completing plan 02-01
+  - 85e03461d docs(typography): add comprehensive typography system documentation
+  - 5ac16522c feat(typography): add Text and Heading components
+  - 085a3b8dc feat(typography): add font size, weight, and line height tokens
+  - 56f88b587 docs(02): create phase plan
+  - 314490f52 docs(phase-01): complete phase execution
+  - e1ae1d4d5 docs(state): update project state after plan 01-01 completion
+  - 718008c64 docs(design-tokens): create plan 01-01 summary
+  - 626608f62 docs(design-tokens): create comprehensive token documentation
+  - 16498ec5c refactor(design-tokens): simplify globals.css to HSL system
+  - ece32eaea docs(01): create phase plan
+  - 0cacfcd88 docs: create roadmap for UI/UX modernization
+  - 525b2450f docs: initialize Auto-Claude UI/UX Modernization
+  - 82b537975 docs: map existing codebase
+  - 7763fbc66 Merge branch 'AndyMik90:develop' into develop
+  - 5a625690a add port
+  - 9dbbc17d2 add idioma port
+
+- Sync result: no-upstream-updates
+- Last synced upstream commit: 60c489021
+
