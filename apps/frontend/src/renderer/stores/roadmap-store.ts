@@ -13,7 +13,119 @@ import type {
   TaskOutcome,
   FeatureSource
 } from '../../shared/types';
+import {
+  roadmapGenerationMachine,
+  roadmapFeatureMachine,
+  mapGenerationStateToPhase,
+  mapFeatureStateToStatus,
+  type RoadmapGenerationEvent,
+  type RoadmapFeatureEvent
+} from '@shared/state-machines';
 import { debugError, debugLog } from '../../shared/utils/debug-logger';
+
+// ---------------------------------------------------------------------------
+// Module-level XState actor singletons
+// ---------------------------------------------------------------------------
+
+let generationActor: Actor<typeof roadmapGenerationMachine> | null = null;
+const featureActors = new Map<string, Actor<typeof roadmapFeatureMachine>>();
+
+/**
+ * Reset all actors to clean state.
+ * Use this in tests (afterEach) and HMR dispose handlers to avoid stale actors.
+ */
+export function resetActors(): void {
+  if (generationActor) {
+    generationActor.stop();
+    generationActor = null;
+  }
+  featureActors.forEach((actor) => actor.stop());
+  featureActors.clear();
+}
+
+/**
+ * Get or create the singleton generation actor.
+ * Optionally provide an initial state and context to restore from persisted data.
+ */
+function getOrCreateGenerationActor(
+  initialState?: RoadmapGenerationStatus['phase'],
+  initialContext?: Partial<{ progress: number; message: string; error: string; startedAt: number; completedAt: number; lastActivityAt: number }>
+): Actor<typeof roadmapGenerationMachine> {
+  // Invalidate cached actor if its state doesn't match the expected value
+  if (generationActor && initialState) {
+    const currentValue = String(generationActor.getSnapshot().value);
+    if (currentValue !== initialState) {
+      generationActor.stop();
+      generationActor = null;
+    }
+  }
+  if (!generationActor) {
+    if (initialState) {
+      const resolvedSnapshot = roadmapGenerationMachine.resolveState({
+        value: initialState,
+        context: {
+          progress: initialContext?.progress ?? 0,
+          message: initialContext?.message,
+          error: initialContext?.error,
+          startedAt: initialContext?.startedAt,
+          completedAt: initialContext?.completedAt,
+          lastActivityAt: initialContext?.lastActivityAt
+        }
+      });
+      generationActor = createActor(roadmapGenerationMachine, { snapshot: resolvedSnapshot });
+    } else {
+      generationActor = createActor(roadmapGenerationMachine);
+    }
+    generationActor.start();
+  }
+  return generationActor;
+}
+
+/**
+ * Get or create a feature actor for a given feature ID.
+ * Optionally provide an initial state to restore from persisted data.
+ */
+function getOrCreateFeatureActor(
+  featureId: string,
+  initialState?: RoadmapFeatureStatus,
+  initialContext?: Partial<{ linkedSpecId: string; taskOutcome: TaskOutcome; previousStatus: RoadmapFeatureStatus }>
+): Actor<typeof roadmapFeatureMachine> {
+  let actor = featureActors.get(featureId);
+  // Invalidate cached actor if its state or context doesn't match the expected values
+  if (actor && initialState) {
+    const snapshot = actor.getSnapshot();
+    const currentValue = String(snapshot.value);
+    const ctx = snapshot.context;
+    const contextMismatch = initialContext && (
+      ctx.taskOutcome !== (initialContext.taskOutcome ?? undefined) ||
+      ctx.previousStatus !== (initialContext.previousStatus ?? undefined) ||
+      ctx.linkedSpecId !== (initialContext.linkedSpecId ?? undefined)
+    );
+    if (currentValue !== initialState || contextMismatch) {
+      actor.stop();
+      featureActors.delete(featureId);
+      actor = undefined;
+    }
+  }
+  if (!actor) {
+    if (initialState) {
+      const resolvedSnapshot = roadmapFeatureMachine.resolveState({
+        value: initialState,
+        context: {
+          linkedSpecId: initialContext?.linkedSpecId ?? undefined,
+          taskOutcome: initialContext?.taskOutcome ?? undefined,
+          previousStatus: initialContext?.previousStatus ?? undefined
+        }
+      });
+      actor = createActor(roadmapFeatureMachine, { snapshot: resolvedSnapshot });
+    } else {
+      actor = createActor(roadmapFeatureMachine);
+    }
+    actor.start();
+    featureActors.set(featureId, actor);
+  }
+  return actor;
+}
 
 /**
  * Migrate roadmap data to latest schema

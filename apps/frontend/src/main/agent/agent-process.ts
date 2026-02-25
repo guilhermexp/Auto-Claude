@@ -13,7 +13,8 @@ import { AgentEvents } from './agent-events';
 import { ProcessType, ExecutionProgressData } from './types';
 import type { CompletablePhase } from '../../shared/constants/phase-protocol';
 import { parseTaskEvent } from './task-event-parser';
-import { detectRateLimit, createSDKRateLimitInfo, detectAuthFailure } from '../rate-limit-detector';
+import { detectRateLimit, createSDKRateLimitInfo, getBestAvailableProfileEnv, detectAuthFailure } from '../rate-limit-detector';
+import { getAPIProfileEnv } from '../services/profile';
 import { projectStore } from '../project-store';
 import { getClaudeProfileManager } from '../claude-profile-manager';
 import { parsePythonCommand, validatePythonPath } from '../python-detector';
@@ -21,12 +22,11 @@ import { pythonEnvManager, getConfiguredPythonPath } from '../python-env-manager
 import { buildMemoryEnvVars } from '../memory-env-builder';
 import { readSettingsFile } from '../settings-utils';
 import type { AppSettings } from '../../shared/types/settings';
-import { NESTED_SESSION_VARS_TO_DELETE, mergePythonEnvPath } from './env-utils';
+import { getOAuthModeClearVars, normalizeEnvPathKey, mergePythonEnvPath } from './env-utils';
 import { getAugmentedEnv } from '../env-utils';
 import { getToolInfo, getClaudeCliPathForSdk } from '../cli-tool-manager';
 import { killProcessGracefully, isWindows, getPathDelimiter } from '../platform';
 import { debugLog } from '../../shared/utils/debug-logger';
-import { resolveAuthEnvForFeature } from '../auth-profile-routing';
 
 /**
  * Type for supported CLI tools
@@ -174,10 +174,14 @@ export class AgentProcessManager {
   }
 
   private setupProcessEnvironment(
-    extraEnv: Record<string, string>,
-    profileEnv: Record<string, string>
+    extraEnv: Record<string, string>
   ): NodeJS.ProcessEnv {
+    // Get best available Claude profile environment (automatically handles rate limits)
+    const profileResult = getBestAvailableProfileEnv();
+    const profileEnv = profileResult.env;
+
     debugLog('[AgentProcess:setupEnv] Profile result:', {
+      profileId: profileResult.profileId,
       hasOAuthToken: !!profileEnv.CLAUDE_CODE_OAUTH_TOKEN,
       hasApiKey: !!profileEnv.ANTHROPIC_API_KEY,
       hasConfigDir: !!profileEnv.CLAUDE_CONFIG_DIR,
@@ -225,8 +229,9 @@ export class AgentProcessManager {
     const ghCliEnv = this.detectAndSetCliPath('gh');
     const glabCliEnv = this.detectAndSetCliPath('glab');
 
-    // Build the environment object
-    const env: NodeJS.ProcessEnv = {
+    // Profile env is spread last to ensure CLAUDE_CONFIG_DIR and auth vars
+    // from the active profile always win over extraEnv or augmentedEnv.
+    const mergedEnv = {
       ...augmentedEnv,
       ...gitBashEnv,
       ...claudeCliEnv,
@@ -237,16 +242,30 @@ export class AgentProcessManager {
       PYTHONUNBUFFERED: '1',
       PYTHONIOENCODING: 'utf-8',
       PYTHONUTF8: '1'
-    };
+    } as NodeJS.ProcessEnv;
 
-    // DELETE variables that would block nested Claude CLI execution
-    // These must be deleted (not just set to empty) because Claude CLI checks
-    // for the existence of the variable, not its value
-    for (const varName of NESTED_SESSION_VARS_TO_DELETE) {
-      delete env[varName];
+    // When the active profile provides CLAUDE_CONFIG_DIR, clear CLAUDE_CODE_OAUTH_TOKEN
+    // from the spawn environment. CLAUDE_CONFIG_DIR lets Claude Code resolve its own
+    // OAuth tokens from the config directory, making an explicit token unnecessary.
+    // This matches the terminal pattern in claude-integration-handler.ts where
+    // configDir is preferred over direct token injection.
+    // We check profileEnv specifically (not mergedEnv) to avoid clearing the token
+    // when CLAUDE_CONFIG_DIR comes from the shell environment rather than the profile.
+    if (profileEnv.CLAUDE_CONFIG_DIR) {
+      mergedEnv.CLAUDE_CODE_OAUTH_TOKEN = '';
+      debugLog('[AgentProcess:setupEnv] Profile provides CLAUDE_CONFIG_DIR, cleared CLAUDE_CODE_OAUTH_TOKEN from spawn env');
     }
 
-    return env;
+    debugLog('[AgentProcess:setupEnv] Final merged env auth state:', {
+      hasOAuthToken: !!mergedEnv.CLAUDE_CODE_OAUTH_TOKEN,
+      hasApiKey: !!mergedEnv.ANTHROPIC_API_KEY,
+      hasConfigDir: !!mergedEnv.CLAUDE_CONFIG_DIR,
+      configDir: mergedEnv.CLAUDE_CONFIG_DIR || '(not set)',
+      oauthTokenPrefix: mergedEnv.CLAUDE_CODE_OAUTH_TOKEN?.substring(0, 8) || '(not set)',
+      apiKeyPrefix: mergedEnv.ANTHROPIC_API_KEY?.substring(0, 8) || '(not set)',
+    });
+
+    return mergedEnv;
   }
 
   private handleProcessFailure(
@@ -628,31 +647,29 @@ export class AgentProcessManager {
       spawnId
     });
 
-    const authResolution = await resolveAuthEnvForFeature('tasks');
-    const env = this.setupProcessEnvironment(extraEnv, authResolution.profileEnv);
+    const env = this.setupProcessEnvironment(extraEnv);
 
     // Get Python environment (PYTHONPATH for bundled packages, etc.)
     const pythonEnv = pythonEnvManager.getPythonEnv();
 
-    const apiProfileEnv = authResolution.apiProfileEnv;
-    const oauthModeClearVars = authResolution.oauthModeClearVars;
+    // Get active API profile environment variables
+    let apiProfileEnv: Record<string, string> = {};
+    try {
+      apiProfileEnv = await getAPIProfileEnv();
+    } catch (error) {
+      console.error('[Agent Process] Failed to get API profile env:', error);
+      // Continue with empty profile env (falls back to OAuth mode)
+    }
 
-    // Defensive cleanup: if a config dir is set, force SDK auth resolution via that dir.
-    // getBestAvailableProfileEnv() already does this, but we keep a local guard here.
-    const cleanedEnv = env.CLAUDE_CONFIG_DIR
-      ? {
-        ...env,
-        CLAUDE_CODE_OAUTH_TOKEN: '',
-        ANTHROPIC_API_KEY: ''
-      }
-      : env;
+    // Get OAuth mode clearing vars (clears stale ANTHROPIC_* vars when in OAuth mode)
+    const oauthModeClearVars = getOAuthModeClearVars(apiProfileEnv);
 
     debugLog('[AgentProcess:spawnProcess] Environment merge chain for task:', taskId, {
       baseEnv: {
-        hasOAuthToken: !!cleanedEnv.CLAUDE_CODE_OAUTH_TOKEN,
-        hasApiKey: !!cleanedEnv.ANTHROPIC_API_KEY,
-        hasConfigDir: !!cleanedEnv.CLAUDE_CONFIG_DIR,
-        configDir: cleanedEnv.CLAUDE_CONFIG_DIR || '(not set)',
+        hasOAuthToken: !!env.CLAUDE_CODE_OAUTH_TOKEN,
+        hasApiKey: !!env.ANTHROPIC_API_KEY,
+        hasConfigDir: !!env.CLAUDE_CONFIG_DIR,
+        configDir: env.CLAUDE_CONFIG_DIR || '(not set)',
       },
       oauthModeClearVars: Object.keys(oauthModeClearVars),
       apiProfileEnv: {
@@ -679,8 +696,8 @@ export class AgentProcessManager {
       childProcess = spawn(pythonCommand, [...pythonBaseArgs, ...args], {
         cwd,
         env: {
-          ...cleanedEnv, // Already includes process.env, extraEnv, profileEnv, PYTHONUNBUFFERED, PYTHONUTF8
-          ...pythonEnv, // Include Python environment (PYTHONPATH for bundled packages)
+          ...env, // Already includes process.env, extraEnv, profileEnv, PYTHONUNBUFFERED, PYTHONUTF8
+          ...mergedPythonEnv, // Python env with merged PATH (preserves augmented PATH entries)
           ...oauthModeClearVars, // Clear stale ANTHROPIC_* vars when in OAuth mode
           ...apiProfileEnv // Include active API profile config (highest priority for ANTHROPIC_* vars)
         }

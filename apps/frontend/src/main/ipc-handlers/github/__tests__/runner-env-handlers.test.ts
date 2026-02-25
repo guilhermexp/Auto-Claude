@@ -193,7 +193,7 @@ describe('GitHub runner env usage', () => {
     registerPRHandlers(() => createMockWindow());
     await mockIpcMain.emit(IPC_CHANNELS.GITHUB_PR_REVIEW, projectRef.current?.id, 123);
 
-    expect(mockGetRunnerEnv).toHaveBeenCalledWith({ USE_CLAUDE_MD: 'true' });
+    expect(mockGetRunnerEnv).toHaveBeenCalledWith('githubPrs', { USE_CLAUDE_MD: 'true' });
     expect(mockRunPythonSubprocess).toHaveBeenCalledWith(
       expect.objectContaining({
         env: { ANTHROPIC_AUTH_TOKEN: 'token' },
@@ -218,7 +218,7 @@ describe('GitHub runner env usage', () => {
     registerTriageHandlers(() => createMockWindow());
     await mockIpcMain.emit(IPC_CHANNELS.GITHUB_TRIAGE_RUN, projectRef.current?.id);
 
-    expect(mockGetRunnerEnv).toHaveBeenCalledWith();
+    expect(mockGetRunnerEnv).toHaveBeenCalledWith('githubIssues');
     expect(mockRunPythonSubprocess).toHaveBeenCalledWith(
       expect.objectContaining({
         env: { ANTHROPIC_AUTH_TOKEN: 'token' },
@@ -252,7 +252,7 @@ describe('GitHub runner env usage', () => {
     registerAutoFixHandlers(agentManager, getMainWindow);
     await mockIpcMain.emit(IPC_CHANNELS.GITHUB_AUTOFIX_ANALYZE_PREVIEW, projectRef.current?.id);
 
-    expect(mockGetRunnerEnv).toHaveBeenCalledWith();
+    expect(mockGetRunnerEnv).toHaveBeenCalledWith('githubIssues');
     expect(mockRunPythonSubprocess).toHaveBeenCalledWith(
       expect.objectContaining({
         env: { ANTHROPIC_AUTH_TOKEN: 'token' },
