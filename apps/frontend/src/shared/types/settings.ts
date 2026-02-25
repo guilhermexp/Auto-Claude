@@ -361,6 +361,9 @@ export interface AppSettings {
   sidebarWidth?: number;
 }
 
+// GPU acceleration mode for terminal WebGL rendering
+export type GpuAcceleration = 'auto' | 'on' | 'off';
+
 // Auto-Claude Source Environment Configuration (for auto-claude repo .env)
 export interface SourceEnvConfig {
   // Claude Authentication (required for ideation, roadmap generation, etc.)

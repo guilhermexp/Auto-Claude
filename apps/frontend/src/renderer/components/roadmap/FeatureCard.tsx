@@ -18,6 +18,7 @@ export function FeatureCard({
   onClick,
   onConvertToSpec,
   onGoToTask,
+  onArchive,
   hasCompetitorInsight = false,
 }: FeatureCardProps) {
   const { t } = useTranslation('roadmap');
@@ -82,14 +83,42 @@ export function FeatureCard({
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                onConvertToSpec(feature);
+                onGoToTask(feature.linkedSpecId!);
               }}
             >
               <Play className="h-3 w-3 mr-1" />
               {t('featureCard.build')}
             </Button>
-          )
-        )}
+          ) : (
+            feature.status !== 'done' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onConvertToSpec(feature);
+                }}
+              >
+                <Play className="h-3 w-3 mr-1" />
+                {t('roadmap.build')}
+              </Button>
+            )
+          )}
+          {feature.status === 'done' && onArchive && (
+            <Button
+              variant="ghost"
+              size="sm"
+              title={t('roadmap.archiveFeature')}
+              aria-label={t('accessibility.archiveFeatureAriaLabel')}
+              onClick={(e) => {
+                e.stopPropagation();
+                onArchive(feature.id);
+              }}
+            >
+              <Archive className="h-3 w-3" />
+            </Button>
+          )}
+        </div>
       </div>
     </Card>
   );

@@ -24,7 +24,7 @@ import type { AppSettings } from '../../shared/types/settings';
 import { NESTED_SESSION_VARS_TO_DELETE } from './env-utils';
 import { getAugmentedEnv } from '../env-utils';
 import { getToolInfo, getClaudeCliPathForSdk } from '../cli-tool-manager';
-import { killProcessGracefully, isWindows } from '../platform';
+import { killProcessGracefully, isWindows, getPathDelimiter } from '../platform';
 import { debugLog } from '../../shared/utils/debug-logger';
 import { resolveAuthEnvForFeature } from '../auth-profile-routing';
 
@@ -662,7 +662,17 @@ export class AgentProcessManager {
       },
     });
 
-    // Parse Python commandto handle space-separated commands like "py -3"
+    // Merge PATH from pythonEnv with augmented PATH from env.
+    // pythonEnv may contain its own PATH (e.g., on Windows with pywin32_system32 prepended).
+    // Simply spreading pythonEnv after env would overwrite the augmented PATH (which includes
+    // npm globals, homebrew, etc.), causing "Claude code not found" on Windows (#1661).
+    // mergePythonEnvPath() normalizes PATH key casing and prepends pythonEnv-specific paths.
+    const mergedPythonEnv = { ...pythonEnv };
+    const pathSep = getPathDelimiter();
+
+    mergePythonEnvPath(env as Record<string, string | undefined>, mergedPythonEnv as Record<string, string | undefined>, pathSep);
+
+    // Parse Python command to handle space-separated commands like "py -3"
     const [pythonCommand, pythonBaseArgs] = parsePythonCommand(this.getPythonPath());
     let childProcess;
     try {

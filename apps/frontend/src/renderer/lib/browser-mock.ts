@@ -63,6 +63,10 @@ const browserMockAPI: ElectronAPI = {
     success: true
   }),
 
+  saveCompetitorAnalysis: async () => ({
+    success: true
+  }),
+
   generateRoadmap: (_projectId: string, _enableCompetitorAnalysis?: boolean, _refreshCompetitorAnalysis?: boolean) => {
     console.warn('[Browser Mock] generateRoadmap called');
   },
@@ -215,6 +219,7 @@ const browserMockAPI: ElectronAPI = {
     markReviewPosted: async () => true,
     getPRReview: async () => null,
     getPRReviewsBatch: async () => ({}),
+    notifyExternalReviewComplete: async () => {},
     deletePRReview: async () => true,
     checkNewCommits: async () => ({ hasNewCommits: false, newCommitCount: 0 }),
     checkMergeReadiness: async () => ({ isDraft: false, mergeable: 'UNKNOWN' as const, isBehind: false, ciStatus: 'none' as const, blockers: [] }),
@@ -226,6 +231,7 @@ const browserMockAPI: ElectronAPI = {
     onPRReviewProgress: () => () => {},
     onPRReviewComplete: () => () => {},
     onPRReviewError: () => () => {},
+    onPRReviewStateChange: () => () => {},
     onPRLogsUpdated: () => () => {},
     batchAutoFix: () => {},
     getBatches: async () => [],

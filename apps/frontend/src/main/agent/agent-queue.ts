@@ -391,6 +391,12 @@ export class AgentQueueManager {
       PYTHONUTF8: '1'
     };
 
+    // Normalize PATH key to a single uppercase 'PATH' entry.
+    // On Windows, process.env spread produces 'Path' while pythonEnv may write 'PATH',
+    // resulting in duplicate keys in the final object. Without normalization the child
+    // process inherits both keys, which can cause tool-not-found errors (#1661).
+    normalizeEnvPathKey(finalEnv as Record<string, string | undefined>);
+
     // Debug: Show OAuth token source (token values intentionally omitted for security - AC4)
     const tokenSource = profileEnv['CLAUDE_CODE_OAUTH_TOKEN']
       ? 'Electron app profile'
@@ -718,6 +724,12 @@ export class AgentQueueManager {
       PYTHONUNBUFFERED: '1',
       PYTHONUTF8: '1'
     };
+
+    // Normalize PATH key to a single uppercase 'PATH' entry.
+    // On Windows, process.env spread produces 'Path' while pythonEnv may write 'PATH',
+    // resulting in duplicate keys in the final object. Without normalization the child
+    // process inherits both keys, which can cause tool-not-found errors (#1661).
+    normalizeEnvPathKey(finalEnv as Record<string, string | undefined>);
 
     // Debug: Show OAuth token source (token values intentionally omitted for security - AC4)
     const tokenSource = profileEnv['CLAUDE_CODE_OAUTH_TOKEN']

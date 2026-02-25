@@ -10,12 +10,15 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from './ui/alert-dialog';
+import { Button } from './ui/button';
+import { AddCompetitorDialog } from './AddCompetitorDialog';
 
 interface CompetitorAnalysisDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAccept: () => void;
   onDecline: () => void;
+  projectId: string;
 }
 
 export function CompetitorAnalysisDialog({
@@ -23,6 +26,7 @@ export function CompetitorAnalysisDialog({
   onOpenChange,
   onAccept,
   onDecline,
+  projectId,
 }: CompetitorAnalysisDialogProps) {
   const { t } = useTranslation('dialogs');
   const handleAccept = () => {
@@ -74,10 +78,9 @@ export function CompetitorAnalysisDialog({
             </ul>
           </div>
 
-          {/* Privacy notice */}
-          <div className="rounded-lg bg-warning/10 border border-warning/30 p-4">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0 mt-0.5" />
+          {/* Add Known Competitors section */}
+          <div className="border-t border-border pt-4">
+            <div className="flex items-center justify-between">
               <div className="flex-1">
                 <h4 className="text-sm font-medium text-foreground">
                   {t('competitorAnalysis.privacyTitle')}
@@ -86,6 +89,20 @@ export function CompetitorAnalysisDialog({
                   {t('competitorAnalysis.privacyDescription')}
                 </p>
               </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1.5"
+                onClick={() => setShowAddDialog(true)}
+              >
+                <UserPlus className="h-3.5 w-3.5" />
+                {t('dialogs:competitorAnalysis.addKnownCompetitors', 'Add Known Competitors')}
+                {addedCount > 0 && (
+                  <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-medium text-primary-foreground">
+                    {t('dialogs:competitorAnalysis.competitorsAdded', '{{count}} added', { count: addedCount })}
+                  </span>
+                )}
+              </Button>
             </div>
           </div>
 

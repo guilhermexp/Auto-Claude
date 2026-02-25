@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Plus,
@@ -8,7 +8,10 @@ import {
   Check,
   X,
   MoreVertical,
-  Loader2
+  Loader2,
+  CheckSquare,
+  Archive,
+  ArchiveRestore
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -62,6 +65,52 @@ export function ChatHistorySidebar({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [deleteSessionId, setDeleteSessionId] = useState<string | null>(null);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [bulkArchiveOpen, setBulkArchiveOpen] = useState(false);
+
+  // Clear selection when exiting selection mode
+  const handleToggleSelectionMode = useCallback(() => {
+    setIsSelectionMode((prev) => {
+      if (prev) {
+        setSelectedIds(new Set());
+      }
+      return !prev;
+    });
+  }, []);
+
+  // Prune selectedIds when sessions change - removes IDs for sessions no longer displayed
+  // Also resets when showArchived toggles
+  // biome-ignore lint/correctness/useExhaustiveDependencies: showArchived is intentionally a dependency to reset selection on filter change
+  useEffect(() => {
+    setSelectedIds((prev) => {
+      if (prev.size === 0) return prev;
+      const validIds = new Set(sessions.map((s) => s.id));
+      const pruned = new Set([...prev].filter((id) => validIds.has(id)));
+      return pruned.size === prev.size ? prev : pruned;
+    });
+  }, [sessions, showArchived]);
+
+  const handleToggleSelect = useCallback((sessionId: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(sessionId)) {
+        next.delete(sessionId);
+      } else {
+        next.add(sessionId);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    setSelectedIds(new Set(sessions.map((s) => s.id)));
+  }, [sessions]);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
 
   const handleStartEdit = (session: InsightsSessionSummary) => {
     setEditingId(session.id);
@@ -85,6 +134,38 @@ export function ChatHistorySidebar({
     if (deleteSessionId) {
       await onDeleteSession(deleteSessionId);
       setDeleteSessionId(null);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.size > 0 && onDeleteSessions) {
+      try {
+        await onDeleteSessions(Array.from(selectedIds));
+        setSelectedIds(new Set());
+      } catch (error) {
+        console.error('Failed to delete sessions:', error);
+      } finally {
+        setBulkDeleteOpen(false);
+      }
+    }
+  };
+
+  const handleBulkArchive = () => {
+    if (selectedIds.size > 0 && onArchiveSessions) {
+      setBulkArchiveOpen(true);
+    }
+  };
+
+  const handleBulkArchiveConfirmed = async () => {
+    if (selectedIds.size > 0 && onArchiveSessions) {
+      try {
+        await onArchiveSessions(Array.from(selectedIds));
+        setSelectedIds(new Set());
+      } catch (error) {
+        console.error('Failed to archive sessions:', error);
+      } finally {
+        setBulkArchiveOpen(false);
+      }
     }
   };
 
@@ -114,6 +195,9 @@ export function ChatHistorySidebar({
     groups[dateLabel].push(session);
     return groups;
   }, {} as Record<string, InsightsSessionSummary[]>);
+
+  // Sessions selected for bulk delete preview
+  const sessionsToDelete = sessions.filter((s) => selectedIds.has(s.id));
 
   return (
     <div className="flex h-full flex-col">
@@ -221,6 +305,12 @@ interface SessionItemProps {
   onCancelEdit: () => void;
   onEditTitleChange: (title: string) => void;
   onDelete: () => void;
+  onArchive?: () => Promise<void>;
+  onUnarchive?: () => Promise<void>;
+  isArchived: boolean;
+  isSelectionMode: boolean;
+  isSelected: boolean;
+  onToggleSelect: () => void;
 }
 
 function SessionItem({
@@ -233,7 +323,13 @@ function SessionItem({
   onSaveEdit,
   onCancelEdit,
   onEditTitleChange,
-  onDelete
+  onDelete,
+  onArchive,
+  onUnarchive,
+  isArchived,
+  isSelectionMode,
+  isSelected,
+  onToggleSelect
 }: SessionItemProps) {
   const { t } = useTranslation(['insights', 'common']);
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -280,13 +376,22 @@ function SessionItem({
   // Session item with semantic tokens
   return (
     <div
+      role={isSelectionMode ? 'checkbox' : 'button'}
+      aria-checked={isSelectionMode ? isSelected : undefined}
+      tabIndex={0}
       className={cn(
         'group relative cursor-pointer px-3 py-1.5 text-sm font-medium insights-session-item',
         isActive
           ? 'insights-session-item-active text-foreground'
           : 'text-muted-foreground hover:text-foreground'
       )}
-      onClick={onSelect}
+      onClick={isSelectionMode ? onToggleSelect : onSelect}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          isSelectionMode ? onToggleSelect() : onSelect();
+        }
+      }}
     >
       <div className="flex items-center gap-2 pr-6">
         <MessageSquare

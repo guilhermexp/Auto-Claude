@@ -248,7 +248,9 @@ export const TaskCard = memo(function TaskCard({
 
   const handleStartStop = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isRunning && !isStuck) {
+    if (isRunning) {
+      // Allow stopping both running and stuck tasks
+      // User should be able to force-stop a stuck task
       stopTask(task.id);
     } else {
       const result = await startTaskOrQueue(task.id);

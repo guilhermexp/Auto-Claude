@@ -16,6 +16,7 @@ export function PhaseCard({
   onFeatureSelect,
   onConvertToSpec,
   onGoToTask,
+  onArchive,
 }: PhaseCardProps) {
   const { t } = useTranslation('roadmap');
   const completedCount = features.filter((f) => f.status === 'done').length;
@@ -91,7 +92,24 @@ export function PhaseCard({
       <div>
         <h4 className="text-sm font-medium mb-2">{t('phaseCard.featuresSection', { count: features.length })}</h4>
         <div className="grid gap-2">
-          {visibleFeatures.map((feature) => (
+          {visibleFeatures.map((feature) => {
+            const isDone = feature.status === 'done';
+            const archiveButton = isDone && onArchive && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2"
+                title={t('roadmap.archiveFeature')}
+                aria-label={t('accessibility.archiveFeatureAriaLabel')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onArchive(feature.id);
+                }}
+              >
+                <Archive className="h-3 w-3" />
+              </Button>
+            );
+            return (
             <div
               key={feature.id}
               className="flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors roadmap-kanban-card"
@@ -114,11 +132,15 @@ export function PhaseCard({
                 )}
               </button>
               {feature.taskOutcome ? (
-                <span className="flex-shrink-0">
+                <span className="flex items-center gap-1 flex-shrink-0">
                   <TaskOutcomeBadge outcome={feature.taskOutcome} size="lg" showLabel={false} />
+                  {archiveButton}
                 </span>
-              ) : feature.status === 'done' ? (
-                <CheckCircle2 className="h-4 w-4 text-success flex-shrink-0" />
+              ) : isDone ? (
+                <span className="flex items-center gap-1 flex-shrink-0">
+                  <CheckCircle2 className="h-4 w-4 text-success" />
+                  {archiveButton}
+                </span>
               ) : feature.linkedSpecId ? (
                 <Button
                   variant="outline"
