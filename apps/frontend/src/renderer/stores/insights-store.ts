@@ -437,6 +437,64 @@ export async function cancelInsightsAction(
 // IPC listener setup - call this once when the app initializes
 export function setupInsightsListeners(): () => void {
   const store = useInsightsStore.getState;
+  const setStore = useInsightsStore.setState;
+
+  const finalizeStreamingWithCompleteStatus = (message: string): void => {
+    setStore((state) => {
+      const content = state.streamingContent;
+      const toolsUsed = state.toolsUsed.length > 0 ? [...state.toolsUsed] : undefined;
+      const suggestedTasks = state.streamingTasks.length > 0 ? [...state.streamingTasks] : undefined;
+
+      let nextSession = state.session;
+      const hasAssistantPayload = Boolean(content || suggestedTasks || toolsUsed);
+      if (hasAssistantPayload) {
+        const newMessage: InsightsChatMessage = {
+          id: `msg-${Date.now()}`,
+          role: 'assistant',
+          content,
+          timestamp: new Date(),
+          suggestedTasks,
+          toolsUsed
+        };
+
+        if (!nextSession) {
+          nextSession = {
+            id: `session-${Date.now()}`,
+            projectId: '',
+            messages: [newMessage],
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            pendingAction: null
+          };
+        } else {
+          nextSession = {
+            ...nextSession,
+            pendingAction: null,
+            messages: [...nextSession.messages, newMessage],
+            updatedAt: new Date()
+          };
+        }
+      } else if (nextSession?.pendingAction) {
+        nextSession = {
+          ...nextSession,
+          pendingAction: null,
+          updatedAt: new Date()
+        };
+      }
+
+      return {
+        currentTool: null,
+        streamingContent: '',
+        streamingTasks: [],
+        toolsUsed: [],
+        session: nextSession,
+        status: {
+          phase: 'complete',
+          message
+        }
+      };
+    });
+  };
 
   // Listen for streaming chunks
   const unsubStreamChunk = window.electronAPI.onInsightsStreamChunk(
@@ -444,40 +502,51 @@ export function setupInsightsListeners(): () => void {
       switch (chunk.type) {
         case 'text':
           if (chunk.content) {
-            store().appendStreamingContent(chunk.content);
-            store().setCurrentTool(null); // Clear tool when receiving text
-            store().setStatus({
-              phase: 'streaming',
-              message: 'Receiving response...'
-            });
+            setStore((state) => ({
+              streamingContent: state.streamingContent + chunk.content,
+              currentTool: null,
+              status: state.status.phase === 'streaming' && state.status.message === 'Receiving response...'
+                ? state.status
+                : {
+                    phase: 'streaming',
+                    message: 'Receiving response...'
+                  }
+            }));
           }
           break;
         case 'tool_start':
           if (chunk.tool) {
-            store().setCurrentTool({
-              name: chunk.tool.name,
-              input: chunk.tool.input
-            });
-            // Record this tool usage for history
-            store().addToolUsage({
-              name: chunk.tool.name,
-              input: chunk.tool.input
-            });
-            store().setStatus({
-              phase: 'streaming',
-              message: `Using ${chunk.tool.name}...`
-            });
+            setStore((state) => ({
+              currentTool: {
+                name: chunk.tool!.name,
+                input: chunk.tool!.input
+              },
+              toolsUsed: [
+                ...state.toolsUsed,
+                {
+                  name: chunk.tool!.name,
+                  input: chunk.tool!.input,
+                  timestamp: new Date()
+                }
+              ],
+              status: {
+                phase: 'streaming',
+                message: `Using ${chunk.tool!.name}...`
+              }
+            }));
           }
           break;
         case 'tool_end':
-          store().setCurrentTool(null);
+          setStore((state) => (state.currentTool ? { currentTool: null } : {}));
           break;
         case 'task_suggestion':
           // Accumulate task suggestions — they'll be included when 'done' finalizes the message
-          store().setCurrentTool(null);
-          if (chunk.suggestedTasks) {
-            store().addStreamingTasks(chunk.suggestedTasks);
-          }
+          setStore((state) => ({
+            currentTool: null,
+            streamingTasks: chunk.suggestedTasks
+              ? [...state.streamingTasks, ...chunk.suggestedTasks]
+              : state.streamingTasks
+          }));
           break;
         case 'action_proposal': {
           const action = chunk.actionProposal;
@@ -501,22 +570,11 @@ export function setupInsightsListeners(): () => void {
           break;
         }
         case 'action_result':
-          store().setCurrentTool(null);
-          store().finalizeStreamingMessage();
-          store().setPendingAction(null);
-          store().setStatus({
-            phase: 'complete',
-            message: chunk.actionResult?.summary ?? ''
-          });
+          finalizeStreamingWithCompleteStatus(chunk.actionResult?.summary ?? '');
           break;
         case 'done':
           // Finalize any remaining content
-          store().setCurrentTool(null);
-          store().finalizeStreamingMessage();
-          store().setStatus({
-            phase: 'complete',
-            message: ''
-          });
+          finalizeStreamingWithCompleteStatus('');
           break;
         case 'error':
           store().setCurrentTool(null);

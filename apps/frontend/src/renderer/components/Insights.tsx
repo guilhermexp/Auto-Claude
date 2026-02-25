@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback, useDeferredValue } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Bot,
@@ -133,6 +133,8 @@ export function Insights({ projectId }: InsightsProps) {
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const isUserAtBottomRef = useRef(true);
+  const scrollCheckRafRef = useRef<number | null>(null);
 
   const isLoading = status.phase === 'thinking' || status.phase === 'streaming';
 
@@ -169,18 +171,33 @@ export function Insights({ projectId }: InsightsProps) {
 
   // Handle scroll events to track user position
   const handleScroll = useCallback(() => {
-    if (viewportEl) {
-      setIsUserAtBottom(checkIfAtBottom(viewportEl));
-    }
+    if (!viewportEl) return;
+    if (scrollCheckRafRef.current !== null) return;
+
+    scrollCheckRafRef.current = requestAnimationFrame(() => {
+      scrollCheckRafRef.current = null;
+      const nextIsAtBottom = checkIfAtBottom(viewportEl);
+      if (nextIsAtBottom === isUserAtBottomRef.current) return;
+      isUserAtBottomRef.current = nextIsAtBottom;
+      setIsUserAtBottom(nextIsAtBottom);
+    });
   }, [viewportEl, checkIfAtBottom]);
 
   // Set up scroll listener and check initial position when viewport becomes available
   useEffect(() => {
     if (viewportEl) {
       // Check initial scroll position
-      setIsUserAtBottom(checkIfAtBottom(viewportEl));
+      const nextIsAtBottom = checkIfAtBottom(viewportEl);
+      isUserAtBottomRef.current = nextIsAtBottom;
+      setIsUserAtBottom(nextIsAtBottom);
       viewportEl.addEventListener('scroll', handleScroll, { passive: true });
-      return () => viewportEl.removeEventListener('scroll', handleScroll);
+      return () => {
+        viewportEl.removeEventListener('scroll', handleScroll);
+        if (scrollCheckRafRef.current !== null) {
+          cancelAnimationFrame(scrollCheckRafRef.current);
+          scrollCheckRafRef.current = null;
+        }
+      };
     }
   }, [viewportEl, handleScroll, checkIfAtBottom]);
 
@@ -208,7 +225,10 @@ export function Insights({ projectId }: InsightsProps) {
   // yanked back down during streaming responses
   useEffect(() => {
     if (isUserAtBottom && viewportEl) {
-      viewportEl.scrollTop = viewportEl.scrollHeight;
+      requestAnimationFrame(() => {
+        if (!viewportEl) return;
+        viewportEl.scrollTop = viewportEl.scrollHeight;
+      });
     }
   }, [session?.messages?.length, streamingContent, currentTool, isUserAtBottom, viewportEl]);
 
@@ -232,6 +252,7 @@ export function Insights({ projectId }: InsightsProps) {
     sendMessage(projectId, message, session?.modelConfig, hasImages ? pendingImages : undefined);
     setPendingImages([]);
     setImageError(null);
+    isUserAtBottomRef.current = true;
     setIsUserAtBottom(true); // Resume auto-scroll when user sends a message
   };
 
@@ -375,12 +396,13 @@ export function Insights({ projectId }: InsightsProps) {
   };
 
   const messages = session?.messages || [];
+  const deferredMessages = useDeferredValue(messages);
   const translationEntries = useMemo(() => {
     if (!isPortugueseUi || !isTranslationEnabled) {
       return [];
     }
 
-    return messages.flatMap((message) => {
+    return deferredMessages.flatMap((message) => {
       if (message.role !== 'assistant') {
         return [];
       }
@@ -402,7 +424,7 @@ export function Insights({ projectId }: InsightsProps) {
 
       return entries;
     });
-  }, [isPortugueseUi, isTranslationEnabled, messages]);
+  }, [isPortugueseUi, isTranslationEnabled, deferredMessages]);
 
   useEffect(() => {
     if (!isTranslationEnabled) {
@@ -427,10 +449,10 @@ export function Insights({ projectId }: InsightsProps) {
 
   const displayedMessages = useMemo(() => {
     if (!isTranslationEnabled) {
-      return messages;
+      return deferredMessages;
     }
 
-    return messages.map((message) => {
+    return deferredMessages.map((message) => {
       if (message.role !== 'assistant') {
         return message;
       }
@@ -451,7 +473,7 @@ export function Insights({ projectId }: InsightsProps) {
         })),
       };
     });
-  }, [isTranslationEnabled, messages, getTranslatedText]);
+  }, [isTranslationEnabled, deferredMessages, getTranslatedText]);
 
   const isEmptySession = messages.length === 0 && !streamingContent;
   const greetingName = project?.name || t('insights:chat.defaultGreetingName', 'there');

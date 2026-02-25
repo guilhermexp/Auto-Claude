@@ -51,6 +51,9 @@ export function ResizablePanels({
 
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const containerRectRef = useRef<DOMRect | null>(null);
+  const pendingClientXRef = useRef<number | null>(null);
+  const dragRafIdRef = useRef<number | null>(null);
 
   // Save to storage when width changes (debounced by only saving when not dragging)
   useEffect(() => {
@@ -76,15 +79,27 @@ export function ResizablePanels({
   useEffect(() => {
     if (!isDragging) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!containerRef.current) return;
+    containerRectRef.current = containerRef.current?.getBoundingClientRect() ?? null;
 
-      const rect = containerRef.current.getBoundingClientRect();
-      // Guard against division by zero when container has no width
-      if (rect.width <= 0) return;
-      const newWidth = ((e.clientX - rect.left) / rect.width) * 100;
+    const applyPendingDrag = () => {
+      dragRafIdRef.current = null;
+      const rect = containerRectRef.current;
+      const clientX = pendingClientXRef.current;
+      if (!rect || clientX === null || rect.width <= 0) return;
+
+      const newWidth = ((clientX - rect.left) / rect.width) * 100;
       const clampedWidth = Math.max(minLeftWidth, Math.min(maxLeftWidth, newWidth));
       setLeftWidth(clampedWidth);
+    };
+
+    const scheduleDragUpdate = (clientX: number) => {
+      pendingClientXRef.current = clientX;
+      if (dragRafIdRef.current !== null) return;
+      dragRafIdRef.current = requestAnimationFrame(applyPendingDrag);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      scheduleDragUpdate(e.clientX);
     };
 
     const handleMouseUp = () => {
@@ -92,14 +107,9 @@ export function ResizablePanels({
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (!containerRef.current || e.touches.length === 0) return;
-
-      const rect = containerRef.current.getBoundingClientRect();
-      if (rect.width <= 0) return;
       const touch = e.touches[0];
-      const newWidth = ((touch.clientX - rect.left) / rect.width) * 100;
-      const clampedWidth = Math.max(minLeftWidth, Math.min(maxLeftWidth, newWidth));
-      setLeftWidth(clampedWidth);
+      if (!touch) return;
+      scheduleDragUpdate(touch.clientX);
     };
 
     const handleTouchEnd = () => {
@@ -112,12 +122,18 @@ export function ResizablePanels({
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
     document.addEventListener('touchend', handleTouchEnd);
 
     return () => {
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
+      if (dragRafIdRef.current !== null) {
+        cancelAnimationFrame(dragRafIdRef.current);
+        dragRafIdRef.current = null;
+      }
+      pendingClientXRef.current = null;
+      containerRectRef.current = null;
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('touchmove', handleTouchMove);

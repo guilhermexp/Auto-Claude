@@ -641,6 +641,9 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
   const [resizingColumn, setResizingColumn] = useState<typeof TASK_STATUS_COLUMNS[number] | null>(null);
   const resizeStartX = useRef<number>(0);
   const resizeStartWidth = useRef<number>(0);
+  const resizeScaleFactor = useRef<number>(1);
+  const resizePendingClientX = useRef<number | null>(null);
+  const resizeRafId = useRef<number | null>(null);
   // Capture projectId at resize start to avoid stale closure if project changes during resize
   const resizeProjectIdRef = useRef<string | null>(null);
 
@@ -1202,21 +1205,40 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
     const currentWidth = columnPreferences?.[status]?.width ?? DEFAULT_COLUMN_WIDTH;
     resizeStartX.current = startX;
     resizeStartWidth.current = currentWidth;
+    resizeScaleFactor.current = parseFloat(getComputedStyle(document.documentElement).fontSize) / BASE_FONT_SIZE;
     // Capture projectId at resize start to ensure we save to the correct project
     resizeProjectIdRef.current = projectId ?? null;
     setResizingColumn(status);
   }, [columnPreferences, projectId]);
 
-  const handleResizeMove = useCallback((clientX: number) => {
-    if (!resizingColumn) return;
+  const applyPendingResize = useCallback(() => {
+    resizeRafId.current = null;
+    if (!resizingColumn || resizePendingClientX.current === null) return;
 
-    const scaleFactor = parseFloat(getComputedStyle(document.documentElement).fontSize) / BASE_FONT_SIZE;
-    const deltaX = (clientX - resizeStartX.current) / scaleFactor;
+    const deltaX = (resizePendingClientX.current - resizeStartX.current) / resizeScaleFactor.current;
     const newWidth = Math.max(MIN_COLUMN_WIDTH, Math.min(MAX_COLUMN_WIDTH, resizeStartWidth.current + deltaX));
     setColumnWidth(resizingColumn, newWidth);
   }, [resizingColumn, setColumnWidth]);
 
+  const handleResizeMove = useCallback((clientX: number) => {
+    if (!resizingColumn) return;
+    resizePendingClientX.current = clientX;
+    if (resizeRafId.current !== null) return;
+    resizeRafId.current = requestAnimationFrame(applyPendingResize);
+  }, [resizingColumn, applyPendingResize]);
+
   const handleResizeEnd = useCallback(() => {
+    if (resizeRafId.current !== null) {
+      cancelAnimationFrame(resizeRafId.current);
+      resizeRafId.current = null;
+    }
+    if (resizePendingClientX.current !== null && resizingColumn) {
+      const deltaX = (resizePendingClientX.current - resizeStartX.current) / resizeScaleFactor.current;
+      const newWidth = Math.max(MIN_COLUMN_WIDTH, Math.min(MAX_COLUMN_WIDTH, resizeStartWidth.current + deltaX));
+      setColumnWidth(resizingColumn, newWidth);
+      resizePendingClientX.current = null;
+    }
+
     // Use the projectId captured at resize start to avoid saving to wrong project
     const savedProjectId = resizeProjectIdRef.current;
     if (resizingColumn && savedProjectId) {
@@ -1224,7 +1246,7 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
     }
     setResizingColumn(null);
     resizeProjectIdRef.current = null;
-  }, [resizingColumn, saveKanbanPreferences]);
+  }, [resizingColumn, saveKanbanPreferences, setColumnWidth]);
 
   // Document-level event listeners for resize dragging
   useEffect(() => {
@@ -1253,12 +1275,17 @@ export function KanbanBoard({ tasks, onTaskClick, onNewTaskClick, onRefresh, isR
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
     document.addEventListener('touchend', handleTouchEnd);
 
     return () => {
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
+      if (resizeRafId.current !== null) {
+        cancelAnimationFrame(resizeRafId.current);
+        resizeRafId.current = null;
+      }
+      resizePendingClientX.current = null;
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('touchmove', handleTouchMove);
