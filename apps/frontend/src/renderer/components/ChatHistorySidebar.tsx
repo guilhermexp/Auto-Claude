@@ -43,7 +43,13 @@ interface ChatHistorySidebarProps {
   onNewSession: () => void;
   onSelectSession: (sessionId: string) => void;
   onDeleteSession: (sessionId: string) => Promise<boolean>;
+  onDeleteSessions?: (sessionIds: string[]) => Promise<void>;
   onRenameSession: (sessionId: string, newTitle: string) => Promise<boolean>;
+  onArchiveSession?: (sessionId: string) => Promise<void>;
+  onArchiveSessions?: (sessionIds: string[]) => Promise<void>;
+  onUnarchiveSession?: (sessionId: string) => Promise<void>;
+  showArchived?: boolean;
+  onToggleShowArchived?: () => void;
   modelConfig?: InsightsModelConfig;
   onModelConfigChange?: (config: InsightsModelConfig) => void;
   isModelSelectorDisabled?: boolean;
@@ -56,7 +62,13 @@ export function ChatHistorySidebar({
   onNewSession,
   onSelectSession,
   onDeleteSession,
+  onDeleteSessions,
   onRenameSession,
+  onArchiveSession,
+  onArchiveSessions,
+  onUnarchiveSession,
+  showArchived,
+  onToggleShowArchived,
   modelConfig,
   onModelConfigChange,
   isModelSelectorDisabled
@@ -307,10 +319,10 @@ interface SessionItemProps {
   onDelete: () => void;
   onArchive?: () => Promise<void>;
   onUnarchive?: () => Promise<void>;
-  isArchived: boolean;
-  isSelectionMode: boolean;
-  isSelected: boolean;
-  onToggleSelect: () => void;
+  isArchived?: boolean;
+  isSelectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 }
 
 function SessionItem({
@@ -326,9 +338,9 @@ function SessionItem({
   onDelete,
   onArchive,
   onUnarchive,
-  isArchived,
-  isSelectionMode,
-  isSelected,
+  isArchived = false,
+  isSelectionMode = false,
+  isSelected = false,
   onToggleSelect
 }: SessionItemProps) {
   const { t } = useTranslation(['insights', 'common']);
@@ -385,11 +397,11 @@ function SessionItem({
           ? 'insights-session-item-active text-foreground'
           : 'text-muted-foreground hover:text-foreground'
       )}
-      onClick={isSelectionMode ? onToggleSelect : onSelect}
+      onClick={isSelectionMode && onToggleSelect ? onToggleSelect : onSelect}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          isSelectionMode ? onToggleSelect() : onSelect();
+          isSelectionMode && onToggleSelect ? onToggleSelect() : onSelect();
         }
       }}
     >

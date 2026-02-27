@@ -24,7 +24,7 @@ const radioGroupVariants = cva('', {
 });
 
 export interface RadioGroupProps
-  extends React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>,
+  extends Omit<React.ComponentPropsWithoutRef<typeof RadioGroupPrimitive.Root>, 'orientation'>,
     VariantProps<typeof radioGroupVariants> {}
 
 const RadioGroup = React.forwardRef<

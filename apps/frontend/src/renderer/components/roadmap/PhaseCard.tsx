@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, Circle, ExternalLink, Play, TrendingUp } from 'lucide-react';
+import { Archive, CheckCircle2, Circle, ExternalLink, Play, TrendingUp } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Progress } from '../ui/progress';
+import { TaskOutcomeBadge } from './TaskOutcomeBadge';
 import { ROADMAP_PRIORITY_COLORS } from '../../../shared/constants';
 import type { PhaseCardProps } from './types';
 
@@ -92,7 +93,7 @@ export function PhaseCard({
       <div>
         <h4 className="text-sm font-medium mb-2">{t('phaseCard.featuresSection', { count: features.length })}</h4>
         <div className="grid gap-2">
-          {visibleFeatures.map((feature) => {
+          {features.slice(0, INITIAL_VISIBLE_COUNT).map((feature) => {
             const isDone = feature.status === 'done';
             const archiveButton = isDone && onArchive && (
               <Button

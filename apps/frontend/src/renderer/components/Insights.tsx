@@ -21,6 +21,7 @@ import { ScrollArea } from './ui/scroll-area';
 import {
   useInsightsStore,
   loadInsightsSession,
+  loadInsightsSessions,
   sendMessage,
   newSession,
   switchSession,
@@ -103,6 +104,10 @@ export function Insights({ projectId }: InsightsProps) {
   const currentTool = useInsightsStore((state) => state.currentTool);
   const isLoadingSessions = useInsightsStore((state) => state.isLoadingSessions);
   const pendingAction = useInsightsStore((state) => state.session?.pendingAction ?? null);
+  const pendingImages = useInsightsStore((state) => state.pendingImages);
+  const setPendingImages = useInsightsStore((state) => state.setPendingImages);
+  const showArchived = useInsightsStore((state) => state.showArchived);
+  const setImageError = useInsightsStore((state) => state.setImageError);
   const isPortugueseUi = i18n.resolvedLanguage === 'pt';
   const {
     isEnabled: isTranslationEnabled,
@@ -502,7 +507,13 @@ export function Insights({ projectId }: InsightsProps) {
           onNewSession={handleNewSession}
           onSelectSession={handleSelectSession}
           onDeleteSession={handleDeleteSession}
+          onDeleteSessions={handleDeleteSessions}
           onRenameSession={handleRenameSession}
+          onArchiveSession={handleArchiveSession}
+          onArchiveSessions={handleArchiveSessions}
+          onUnarchiveSession={handleUnarchiveSession}
+          showArchived={showArchived}
+          onToggleShowArchived={handleToggleShowArchived}
           modelConfig={session?.modelConfig}
           onModelConfigChange={handleModelConfigChange}
           isModelSelectorDisabled={isLoading}

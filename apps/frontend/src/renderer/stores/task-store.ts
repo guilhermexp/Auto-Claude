@@ -153,17 +153,16 @@ function normalizePlanData(plan: ImplementationPlan): ImplementationPlan | null 
   }
 
   // Check for flat subtasks at top level (some agents/spec-quick generate this)
-  const planAny = plan as Record<string, unknown>;
+  const planAny = plan as unknown as Record<string, unknown>;
   if (Array.isArray(planAny.subtasks) && planAny.subtasks.length > 0) {
     debugWarn('[normalizePlanData] Wrapping top-level subtasks into a single phase');
     plan.phases = [{
       phase: 1,
-      id: 'phase-1',
       name: plan.feature || 'Implementation',
       type: 'implementation',
       subtasks: planAny.subtasks as ImplementationPlan['phases'][0]['subtasks'],
       depends_on: []
-    }] as ImplementationPlan['phases'];
+    }];
     return plan;
   }
 

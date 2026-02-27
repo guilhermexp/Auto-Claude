@@ -49,6 +49,9 @@ interface InsightsState {
   clearSession: () => void;
   setLoadingSessions: (loading: boolean) => void;
   setPendingAction: (action: InsightsActionProposal | null) => void;
+  setShowArchived: (show: boolean) => void;
+  setImageError: (error: string | null) => void;
+  setPendingImages: (images: ImageAttachment[]) => void;
 }
 
 const initialStatus: InsightsChatStatus = {
@@ -224,7 +227,14 @@ export const useInsightsStore = create<InsightsState>((set, _get) => ({
       pendingImages: []
     }),
 
-  setPendingImages: (images) => set({ pendingImages: images })
+  setShowArchived: (show) => set({ showArchived: show }),
+
+  setImageError: (_error) => {
+    // Image errors are handled locally in the component via state;
+    // this action is provided for symmetry with the store interface.
+  },
+
+  setPendingImages: (images: ImageAttachment[]) => set({ pendingImages: images })
 }));
 
 // Helper functions

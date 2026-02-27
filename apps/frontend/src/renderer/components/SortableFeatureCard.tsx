@@ -10,7 +10,7 @@ import {
   TooltipTrigger
 } from './ui/tooltip';
 import { useTranslation } from 'react-i18next';
-import { Play, ExternalLink, TrendingUp, Layers, ThumbsUp } from 'lucide-react';
+import { Archive, Play, ExternalLink, TrendingUp, Layers, ThumbsUp } from 'lucide-react';
 import { TaskOutcomeBadge, getTaskOutcomeColorClass } from './roadmap/TaskOutcomeBadge';
 import {
   ROADMAP_PRIORITY_COLORS,

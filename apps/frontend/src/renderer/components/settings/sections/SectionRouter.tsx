@@ -7,7 +7,7 @@ import { LinearIntegration } from '../integrations/LinearIntegration';
 import { GitHubIntegration } from '../integrations/GitHubIntegration';
 import { GitLabIntegration } from '../integrations/GitLabIntegration';
 import { InitializationGuard } from '../common/InitializationGuard';
-import type { ProjectSettingsCard } from '../ProjectSettingsContent';
+import type { ProjectSettingsSection as ProjectSettingsCard } from '../ProjectSettingsContent';
 
 interface SectionRouterProps {
   activeSection: ProjectSettingsCard;

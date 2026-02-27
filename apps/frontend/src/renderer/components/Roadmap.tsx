@@ -20,6 +20,17 @@ import { getCompetitorInsightsForFeature } from './roadmap/utils';
 import { useTextTranslation, type TranslationEntry } from '../hooks/useTextTranslation';
 import { toast } from '../hooks/use-toast';
 import type { CompetitorAnalysis, Roadmap as RoadmapModel, RoadmapFeature } from '../../shared/types';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from './ui/alert-dialog';
+import { Archive } from 'lucide-react';
 import type { RoadmapProps } from './roadmap/types';
 
 function collectRoadmapTranslationEntries(roadmap: RoadmapModel): TranslationEntry[] {

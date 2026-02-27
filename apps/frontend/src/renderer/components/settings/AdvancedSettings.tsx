@@ -562,12 +562,17 @@ export function AdvancedSettings({ settings, onSettingsChange, section, version,
   }
 
   // notifications section
-  const notificationSettings: NotificationSettings = {
+  const notificationDefaults: NotificationSettings = {
     onTaskComplete: true,
     onTaskFailed: true,
     onReviewNeeded: true,
     sound: false,
-    ...(settings.notifications ?? {})
+  };
+  const notificationSettings: NotificationSettings = {
+    onTaskComplete: settings.notifications?.onTaskComplete ?? notificationDefaults.onTaskComplete,
+    onTaskFailed: settings.notifications?.onTaskFailed ?? notificationDefaults.onTaskFailed,
+    onReviewNeeded: settings.notifications?.onReviewNeeded ?? notificationDefaults.onReviewNeeded,
+    sound: settings.notifications?.sound ?? notificationDefaults.sound,
   };
 
   const notificationItems: Array<{

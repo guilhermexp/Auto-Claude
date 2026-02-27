@@ -359,6 +359,8 @@ export interface AppSettings {
   sidebarCollapsed?: boolean;
   // Sidebar expanded width in pixels
   sidebarWidth?: number;
+  // GPU acceleration mode for terminal WebGL rendering
+  gpuAcceleration?: GpuAcceleration;
 }
 
 // GPU acceleration mode for terminal WebGL rendering

@@ -68,7 +68,7 @@ const dialogMotionVariants = {
     y: 0,
     transition: {
       duration: 0.2,
-      ease: [0, 0, 0.2, 1], // --ease-out
+      ease: [0, 0, 0.2, 1] as [number, number, number, number], // --ease-out
     },
   },
   exit: {
@@ -79,7 +79,7 @@ const dialogMotionVariants = {
 };
 
 interface DialogContentProps
-  extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>,
+  extends Omit<React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>, 'size'>,
     VariantProps<typeof dialogContentVariants> {
   hideCloseButton?: boolean;
   useMotion?: boolean;
@@ -91,6 +91,9 @@ const DialogContent = React.forwardRef<
 >(({ className, children, hideCloseButton, size, useMotion = false, ...props }, ref) => {
   const ContentComponent = useMotion ? motion.div : DialogPrimitive.Content;
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { forceMount, onOpenAutoFocus, onCloseAutoFocus, onEscapeKeyDown, onPointerDownOutside, onInteractOutside, ...motionProps } = props as DialogContentProps & Record<string, unknown>;
+
   const contentElement = useMotion ? (
     <motion.div
       initial="hidden"
@@ -98,7 +101,7 @@ const DialogContent = React.forwardRef<
       exit="exit"
       variants={dialogMotionVariants}
       className={cn(dialogContentVariants({ size, className }))}
-      {...props}
+      {...(motionProps as React.ComponentPropsWithoutRef<typeof motion.div>)}
     >
       {children}
       {!hideCloseButton && (

@@ -15,6 +15,7 @@ export const BUILTIN_THEME_PALETTES: BuiltinThemePalette[] = [
     "id": "21st-dark",
     "name": "21st Dark",
     "type": "dark",
+    "source": 'builtin' as const,
     "description": "21st base palette from NEW-UI/theme.md",
     "previewColors": {
       "bg": "#0a0a0a",
@@ -63,6 +64,7 @@ export const BUILTIN_THEME_PALETTES: BuiltinThemePalette[] = [
     "id": "21st-light",
     "name": "21st Light",
     "type": "light",
+    "source": 'builtin' as const,
     "description": "21st base palette from NEW-UI/theme.md",
     "previewColors": {
       "bg": "#ffffff",
@@ -111,6 +113,7 @@ export const BUILTIN_THEME_PALETTES: BuiltinThemePalette[] = [
     "id": "cursor-dark",
     "name": "Cursor Dark",
     "type": "dark",
+    "source": 'builtin' as const,
     "description": "Cursor-inspired UI palette",
     "previewColors": {
       "bg": "#181818",
@@ -159,6 +162,7 @@ export const BUILTIN_THEME_PALETTES: BuiltinThemePalette[] = [
     "id": "cursor-light",
     "name": "Cursor Light",
     "type": "light",
+    "source": 'builtin' as const,
     "description": "Cursor-inspired UI palette",
     "previewColors": {
       "bg": "#FCFCFC",
@@ -207,6 +211,7 @@ export const BUILTIN_THEME_PALETTES: BuiltinThemePalette[] = [
     "id": "cursor-midnight",
     "name": "Cursor Midnight",
     "type": "dark",
+    "source": 'builtin' as const,
     "description": "Cursor-inspired UI palette",
     "previewColors": {
       "bg": "#1e2127",
@@ -256,6 +261,7 @@ export const BUILTIN_THEME_PALETTES: BuiltinThemePalette[] = [
     "id": "claude-dark",
     "name": "Claude Dark",
     "type": "dark",
+    "source": 'builtin' as const,
     "description": "Claude-inspired warm palette",
     "previewColors": {
       "bg": "#262624",
@@ -303,6 +309,7 @@ export const BUILTIN_THEME_PALETTES: BuiltinThemePalette[] = [
     "id": "claude-light",
     "name": "Claude Light",
     "type": "light",
+    "source": 'builtin' as const,
     "description": "Claude-inspired warm palette",
     "previewColors": {
       "bg": "#FAF9F5",
@@ -350,6 +357,7 @@ export const BUILTIN_THEME_PALETTES: BuiltinThemePalette[] = [
     "id": "vesper-dark",
     "name": "Vesper",
     "type": "dark",
+    "source": 'builtin' as const,
     "description": "Vesper high-contrast dark palette",
     "previewColors": {
       "bg": "#101010",
@@ -399,6 +407,7 @@ export const BUILTIN_THEME_PALETTES: BuiltinThemePalette[] = [
     "id": "vitesse-dark",
     "name": "Vitesse Dark",
     "type": "dark",
+    "source": 'builtin' as const,
     "description": "Vitesse palette tuned for readability",
     "previewColors": {
       "bg": "#121212",
@@ -446,6 +455,7 @@ export const BUILTIN_THEME_PALETTES: BuiltinThemePalette[] = [
     "id": "vitesse-light",
     "name": "Vitesse Light",
     "type": "light",
+    "source": 'builtin' as const,
     "description": "Vitesse palette tuned for readability",
     "previewColors": {
       "bg": "#ffffff",
@@ -493,6 +503,7 @@ export const BUILTIN_THEME_PALETTES: BuiltinThemePalette[] = [
     "id": "min-dark",
     "name": "Min Dark",
     "type": "dark",
+    "source": 'builtin' as const,
     "description": "Minimal palette with balanced contrast",
     "previewColors": {
       "bg": "#1f1f1f",
@@ -540,6 +551,7 @@ export const BUILTIN_THEME_PALETTES: BuiltinThemePalette[] = [
     "id": "min-light",
     "name": "Min Light",
     "type": "light",
+    "source": 'builtin' as const,
     "description": "Minimal palette with balanced contrast",
     "previewColors": {
       "bg": "#ffffff",

@@ -23,6 +23,7 @@ import { findTaskWorktree } from '../../worktree-paths';
 import { projectStore } from '../../project-store';
 import { getIsolatedGitEnv, detectWorktreeBranch } from '../../utils/git-isolation';
 import { getTeamSyncService } from '../../team-sync/team-sync-service';
+import { cancelFallbackTimer } from '../agent-events-handlers';
 
 /**
  * Safe file read that handles missing files without TOCTOU issues.
@@ -1351,9 +1352,9 @@ export function registerTaskExecutionHandlers(
               const taskDescription = task.description || task.title;
               
               // Ensure spec directory exists before starting spec creation
-              if (!existsSync(specDirForWatcher)) {
-                console.warn(`[Recovery] Spec directory does not exist, creating: ${specDirForWatcher}`);
-                mkdirSync(specDirForWatcher, { recursive: true });
+              if (!existsSync(watchSpecDir)) {
+                console.warn(`[Recovery] Spec directory does not exist, creating: ${watchSpecDir}`);
+                mkdirSync(watchSpecDir, { recursive: true });
               }
               
               console.warn(`[Recovery] Starting spec creation for: ${task.specId}`);

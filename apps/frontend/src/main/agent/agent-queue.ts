@@ -20,6 +20,7 @@ import { getPathDelimiter } from '../platform';
 import { debounce } from '../utils/debounce';
 import { writeFileWithRetry } from '../utils/atomic-file';
 import { resolveAuthEnvForFeature } from '../auth-profile-routing';
+import { normalizeEnvPathKey } from './env-utils';
 
 /** Maximum length for status messages displayed in progress UI */
 const STATUS_MESSAGE_MAX_LENGTH = 200;

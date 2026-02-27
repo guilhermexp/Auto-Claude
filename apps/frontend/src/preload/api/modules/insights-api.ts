@@ -8,7 +8,8 @@ import type {
   InsightsKanbanSnapshot,
   Task,
   TaskMetadata,
-  IPCResult
+  IPCResult,
+  ImageAttachment
 } from '../../../shared/types';
 import { createIpcListener, invokeIpc, sendIpc, IpcListenerCleanup } from './ipc-utils';
 

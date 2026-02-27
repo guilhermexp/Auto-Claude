@@ -22,6 +22,7 @@ import type {
   Task,
   TaskMetadata,
   AppSettings,
+  ImageAttachment,
 } from "../../shared/types";
 import { projectStore } from "../project-store";
 import { insightsService } from "../insights-service";

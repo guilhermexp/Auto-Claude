@@ -11,7 +11,8 @@ import type {
   InsightsStreamChunk,
   InsightsToolUsage,
   InsightsModelConfig,
-  InsightsActionProposal
+  InsightsActionProposal,
+  ImageAttachment
 } from '../../shared/types';
 import { MODEL_ID_MAP, MAX_IMAGES_PER_TASK, MAX_IMAGE_SIZE } from '../../shared/constants';
 import { InsightsConfig } from './config';
@@ -259,8 +260,6 @@ export class InsightsExecutor extends EventEmitter {
           } else if (line.startsWith('__TOOL_END__:')) {
             this.handleToolEnd(projectId, line);
           } else if (line.startsWith('[DEBUG ')) {
-            // Ignore backend debug traces from runner output to avoid polluting chat UI.
-            continue;
           } else if (line.trim()) {
             fullResponse += line + '\n';
             this.emit('stream-chunk', projectId, {

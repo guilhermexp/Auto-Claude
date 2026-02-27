@@ -5,7 +5,8 @@ import type {
   InsightsChatMessage,
   InsightsModelConfig,
   InsightsActionProposal,
-  InsightsActionResult
+  InsightsActionResult,
+  ImageAttachment
 } from '../shared/types';
 import { MAX_IMAGES_PER_TASK } from '../shared/constants';
 import { InsightsConfig } from './insights/config';

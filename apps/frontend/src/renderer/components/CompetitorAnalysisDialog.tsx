@@ -1,4 +1,5 @@
-import { Search, Globe, AlertTriangle, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Globe, AlertTriangle, TrendingUp, UserPlus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import {
   AlertDialog,
@@ -29,6 +30,9 @@ export function CompetitorAnalysisDialog({
   projectId,
 }: CompetitorAnalysisDialogProps) {
   const { t } = useTranslation('dialogs');
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [addedCount, setAddedCount] = useState(0);
+
   const handleAccept = () => {
     onAccept();
     onOpenChange(false);
@@ -40,6 +44,7 @@ export function CompetitorAnalysisDialog({
   };
 
   return (
+    <>
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="sm:max-w-[500px]">
         <AlertDialogHeader>
@@ -122,5 +127,13 @@ export function CompetitorAnalysisDialog({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+
+    <AddCompetitorDialog
+      open={showAddDialog}
+      onOpenChange={setShowAddDialog}
+      onCompetitorAdded={() => setAddedCount(prev => prev + 1)}
+      projectId={projectId}
+    />
+    </>
   );
 }
