@@ -999,7 +999,9 @@ async def run_autonomous_agent(
                 spec_dir,
                 phase_model,
                 agent_type="planner",
-                max_thinking_tokens=phase_thinking_budget,
+                betas=phase_betas,
+                fast_mode=fast_mode,
+                **thinking_kwargs,
                 stderr=lambda line: stderr_lines.append(line),
             )
             prompt = generate_planner_prompt(spec_dir, project_dir)
@@ -1147,7 +1149,9 @@ async def run_autonomous_agent(
                 spec_dir,
                 phase_model,
                 agent_type="coder",
-                max_thinking_tokens=phase_thinking_budget,
+                betas=phase_betas,
+                fast_mode=fast_mode,
+                **thinking_kwargs,
                 stderr=lambda line: stderr_lines.append(line),
             )
 

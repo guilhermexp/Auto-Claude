@@ -64,6 +64,22 @@ def _is_retryable_http_error(stderr: str) -> bool:
     return False
 
 
+def _is_retryable_git_lock_error(stderr: str) -> bool:
+    """Check if a git failure is caused by a transient lock file contention."""
+    stderr_lower = (stderr or "").lower()
+    has_lock_file_conflict = "file exists" in stderr_lower and "lock" in stderr_lower
+    return has_lock_file_conflict or any(
+        pattern in stderr_lower
+        for pattern in (
+            "could not lock config file",
+            "unable to write upstream branch configuration",
+            "another git process seems to be running",
+            "unable to create '.git/index.lock'",
+            "unable to create '.git/config.lock'",
+        )
+    )
+
+
 def _with_retry(
     operation: Callable[[], tuple[bool, T | None, str]],
     max_retries: int = 3,
@@ -265,7 +281,29 @@ class WorktreeManager:
             CompletedProcess with command results. On timeout, returns a
             CompletedProcess with returncode=-1 and timeout error in stderr.
         """
-        return run_git(args, cwd=cwd or self.project_dir, timeout=timeout)
+        working_dir = cwd or self.project_dir
+        max_attempts = 3
+        last_result: subprocess.CompletedProcess | None = None
+
+        for attempt in range(1, max_attempts + 1):
+            result = run_git(args, cwd=working_dir, timeout=timeout)
+            last_result = result
+
+            if result.returncode == 0:
+                return result
+
+            if attempt >= max_attempts or not _is_retryable_git_lock_error(
+                result.stderr
+            ):
+                return result
+
+            backoff = 0.25 * attempt
+            print(
+                f"Git lock contention detected (attempt {attempt}/{max_attempts}) for: git {' '.join(args)}. Retrying in {backoff:.2f}s..."
+            )
+            time.sleep(backoff)
+
+        return last_result or run_git(args, cwd=working_dir, timeout=timeout)
 
     def _unstage_gitignored_files(self) -> None:
         """
